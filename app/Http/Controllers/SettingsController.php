@@ -90,7 +90,7 @@ class SettingsController extends Controller
 
                 $request->validate(
                     [
-                        'company_logo' => 'image|mimes:png|max:20480',
+                        'company_logo' => 'image|mimes:png|max:100480',
                     ]
                 );
 
@@ -126,7 +126,7 @@ class SettingsController extends Controller
 
                 $request->validate(
                     [
-                        'company_logo_light' => 'image|mimes:png|max:20480',
+                        'company_logo_light' => 'image|mimes:png|max:100480',
                     ]
                 );
                 $logoName = 'light_logo.png';
@@ -160,7 +160,7 @@ class SettingsController extends Controller
 
                 $request->validate(
                     [
-                        'company_favicon' => 'image|mimes:png|max:20480',
+                        'company_favicon' => 'image|mimes:png|max:100480',
                     ]
                 );
                 $favicon =  'favicon.png';
@@ -648,8 +648,8 @@ class SettingsController extends Controller
         $rules = [];
 
         if ($request->recaptcha_module == 'yes') {
-            $rules['google_recaptcha_key'] = 'required|string|max:50';
-            $rules['google_recaptcha_secret'] = 'required|string|max:50';
+            $rules['google_recaptcha_key'] = 'required|string|max:100';
+            $rules['google_recaptcha_secret'] = 'required|string|max:100';
         }
 
         $validator = \Validator::make(
@@ -946,10 +946,10 @@ class SettingsController extends Controller
                 $request->all(),
                 [
                     // 'google_calender_id' => 'required',
-                    
+
                     // 'google_calender_json_file' => 'required',
-                    ]
-                );
+                ]
+            );
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
                 return redirect()->back()->with('error', $messages->first());
@@ -958,7 +958,7 @@ class SettingsController extends Controller
         } else {
             $post['is_enabled'] = 'off';
         }
-        
+
         if ($request->google_calender_json_file) {
             // $dir       = storage_path() . '/app/google-calendar';
             $dir       = storage_path() . '/' . md5(time());

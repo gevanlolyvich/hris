@@ -10,42 +10,35 @@ class DocumentController extends Controller
     public function index()
     {
 
-        if(\Auth::user()->can('Manage Document Type'))
-        {
+        if (\Auth::user()->can('Manage Document Type')) {
             $documents = Document::where('created_by', '=', \Auth::user()->creatorId())->get();
 
             return view('document.index', compact('documents'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Document Type'))
-        {
+        if (\Auth::user()->can('Create Document Type')) {
             return view('document.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Document Type'))
-        {
+        if (\Auth::user()->can('Create Document Type')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required|max:20',
-                                   'is_required' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required|max:100',
+                    'is_required' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -58,9 +51,7 @@ class DocumentController extends Controller
             $document->save();
 
             return redirect()->route('document.index')->with('success', __('Document type successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -72,20 +63,14 @@ class DocumentController extends Controller
 
     public function edit(Document $document)
     {
-        if(\Auth::user()->can('Edit Document Type'))
-        {
-            if($document->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Document Type')) {
+            if ($document->created_by == \Auth::user()->creatorId()) {
 
                 return view('document.edit', compact('document'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -93,17 +78,15 @@ class DocumentController extends Controller
     public function update(Request $request, Document $document)
     {
 
-        if(\Auth::user()->can('Edit Document Type'))
-        {
-            if($document->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Document Type')) {
+            if ($document->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required|max:20',
-                                   ]
+                    $request->all(),
+                    [
+                        'name' => 'required|max:100',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -115,35 +98,25 @@ class DocumentController extends Controller
                 $document->save();
 
                 return redirect()->route('document.index')->with('success', __('Document type successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Document $document)
     {
-        if(\Auth::user()->can('Delete Document Type'))
-        {
-            if($document->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Document Type')) {
+            if ($document->created_by == \Auth::user()->creatorId()) {
                 $document->delete();
 
                 return redirect()->route('document.index')->with('success', __('Document type successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
