@@ -20,56 +20,45 @@ class UserController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage User'))
-        {
+        if (\Auth::user()->can('Manage User')) {
             $user = \Auth::user();
-            if(\Auth::user()->type == 'super admin')
-            {
+            if (\Auth::user()->type == 'super admin') {
                 $users = User::where('created_by', '=', $user->creatorId())->where('type', '=', 'company')->get();
-            }
-            else
-            {
+            } else {
                 $users = User::where('created_by', '=', $user->creatorId())->where('type', '!=', 'employee')->get();
             }
 
             return view('user.index', compact('users'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
-
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create User'))
-        {
+        if (\Auth::user()->can('Create User')) {
             $user  = \Auth::user();
             $roles = Role::where('created_by', '=', $user->creatorId())->where('name', '!=', 'employee')->get()->pluck('name', 'id');
 
             return view('user.create', compact('roles'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create User'))
-        {
+        if (\Auth::user()->can('Create User')) {
             $default_language = DB::table('settings')->select('value')->where('name', 'default_language')->first();
             $validator        = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                                   'email' => 'required|unique:users',
-                                   'password' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'email' => 'required|unique:users',
+                    'password' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -77,7 +66,7 @@ class UserController extends Controller
 
             $role_r = Role::findById($request->role);
             $date = date("Y-m-d H:i:s");
-            
+
             $user   = User::create(
                 [
                     'name' => $request['name'],
@@ -93,24 +82,18 @@ class UserController extends Controller
             $user->userDefaultData();
 
             $setings = Utility::settings();
-            if($setings['new_user'] == 1)
-            {
+            if ($setings['new_user'] == 1) {
 
                 $uArr = [
                     'email' => $user->email,
                     'password' => $request->password,
                 ];
-    
+
                 $resp = Utility::sendEmailTemplate('new_user', [$user->id => $user->email], $uArr);
                 return redirect()->route('user.index')->with('success', __('User successfully created.') . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
-
             }
             return redirect()->route('user.index')->with('success', __('User successfully created.'));
-
-
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -122,15 +105,12 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        if(\Auth::user()->can('Edit User'))
-        {
+        if (\Auth::user()->can('Edit User')) {
             $user  = User::find($id);
             $roles = Role::where('created_by', '=', $user->creatorId())->where('name', '!=', 'employee')->get()->pluck('name', 'id');
 
             return view('user.edit', compact('user', 'roles'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -138,20 +118,19 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $validator = \Validator::make(
-            $request->all(), [
-                               'name' => 'required',
-                               'email' => 'unique:users,email,' . $id,
-                           ]
+            $request->all(),
+            [
+                'name' => 'required',
+                'email' => 'unique:users,email,' . $id,
+            ]
         );
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             $messages = $validator->getMessageBag();
 
             return redirect()->back()->with('error', $messages->first());
         }
 
-        if(\Auth::user()->can('Edit User'))
-        {
+        if (\Auth::user()->can('Edit User')) {
             $user = User::findOrFail($id);
 
             $role          = Role::findById($request->role);
@@ -162,46 +141,45 @@ class UserController extends Controller
             $user->assignRole($role);
 
             return redirect()->route('user.index')->with('success', 'User successfully updated.');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
 
     public function destroy($id)
-        {
-            if (\Auth::user()->can('Delete User')) {
-                $user = User::findOrFail($id);
-                $user->delete();
+    {
+        if (\Auth::user()->can('Delete User')) {
+            $user = User::findOrFail($id);
+            $user->delete();
 
-                return redirect()->route('user.index')->with('success', 'User successfully deleted.');
-            } else {
-                return redirect()->back()->with('error', __('Permission denied.'));
-            }
+            return redirect()->route('user.index')->with('success', 'User successfully deleted.');
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
 
     public function userPassword($id)
-    { 
+    {
         $eId        = \Crypt::decrypt($id);
-        
+
         $user = User::find($eId);
-        
+
         $employee = User::where('id', $eId)->first();
-        
+
         return view('user.reset', compact('user', 'employee'));
     }
 
-    public function userPasswordReset(Request $request, $id){
+    public function userPasswordReset(Request $request, $id)
+    {
         $validator = \Validator::make(
-            $request->all(), [
-                               'password' => 'required|confirmed|same:password_confirmation',
-                           ]
+            $request->all(),
+            [
+                'password' => 'required|confirmed|same:password_confirmation',
+            ]
         );
 
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             $messages = $validator->getMessageBag();
 
             return redirect()->back()->with('error', $messages->first());
@@ -214,9 +192,9 @@ class UserController extends Controller
         ])->save();
 
         return redirect()->route('user.index')->with(
-                     'success', 'User Password successfully updated.'
-                 );
-
+            'success',
+            'User Password successfully updated.'
+        );
     }
 
     public function profile()
@@ -232,69 +210,65 @@ class UserController extends Controller
         $user       = User::findOrFail($userDetail['id']);
 
         $validator = \Validator::make(
-            $request->all(), [
-                               'name' => 'required|max:120',
-                               'email' => 'required|email|unique:users,email,' . $userDetail['id'],
-                               'profile' => 'required',
-                           ]
+            $request->all(),
+            [
+                'name' => 'required|max:120',
+                'email' => 'required|email|unique:users,email,' . $userDetail['id'],
+                'profile' => 'required',
+            ]
         );
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             $messages = $validator->getMessageBag();
 
             return redirect()->back()->with('error', $messages->first());
         }
 
-        if($request->hasFile('profile'))
-        {
-       
+        if ($request->hasFile('profile')) {
+
             $filenameWithExt = $request->file('profile')->getClientOriginalName();
             $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             $extension       = $request->file('profile')->getClientOriginalExtension();
             $fileNameToStore = $filename . '_' . time() . '.' . $extension;
 
-           
-                $dir        = 'uploads/avatar';
-             
+
+            $dir        = 'app/public/uploads/avatar';
+
             $image_path = $dir . $userDetail['avatar'];
             if (File::exists($image_path)) {
                 File::delete($image_path);
             }
             $url = '';
-            $path = Utility::upload_file($request,'profile',$fileNameToStore,$dir,[]);
-            
-            if($path['flag'] == 1){
+            $path = Utility::upload_file($request, 'profile', $fileNameToStore, $dir, []);
+
+            if ($path['flag'] == 1) {
                 $url = $path['url'];
-            }else{
+            } else {
                 return redirect()->route('profile', \Auth::user()->id)->with('error', __($path['msg']));
             }
-
         }
 
-        if(!empty($request->profile))
-        {
+        if (!empty($request->profile)) {
             $user['avatar'] = $fileNameToStore;
         }
         $user['name']  = $request['name'];
         $user['email'] = $request['email'];
         $user->save();
 
-        if(\Auth::user()->type == 'employee')
-        {
+        if (\Auth::user()->type == 'employee') {
             $employee        = Employee::where('user_id', $user->id)->first();
             $employee->email = $request['email'];
             $employee->save();
         }
 
         return redirect()->back()->with(
-            'success', 'Profile successfully updated.'
+            'success',
+            'Profile successfully updated.'
         );
     }
 
     public function updatePassword(Request $request)
     {
-        if(\Auth::Check())
-        {
+        if (\Auth::Check()) {
             $request->validate(
                 [
                     'current_password' => 'required',
@@ -305,22 +279,17 @@ class UserController extends Controller
             $objUser          = Auth::user();
             $request_data     = $request->All();
             $current_password = $objUser->password;
-            if(Hash::check($request_data['current_password'], $current_password))
-            {
+            if (Hash::check($request_data['current_password'], $current_password)) {
                 $user_id            = Auth::User()->id;
                 $obj_user           = User::find($user_id);
                 $obj_user->password = Hash::make($request_data['new_password']);;
                 $obj_user->save();
 
                 return redirect()->route('profile', $objUser->id)->with('success', __('Password successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->route('profile', $objUser->id)->with('error', __('Please enter correct current password.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
         }
     }

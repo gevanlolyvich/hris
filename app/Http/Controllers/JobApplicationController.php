@@ -100,7 +100,7 @@ class JobApplicationController extends Controller
                 $extension       = $request->file('profile')->getClientOriginalExtension();
                 $fileNameToStore = $filename . '_' . time() . '.' . $extension;
 
-                $dir        = 'uploads/job/profile';
+                $dir        = 'app/public/uploads/job/profile';
 
                 $image_path = $dir . $filenameWithExt;
                 if (\File::exists($image_path)) {
@@ -122,7 +122,7 @@ class JobApplicationController extends Controller
                 $extension1       = $request->file('resume')->getClientOriginalExtension();
                 $fileNameToStore1 = $filename1 . '_' . time() . '.' . $extension1;
 
-                $dir        = 'uploads/job/resume';
+                $dir        = 'app/public/uploads/job/resume';
 
                 $image_path = $dir . $filenameWithExt1;
                 if (\File::exists($image_path)) {
@@ -530,7 +530,7 @@ class JobApplicationController extends Controller
                 $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                 $extension       = $request->file('document')[$key]->getClientOriginalExtension();
                 $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-                $dir             = storage_path('uploads/document/');
+                $dir             = storage_path('app/public/uploads/document/');
                 $image_path      = $dir . $filenameWithExt;
 
                 if (\File::exists($image_path)) {
@@ -540,7 +540,7 @@ class JobApplicationController extends Controller
                 if (!file_exists($dir)) {
                     mkdir($dir, 0777, true);
                 }
-                $path              = $request->file('document')[$key]->storeAs('uploads/document/', $fileNameToStore);
+                $path              = $request->file('document')[$key]->storeAs('app/public/uploads/document/', $fileNameToStore);
                 $employee_document = EmployeeDocument::create(
                     [
                         'employee_id' => $employee['employee_id'],

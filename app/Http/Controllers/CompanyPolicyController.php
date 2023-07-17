@@ -53,21 +53,21 @@ class CompanyPolicyController extends Controller
             }
 
             if (!empty($request->attachment)) {
-              
+
                 $filenameWithExt = $request->file('attachment')->getClientOriginalName();
                 $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                 $extension       = $request->file('attachment')->getClientOriginalExtension();
                 $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-                $dir = 'uploads/companyPolicy/';
+                $dir = 'app/uploads/companyPolicy/';
                 $image_path = $dir . $fileNameToStore;
                 if (\File::exists($image_path)) {
                     \File::delete($image_path);
                 }
                 $url = '';
-                $path = \Utility::upload_file($request,'attachment',$fileNameToStore,$dir,[]);
-                if($path['flag'] == 1){
+                $path = \Utility::upload_file($request, 'attachment', $fileNameToStore, $dir, []);
+                if ($path['flag'] == 1) {
                     $url = $path['url'];
-                }else{
+                } else {
                     return redirect()->back()->with('error', __($path['msg']));
                 }
             }
@@ -75,7 +75,7 @@ class CompanyPolicyController extends Controller
             $policy              = new CompanyPolicy();
             $policy->branch      = $request->branch;
             $policy->title       = $request->title;
-            $policy->description = (!empty($request->description) ? $request->description :'');
+            $policy->description = (!empty($request->description) ? $request->description : '');
             $policy->attachment  = !empty($request->attachment) ? $fileNameToStore : '';
             $policy->created_by  = \Auth::user()->creatorId();
             $policy->save();
@@ -145,16 +145,16 @@ class CompanyPolicyController extends Controller
                 $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                 $extension       = $request->file('attachment')->getClientOriginalExtension();
                 $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-                $dir = 'uploads/companyPolicy/';
+                $dir = 'app/uploads/companyPolicy/';
                 $image_path = $dir . $fileNameToStore;
                 if (\File::exists($image_path)) {
                     \File::delete($image_path);
                 }
                 $url = '';
-                $path = \Utility::upload_file($request,'attachment',$fileNameToStore,$dir,[]);
-                if($path['flag'] == 1){
+                $path = \Utility::upload_file($request, 'attachment', $fileNameToStore, $dir, []);
+                if ($path['flag'] == 1) {
                     $url = $path['url'];
-                }else{
+                } else {
                     return redirect()->back()->with('error', __($path['msg']));
                 }
             }
@@ -182,7 +182,7 @@ class CompanyPolicyController extends Controller
             if ($companyPolicy->created_by == \Auth::user()->creatorId()) {
                 $companyPolicy->delete();
 
-                $dir = storage_path('uploads/companyPolicy/');
+                $dir = storage_path('app/uploads/companyPolicy/');
                 if (!empty($companyPolicy->attachment)) {
                     // unlink($dir . $c ompanyPolicy->attachment);
                 }

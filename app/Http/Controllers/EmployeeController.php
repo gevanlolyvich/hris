@@ -147,7 +147,7 @@ class EmployeeController extends Controller
                     $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                     $extension       = $request->file('document')[$key]->getClientOriginalExtension();
                     $fileNameToStore = $filename . '_' . time() . '.' . $extension;
-                    $dir             = 'uploads/document/';
+                    $dir             = 'app/public/uploads/document/';
 
                     $image_path      = $dir . $fileNameToStore;
 
@@ -247,7 +247,7 @@ class EmployeeController extends Controller
                         $extension       = $request->file('document')[$key]->getClientOriginalExtension();
                         $fileNameToStore = $filename . '_' . time() . '.' . $extension;
 
-                        $dir             = 'uploads/document/';
+                        $dir             = 'app/public/uploads/document/';
 
                         $image_path      = $dir . $fileNameToStore;
 
@@ -267,7 +267,7 @@ class EmployeeController extends Controller
 
                         if (!empty($employee_document)) {
                             if ($employee_document->document_value) {
-                                \File::delete(storage_path('uploads/document/' . $employee_document->document_value));
+                                \File::delete(storage_path('app/public/uploads/document/' . $employee_document->document_value));
                             }
                             $employee_document->document_value = $fileNameToStore;
                             $employee_document->save();
@@ -308,10 +308,10 @@ class EmployeeController extends Controller
             $emp_documents = EmployeeDocument::where('employee_id', $employee->employee_id)->get();
             $employee->delete();
             $user->delete();
-            $dir = storage_path('uploads/document/');
+            $dir = storage_path('app/public/uploads/document/');
             foreach ($emp_documents as $emp_document) {
                 $emp_document->delete();
-                \File::delete(storage_path('uploads/document/' . $emp_document->document_value));
+                \File::delete(storage_path('app/public/uploads/document/' . $emp_document->document_value));
                 if (!empty($emp_document->document_value)) {
                     // unlink($dir . $emp_document->document_value);
                 }
