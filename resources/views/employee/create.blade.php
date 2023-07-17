@@ -97,6 +97,7 @@
                                 <div class="form-group col-md-6">
                                     {{ Form::label('department_id', __('Select Department*'), ['class' => 'form-label']) }}
                                     <div class="form-icon-user">
+                                        {{-- {{ $departements }} --}}
                                         {{ Form::select('department_id', $departments, null, ['class' => 'form-control ', 'id' => 'department_id', 'required' => 'required' ,'placeholder' => 'Select Department']) }}
                                     </div>
                                 </div>
