@@ -26,13 +26,13 @@ class ContractTypeController extends Controller
     {
         // if(\Auth::user()->can('Manage Contract Types'))
         // {
-            $contractTypes = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        $contractTypes = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get();
 
-            return view('contract_type.index')->with('contractTypes', $contractTypes);
+        return view('contract_type.index')->with('contractTypes', $contractTypes);
         // }
         // else
         // {
-            return redirect()->back()->with('error', __('Permission Denied.'));
+        return redirect()->back()->with('error', __('Permission Denied.'));
         // }
     }
 
@@ -43,12 +43,9 @@ class ContractTypeController extends Controller
      */
     public function create()
     {
-        if(\Auth::user()->can('Create Contract Type'))
-        {
+        if (\Auth::user()->can('Create Contract Type')) {
             return view('contract_type.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission Denied.')], 401);
         }
     }
@@ -62,16 +59,15 @@ class ContractTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Contract Type'))
-        {
+        if (\Auth::user()->can('Create Contract Type')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required|max:20',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required|max:100',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->route('contract_type.index')->with('error', $messages->first());
@@ -83,9 +79,7 @@ class ContractTypeController extends Controller
             $contractType->save();
 
             return redirect()->route('contract_type.index')->with('success', __('Contract Type successfully created!'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission Denied.'));
         }
     }
@@ -111,19 +105,13 @@ class ContractTypeController extends Controller
      */
     public function edit(ContractType $contractType)
     {
-        if(\Auth::user()->can('Edit Contract Type'))
-        {
-            if($contractType->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Contract Type')) {
+            if ($contractType->created_by == \Auth::user()->creatorId()) {
                 return view('contract_type.edit', compact('contractType'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission Denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission Denied.')], 401);
         }
     }
@@ -140,18 +128,16 @@ class ContractTypeController extends Controller
     {
         return redirect()->back()->with('error', __('This operation is not perform due to demo mode.'));
 
-        if(\Auth::user()->can('Edit Contract Type'))
-        {
-            if($contractType->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Contract Type')) {
+            if ($contractType->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required|max:20',
-                                   ]
+                    $request->all(),
+                    [
+                        'name' => 'required|max:100',
+                    ]
                 );
 
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->route('contract_type.index')->with('error', $messages->first());
@@ -161,14 +147,10 @@ class ContractTypeController extends Controller
                 $contractType->save();
 
                 return redirect()->route('contract_type.index')->with('success', __('Contract Type successfully updated!'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission Denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission Denied.'));
         }
     }
@@ -183,22 +165,16 @@ class ContractTypeController extends Controller
     public function destroy(ContractType $contractType)
     {
         // return redirect()->back()->with('error', __('This operation is not perform due to demo mode.'));
-        
-        if(\Auth::user()->can('Delete Contract Type'))
-        {
-            if($contractType->created_by == \Auth::user()->creatorId())
-            {
+
+        if (\Auth::user()->can('Delete Contract Type')) {
+            if ($contractType->created_by == \Auth::user()->creatorId()) {
                 $contractType->delete();
 
                 return redirect()->route('contract_type.index')->with('success', __('Contract Type successfully deleted!'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission Denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission Denied.'));
         }
     }

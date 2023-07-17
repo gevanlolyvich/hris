@@ -8,7 +8,7 @@
             <div class="form-group">
                 {{ Form::label('title', __('Name'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {{ Form::text('title', null, ['class' => 'form-control', 'placeholder' => __('Enter Payment Type Name')]) }}
+                    {{ Form::text('title', null, ['class' => 'form-control', 'placeholder' => __('Enter Leave Type Name')]) }}
                 </div>
                 @error('title')
                     <span class="invalid-name" role="alert">

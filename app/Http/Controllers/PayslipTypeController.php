@@ -10,26 +10,20 @@ class PayslipTypeController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Payslip Type'))
-        {
+        if (\Auth::user()->can('Manage Payslip Type')) {
             $paysliptypes = PayslipType::where('created_by', '=', \Auth::user()->creatorId())->get();
 
             return view('paysliptype.index', compact('paysliptypes'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Payslip Type'))
-        {
+        if (\Auth::user()->can('Create Payslip Type')) {
             return view('paysliptype.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -37,16 +31,15 @@ class PayslipTypeController extends Controller
     public function store(Request $request)
     {
 
-        if(\Auth::user()->can('Create Payslip Type'))
-        {
+        if (\Auth::user()->can('Create Payslip Type')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required|max:20',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required|max:100',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -57,9 +50,7 @@ class PayslipTypeController extends Controller
             $paysliptype->save();
 
             return redirect()->route('paysliptype.index')->with('success', __('PayslipType  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -71,39 +62,31 @@ class PayslipTypeController extends Controller
 
     public function edit(PayslipType $paysliptype)
     {
-        if(\Auth::user()->can('Edit Payslip Type'))
-        {
-            if($paysliptype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Payslip Type')) {
+            if ($paysliptype->created_by == \Auth::user()->creatorId()) {
 
                 return view('paysliptype.edit', compact('paysliptype'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, PayslipType $paysliptype)
     {
-        if(\Auth::user()->can('Edit Payslip Type'))
-        {
-            if($paysliptype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Payslip Type')) {
+            if ($paysliptype->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required|max:20',
+                    $request->all(),
+                    [
+                        'name' => 'required|max:100',
 
-                                   ]
+                    ]
                 );
 
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -113,46 +96,31 @@ class PayslipTypeController extends Controller
                 $paysliptype->save();
 
                 return redirect()->route('paysliptype.index')->with('success', __('PayslipType successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(PayslipType $paysliptype)
     {
-        if(\Auth::user()->can('Delete Payslip Type'))
-        {
-            if($paysliptype->created_by == \Auth::user()->creatorId())
-            {
-                $employee     = Employee::where('salary_type',$paysliptype->id)->get();
-                if(count($employee) == 0)
-                {
+        if (\Auth::user()->can('Delete Payslip Type')) {
+            if ($paysliptype->created_by == \Auth::user()->creatorId()) {
+                $employee     = Employee::where('salary_type', $paysliptype->id)->get();
+                if (count($employee) == 0) {
                     $paysliptype->delete();
-                }
-                else
-                {
+                } else {
                     return redirect()->route('paysliptype.index')->with('error', __('This Payslip Type has Set Salary. Please remove the Set Salary from this Payslip Type.'));
                 }
 
                 return redirect()->route('paysliptype.index')->with('success', __('PayslipType successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
-
-
 }

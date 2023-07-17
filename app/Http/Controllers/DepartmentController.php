@@ -12,45 +12,38 @@ class DepartmentController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Department'))
-        {
+        if (\Auth::user()->can('Manage Department')) {
             $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
 
             return view('department.index', compact('departments'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Department'))
-        {
+        if (\Auth::user()->can('Create Department')) {
             $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
             return view('department.create', compact('branch'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Department'))
-        {
+        if (\Auth::user()->can('Create Department')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'branch_id' => 'required',
-                                   'name' => 'required|max:20',
-                               ]
+                $request->all(),
+                [
+                    'branch_id' => 'required',
+                    'name' => 'required|max:100',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -63,9 +56,7 @@ class DepartmentController extends Controller
             $department->save();
 
             return redirect()->route('department.index')->with('success', __('Department  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -77,39 +68,31 @@ class DepartmentController extends Controller
 
     public function edit(Department $department)
     {
-        if(\Auth::user()->can('Edit Department'))
-        {
-            if($department->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Department')) {
+            if ($department->created_by == \Auth::user()->creatorId()) {
                 $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
                 return view('department.edit', compact('department', 'branch'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Department $department)
     {
-        if(\Auth::user()->can('Edit Department'))
-        {
-            if($department->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Department')) {
+            if ($department->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'branch_id' => 'required',
-                                       'name' => 'required|max:20',
-                                   ]
+                    $request->all(),
+                    [
+                        'branch_id' => 'required',
+                        'name' => 'required|max:100',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -120,44 +103,31 @@ class DepartmentController extends Controller
                 $department->save();
 
                 return redirect()->route('department.index')->with('success', __('Department successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Department $department)
     {
-        if(\Auth::user()->can('Delete Department'))
-        {
-            if($department->created_by == \Auth::user()->creatorId())
-            {
-                $employee     = Employee::where('department_id',$department->id)->get();
-                if(count($employee) == 0)
-                {
-                    Designation::where('department_id',$department->id)->delete();
+        if (\Auth::user()->can('Delete Department')) {
+            if ($department->created_by == \Auth::user()->creatorId()) {
+                $employee     = Employee::where('department_id', $department->id)->get();
+                if (count($employee) == 0) {
+                    Designation::where('department_id', $department->id)->delete();
                     $department->delete();
-                }
-                else
-                {
+                } else {
                     return redirect()->route('department.index')->with('error', __('This department has employees. Please remove the employee from this department.'));
                 }
 
                 return redirect()->route('department.index')->with('success', __('Department successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
