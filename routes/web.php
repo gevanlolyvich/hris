@@ -78,6 +78,7 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,9 +99,11 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return view('dashboard.dashboard');
 // })->middleware(['auth'])->name('dashboard');
-
+//* TEST ROUTE
+Route::get('/tests/attendances', [TestController::class, 'get_attendances']);
 
 require __DIR__ . '/auth.php';
+
 
 Route::get('/check', [HomeController::class, 'check'])->middleware(
     [
@@ -115,7 +118,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['XS
 
 // Route::group(['middleware' => ['verified']], function () {
 
-Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth','XSS'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'XSS'])->name('dashboard');
 Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware(
     [
         'auth',
