@@ -475,7 +475,7 @@ class EmployeeController extends Controller
                 $user->assignRole('Employee');
 
                 $employeeData = new Employee();
-                $employeeData->employee_id      = $this->employeeNumber();
+                $employeeData->employee_id      = $employee[7];
                 $employeeData->user_id             = $user->id;
             }
 
@@ -487,7 +487,7 @@ class EmployeeController extends Controller
             $employeeData->address             = $employee[4];
             $employeeData->email               = $employee[5];
             $employeeData->password            = Hash::make($employee[6]);
-            $employeeData->employee_id         = $this->employeeNumber();
+            $employeeData->employee_id         = $employee[7];
             $employeeData->branch_id           = $employee[8];
             $employeeData->department_id       = $employee[9];
             $employeeData->designation_id      = $employee[10];
