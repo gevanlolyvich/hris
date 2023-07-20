@@ -84,7 +84,7 @@
                                 @csrf
                                 <div class="form-group">
                                     {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('employee_id', $employeesId, ['class' => 'form-control', 'disabled' => 'disabled']) !!}
+                                    {!! Form::text('employee_id', old('employee_id'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee Id']) !!}
                                 </div>
 
                                 <div class="form-group col-md-6">

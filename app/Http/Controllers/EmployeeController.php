@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Imports\EmployeesImport;
-use App\Exports\EmployeeExport;
+use App\Exports\EmployeesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\NOC;
 use App\Models\Termination;
@@ -62,6 +62,7 @@ class EmployeeController extends Controller
 
             $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
 
+            // return $employeesId;
             return view('employee.create', compact('employees', 'employeesId', 'departments', 'designations', 'documents', 'branches', 'company_settings'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -74,6 +75,7 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
+                    'employee_id' => 'required|unique:employees',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
@@ -91,6 +93,7 @@ class EmployeeController extends Controller
 
                 return redirect()->back()->withInput()->with('error', $messages->first());
             }
+            // return $request;
 
             $user = User::create(
                 [
@@ -123,7 +126,7 @@ class EmployeeController extends Controller
                     'address' => $request['address'],
                     'email' => $request['email'],
                     'password' => Hash::make($request['password']),
-                    'employee_id' => $this->employeeNumber(),
+                    'employee_id' => $request['employee_id'],
                     'branch_id' => $request['branch_id'],
                     'department_id' => $request['department_id'],
                     'designation_id' => $request['designation_id'],
@@ -207,7 +210,7 @@ class EmployeeController extends Controller
             $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
-            $employeesId  = \Auth::user()->employeeIdFormat($employee->employee_id);
+            $employeesId  = ($employee->employee_id);
 
             return view('employee.edit', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
@@ -527,7 +530,7 @@ class EmployeeController extends Controller
     public function export()
     {
         $name = 'employee_' . date('Y-m-d i:h:s');
-        $data = Excel::download(new EmployeeExport(), $name . '.xlsx');
+        $data = Excel::download(new EmployeesExport(), $name . '.xlsx');
 
         return $data;
     }
