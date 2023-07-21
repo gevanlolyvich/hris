@@ -1712,7 +1712,7 @@ class UsersTableSeeder extends Seeder
                 "created_at" => date('Y-m-d H:i:s'),
                 "updated_at" => date('Y-m-d H:i:s'),
             ],
-             [
+            [
                 "name" => "Create Performance Type",
                 "guard_name" => "web",
                 "created_at" => date('Y-m-d H:i:s'),
@@ -1825,8 +1825,8 @@ class UsersTableSeeder extends Seeder
                 "guard_name" => "web",
                 "created_at" => date('Y-m-d H:i:s'),
                 "updated_at" => date('Y-m-d H:i:s'),
-            ],  
-            
+            ],
+
         ];
         Permission::insert($arrPermissions);
 
@@ -2021,7 +2021,7 @@ class UsersTableSeeder extends Seeder
             ["name" => "Manage Plan"],
             ["name" => "Buy Plan"],
             ["name" => "Manage Company Settings"],
-            ["name"=>"Manage System Settings"],
+            ["name" => "Manage System Settings"],
             ["name" => "Manage TimeSheet"],
             ["name" => "Create TimeSheet"],
             ["name" => "Edit TimeSheet"],
@@ -2129,12 +2129,12 @@ class UsersTableSeeder extends Seeder
             ["name" => "Delete Contract"],
             ["name" => "Store Note"],
             ["name" => "Delete Note"],
-            ["name"=>"Store Comment"],
-            ["name"=>"Delete Comment"],
-            ["name"=>"Delete Attachment"],
+            ["name" => "Store Comment"],
+            ["name" => "Delete Comment"],
+            ["name" => "Delete Attachment"],
 
-            
-            
+
+
 
 
         ];
@@ -2148,7 +2148,7 @@ class UsersTableSeeder extends Seeder
                 'type' => 'company',
                 'lang' => 'en',
                 'avatar' => '',
-                'created_by' =>0,
+                'created_by' => 0,
             ]
         );
         $company->assignRole($companyRole);
@@ -2387,9 +2387,9 @@ class UsersTableSeeder extends Seeder
             ["name" => "Create Contract Type"],
             ["name" => "Edit Contract Type"],
             ["name" => "Delete Contract Type"],
-           
-           
-            
+
+
+
         ];
 
         $hrRole->givePermissionTo($hrPermission);
@@ -2461,11 +2461,11 @@ class UsersTableSeeder extends Seeder
             ["name" => "Manage Contracts"],
             ["name" => "Store Note"],
             ["name" => "Delete Note"],
-            ["name"=>"Store Comment"],
-            ["name"=>"Delete Comment"],
-            ["name"=>"Delete Attachment"],
+            ["name" => "Store Comment"],
+            ["name" => "Delete Comment"],
+            ["name" => "Delete Attachment"],
 
-            
+
         ];
 
         $employeeRole->givePermissionTo($employeePermission);
@@ -2480,18 +2480,23 @@ class UsersTableSeeder extends Seeder
 
 
         $data = [
-            ['name'=>'local_storage_validation', 'value'=> 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'wasabi_storage_validation', 'value'=> 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'s3_storage_validation', 'value'=> 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'local_storage_max_upload_size', 'value'=> 2048000, 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'wasabi_max_upload_size', 'value'=> 2048000, 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'s3_max_upload_size', 'value'=> 2048000, 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()],
-            ['name'=>'storage_setting', 'value'=> 'local', 'created_by'=> 1, 'created_at'=> now(), 'updated_at'=> now()]
+            ['name' => 'local_storage_validation', 'value' => 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'wasabi_storage_validation', 'value' => 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 's3_storage_validation', 'value' => 'jpg,jpeg,png,xlsx,xls,csv,pdf', 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'local_storage_max_upload_size', 'value' => 2048000, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'wasabi_max_upload_size', 'value' => 2048000, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 's3_max_upload_size', 'value' => 2048000, 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'storage_setting', 'value' => 'local', 'created_by' => 1, 'created_at' => now(), 'updated_at' => now()]
         ];
         DB::table('settings')->insert($data);
-        
+
+        //* Attendance Types
+        $attendance_types = [
+            ['name'=>'On Site'],
+            ['name'=>'Out Site'],
+            ['name'=>'Work From Home'],
+            ['name'=>'Invalid Attendance']
+        ];
+        DB::table('attendance_types')->insert($attendance_types);
     }
 }
-
-
-
