@@ -76,7 +76,7 @@ if (!empty($mode_setting['theme_color'])) {
                 <div class="container-fluid pe-2">
                     <a class="navbar-brand" href="#">
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
-                            class="logo logo-lg" />
+                            class="logo logo-lg" width="50"height="50"/>
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
