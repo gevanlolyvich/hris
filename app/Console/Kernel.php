@@ -16,7 +16,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('demo:cron')->cron('* * * * *');
-        $schedule->command('access_door_sync_attendance:cron')->cron('* * * * *');
+        $schedule->command('access_door_sync_attendance:cron')
+        // ->weekdays()
+        ->hourly()
+        ->timezone('Asia/Jakarta')
+        ->between('8:00', '23:59');
     }
 
     /**

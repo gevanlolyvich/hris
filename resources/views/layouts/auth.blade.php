@@ -76,7 +76,7 @@ if (!empty($mode_setting['theme_color'])) {
                 <div class="container-fluid pe-2">
                     <a class="navbar-brand" href="#">
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
-                            class="logo logo-lg" />
+                            class="logo logo-lg" width="50"height="50"/>
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
@@ -85,7 +85,7 @@ if (!empty($mode_setting['theme_color'])) {
                     </button>
                     <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="flex-grow: 0;">
                         <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link active" href="#">{{ __('Support') }}</a>
                             </li>
                             <li class="nav-item">
@@ -93,7 +93,7 @@ if (!empty($mode_setting['theme_color'])) {
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">{{ __('Privacy') }}</a>
-                            </li>
+                            </li> --}}
                             <li class="nav-item">
                                 @yield('language-bar')
                             </li>

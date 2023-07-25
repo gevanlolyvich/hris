@@ -212,6 +212,7 @@ class EmployeeController extends Controller
             $employee     = Employee::find($id);
             $employeesId  = ($employee->employee_id);
 
+            // return $employee;
             return view('employee.edit', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -480,6 +481,7 @@ class EmployeeController extends Controller
             }
 
 
+            $employeeData->personel_id         = $employee[18];
             $employeeData->name                = $employee[0];
             $employeeData->dob                 = $employee[1];
             $employeeData->gender              = $employee[2];
