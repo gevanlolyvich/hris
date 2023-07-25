@@ -10,6 +10,7 @@ class Employee extends Model
     protected $table = 'employees';
     protected $fillable = [
         'user_id',
+        'personel_id',
         'name',
         'dob',
         'gender',

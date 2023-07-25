@@ -120,6 +120,7 @@ class AttendanceEmployeeController extends Controller
 
                 $attendanceEmployee = $attendanceEmployee->get();
             }
+            // return $attendanceEmployee;
 
             return view('attendance.index', compact('attendanceEmployee', 'branch', 'department'));
         } else {

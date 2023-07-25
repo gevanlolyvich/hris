@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::table('attendance_employees', function (Blueprint $table) {
             $table->foreignId('attendance_type_id')->nullable();
-            $table->string('longitude')->nullable();
-            $table->string('latitude')->nullable();
+            $table->string('coord_in')->nullable();
+            $table->string('coord_out')->nullable();
             $table->boolean('is_valid')->nullable();
             $table->integer('validate_by')->nullable();
         });
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('attendance_employees', function (Blueprint $table) {
-            $table->dropColumn(['attendance_type_id', 'longitude', 'latitude', 'is_valid', "validate_by"]);
+            $table->dropColumn(['attendance_type_id', 'coord_in', 'coord_out', 'is_valid', "validate_by"]);
         });
     }
 };
