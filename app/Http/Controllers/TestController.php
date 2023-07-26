@@ -15,8 +15,8 @@ class TestController extends Controller
     function get_attendances()
     {
         $units = ['Head Office'];
-        $apis =['http://172.16.0.176:3020'];
-        $locations = ['-6.233700306498369, 106.84788722660112'];
+        $apis =['http://172.16.0.11:3050'];
+        $locations = ['-6.233798952272397, 106.8479844300084'];
         $date = date('Y-m-d');
         $employees = Employee::where('is_active', 1)->get();
 
