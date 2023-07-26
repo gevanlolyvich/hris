@@ -12,8 +12,8 @@ use App\Models\GenerateOfferLetter;
 use App\Models\JoiningLetter;
 use App\Models\ExperienceCertificate;
 use App\Models\NOC;
-use DB;
-
+// use DB;
+use Illuminate\Support\Facades\DB;
 
 class UsersTableSeeder extends Seeder
 {

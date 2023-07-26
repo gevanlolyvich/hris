@@ -16,6 +16,7 @@ class TestController extends Controller
     {
         $units = ['Head Office'];
         $apis =['http://172.16.0.176:3020'];
+        $locations = ['-6.233700306498369, 106.84788722660112'];
         $date = date('Y-m-d');
         $employees = Employee::where('is_active', 1)->get();
 
@@ -80,6 +81,11 @@ class TestController extends Controller
                             $employeeAttendance->overtime      = $overtime;
                             $employeeAttendance->total_rest    = '00:00:00';
                             $employeeAttendance->created_by    = $employee->user_id;
+                            $employeeAttendance->attendance_type_id    = 1; //* ON SITE
+                            $employeeAttendance->coord_in      = $locations[$a];
+                            $employeeAttendance->coord_out     = $locations[$a];
+                            $employeeAttendance->is_valid      = true;
+                            $employeeAttendance->validate_by   = 1; //* System
                             $employeeAttendance->save();
                         } else { 
                             $date = date("Y-m-d");
@@ -121,6 +127,11 @@ class TestController extends Controller
                             $employeeAttendance->overtime      = $overtime;
                             $employeeAttendance->total_rest    = '00:00:00';
                             $employeeAttendance->created_by    = $employee->user_id;
+                            $employeeAttendance->attendance_type_id    = 1; //* ON SITE
+                            $employeeAttendance->coord_in      = $locations[$a];
+                            $employeeAttendance->coord_out     = $locations[$a];
+                            $employeeAttendance->is_valid      = true;
+                            $employeeAttendance->validate_by   = 1; //* System
                             $employeeAttendance->save();
                         }
                     }
