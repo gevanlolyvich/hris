@@ -15,10 +15,6 @@
                         <th>{{ __('Work') }}</th>
                         <th>{{ __('Start Time') }}</th>
                         <th>{{ __('End Time') }}</th>
-                        {{-- <th>{{ __('Description') }}</th> --}}
-                        {{-- @if (Gate::check('Edit Warning') || Gate::check('Delete Warning'))
-                            <th width="200px">{{ __('Action') }}</th>
-                        @endif --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -27,8 +23,9 @@
                         <td>{{ __('Monday') }}</td>
                         <td>
                             <div class="form-check form-switch rtl-hide">
+                                {{-- {{ Form::checkbox('status[]',null,['class'=>"form-check-input"]) }} --}}
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status1"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -37,7 +34,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -45,7 +42,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -58,7 +55,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status2"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -67,7 +64,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -75,7 +72,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -88,7 +85,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status3"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -97,7 +94,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -105,7 +102,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -118,7 +115,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status4"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -127,7 +124,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -135,7 +132,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -148,7 +145,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status5"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -157,7 +154,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -165,7 +162,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -178,7 +175,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status6"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -187,7 +184,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -195,7 +192,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -208,7 +205,7 @@
                         <td>
                             <div class="form-check form-switch rtl-hide">
                                 <input type="checkbox" class="form-check-input"
-                                    id="status" name="status"
+                                    id="status" name="status7"
                                     {{-- @if ($status == 'on') checked @endif  --}}
                                     />
 
@@ -217,7 +214,7 @@
                             </div>
                         </td>
                         <td>
-                            {{ Form::time('company_start_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_start_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_start_time')
                                 <span class="invalid-company_start_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -225,7 +222,7 @@
                             @enderror
                         </td>
                         <td>
-                            {{ Form::time('company_end_time', null, ['class' => 'form-control timepicker_format']) }}
+                            {{ Form::time('company_end_time[]', null, ['class' => 'form-control timepicker_format']) }}
                             @error('company_end_time')
                                 <span class="invalid-company_end_time" role="alert">
                                     <small class="text-danger">{{ $message }}</small>
@@ -238,22 +235,6 @@
                 </tbody>
             </table>
         </div>
-        {{-- <div class="form-group col-md-6 col-lg-6">
-            {{ Form::label('warning_to', __('Warning To'), ['class' => 'col-form-label']) }}
-            {{ Form::select('warning_to', $employees, null, ['class' => 'form-control select2' ,'required' => 'required']) }}
-        </div>
-        <div class="form-group col-md-6 col-lg-6">
-            {{ Form::label('subject', __('Subject'), ['class' => 'col-form-label']) }}
-            {{ Form::text('subject', null, ['class' => 'form-control' ,'required' => 'required']) }}
-        </div>
-        <div class="form-group col-md-6 col-lg-6">
-            {{ Form::label('warning_date', __('Warning Date'), ['class' => 'col-form-label']) }}
-            {{ Form::text('warning_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off' ,'required' => 'required']) }}
-        </div>
-        <div class="form-group col-md-12">
-            {{ Form::label('description', __('Description'), ['class' => 'col-form-label']) }}
-            {{ Form::textarea('description', null, ['class' => 'form-control', 'placeholder' => __('Enter Description') ,'rows' => '3' ,'required' => 'required']) }}
-        </div> --}}
     </div>
 </div>
 <div class="modal-footer">
