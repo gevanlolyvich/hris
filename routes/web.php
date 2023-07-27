@@ -78,6 +78,7 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
+use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 
 /*
@@ -644,6 +645,12 @@ Route::resource('complaint', ComplaintController::class)->middleware(
     ]
 );
 Route::resource('warning', WarningController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('shift', ShiftController::class)->middleware(
     [
         'auth',
         'XSS',

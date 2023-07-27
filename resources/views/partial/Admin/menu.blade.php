@@ -379,7 +379,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
 
                 <!-- HR-->
-                @if (Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Termination') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday'))
+                @if ( Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Termination') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday'))
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -387,6 +387,9 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('HR Admin Setup') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            <li class="dash-item {{ Request::segment(1) == 'shift' ? 'active' : '' }}">
+                                <a class="dash-link" href="{{ route('shift.index') }}">{{ __('Shift') }}</a>
+                            </li>
                             <li class="dash-item {{ Request::segment(1) == 'award' ? 'active' : '' }}">
                                 <a class="dash-link" href="{{ route('award.index') }}">{{ __('Award') }}</a>
                             </li>
