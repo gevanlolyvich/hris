@@ -32,7 +32,7 @@
                                 <th>{{ __('Work Days') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
-                                <th>{{ __('Description') }}</th>
+                                {{-- <th>{{ __('Description') }}</th> --}}
                                 @if (Gate::check('Edit Warning') || Gate::check('Delete Warning'))
                                     <th width="200px">{{ __('Action') }}</th>
                                 @endif
@@ -40,42 +40,49 @@
                         </thead>
                         <tbody>
 
-                            @foreach ($warnings as $warning)
+                            @foreach ($shifts as $shift)
                                 <tr>
-                                    <td>{{ !empty($warning->WarningBy($warning->warning_by)) ? $warning->WarningBy($warning->warning_by)->name : '' }}
+                                    <td>{{ $shift->name }}
                                     </td>
-                                    <td>{{ !empty($warning->warningTo($warning->warning_to)) ? $warning->warningTo($warning->warning_to)->name : '' }}
+                                    <td>
+                                        @foreach ($shift->shiftTimes as $shiftTimes)
+                                            @if ($shiftTimes->is_working== true)
+                                                {{ __($shiftTimes->days) }} <br>
+                                            @endif
+                                        @endforeach
                                     </td>
-                                    <td>{{ $warning->subject }}</td>
-                                    <td>{{ \Auth::user()->dateFormat($warning->warning_date) }}</td>
-                                    <td>{{ $warning->description }}</td>
+                                    <td>
+                                        @foreach ($shift->shiftTimes as $shiftTimes)
+                                            @if ($shiftTimes->is_working == true)
+                                                {{ $shiftTimes->start_time }} <br>
+                                            @endif
+                                        @endforeach    
+                                    </td>
+                                    <td>
+                                        @foreach ($shift->shiftTimes as $shiftTimes)
+                                            @if ($shiftTimes->is_working == true)
+                                                {{ $shiftTimes->end_time }} <br>
+                                            @endif
+                                        @endforeach    
+                                    </td>
                                     <td class="Action">
-                                        @if (Gate::check('Edit Warning') || Gate::check('Delete Warning'))
-                                            <span>
-                                                @can('Edit Warning')
-                                                    <div class="action-btn bg-info ms-2">
-                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                            data-url="{{ URL::to('warning/' . $warning->id . '/edit') }}"
-                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Edit Warning') }}"
-                                                            data-bs-original-title="{{ __('Edit') }}">
-                                                            <i class="ti ti-pencil text-white"></i>
-                                                        </a>
-                                                    </div>
-                                                @endcan
-
-                                                @can('Delete Warning')
-                                                    <div class="action-btn bg-danger ms-2">
-                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['warning.destroy', $warning->id], 'id' => 'delete-form-' . $warning->id]) !!}
-                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                            aria-label="Delete"><i
-                                                                class="ti ti-trash text-white text-white"></i></a>
-                                                        </form>
-                                                    </div>
-                                                @endcan
-                                            </span>
-                                        @endif
+                                        <div class="action-btn bg-info ms-2">
+                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                data-url="{{ URL::to('shift/' . $shift->id . '/edit') }}"
+                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Edit Warning') }}"
+                                                data-bs-original-title="{{ __('Edit') }}">
+                                                <i class="ti ti-pencil text-white"></i>
+                                            </a>
+                                        </div>
+                                        <div class="action-btn bg-danger ms-2">
+                                            {!! Form::open(['method' => 'DELETE', 'route' => ['warning.destroy', $shift->id], 'id' => 'delete-form-' . $shift->id]) !!}
+                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                aria-label="Delete"><i
+                                                    class="ti ti-trash text-white text-white"></i></a>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
