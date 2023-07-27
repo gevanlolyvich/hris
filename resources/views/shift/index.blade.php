@@ -70,7 +70,7 @@
                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                                 data-url="{{ URL::to('shift/' . $shift->id . '/edit') }}"
                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                title="" data-title="{{ __('Edit Warning') }}"
+                                                title="" data-title="{{ __('Edit Shift') }}"
                                                 data-bs-original-title="{{ __('Edit') }}">
                                                 <i class="ti ti-pencil text-white"></i>
                                             </a>
