@@ -159,7 +159,26 @@ class ShiftController extends Controller
                                 'end_time'      => $end_time,
                             ]);
             }
-            return redirect()->route('shift.index')->with('success', __('Warning successfully updated.'));
+            return redirect()->route('shift.index')->with('success', __('Shift successfully updated.'));
+        }
+        else
+        {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+
+    // * Soft Delete
+    public function destroy(ShiftType $shift)
+    {
+        if(Auth::user()->can('Delete Warning'))
+        {
+            //* Destroy shift times 
+            $shift_times = ShiftTime::where('shift_type_id',$shift->id)->get()->pluck('id');
+            ShiftTime::destroy($shift_times);
+            
+            // * Destroy shift type
+            $shift->delete();
+            return redirect()->route('shift.index')->with('success', __('Shift successfully deleted.'));
         }
         else
         {

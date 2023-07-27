@@ -76,7 +76,7 @@
                                             </a>
                                         </div>
                                         <div class="action-btn bg-danger ms-2">
-                                            {!! Form::open(['method' => 'DELETE', 'route' => ['warning.destroy', $shift->id], 'id' => 'delete-form-' . $shift->id]) !!}
+                                            {!! Form::open(['method' => 'DELETE', 'route' => ['shift.destroy', $shift->id], 'id' => 'delete-form-' . $shift->id]) !!}
                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                 data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                 aria-label="Delete"><i
