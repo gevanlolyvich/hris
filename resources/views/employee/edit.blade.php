@@ -96,13 +96,6 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         {{ Form::label('designation_id', __('Designation'), ['class' => 'form-label']) }}
-                                        {{-- <select class=" form-control select2-multiple" id="designation_id"
-                                            name="designation_id" data-toggle=""
-                                            data-placeholder="{{ __('Select Designation ...') }}">
-                                            <option value="">{{ __('Select any Designation') }}</option>
-                                        </select> --}}
-
-
                                         <div class="form-icon-user">
                                             <div class="designation_div">
                                                 <select class="form-control designation_id select2" name="designation_id"
@@ -114,6 +107,10 @@
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}
                                         {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2', 'required' => 'required']) !!}
+                                    </div>
+                                    <div class="form-group">
+                                        {!! Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) !!}
+                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift')]) }}
                                     </div>
                                 </div>
                             </div>
