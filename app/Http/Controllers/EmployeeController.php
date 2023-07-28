@@ -24,6 +24,7 @@ use App\Models\NOC;
 use App\Models\Termination;
 use App\Models\ExperienceCertificate;
 use App\Models\JoiningLetter;
+use App\Models\ShiftType;
 
 //use Faker\Provider\File;
 
@@ -59,11 +60,12 @@ class EmployeeController extends Controller
             $departments      = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employees        = User::where('created_by', \Auth::user()->creatorId())->get();
+            $shift_types      = ShiftType::get()->pluck('name', 'id');
 
-            $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
+            // $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
 
-            // return $employeesId;
-            return view('employee.create', compact('employees', 'employeesId', 'departments', 'designations', 'documents', 'branches', 'company_settings'));
+            // return $shift_types;
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings','shift_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -71,11 +73,14 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        // return $request;
         if (\Auth::user()->can('Create Employee')) {
             $validator = \Validator::make(
                 $request->all(),
                 [
                     'employee_id' => 'required|unique:employees',
+                    'personel_id' => 'required|unique:employees',
+                    'shift_type_id' => 'required',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
@@ -119,6 +124,8 @@ class EmployeeController extends Controller
             $employee = Employee::create(
                 [
                     'user_id' => $user->id,
+                    'personel_id' => $request['personel_id'],
+                    'shift_type_id' => $request['shift_type_id'],
                     'name' => $request['name'],
                     'dob' => $request['dob'],
                     'gender' => $request['gender'],
@@ -211,9 +218,10 @@ class EmployeeController extends Controller
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
             $employeesId  = ($employee->employee_id);
+            $shift_types  = ShiftType::get()->pluck('name', 'id');
 
             // return $employee;
-            return view('employee.edit', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.edit', compact('shift_types','employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -278,6 +286,7 @@ class EmployeeController extends Controller
                         } else {
                             $employee_document                 = new EmployeeDocument();
                             $employee_document->employee_id    = $employee->employee_id;
+                            $employee_document->personel_id    = $employee->personel_id;
                             $employee_document->document_id    = $key;
                             $employee_document->document_value = $fileNameToStore;
                             $employee_document->save();

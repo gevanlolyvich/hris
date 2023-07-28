@@ -82,9 +82,13 @@
                         <div class="card-body employee-detail-create-body">
                             <div class="row">
                                 @csrf
-                                <div class="form-group">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('employee_id', old('employee_id'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee Id']) !!}
+                                    {!! Form::text('employee_id', null, ['class' => 'form-control','placeholder'=>"Enter Employee ID"]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
+                                    {!! Form::text('personel_id', null, ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
                                 </div>
 
                                 <div class="form-group col-md-6">
@@ -102,7 +106,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group col-md-6">
                                     {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
 
                                     <div class="form-icon-user">
@@ -113,9 +117,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group ">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}
                                     {{ Form::date('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
+                                </div>
+                                <div class="form-group">
+                                    {!! Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) !!}
+                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift')]) }}
+                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
                                 </div>
                             </div>
                         </div>
