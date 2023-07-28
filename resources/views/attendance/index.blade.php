@@ -193,6 +193,7 @@
                                 @if (\Auth::user()->type != 'employee')
                                     <th>{{ __('Employee') }}</th>
                                 @endif
+                                <th>{{ __('Shift') }}</th>
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Status') }}</th>
                                 <th>{{ __('Clock In') }}</th>
@@ -250,6 +251,7 @@
                                     @if (\Auth::user()->type != 'employee')
                                         <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                     @endif
+                                    <td>{{ $attendance->employee->shift_type->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                     <td>{{ $attendance->status }}</td>
                                     <td>{{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}

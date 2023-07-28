@@ -491,6 +491,7 @@ class EmployeeController extends Controller
 
 
             $employeeData->personel_id         = $employee[18];
+            $employeeData->shift_type_id       = $employee[19];
             $employeeData->name                = $employee[0];
             $employeeData->dob                 = $employee[1];
             $employeeData->gender              = $employee[2];
