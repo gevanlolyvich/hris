@@ -35,6 +35,11 @@ class Employee extends Model
         'salary',
         'created_by',
     ];
+    
+    public function shift_type()
+    {
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
+    }
 
     public function documents()
     {

@@ -346,7 +346,7 @@ class EmployeeController extends Controller
             $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($empId);
-            $employeesId  = \Auth::user()->employeeIdFormat($employee->employee_id);
+            $employeesId  = $employee->employee_id;
 
             return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
@@ -418,7 +418,7 @@ class EmployeeController extends Controller
             if ($employee == null) {
                 $employee     = Employee::where('user_id', $empId)->first();
             }
-            $employeesId  = \Auth::user()->employeeIdFormat($employee->employee_id);
+            $employeesId  = $employee->employee_id;
 
             return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
@@ -491,6 +491,7 @@ class EmployeeController extends Controller
 
 
             $employeeData->personel_id         = $employee[18];
+            $employeeData->shift_type_id       = $employee[19];
             $employeeData->name                = $employee[0];
             $employeeData->dob                 = $employee[1];
             $employeeData->gender              = $employee[2];

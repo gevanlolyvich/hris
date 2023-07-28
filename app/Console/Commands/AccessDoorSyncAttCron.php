@@ -30,7 +30,7 @@ class AccessDoorSyncAttCron extends Command
      */
     public function handle()
     {
-        Log::info(app("App\Http\Controllers\TestController")->get_attendances());
+        Log::info(app("App\Http\Controllers\TestController")->new_get_attendances());
         Log::info("SUCCESS GET DATA ATTENDANCE");
         return Command::SUCCESS;
     }

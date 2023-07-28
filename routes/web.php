@@ -101,7 +101,7 @@ Route::get('/', function () {
 //     return view('dashboard.dashboard');
 // })->middleware(['auth'])->name('dashboard');
 //* TEST ROUTE
-Route::get('/tests/attendances', [TestController::class, 'get_attendances']);
+Route::get('/tests/attendances', [TestController::class, 'new_get_attendances']);
 
 require __DIR__ . '/auth.php';
 

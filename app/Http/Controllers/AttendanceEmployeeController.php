@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\IpRestrict;
+use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Http\Request;
@@ -231,85 +232,177 @@ class AttendanceEmployeeController extends Controller
     {
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
         $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
-        if (!empty($todayAttendance) && $todayAttendance->clock_out == '00:00:00') {
-            $startTime = Utility::getValByName('company_start_time');
-            $endTime   = Utility::getValByName('company_end_time');
-            if (Auth::user()->type == 'employee') {
+        
+        $shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
+                        ->where('days',date('l'))
+                        ->first();
+        $date = date("Y-m-d");
+        $time = date("H:i:s");
 
-                $date = date("Y-m-d");
-                $time = date("H:i:s");
+        if($shift_times->is_working){
+            if (!empty($todayAttendance)) {
+                $startTime = $shift_times->start_time;
+                $endTime = $shift_times->end_time;
 
-                //early Leaving
-                $totalEarlyLeavingSeconds = strtotime($date . $endTime) - time();
-                $hours                    = floor($totalEarlyLeavingSeconds / 3600);
-                $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
-                $secs                     = floor($totalEarlyLeavingSeconds % 60);
-                $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-                if (time() > strtotime($date . $endTime)) {
-                    //Overtime
-                    $totalOvertimeSeconds = time() - strtotime($date . $endTime);
-                    $hours                = floor($totalOvertimeSeconds / 3600);
-                    $mins                 = floor($totalOvertimeSeconds / 60 % 60);
-                    $secs                 = floor($totalOvertimeSeconds % 60);
-                    $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                if (Auth::user()->type == 'employee') {
+    
+                    $date = date("Y-m-d");
+                    $time = date("H:i:s");
+    
+                    //early Leaving
+                    $totalEarlyLeavingSeconds = strtotime($date . $endTime) - time();
+                    $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+                    if (time() > strtotime($date . $endTime)) {
+                        //Overtime
+                        $totalOvertimeSeconds = time() - strtotime($date . $endTime);
+                        $hours                = floor($totalOvertimeSeconds / 3600);
+                        $mins                 = floor($totalOvertimeSeconds / 60 % 60);
+                        $secs                 = floor($totalOvertimeSeconds % 60);
+                        $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    } else {
+                        $overtime = '00:00:00';
+                    }
+    
+                    $attendanceEmployee                = AttendanceEmployee::find($id);
+                    $attendanceEmployee->clock_out     = $time;
+                    $attendanceEmployee->early_leaving = $earlyLeaving;
+                    $attendanceEmployee->overtime      = $overtime;
+                    $attendanceEmployee->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee successfully clock Out.'));
                 } else {
-                    $overtime = '00:00:00';
+                    $date = date("Y-m-d");
+                    //late
+                    $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
+    
+                    $hours = floor($totalLateSeconds / 3600);
+                    $mins  = floor($totalLateSeconds / 60 % 60);
+                    $secs  = floor($totalLateSeconds % 60);
+                    $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+                    //early Leaving
+                    $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($request->clock_out);
+                    $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+    
+                    if (strtotime($request->clock_out) > strtotime($date . $endTime)) {
+                        //Overtime
+                        $totalOvertimeSeconds = strtotime($request->clock_out) - strtotime($date . $endTime);
+                        $hours                = floor($totalOvertimeSeconds / 3600);
+                        $mins                 = floor($totalOvertimeSeconds / 60 % 60);
+                        $secs                 = floor($totalOvertimeSeconds % 60);
+                        $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    } else {
+                        $overtime = '00:00:00';
+                    }
+    
+                    $attendanceEmployee                = AttendanceEmployee::find($id);
+                    $attendanceEmployee->employee_id   = $request->employee_id;
+                    $attendanceEmployee->date          = $request->date;
+                    $attendanceEmployee->clock_in      = $request->clock_in;
+                    $attendanceEmployee->clock_out     = $request->clock_out;
+                    $attendanceEmployee->late          = $late;
+                    $attendanceEmployee->early_leaving = $earlyLeaving;
+                    $attendanceEmployee->overtime      = $overtime;
+                    $attendanceEmployee->total_rest    = '00:00:00';
+    
+                    $attendanceEmployee->save();
+    
+                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
                 }
-
-                $attendanceEmployee                = AttendanceEmployee::find($id);
-                $attendanceEmployee->clock_out     = $time;
-                $attendanceEmployee->early_leaving = $earlyLeaving;
-                $attendanceEmployee->overtime      = $overtime;
-                $attendanceEmployee->save();
-
-                return redirect()->route('home')->with('success', __('Employee successfully clock Out.'));
             } else {
-                $date = date("Y-m-d");
-                //late
-                $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
-
-                $hours = floor($totalLateSeconds / 3600);
-                $mins  = floor($totalLateSeconds / 60 % 60);
-                $secs  = floor($totalLateSeconds % 60);
-                $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-                //early Leaving
-                $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($request->clock_out);
-                $hours                    = floor($totalEarlyLeavingSeconds / 3600);
-                $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
-                $secs                     = floor($totalEarlyLeavingSeconds % 60);
-                $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-
-                if (strtotime($request->clock_out) > strtotime($date . $endTime)) {
-                    //Overtime
-                    $totalOvertimeSeconds = strtotime($request->clock_out) - strtotime($date . $endTime);
-                    $hours                = floor($totalOvertimeSeconds / 3600);
-                    $mins                 = floor($totalOvertimeSeconds / 60 % 60);
-                    $secs                 = floor($totalOvertimeSeconds % 60);
-                    $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-                } else {
-                    $overtime = '00:00:00';
-                }
-
-                $attendanceEmployee                = AttendanceEmployee::find($id);
-                $attendanceEmployee->employee_id   = $request->employee_id;
-                $attendanceEmployee->date          = $request->date;
-                $attendanceEmployee->clock_in      = $request->clock_in;
-                $attendanceEmployee->clock_out     = $request->clock_out;
-                $attendanceEmployee->late          = $late;
-                $attendanceEmployee->early_leaving = $earlyLeaving;
-                $attendanceEmployee->overtime      = $overtime;
-                $attendanceEmployee->total_rest    = '00:00:00';
-
-                $attendanceEmployee->save();
-
-                return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
+                return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
             }
-        } else {
-            return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
+        }else{
+            if (!empty($todayAttendance)) {
+                $startTime = Utility::getValByName('company_start_time');
+                $endTime   = Utility::getValByName('company_end_time');
+                if (Auth::user()->type == 'employee') {
+    
+                    // $date = date("Y-m-d");
+                    // $time = date("H:i:s");
+    
+                    // //early Leaving
+                    // $totalEarlyLeavingSeconds = strtotime($date . $endTime) - time();
+                    // $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    // $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    // $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    // $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+                    // if (time() > strtotime($date . $endTime)) {
+                    //     //Overtime
+                    //     $totalOvertimeSeconds = time() - strtotime($date . $endTime);
+                    //     $hours                = floor($totalOvertimeSeconds / 3600);
+                    //     $mins                 = floor($totalOvertimeSeconds / 60 % 60);
+                    //     $secs                 = floor($totalOvertimeSeconds % 60);
+                    //     $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    // } else {
+                    //     $overtime = '00:00:00';
+                    // }
+    
+                    $attendanceEmployee                = AttendanceEmployee::find($id);
+                    $attendanceEmployee->clock_out     = $time;
+                    $attendanceEmployee->early_leaving = '00:00:00';
+                    $attendanceEmployee->overtime      = '00:00:00';
+                    $attendanceEmployee->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee successfully clock Out.'));
+                } else {
+                    // $date = date("Y-m-d");
+                    // //late
+                    // $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
+    
+                    // $hours = floor($totalLateSeconds / 3600);
+                    // $mins  = floor($totalLateSeconds / 60 % 60);
+                    // $secs  = floor($totalLateSeconds % 60);
+                    // $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+                    // //early Leaving
+                    // $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($request->clock_out);
+                    // $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    // $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    // $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    // $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+    
+                    // if (strtotime($request->clock_out) > strtotime($date . $endTime)) {
+                    //     //Overtime
+                    //     $totalOvertimeSeconds = strtotime($request->clock_out) - strtotime($date . $endTime);
+                    //     $hours                = floor($totalOvertimeSeconds / 3600);
+                    //     $mins                 = floor($totalOvertimeSeconds / 60 % 60);
+                    //     $secs                 = floor($totalOvertimeSeconds % 60);
+                    //     $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    // } else {
+                    //     $overtime = '00:00:00';
+                    // }
+    
+                    $attendanceEmployee                = AttendanceEmployee::find($id);
+                    $attendanceEmployee->employee_id   = $request->employee_id;
+                    $attendanceEmployee->date          = $request->date;
+                    $attendanceEmployee->clock_in      = $request->clock_in;
+                    $attendanceEmployee->clock_out     = $request->clock_out;
+                    $attendanceEmployee->late          = '00:00:00';
+                    $attendanceEmployee->early_leaving = '00:00:00';
+                    $attendanceEmployee->overtime      = '00:00:00';
+                    $attendanceEmployee->total_rest    = '00:00:00';
+    
+                    $attendanceEmployee->save();
+    
+                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
+                }
+            } else {
+                return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
+            }
         }
+
+        
     }
 
     public function destroy($id)
@@ -339,71 +432,122 @@ class AttendanceEmployeeController extends Controller
 
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
         $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
-        if (empty($todayAttendance)) {
+        $shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
+                        ->where('days',date('l'))
+                        ->first();
+        $date = date("Y-m-d");
+        $time = date("H:i:s");
+        
+        if($shift_times->is_working){
+            if (empty($todayAttendance)) {
 
-            $startTime = Utility::getValByName('company_start_time');
-            $endTime   = Utility::getValByName('company_end_time');
-
-            $attendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', $employeeId)->where('clock_out', '=', '00:00:00')->first();
-
-            if ($attendance != null) {
-                $attendance            = AttendanceEmployee::find($attendance->id);
-                $attendance->clock_out = $endTime;
-                $attendance->save();
+                // $startTime = Utility::getValByName('company_start_time');
+                // $endTime   = Utility::getValByName('company_end_time');
+                $startTime = $shift_times->start_time;
+                $endTime = $shift_times->end_time;
+                
+    
+                $attendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', $employeeId)->where('clock_out', '=', '00:00:00')->first();
+    
+                if ($attendance != null) {
+                    $attendance            = AttendanceEmployee::find($attendance->id);
+                    $attendance->clock_out = $endTime;
+                    $attendance->save();
+                }
+    
+                
+    
+                //late
+                $totalLateSeconds = time() - strtotime($date . $startTime);
+                $hours            = floor($totalLateSeconds / 3600);
+                $mins             = floor($totalLateSeconds / 60 % 60);
+                $secs             = floor($totalLateSeconds % 60);
+                $late             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+    
+                $checkDb = AttendanceEmployee::where('employee_id', '=', \Auth::user()->id)->get()->toArray();
+    
+    
+                if (empty($checkDb)) {
+                    $employeeAttendance                = new AttendanceEmployee();
+                    $employeeAttendance->employee_id   = $employeeId;
+                    $employeeAttendance->date          = $date;
+                    $employeeAttendance->status        = 'Present';
+                    $employeeAttendance->clock_in      = $time;
+                    $employeeAttendance->clock_out     = '00:00:00';
+                    $employeeAttendance->late          = $late;
+                    $employeeAttendance->early_leaving = '00:00:00';
+                    $employeeAttendance->overtime      = '00:00:00';
+                    $employeeAttendance->total_rest    = '00:00:00';
+                    $employeeAttendance->created_by    = \Auth::user()->id;
+    
+                    $employeeAttendance->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
+                }
+                foreach ($checkDb as $check) {
+    
+    
+                    $employeeAttendance                = new AttendanceEmployee();
+                    $employeeAttendance->employee_id   = $employeeId;
+                    $employeeAttendance->date          = $date;
+                    $employeeAttendance->status        = 'Present';
+                    $employeeAttendance->clock_in      = $time;
+                    $employeeAttendance->clock_out     = '00:00:00';
+                    $employeeAttendance->late          = $late;
+                    $employeeAttendance->early_leaving = '00:00:00';
+                    $employeeAttendance->overtime      = '00:00:00';
+                    $employeeAttendance->total_rest    = '00:00:00';
+                    $employeeAttendance->created_by    = \Auth::user()->id;
+    
+                    $employeeAttendance->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
+                }
+            } else {
+                return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
             }
-
-            $date = date("Y-m-d");
-            $time = date("H:i:s");
-
-            //late
-            $totalLateSeconds = time() - strtotime($date . $startTime);
-            $hours            = floor($totalLateSeconds / 3600);
-            $mins             = floor($totalLateSeconds / 60 % 60);
-            $secs             = floor($totalLateSeconds % 60);
-            $late             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
+        }else{
             $checkDb = AttendanceEmployee::where('employee_id', '=', \Auth::user()->id)->get()->toArray();
-
-
-            if (empty($checkDb)) {
-                $employeeAttendance                = new AttendanceEmployee();
-                $employeeAttendance->employee_id   = $employeeId;
-                $employeeAttendance->date          = $date;
-                $employeeAttendance->status        = 'Present';
-                $employeeAttendance->clock_in      = $time;
-                $employeeAttendance->clock_out     = '00:00:00';
-                $employeeAttendance->late          = $late;
-                $employeeAttendance->early_leaving = '00:00:00';
-                $employeeAttendance->overtime      = '00:00:00';
-                $employeeAttendance->total_rest    = '00:00:00';
-                $employeeAttendance->created_by    = \Auth::user()->id;
-
-                $employeeAttendance->save();
-
-                return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
+    
+    
+                if (empty($checkDb)) {
+                    $employeeAttendance                = new AttendanceEmployee();
+                    $employeeAttendance->employee_id   = $employeeId;
+                    $employeeAttendance->date          = $date;
+                    $employeeAttendance->status        = 'No Working Hour';
+                    $employeeAttendance->clock_in      = $time;
+                    $employeeAttendance->clock_out     = '00:00:00';
+                    $employeeAttendance->late          = '00:00:00';
+                    $employeeAttendance->early_leaving = '00:00:00';
+                    $employeeAttendance->overtime      = '00:00:00';
+                    $employeeAttendance->total_rest    = '00:00:00';
+                    $employeeAttendance->created_by    = \Auth::user()->id;
+    
+                    $employeeAttendance->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
+                }
+                foreach ($checkDb as $check) {
+    
+    
+                    $employeeAttendance                = new AttendanceEmployee();
+                    $employeeAttendance->employee_id   = $employeeId;
+                    $employeeAttendance->date          = $date;
+                    $employeeAttendance->status        = 'No Working Hour';
+                    $employeeAttendance->clock_in      = $time;
+                    $employeeAttendance->clock_out     = '00:00:00';
+                    $employeeAttendance->late          = '00:00:00';
+                    $employeeAttendance->early_leaving = '00:00:00';
+                    $employeeAttendance->overtime      = '00:00:00';
+                    $employeeAttendance->total_rest    = '00:00:00';
+                    $employeeAttendance->created_by    = \Auth::user()->id;
+    
+                    $employeeAttendance->save();
+    
+                    return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
             }
-            foreach ($checkDb as $check) {
-
-
-                $employeeAttendance                = new AttendanceEmployee();
-                $employeeAttendance->employee_id   = $employeeId;
-                $employeeAttendance->date          = $date;
-                $employeeAttendance->status        = 'Present';
-                $employeeAttendance->clock_in      = $time;
-                $employeeAttendance->clock_out     = '00:00:00';
-                $employeeAttendance->late          = $late;
-                $employeeAttendance->early_leaving = '00:00:00';
-                $employeeAttendance->overtime      = '00:00:00';
-                $employeeAttendance->total_rest    = '00:00:00';
-                $employeeAttendance->created_by    = \Auth::user()->id;
-
-                $employeeAttendance->save();
-
-                return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
-            }
-        } else {
-            return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
         }
+        
     }
 
     public function bulkAttendance(Request $request)

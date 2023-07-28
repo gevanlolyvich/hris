@@ -12,6 +12,7 @@ use App\Models\Meeting;
 use App\Models\Job;
 use App\Models\Payees;
 use App\Models\Payer;
+use App\Models\ShiftTime;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Utility;
@@ -85,8 +86,14 @@ class HomeController extends Controller
                 $time               = date("H:i:s");
                 $employeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $date)->first();
 
-                $officeTime['startTime'] = Utility::getValByName('company_start_time');
-                $officeTime['endTime']   = Utility::getValByName('company_end_time');
+                $shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
+                                ->where('days',date('l'))
+                                ->first();
+
+                $officeTime['startTime']    = $shift_times->start_time;
+                $officeTime['endTime']      = $shift_times->end_time;
+                $officeTime['is_working']   = $shift_times->is_working;
+                // return $officeTime;
 
                 return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'officeTime'));
             }
