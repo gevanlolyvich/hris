@@ -153,11 +153,6 @@ class TestController extends Controller
         $locations = ['-6.233798952272397, 106.8479844300084'];
         $date = date('Y-m-d');
         $employees = Employee::where('is_active', 1)->get();
-        // $shift_times = ShiftTime::where('shift_type_id',$employees[0]->shift_type->id)
-        //                 ->where('days',date('l'))
-        //                 ->first();
-
-        //                 return $shift_times;
 
         for ($a=0; $a < count($apis); $a++) { 
             $responses = Http::withHeaders([
@@ -181,8 +176,6 @@ class TestController extends Controller
                         if($shift_times->is_working){
                             $startTime = $shift_times->start_time;
                             $endTime = $shift_times->end_time;
-                            // $startTime  = Utility::getValByName('company_start_time');
-                            // $endTime    = Utility::getValByName('company_end_time');
                             $employee = Employee::where('employee_id', '=', $employees[$j]->employee_id)->first();
                             $attendance = AttendanceEmployee::where('employee_id', '=', $employees[$j]->id)->where('date', '=', $date)->first();
                             

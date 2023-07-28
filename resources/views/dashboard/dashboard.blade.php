@@ -57,11 +57,16 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted pb-0-5">
-                        {{ __('My Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}</p>
+                        @if ($officeTime['is_working'])
+                            {{ __('My Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}</p>
+                        @else
+                            {{ __('No Working Hour') }}
+                        @endif
                     <div class="row">
                         <div class="col-md-6 float-right border-right">
                             {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post']) }}
-                            @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00')
+                            {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
+                            @if (empty($employeeAttendance))
                                 <button type="submit" value="0" name="in" id="clock_in"
                                     class="btn btn-primary">{{ __('CLOCK IN') }}</button>
                             @else
@@ -71,7 +76,8 @@
                             {{ Form::close() }}
                         </div>
                         <div class="col-md-6 float-left">
-                            @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00')
+                            {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
+                            @if (!empty($employeeAttendance) && date('H:i:s') <= '23:59:59')
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
                                 <button type="submit" value="1" name="out" id="clock_out"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
