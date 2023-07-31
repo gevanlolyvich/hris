@@ -108,9 +108,13 @@
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}
                                         {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2', 'required' => 'required']) !!}
                                     </div>
-                                    <div class="form-group">
-                                        {!! Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) !!}
-                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift')]) }}
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}
+                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('managed_by', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}
+                                        {{ Form::select('managed_by', $employees, null, ['class' => 'form-control ', 'id' => 'managed_by', 'required' => 'required' ,'placeholder' =>  __('Select Direct Supervisor')]) }}
                                     </div>
                                 </div>
                             </div>

@@ -1,9 +1,11 @@
 {
+    "Select Direct Supervisor":"Select Direct Supervisor",
+    "Direct Supervisor":"Direct Supervisor",
     "Shift":"Shift",
     "Manage Shift":"Manage Shift",
     "Create New Shift":"Create New Shift",
     "Edit Shift" :"Edit Shift",
-    "Select Shift" :"Select Shift",
+    "Select Shift*" :"Select Shift*",
     "Shift Name" :"Shift Name",
     "Work Days":"Work Days",
     "Days":"Days",

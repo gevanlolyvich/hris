@@ -12,6 +12,7 @@ class Employee extends Model
         'user_id',
         'personel_id',
         'shift_type_id',
+        'managed_by',
         'name',
         'dob',
         'gender',
