@@ -59,7 +59,7 @@ class EmployeeController extends Controller
             $branches         = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $departments      = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees        = User::where('created_by', \Auth::user()->creatorId())->get();
+            $employees        = User::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');;
             $shift_types      = ShiftType::get()->pluck('name', 'id');
 
             // $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
@@ -126,6 +126,7 @@ class EmployeeController extends Controller
                     'user_id' => $user->id,
                     'personel_id' => $request['personel_id'],
                     'shift_type_id' => $request['shift_type_id'],
+                    'managed_by' => $request['managed_by'],
                     'name' => $request['name'],
                     'dob' => $request['dob'],
                     'gender' => $request['gender'],
@@ -217,11 +218,12 @@ class EmployeeController extends Controller
             $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
+            $employees        = User::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');;
             $employeesId  = ($employee->employee_id);
             $shift_types  = ShiftType::get()->pluck('name', 'id');
 
             // return $employee;
-            return view('employee.edit', compact('shift_types','employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.edit', compact('shift_types','employee','employees', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

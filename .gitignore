@@ -13,6 +13,8 @@ yarn-error.log
 /.idea
 /.vscode
 /storage/framework/*
+/storage/framework/cache/data/*
 /storage/framework/sessions/*
-logs/*
+/storage/logs/*
+/storage/app/*
 /storage/*
