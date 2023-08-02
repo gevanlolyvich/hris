@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('attendance_employees', function (Blueprint $table) {
             $table->foreignId('attendance_status_id')->after('date')->nullable();
-            $table->string('work_hours')->after('early_leaving')->nullable();
+            $table->time('work_hours')->after('early_leaving')->nullable();
         });
     }
 
