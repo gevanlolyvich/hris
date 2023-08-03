@@ -640,9 +640,9 @@ class ReportController extends Controller
                     {
                         $employeeAttendance = AttendanceEmployee::where('employee_id', $id)->where('date', $dateFormat)->first();
 
-                        if(!empty($employeeAttendance) && $employeeAttendance->status == 'Present')
+                        if(!empty($employeeAttendance) && $employeeAttendance->attendanceStatus->id == 1) //* Present
                         {
-                            $attendanceStatus[$date] = 'P';
+                            $attendanceStatus[$date] = $employeeAttendance->attendanceStatus->label;
                             $totalPresent            += 1;
 
                             if($employeeAttendance->overtime > 0)
@@ -665,14 +665,14 @@ class ReportController extends Controller
 
 
                         }
-                        elseif(!empty($employeeAttendance) && $employeeAttendance->status == 'Leave')
+                        elseif(!empty($employeeAttendance) && $employeeAttendance->attendanceStatus->id == 4) //* Leave
                         {
-                            $attendanceStatus[$date] = 'L';
+                            $attendanceStatus[$date] = $employeeAttendance->attendanceStatus->label;
                             $totalLeave              += 1;
                         }
                         else
                         {
-                            $attendanceStatus[$date] = '';
+                            $attendanceStatus[$date] = 'A';
                         }
                     }
                     else

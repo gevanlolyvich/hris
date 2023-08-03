@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('attendance_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('label');
+            $table->string('color')->nullable();
         });
     }
 
