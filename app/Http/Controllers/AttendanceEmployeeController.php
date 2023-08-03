@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceEmployee;
+use App\Models\AttendanceStatus;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
@@ -180,6 +181,9 @@ class AttendanceEmployeeController extends Controller
                 $secs                     = floor($totalEarlyLeavingSeconds % 60);
                 $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
+                // get attendance status persent for attendance_status model, when employee clock in
+                $status = AttendanceStatus::where('id', 1)->first();
+
 
                 if (strtotime($request->clock_out) > strtotime($date . $endTime)) {
                     //Overtime
@@ -192,17 +196,19 @@ class AttendanceEmployeeController extends Controller
                     $overtime = '00:00:00';
                 }
 
-                $employeeAttendance                = new AttendanceEmployee();
-                $employeeAttendance->employee_id   = $request->employee_id;
-                $employeeAttendance->date          = $request->date;
-                $employeeAttendance->status        = 'Present';
-                $employeeAttendance->clock_in      = $request->clock_in . ':00';
-                $employeeAttendance->clock_out     = $request->clock_out . ':00';
-                $employeeAttendance->late          = $late;
-                $employeeAttendance->early_leaving = $earlyLeaving;
-                $employeeAttendance->overtime      = $overtime;
-                $employeeAttendance->total_rest    = '00:00:00';
-                $employeeAttendance->created_by    = \Auth::user()->creatorId();
+                $employeeAttendance                         = new AttendanceEmployee();
+                $employeeAttendance->employee_id            = $request->employee_id;
+                $employeeAttendance->date                   = $request->date;
+                $employeeAttendance->attendance_status_id   = $status->id;
+                $employeeAttendance->status                 = $status->name;
+                $employeeAttendance->clock_in               = $request->clock_in . ':00';
+                $employeeAttendance->clock_out              = $request->clock_out . ':00';
+                $employeeAttendance->late                   = $late;
+                $employeeAttendance->early_leaving          = $earlyLeaving;
+                $employeeAttendance->overtime               = $overtime;
+                $employeeAttendance->total_rest             = '00:00:00';
+                $employeeAttendance->created_by             = \Auth::user()->creatorId();
+
                 $employeeAttendance->save();
 
                 return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully created.'));
@@ -271,6 +277,15 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->clock_out     = $time;
                     $attendanceEmployee->early_leaving = $earlyLeaving;
                     $attendanceEmployee->overtime      = $overtime;
+                    
+                    // calculate work hours
+                    $totalWorkSeconds = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours                = floor($totalWorkSeconds / 3600);
+                    $mins                 = floor($totalWorkSeconds / 60 % 60);
+                    $secs                 = floor($totalWorkSeconds % 60);
+                    $workhours             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+                    $attendanceEmployee->work_hours      = $workhours;
                     $attendanceEmployee->save();
     
                     return redirect()->route('home')->with('success', __('Employee successfully clock Out.'));
@@ -465,21 +480,23 @@ class AttendanceEmployeeController extends Controller
                 $late             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
     
                 $checkDb = AttendanceEmployee::where('employee_id', '=', \Auth::user()->id)->get()->toArray();
-    
+                $presentStatus = AttendanceStatus::where('id', 1)->first();
     
                 if (empty($checkDb)) {
-                    $employeeAttendance                = new AttendanceEmployee();
-                    $employeeAttendance->employee_id   = $employeeId;
-                    $employeeAttendance->date          = $date;
-                    $employeeAttendance->status        = 'Present';
-                    $employeeAttendance->clock_in      = $time;
-                    $employeeAttendance->clock_out     = '00:00:00';
-                    $employeeAttendance->late          = $late;
-                    $employeeAttendance->early_leaving = '00:00:00';
-                    $employeeAttendance->overtime      = '00:00:00';
-                    $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->created_by    = \Auth::user()->id;
-    
+                    $employeeAttendance                         = new AttendanceEmployee();
+                    $employeeAttendance->employee_id            = $employeeId;
+                    $employeeAttendance->date                      = $date;
+                    $employeeAttendance->attendance_status_id   = $presentStatus->id;
+                    $employeeAttendance->status                 = $presentStatus->name;
+                    $employeeAttendance->clock_in               = $time;
+                    $employeeAttendance->clock_out              = '00:00:00';
+                    $employeeAttendance->late                   = $late;
+                    $employeeAttendance->early_leaving          = '00:00:00';
+                    $employeeAttendance->overtime               = '00:00:00';
+                    $employeeAttendance->total_rest             = '00:00:00';
+                    $employeeAttendance->work_hours             = '00:00:00';
+                    $employeeAttendance->created_by             = \Auth::user()->id;
+
                     $employeeAttendance->save();
     
                     return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
@@ -487,18 +504,19 @@ class AttendanceEmployeeController extends Controller
                 foreach ($checkDb as $check) {
     
     
-                    $employeeAttendance                = new AttendanceEmployee();
-                    $employeeAttendance->employee_id   = $employeeId;
-                    $employeeAttendance->date          = $date;
-                    $employeeAttendance->status        = 'Present';
-                    $employeeAttendance->clock_in      = $time;
-                    $employeeAttendance->clock_out     = '00:00:00';
-                    $employeeAttendance->late          = $late;
-                    $employeeAttendance->early_leaving = '00:00:00';
-                    $employeeAttendance->overtime      = '00:00:00';
-                    $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->created_by    = \Auth::user()->id;
-    
+                    $employeeAttendance                         = new AttendanceEmployee();
+                    $employeeAttendance->employee_id            = $employeeId;
+                    $employeeAttendance->date                   = $date;
+                    $employeeAttendance->attendance_status_id   = $presentStatus->id;
+                    $employeeAttendance->status                 = $presentStatus->name;
+                    $employeeAttendance->clock_in               = $time;
+                    $employeeAttendance->clock_out              = '00:00:00';
+                    $employeeAttendance->late                   = $late;
+                    $employeeAttendance->early_leaving          = '00:00:00';
+                    $employeeAttendance->overtime               = '00:00:00';
+                    $employeeAttendance->total_rest             = '00:00:00';
+                    $employeeAttendance->created_by             = \Auth::user()->id;
+
                     $employeeAttendance->save();
     
                     return redirect()->route('home')->with('success', __('Employee Successfully Clock In.'));
