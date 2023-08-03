@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceEmployee;
+use App\Models\AttendanceStatus;
 use App\Models\Employee;
 use App\Models\LogSyncAttendance;
 use App\Models\ShiftTime;
@@ -152,7 +153,10 @@ class TestController extends Controller
         $apis =['http://172.16.0.11:3050'];
         $locations = ['-6.233798952272397, 106.8479844300084'];
         $date = date('Y-m-d');
+        $tomorrow = date("Y-m-d", strtotime('tomorrow'));
         $employees = Employee::where('is_active', 1)->get();
+        $presentAttendance = AttendanceStatus::where('id',1)->first();
+        // return $tomorrow;
 
         for ($a=0; $a < count($apis); $a++) { 
             $responses = Http::withHeaders([
@@ -172,10 +176,15 @@ class TestController extends Controller
                         $shift_times = ShiftTime::where('shift_type_id',$employees[$j]->shift_type->id)
                         ->where('days',date('l'))
                         ->first();
+
                         
                         if($shift_times->is_working){
                             $startTime = $shift_times->start_time;
                             $endTime = $shift_times->end_time;
+
+                            if(strtotime($startTime) > strtotime($endTime)){
+                                continue;
+                            }
                             $employee = Employee::where('employee_id', '=', $employees[$j]->employee_id)->first();
                             $attendance = AttendanceEmployee::where('employee_id', '=', $employees[$j]->id)->where('date', '=', $date)->first();
                             
@@ -189,6 +198,13 @@ class TestController extends Controller
                                 $secs  = floor($totalLateSeconds % 60);
                                 $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
                 
+                                //work hours
+                                $totalWorkHoursSeconds    = strtotime($attendances[$i]['last_time']) - strtotime($attendances[$i]['first_time']);
+                                $hours                    = floor($totalWorkHoursSeconds / 3600);
+                                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
+                                $secs                     = floor($totalWorkHoursSeconds % 60);
+                                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                                
                                 //early Leaving
                                 $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($attendances[$i]['last_time']);
                                 $hours                    = floor($totalEarlyLeavingSeconds / 3600);
@@ -211,11 +227,13 @@ class TestController extends Controller
                                 $employeeAttendance                = new AttendanceEmployee();
                                 $employeeAttendance->employee_id   = $employees[$j]->id;
                                 $employeeAttendance->date          = $date;
-                                $employeeAttendance->status        = 'Present';
+                                $employeeAttendance->attendance_status_id = $presentAttendance->id;
+                                $employeeAttendance->status        = $presentAttendance->name;
                                 $employeeAttendance->clock_in      = $attendances[$i]['first_time'] . ':00';
                                 $employeeAttendance->clock_out     = $attendances[$i]['last_time'] . ':00';
                                 $employeeAttendance->late          = $late;
                                 $employeeAttendance->early_leaving = $earlyLeaving;
+                                $employeeAttendance->work_hours    = $workHours;
                                 $employeeAttendance->overtime      = $overtime;
                                 $employeeAttendance->total_rest    = '00:00:00';
                                 $employeeAttendance->created_by    = $employee->user_id;
@@ -234,6 +252,17 @@ class TestController extends Controller
                                 $mins  = floor($totalLateSeconds / 60 % 60);
                                 $secs  = floor($totalLateSeconds % 60);
                                 $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+                                //work hours
+                                if(strtotime($attendances[$i]['last_time']) >strtotime($attendances[$i]['first_time'])){
+                                    $totalWorkHoursSeconds    = strtotime($attendances[$i]['last_time']) - strtotime($attendances[$i]['first_time']);
+                                }else{
+                                    $totalWorkHoursSeconds    = strtotime($date.$attendances[$i]['last_time']) - strtotime($tomorrow.$attendances[$i]['first_time']);
+                                }
+                                $hours                    = floor($totalWorkHoursSeconds / 3600);
+                                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
+                                $secs                     = floor($totalWorkHoursSeconds % 60);
+                                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
                 
                                 //early Leaving
                                 $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($attendances[$i]['last_time']);
@@ -257,11 +286,13 @@ class TestController extends Controller
                                 $employeeAttendance                = $attendance;
                                 $employeeAttendance->employee_id   = $employees[$j]->id;
                                 $employeeAttendance->date          = $date;
-                                $employeeAttendance->status        = 'Present';
+                                $employeeAttendance->attendance_status_id = $presentAttendance->id;
+                                $employeeAttendance->status        = $presentAttendance->name;
                                 $employeeAttendance->clock_in      = $attendances[$i]['first_time'] . ':00';
                                 $employeeAttendance->clock_out     = $attendances[$i]['last_time'] . ':00';
                                 $employeeAttendance->late          = $late;
                                 $employeeAttendance->early_leaving = $earlyLeaving;
+                                $employeeAttendance->work_hours    = $workHours;
                                 $employeeAttendance->overtime      = $overtime;
                                 $employeeAttendance->total_rest    = '00:00:00';
                                 $employeeAttendance->created_by    = $employee->user_id;
@@ -284,11 +315,13 @@ class TestController extends Controller
                                 $employeeAttendance                = new AttendanceEmployee();
                                 $employeeAttendance->employee_id   = $employees[$j]->id;
                                 $employeeAttendance->date          = $date;
-                                $employeeAttendance->status        = 'No Working Hour';
+                                $employeeAttendance->attendance_status_id = $presentAttendance->id;
+                                $employeeAttendance->status        = $presentAttendance->name;
                                 $employeeAttendance->clock_in      = $attendances[$i]['first_time'] . ':00';
                                 $employeeAttendance->clock_out     = $attendances[$i]['last_time'] . ':00';
                                 $employeeAttendance->late          = '00:00:00';
                                 $employeeAttendance->early_leaving = '00:00:00';
+                                $employeeAttendance->work_hours    = '00:00:00';
                                 $employeeAttendance->overtime      = '00:00:00';
                                 $employeeAttendance->total_rest    = '00:00:00';
                                 $employeeAttendance->created_by    = $employee->user_id;
@@ -304,11 +337,13 @@ class TestController extends Controller
                                 $employeeAttendance                = $attendance;
                                 $employeeAttendance->employee_id   = $employees[$j]->id;
                                 $employeeAttendance->date          = $date;
-                                $employeeAttendance->status        = 'No Working Hour';
+                                $employeeAttendance->attendance_status_id = $presentAttendance->id;
+                                $employeeAttendance->status        = $presentAttendance->name;
                                 $employeeAttendance->clock_in      = $attendances[$i]['first_time'] . ':00';
                                 $employeeAttendance->clock_out     = $attendances[$i]['last_time'] . ':00';
                                 $employeeAttendance->late          = '00:00:00';
                                 $employeeAttendance->early_leaving = '00:00:00';
+                                $employeeAttendance->work_hours    = '00:00:00';
                                 $employeeAttendance->overtime      = '00:00:00';
                                 $employeeAttendance->total_rest    = '00:00:00';
                                 $employeeAttendance->created_by    = $employee->user_id;
