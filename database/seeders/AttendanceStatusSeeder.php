@@ -16,10 +16,10 @@ class AttendanceStatusSeeder extends Seeder
     public function run()
     {
         $attendance_statuses = [
-            ['name'=>'Present'],
-            ['name'=>'Absent'],
-            ['name'=>'Permission'],
-            ['name'=>'Leave']
+            ['name'=>'Present','label'=>'H'],
+            ['name'=>'Absent','label'=>'A'],
+            ['name'=>'Permission','label'=>'I'],
+            ['name'=>'Leave','label'=>'C']
         ];
         DB::table('attendance_statuses')->insert($attendance_statuses);
     }
