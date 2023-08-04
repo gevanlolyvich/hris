@@ -66,7 +66,10 @@
                         <div class="col-md-6 float-right border-right">
                             {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post']) }}
                             {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                            @if (empty($employeeAttendance))
+                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                                <button type="submit" value="0" name="in" id="clock_in"
+                                    class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
+                            @elseif (empty($employeeAttendance))
                                 <button type="submit" value="0" name="in" id="clock_in"
                                     class="btn btn-primary">{{ __('CLOCK IN') }}</button>
                             @else
@@ -77,7 +80,15 @@
                         </div>
                         <div class="col-md-6 float-left">
                             {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
-                            @if (!empty($employeeAttendance) && date('H:i:s') <= '23:59:59')
+                            @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
+                                <button type="submit" value="1" name="out" id="clock_out"
+                                    class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
+                            @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === $officeTime['default_clock_out'])
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                                <button type="submit" value="1" name="out" id="clock_out"
+                                    class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
+                            @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === '00:00:00')
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
                                 <button type="submit" value="1" name="out" id="clock_out"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>

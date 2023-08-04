@@ -83,8 +83,10 @@ class HomeController extends Controller
                 }
 
                 $date               = date("Y-m-d");
+                $dateYesterday      = date("Y-m-d", strtotime('yesterday'));
                 $time               = date("H:i:s");
                 $employeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $date)->first();
+                $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $dateYesterday)->first();
 
                 $shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
                                 ->where('days',date('l'))
@@ -93,9 +95,35 @@ class HomeController extends Controller
                 $officeTime['startTime']    = $shift_times->start_time;
                 $officeTime['endTime']      = $shift_times->end_time;
                 $officeTime['is_working']   = $shift_times->is_working;
-                // return $officeTime;
+                $officeTime['is_cross_day'] = $shift_times->start_time > $shift_times->end_time ? true : false;
 
-                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'officeTime'));
+                // calculate default clock out for yesterday cross day shift
+                $clockoutSeconds                          = strtotime($shift_times->end_time) - strtotime($date) - 3600;
+                $hours                                    = floor($clockoutSeconds / 3600);
+                $mins                                     = floor($clockoutSeconds / 60 % 60);
+                $secs                                     = floor($clockoutSeconds % 60);
+                $default_clock_out_cross_day              = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                $officeTime['default_clock_out']          = $default_clock_out_cross_day;
+
+                // create shift and office time for yesterday
+                $yesterday_shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
+                                ->where('days',date('l', strtotime('yesterday')))
+                                ->first();
+
+                $yesterdayOfficeTime['startTime']    = $yesterday_shift_times->start_time;
+                $yesterdayOfficeTime['endTime']      = $yesterday_shift_times->end_time;
+                $yesterdayOfficeTime['is_working']   = $yesterday_shift_times->is_working;
+                $yesterdayOfficeTime['is_cross_day'] = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
+                
+                // calculate default clock out for yesterday cross day shift
+                $clockoutSeconds                          = strtotime($yesterday_shift_times->end_time) - strtotime($date) - 3600;
+                $hours                                    = floor($clockoutSeconds / 3600);
+                $mins                                     = floor($clockoutSeconds / 60 % 60);
+                $secs                                     = floor($clockoutSeconds % 60);
+                $default_clock_out_cross_day              = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                $yesterdayOfficeTime['default_clock_out'] = $default_clock_out_cross_day;
+
+                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime'));
             }
             else
             {
