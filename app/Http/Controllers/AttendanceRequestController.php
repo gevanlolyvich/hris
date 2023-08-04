@@ -14,16 +14,16 @@ class AttendanceRequestController extends Controller
     public function index()
     {
         if (Auth::user()->can('Manage Leave')) {
-            $leaves = AttendanceRequest::where('created_by', '=', Auth::user()->creatorId())->get();
+            $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->creatorId())->get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
                 $employee = Employee::where('user_id', '=', $user->id)->first();
-                $leaves   = AttendanceRequest::where('employee_id', '=', $employee->id)->get();
+                $attendance_requests   = AttendanceRequest::where('employee_id', '=', $employee->id)->get();
             } else {
-                $leaves = AttendanceRequest::where('created_by', '=', Auth::user()->creatorId())->get();
+                $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->creatorId())->get();
             }
 
-            return view('attendancerequest.index', compact('leaves'));
+            return view('attendancerequest.index', compact('attendance_requests'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -73,16 +73,17 @@ class AttendanceRequestController extends Controller
         }
         $employee = Employee::find($employee_id);
         $date = date_create($request->date);
-        return date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $employee->name);
+        // return date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $employee->name);
 
-        $docName = null;
+        $document_path = null;
         if ($request->file('document')) {
             $docs = $request->file('document');
-            $docName =
-                $path = $request->file('document')->storeAs('uploads/attendance_requests', $employee_id . $docs->getClientOriginalName(), 'public');
-            return "ada document";
+            $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+            $path = $docs->storeAs('uploads/attendance_requests', $docName, 'public');
+            $document_path = env('APP_URL') . '/storage/' . $path;
+            // return "ada document";
         }
-        return "tidak ada document";
+        // return "tidak ada document";
 
         // $path = Storage::put('attendance_requests', $request->file('document'));
         // $visibility = Storage::getVisibility('attendance_requests');
@@ -97,19 +98,15 @@ class AttendanceRequestController extends Controller
         //* Input Data
         $form = [
             'employee_id'   => $employee_id,
-            'date'          => $request->date,
+            'date'          => date_format($date, "Y-m-d"),
             'start_time'    => $request->start_time,
             'end_time'      => $request->end_time,
             'reason'        => $request->reason,
-            // 'docs'          => env('APP_URL') . '/storage/' . $path,
+            'docs'          => $document_path,
             'created_by'    => Auth::user()->id
         ];
-        return $form;
-        $attendanceRequest = AttendanceRequest::create($form);
 
-        $employeeRequest = Employee::where('id', $employee_id)->first();
-        return $employeeRequest;
-        $documents = $request->file('documents');
-        return $documents->getClientOriginalName();
+        $attendanceRequest = AttendanceRequest::create($form);
+        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Created'));
     }
 }

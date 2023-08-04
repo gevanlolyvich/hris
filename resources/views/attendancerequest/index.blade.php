@@ -54,39 +54,45 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($leaves as $leave)
+                            @foreach ($attendance_requests as $attendance_request)
                                 <tr>
                                     @if (\Auth::user()->type != 'employee')
-                                        <td>{{ !empty(\Auth::user()->getEmployee($leave->employee_id)) ? \Auth::user()->getEmployee($leave->employee_id)->name : '' }}
+                                        <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}
                                         </td>
                                     @endif
-                                    <td>{{ !empty(\Auth::user()->getLeaveType($leave->leave_type_id)) ? \Auth::user()->getLeaveType($leave->leave_type_id)->title : '' }}
-                                    </td>
-                                    <td>{{ \Auth::user()->dateFormat($leave->applied_on) }}</td>
-                                    <td>{{ \Auth::user()->dateFormat($leave->start_date) }}</td>
-                                    <td>{{ \Auth::user()->dateFormat($leave->end_date) }}</td>
-                                   
-                                    <td>{{ $leave->total_leave_days }}</td>
-                                    <td>{{ $leave->leave_reason }}</td>
+                                    <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
+                                    <td>{{ $attendance_request->start_time }}</td>
+                                    <td>{{ $attendance_request->end_time }}</td>
+                                    <td>{{ $attendance_request->reason }}</td>                                   
                                     <td>
-                                        @if ($leave->status == 'Pending')
-                                            <div class="badge bg-warning p-2 px-3 rounded">{{ $leave->status }}</div>
-                                        @elseif($leave->status == 'Approved')
-                                            <div class="badge bg-success p-2 px-3 rounded">{{ $leave->status }}</div>
-                                        @elseif($leave->status == "Reject")
-                                            <div class="badge bg-danger p-2 px-3 rounded">{{ $leave->status }}</div>
+                                        <div class="action-btn bg-info ms-2">
+                                            <a href="{{ $attendance_request->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                data-bs-original-title="{{ __('View') }}">
+                                                <i class="ti ti-file text-white"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    {{-- <td>{{ $attendance_request->leave_reason }}</td> --}}
+                                    <td>
+                                        @if ($attendance_request->is_approved == null)
+                                            <div class="badge bg-warning p-2 px-3 rounded">Waiting</div>
+                                        @elseif($attendance_request->is_approved == 1)
+                                            <div class="badge bg-success p-2 px-3 rounded">Approved</div>
+                                        @elseif($attendance_request->is_approved == 0)
+                                            <div class="badge bg-danger p-2 px-3 rounded">Rejected</div>
                                         @endif
                                     </td>
 
                                     <td class="Action">
                                         <span>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if ($leave->status == 'Pending')
+                                                @if ($attendance_request->status == 'Pending')
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                                 data-size="lg"
-                                                                data-url="{{ URL::to('leave/' . $leave->id . '/edit') }}"
+                                                                data-url="{{ URL::to('leave/' . $attendance_request->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                                 title="" data-title="{{ __('Edit Leave') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -98,7 +104,7 @@
                                             @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $leave->id . '/action') }}"
+                                                        data-url="{{ URL::to('leave/' . $attendance_request->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Leave Action') }}"
                                                         data-bs-original-title="{{ __('Manage Leave') }}">
@@ -108,7 +114,7 @@
                                                 @can('Edit Leave')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                            data-url="{{ URL::to('leave/' . $leave->id . '/edit') }}"
+                                                            data-url="{{ URL::to('leave/' . $attendance_request->id . '/edit') }}"
                                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                             title="" data-title="{{ __('Edit Leave') }}"
                                                             data-bs-original-title="{{ __('Edit') }}">
@@ -120,7 +126,7 @@
 
                                             @can('Delete Leave')
                                                 <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                         aria-label="Delete"><i
