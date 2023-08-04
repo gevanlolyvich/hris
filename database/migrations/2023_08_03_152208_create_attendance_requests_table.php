@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('docs')->nullable();
             $table->boolean('is_approved')->nullable();
             $table->foreignId('approved_by')->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamps();
         });
     }

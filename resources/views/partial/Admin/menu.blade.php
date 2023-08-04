@@ -249,6 +249,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                                     href="{{ route('attendanceemployee.bulkattendance') }}">{{ __('Bulk Attendance') }}</a>
                                             </li>
                                         @endcan
+                                        <li class="dash-item">
+                                            <a class="dash-link"
+                                                href="{{ route('attendancerequest.index') }}">{{ __('Request Attendance') }}</a>
+                                        </li>
                                     </ul>
                                 </li>
                             @endcan
