@@ -65,13 +65,15 @@
                                     <td>{{ $attendance_request->end_time }}</td>
                                     <td>{{ $attendance_request->reason }}</td>                                   
                                     <td>
-                                        <div class="action-btn bg-info ms-2">
-                                            <a href="{{ $attendance_request->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-original-title="{{ __('View') }}">
-                                                <i class="ti ti-file text-white"></i>
-                                            </a>
-                                        </div>
+                                        @if ($attendance_request->docs)
+                                            <div class="action-btn bg-info ms-2">
+                                                <a href="{{ $attendance_request->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-original-title="{{ __('View') }}">
+                                                    <i class="ti ti-file text-white"></i>
+                                                </a>
+                                            </div>
+                                        @endif
                                     </td>
                                     {{-- <td>{{ $attendance_request->leave_reason }}</td> --}}
                                     <td>

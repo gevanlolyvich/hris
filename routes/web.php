@@ -779,6 +779,13 @@ Route::get('attendancerequest/{id}/edit', [AttendanceRequestController::class, '
     ]
 );
 
+Route::get('attendancerequest/{id}/destroy', [AttendanceRequestController::class, 'destroy'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::resource('timesheet', TimeSheetController::class)->middleware(
     [
         'auth',
