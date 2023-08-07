@@ -67,7 +67,7 @@
                                     <td>
                                         <div class="action-btn bg-info ms-2">
                                             <a href="{{ $attendance_request->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
-                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                data-bs-toggle="tooltip"
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-file text-white"></i>
                                             </a>
@@ -87,14 +87,14 @@
                                     <td class="Action">
                                         <span>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if ($attendance_request->status == 'Pending')
+                                                @if ($attendance_request->is_approved == null)
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                                 data-size="lg"
-                                                                data-url="{{ URL::to('leave/' . $attendance_request->id . '/edit') }}"
+                                                                data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                title="" data-title="{{ __('Edit Leave') }}"
+                                                                title="" data-title="{{ __('Edit Attendance Request') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
@@ -104,7 +104,7 @@
                                             @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $attendance_request->id . '/action') }}"
+                                                        data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Leave Action') }}"
                                                         data-bs-original-title="{{ __('Manage Leave') }}">
@@ -114,9 +114,9 @@
                                                 @can('Edit Leave')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                            data-url="{{ URL::to('leave/' . $attendance_request->id . '/edit') }}"
+                                                            data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
                                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Edit Leave') }}"
+                                                            title="" data-title="{{ __('Edit Attendance Request') }}"
                                                             data-bs-original-title="{{ __('Edit') }}">
                                                             <i class="ti ti-pencil text-white"></i>
                                                         </a>
@@ -126,7 +126,7 @@
 
                                             @can('Delete Leave')
                                                 <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                         aria-label="Delete"><i
