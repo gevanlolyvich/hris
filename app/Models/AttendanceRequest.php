@@ -22,4 +22,9 @@ class AttendanceRequest extends Model
         'approved_by',
         'created_by',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
+    }
 }

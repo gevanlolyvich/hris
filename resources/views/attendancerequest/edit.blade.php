@@ -1,4 +1,4 @@
-{{ Form::model($attendance_request, ['route' => ['attendancerequest.update', $attendance_request->id], 'method' => 'PUT']) }}
+{{ Form::model($attendance_request, ['route' => ['attendancerequest.update', $attendance_request->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     @if (\Auth::user()->type != 'employee')
         <div class="row">

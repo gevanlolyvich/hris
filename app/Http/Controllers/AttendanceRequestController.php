@@ -123,9 +123,55 @@ class AttendanceRequestController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $attendance_request_id)
     {
-        return $request;
+        // return $request;
+        $attendance_request = AttendanceRequest::find($attendance_request_id);
+        if (Auth::user()->can('Edit Leave')) {
+            if ($attendance_request->created_by == Auth::user()->creatorId()) {
+                $validator = Validator::make(
+                    $request->all(),
+                    [
+                        'date' => 'required|before:today',
+                        'start_time' => 'required',
+                        'end_time' => 'required',
+                        'reason' => 'required',
+                    ]
+                );
+                if ($validator->fails()) {
+                    $messages = $validator->getMessageBag();
+
+                    return redirect()->back()->with('error', $messages->first());
+                }
+
+                //* Custom Form
+                $date = date_create($request->date);
+                $document_path = null;
+                if ($request->file('document')) {
+                    $docs = $request->file('document');
+                    $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $attendance_request->employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/attendance_requests', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
+                //* Input Data
+                $form = [
+                    'date'          => date_format($date, "Y-m-d"),
+                    'start_time'    => $request->start_time,
+                    'end_time'      => $request->end_time,
+                    'reason'        => $request->reason,
+                    'docs'          => $document_path,
+                ];
+
+                //* Update Data
+                AttendanceRequest::where('id', $attendance_request->id)->update($form);
+                return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Updated'));
+            } else {
+                return redirect()->back()->with('error', __('Permission denied.'));
+            }
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 
     public function destroy(AttendanceRequest $attendanceReq)

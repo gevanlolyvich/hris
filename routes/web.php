@@ -765,13 +765,6 @@ Route::resource('attendanceemployee', AttendanceEmployeeController::class)->midd
     ]
 );
 
-// Route::resource('attendancerequest', AttendanceRequestController::class)->middleware(
-//     [
-//         'auth',
-//         'XSS',
-//     ]
-// );
-
 Route::resource('attendancerequest', AttendanceRequestController::class)->middleware(
     [
         'auth',
