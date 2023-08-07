@@ -125,7 +125,6 @@ class AttendanceRequestController extends Controller
 
     public function update(Request $request, $attendance_request_id)
     {
-        // return $request;
         $attendance_request = AttendanceRequest::find($attendance_request_id);
         if (Auth::user()->can('Edit Leave')) {
             if ($attendance_request->created_by == Auth::user()->creatorId()) {
@@ -174,14 +173,13 @@ class AttendanceRequestController extends Controller
         }
     }
 
-    public function destroy(AttendanceRequest $attendanceReq)
+    public function destroy($attendance_request_id)
     {
-        if (\Auth::user()->can('Delete Leave')) {
-            $attendanceReq->delete();
-            return redirect()->route('attendancerequest.index')->with('success', __('Leave successfully deleted.'));
-            if ($attendanceReq->created_by == \Auth::user()->creatorId()) {
-
-                return redirect()->route('attendancerequest.index')->with('success', __('Leave successfully deleted.'));
+        $attendance_request = AttendanceRequest::find($attendance_request_id);
+        if (Auth::user()->can('Delete Leave')) {
+            if ($attendance_request->created_by == Auth::user()->creatorId()) {
+                $attendance_request->delete();
+                return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
