@@ -36,7 +36,12 @@ class Employee extends Model
         'salary',
         'created_by',
     ];
-    
+
+    public function attendanceRequests()
+    {
+        return $this->hasMany(AttendanceRequest::class, 'employee_id', 'id');
+    }
+
     public function shift_type()
     {
         return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
@@ -51,7 +56,7 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type')->pluck('name')->first();
     }
- 
+
     public function get_net_salary()
     {
 
@@ -94,7 +99,6 @@ class Employee extends Model
             } else {
                 $total_loan = $loan->amount + $total_loan;
             }
-           
         }
 
         //Saturation Deduction
