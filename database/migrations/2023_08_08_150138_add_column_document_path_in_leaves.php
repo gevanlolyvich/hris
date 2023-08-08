@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('attendance_employees', function (Blueprint $table) {
-            $table->foreignId('attendance_status_id')->after('date')->nullable();
-            $table->time('work_hours')->after('early_leaving')->nullable();
+        Schema::table('leaves', function (Blueprint $table) {
+            $table->string('document_path')->after('remark')->nullable();
+            $table->string('location')->after('remark')->nullable();
         });
     }
 
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('attendance_employees', function (Blueprint $table) {
-            $table->dropColumn(["attendance_status_id", "work_hours"]);
+        Schema::table('leaves', function (Blueprint $table) {
+            $table->dropColumn(['location', 'document_path']);
         });
     }
 };

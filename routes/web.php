@@ -1227,6 +1227,7 @@ Route::get('import/timesheet/file', [TimeSheetController::class, 'importFile'])-
 Route::post('import/timesheet', [TimeSheetController::class, 'import'])->name('timesheet.import');
 Route::get('export/timesheet', [TimeSheetController::class, 'export'])->name('timesheet.export');
 Route::get('export/timesheet/export', [ReportController::class, 'exportTimeshhetReport'])->name('timesheet.report.export');
+Route::get('export/attendancerequest', [AttendanceRequestController::class, 'export'])->name('attendancerequest.export');
 
 //leave export
 Route::get('export/leave', [LeaveController::class, 'export'])->name('leave.export');

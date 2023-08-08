@@ -55,7 +55,6 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
-
         if (\Auth::user()->can('Create Leave')) {
             $validator = \Validator::make(
                 $request->all(),
@@ -65,6 +64,7 @@ class LeaveController extends Controller
                     'end_date' => 'required',
                     'leave_reason' => 'required',
                     'remark' => 'required',
+                    'location' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -76,10 +76,10 @@ class LeaveController extends Controller
 
             $employee = Employee::where('user_id', '=', Auth::user()->id)->first();
             $leave_type = LeaveType::find($request->leave_type_id);
-
             $startDate = new \DateTime($request->start_date);
             $endDate = new \DateTime($request->end_date);
             $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
+            // return $total_leave_days;
             if ($leave_type->days >= $total_leave_days) {
                 $leave    = new LocalLeave();
                 if (\Auth::user()->type == "employee") {
@@ -87,13 +87,25 @@ class LeaveController extends Controller
                 } else {
                     $leave->employee_id = $request->employee_id;
                 }
+
+                $employee = Employee::find($leave->employee_id);
+                $document_path = null;
+                if ($request->file('document')) {
+                    $docs = $request->file('document');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
                 $leave->leave_type_id    = $request->leave_type_id;
                 $leave->applied_on       = date('Y-m-d');
                 $leave->start_date       = $request->start_date;
                 $leave->end_date         = $request->end_date;
-                $leave->total_leave_days = $total_leave_days;
+                $leave->total_leave_days = $total_leave_days + 1;
                 $leave->leave_reason     = $request->leave_reason;
                 $leave->remark           = $request->remark;
+                $leave->location         = $request->location;
+                $leave->document_path    = $document_path;
                 $leave->status           = 'Pending';
                 $leave->created_by       = \Auth::user()->creatorId();
 

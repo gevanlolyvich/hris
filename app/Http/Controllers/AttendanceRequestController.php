@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LeaveExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
 use App\Models\AttendanceStatus;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceRequestController extends Controller
 {
@@ -326,5 +328,13 @@ class AttendanceRequestController extends Controller
         });
 
         return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));
+    }
+
+    public function export(Request $request)
+    {
+        $name = 'Leave' . date('Y-m-d i:h:s');
+        $data = Excel::download(new LeaveExport(), $name . '.xlsx');
+
+        return $data;
     }
 }

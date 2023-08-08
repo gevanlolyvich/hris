@@ -12,15 +12,15 @@
 @endsection
 
 @section('action-button')
-    <a href="{{ route('leave.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+    {{-- <a href="{{ route('attendancerequest.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Export') }}">
         <i class="ti ti-file-export"></i>
-    </a>
+    </a> --}}
 
-    <a href="{{ route('leave.calender') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+    {{-- <a href="{{ route('leave.calender') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Calendar View') }}">
         <i class="ti ti-calendar"></i>
-    </a>
+    </a> --}}
 
     @can('Create Leave')
         <a href="#" data-url="{{ route('attendancerequest.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Request Attendance') }}"

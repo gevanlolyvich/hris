@@ -15,6 +15,7 @@ class Leave extends Model
         'total_leave_days',
         'leave_reason',
         'remark',
+        'document_path',
         'status',
         'created_by',
     ];
