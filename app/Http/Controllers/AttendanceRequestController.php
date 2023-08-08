@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceStatus;
 use App\Models\Employee;
+use App\Models\ShiftTime;
 use App\Models\ShiftType;
+use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -186,5 +191,128 @@ class AttendanceRequestController extends Controller
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
+
+    public function action($id)
+    {
+        // return $id;
+        $attendance_request     = AttendanceRequest::find($id);
+        $employee  = Employee::find($attendance_request->employee_id);
+        // $leavetype = LeaveType::find($leave->leave_type_id);
+
+        return view('attendancerequest.action', compact('employee', 'attendance_request'));
+    }
+
+    public function changeaction(Request $request)
+    {
+        $presentAttendance = AttendanceStatus::where('id', 1)->first();
+        $attendance_request = AttendanceRequest::find($request->attendance_request_id);
+        $date = $attendance_request->date;
+
+        if ($request->status == 'Approved') {
+            $form = [
+                'is_approved'   => true,
+                'approved_by'   => Auth::user()->id
+            ];
+        } elseif ($request->status == 'Reject') {
+            $form = [
+                'is_approved'   => false,
+                'approved_by'   => Auth::user()->id
+            ];
+        }
+
+        if ($form['is_approved']) {
+            //* Method Create Attendance
+            $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
+                ->where('days', date('l'))
+                ->first();
+
+
+            if ($shift_times->is_working) {
+                $startTime = $shift_times->start_time;
+                $endTime = $shift_times->end_time;
+
+                $totalLateSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $startTime);
+
+                $hours = floor($totalLateSeconds / 3600);
+                $mins  = floor($totalLateSeconds / 60 % 60);
+                $secs  = floor($totalLateSeconds % 60);
+                $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+                //work hours
+                $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
+                $hours                    = floor($totalWorkHoursSeconds / 3600);
+                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
+                $secs                     = floor($totalWorkHoursSeconds % 60);
+                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+                //early Leaving
+                $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($date . $attendance_request->end_time);
+                $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+
+                if (strtotime($date . $attendance_request->end_time) > strtotime($date . $endTime)) {
+                    //Overtime
+                    $totalOvertimeSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $endTime);
+                    $hours                = floor($totalOvertimeSeconds / 3600);
+                    $mins                 = floor($totalOvertimeSeconds / 60 % 60);
+                    $secs                 = floor($totalOvertimeSeconds % 60);
+                    $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                } else {
+                    $overtime = '00:00:00';
+                }
+
+                $employee = $attendance_request->employee;
+                $form_attendance = [
+                    'employee_id'           => $employee->id,
+                    'date'                  => $date,
+                    'attendance_status_id'  => $presentAttendance->id,
+                    'status'                => $presentAttendance->name,
+                    'clock_in'              => $attendance_request->start_time . ':00',
+                    'clock_out'             => $attendance_request->end_time . ':00',
+                    'late'                  => $late,
+                    'early_leaving'         => $earlyLeaving,
+                    'work_hours'            => $workHours,
+                    'overtime'              => $overtime,
+                    'total_rest'            => '00:00:00',
+                    'created_by'            => $employee->user_id,
+                    'attendance_type_id'    => 1, //* ON SITE
+                    'coord_in'              => null,
+                    'coord_out'             => null,
+                    'is_valid'              => true,
+                    'validate_by'           => Auth::user()->id,
+                ];
+            } else {
+                $form_attendance = [
+                    'employee_id'           => $attendance_request->employee->id,
+                    'date'                  => $date,
+                    'attendance_status_id'  => $presentAttendance->id,
+                    'status'                => $presentAttendance->name,
+                    'clock_in'              => $attendance_request->start_time . ':00',
+                    'clock_out'             => $attendance_request->end_time . ':00',
+                    'late'                  => '00:00:00',
+                    'early_leaving'         => '00:00:00',
+                    'work_hours'            => '00:00:00',
+                    'overtime'              => '00:00:00',
+                    'total_rest'            => '00:00:00',
+                    'created_by'            => $attendance_request->employee->user_id,
+                    'attendance_type_id'    => 1, //* ON SITE
+                    'coord_in'              => null,
+                    'coord_out'             => null,
+                    'is_valid'              => true,
+                    'validate_by'           => Auth::user()->id,
+                ];
+            }
+        }
+
+        DB::transaction(function () use ($attendance_request, $form, $form_attendance) {
+            AttendanceRequest::where('id', $attendance_request->id)->update($form);
+            AttendanceEmployee::create($form_attendance);
+        });
+
+        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));
     }
 }

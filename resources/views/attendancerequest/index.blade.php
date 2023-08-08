@@ -73,15 +73,18 @@
                                                     <i class="ti ti-file text-white"></i>
                                                 </a>
                                             </div>
+                                        @else
+                                        -
                                         @endif
                                     </td>
-                                    {{-- <td>{{ $attendance_request->leave_reason }}</td> --}}
                                     <td>
-                                        @if ($attendance_request->is_approved == null)
+                                        @if (is_null($attendance_request->is_approved))
                                             <div class="badge bg-warning p-2 px-3 rounded">Waiting</div>
-                                        @elseif($attendance_request->is_approved == 1)
+                                        @endif
+                                        @if ($attendance_request->is_approved == 1)
                                             <div class="badge bg-success p-2 px-3 rounded">Approved</div>
-                                        @elseif($attendance_request->is_approved == 0)
+                                        @endif
+                                        @if ($attendance_request->is_approved === 0)
                                             <div class="badge bg-danger p-2 px-3 rounded">Rejected</div>
                                         @endif
                                     </td>
@@ -108,8 +111,8 @@
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                                         data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Leave Action') }}"
-                                                        data-bs-original-title="{{ __('Manage Leave') }}">
+                                                        title="" data-title="{{ __('Attendance Request Action') }}"
+                                                        data-bs-original-title="{{ __('Manage Attendance Request') }}">
                                                         <i class="ti ti-caret-right text-white"></i>
                                                     </a>
                                                 </div>
