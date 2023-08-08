@@ -187,6 +187,7 @@ class LeaveController extends Controller
                         'end_date' => 'required',
                         'leave_reason' => 'required',
                         'remark' => 'required',
+                        'location'  => 'required'
                     ]
                 );
                 if ($validator->fails()) {
@@ -195,6 +196,14 @@ class LeaveController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
                 $leave_type = LeaveType::find($request->leave_type_id);
+                $employee = Employee::find($leave->employee_id);
+                $document_path = null;
+                if ($request->file('document')) {
+                    $docs = $request->file('document');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
 
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
@@ -204,9 +213,11 @@ class LeaveController extends Controller
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
-                    $leave->total_leave_days = $total_leave_days;
+                    $leave->total_leave_days = $total_leave_days + 1;
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
+                    $leave->location         = $request->location;
+                    $leave->document_path    = $document_path;
 
                     $leave->save();
 
