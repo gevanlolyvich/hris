@@ -14,6 +14,7 @@ use App\Http\Controllers\IncomeTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\AttendanceEmployeeController;
+use App\Http\Controllers\AttendanceRequestController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\AccountListController;
@@ -763,6 +764,42 @@ Route::resource('attendanceemployee', AttendanceEmployeeController::class)->midd
         'XSS',
     ]
 );
+
+Route::resource('attendancerequest', AttendanceRequestController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('attendancerequest/{id}/edit', [AttendanceRequestController::class, 'edit'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('attendancerequest/{id}/destroy', [AttendanceRequestController::class, 'destroy'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('attendancerequest/{id}/action', [AttendanceRequestController::class, 'action'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('attendancerequest/changeaction', [AttendanceRequestController::class, 'changeaction'])->name('attendancerequest.changeaction')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::resource('timesheet', TimeSheetController::class)->middleware(
     [
         'auth',
