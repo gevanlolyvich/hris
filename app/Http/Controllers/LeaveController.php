@@ -259,16 +259,18 @@ class LeaveController extends Controller
 
     public function changeaction(Request $request)
     {
-
+        // return $request;
         $leave = LocalLeave::find($request->leave_id);
 
         $leave->status = $request->status;
+        $leave->note = $request->note;
         if ($leave->status == 'Approval') {
             $startDate               = new \DateTime($leave->start_date);
             $endDate                 = new \DateTime($leave->end_date);
             $total_leave_days        = $startDate->diff($endDate)->days;
-            $leave->total_leave_days = $total_leave_days;
+            $leave->total_leave_days = $total_leave_days + 1;
             $leave->status           = 'Approve';
+            $leave->note             = $request->note;
         }
 
         $leave->save();

@@ -14,6 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('leaves', function (Blueprint $table) {
+            $table->text('note')->after('remark')->nullable();
             $table->string('document_path')->after('remark')->nullable();
             $table->string('location')->after('remark')->nullable();
         });
@@ -27,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('leaves', function (Blueprint $table) {
-            $table->dropColumn(['location', 'document_path']);
+            $table->dropColumn(['note', 'location', 'document_path']);
         });
     }
 };

@@ -95,6 +95,15 @@
                                                         </div>
                                                     @endcan
                                                 @endif
+                                                <div class="action-btn bg-success ms-2">
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                        data-url="{{ URL::to('leave/' . $leave->id . '/action') }}"
+                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                        title="" data-title="{{ __('Leave Action') }}"
+                                                        data-bs-original-title="{{ __('Manage Leave') }}">
+                                                        <i class="ti ti-caret-right text-white"></i>
+                                                    </a>
+                                                </div>
                                             @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"

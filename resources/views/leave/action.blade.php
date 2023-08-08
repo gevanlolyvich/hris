@@ -28,8 +28,50 @@
                     <td>{{ !empty($leave->leave_reason) ? $leave->leave_reason : '' }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Location') }}</th>
+                    <td>{{ !empty($leave->location) ? $leave->location : '' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Remark') }}</th>
+                    <td>{{ !empty($leave->remark) ? $leave->remark : '' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Document') }}</th>
+                    <td>
+                        @if ($leave->document_path)
+                            <div class="action-btn bg-info ms-2">
+                                <a href="{{ $leave->document_path }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-original-title="{{ __('View') }}">
+                                    <i class="ti ti-file text-white"></i>
+                                </a>
+                            </div>
+                        @else
+                        -
+                        @endif 
+                    </td>
+                </tr>
+                <tr>
                     <th>{{ __('Status') }}</th>
-                    <td>{{ !empty($leave->status) ? $leave->status : '' }}</td>
+                    <td>
+                        @if ($leave->status == 'Pending')
+                            <div class="badge bg-warning p-2 px-3 rounded">{{ $leave->status }}</div>
+                        @elseif($leave->status == 'Approved')
+                            <div class="badge bg-success p-2 px-3 rounded">{{ $leave->status }}</div>
+                        @elseif($leave->status == "Reject")
+                            <div class="badge bg-danger p-2 px-3 rounded">{{ $leave->status }}</div>
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ __('Note') }}</th>
+                    <td>
+                        @if (\Auth::user()->type == 'employee')
+                        {{ Form::textarea('note', $leave->note, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => __('Note'), 'rows' => '3']) }}
+                        @else
+                        {{ Form::textarea('note', $leave->note, ['class' => 'form-control', 'required'=>'required','placeholder' => __('Note'), 'rows' => '3']) }}
+                        @endif
+                    </td>
                 </tr>
                 <input type="hidden" value="{{ $leave->id }}" name="leave_id">
             </table>

@@ -17,6 +17,7 @@ class Leave extends Model
         'remark',
         'document_path',
         'status',
+        'note',
         'created_by',
     ];
 
