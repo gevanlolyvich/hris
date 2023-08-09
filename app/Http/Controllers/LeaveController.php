@@ -219,7 +219,7 @@ class LeaveController extends Controller
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
                     $leave->location         = $request->location;
-                    $leave->document_path    = $document_path;
+                    $leave->document_path    = $document_path ? $document_path : $leave->document_path;
 
                     $leave->save();
 
