@@ -7,7 +7,9 @@ use App\Models\Employee;
 use App\Models\Leave as LocalLeave;
 use App\Models\LeaveType;
 use App\Mail\LeaveActionSend;
+use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceStatus;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -260,6 +262,7 @@ class LeaveController extends Controller
     public function changeaction(Request $request)
     {
         // return $request;
+        $dates = [];
         $leave = LocalLeave::find($request->leave_id);
 
         $leave->status = $request->status;
@@ -274,6 +277,45 @@ class LeaveController extends Controller
         }
 
         $leave->save();
+
+        if ($leave->start_date == $leave->end_date) {
+            array_push($dates, $leave->start_date);
+        } else {
+            $period = new \DatePeriod(
+                new \DateTime($leave->start_date),
+                new \DateInterval('P1D'),
+                new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($leave->end_date))))
+            );
+
+            foreach ($period as $key => $value) {
+                array_push($dates, $value->format('Y-m-d'));
+            }
+        }
+
+        $leaveAttendance = AttendanceStatus::find(4);
+        for ($i = 0; $i < count($dates); $i++) {
+            $date = $dates[$i];
+
+            AttendanceEmployee::create([
+                'employee_id'           => $leave->employee_id,
+                'date'                  => $date,
+                'attendance_status_id'  => $leaveAttendance->id,
+                'status'                => $leaveAttendance->name,
+                'clock_in'              => '00:00:00',
+                'clock_out'             => '00:00:00',
+                'late'                  => '00:00:00',
+                'early_leaving'         => '00:00:00',
+                'work_hours'            => '00:00:00',
+                'overtime'              => '00:00:00',
+                'total_rest'            => '00:00:00',
+                'created_by'            => $leave->employee_id,
+                'attendance_type_id'    => null, //* ON SITE
+                'coord_in'              => null,
+                'coord_out'             => null,
+                'is_valid'              => true,
+                'validate_by'           => Auth::user()->id,
+            ]);
+        }
 
         // twilio  
         $setting = Utility::settings(\Auth::user()->creatorId());
