@@ -64,8 +64,22 @@
     </div>
     <div class="row">
         <div class="col-md-6">
+            {{-- <div class="col-md-12 mb-6">
+                <label for="file" class="form-label">Download sample product CSV file</label>
+                <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-employee.csv' }}"
+                    class="btn btn-sm btn-primary rounded">
+                    <i class="ti ti-download"></i> {{ __('Download') }}
+                </a>
+            </div> --}}
             <div class="form-group">
-                {{ Form::label('document', __('Document'), ['class' => 'form-label']) }}
+                {{-- {{ Form::label('document', __('Document'), ['class' => 'form-label']) }} --}}
+                <label for="document" class="form-label">
+                    {{ __('Document') }}
+                    <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-doc-leave.docx' }}"
+                    class="btn btn-sm btn-primary rounded">
+                    <i class="ti ti-download"></i> {{ __('Sample') }}
+                </a>
+                </label>
                 <div class="choose-files ">
                     <label for="document">
                         <div class=" bg-primary document "> <i

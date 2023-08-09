@@ -17,4 +17,4 @@ yarn-error.log
 /storage/framework/sessions/*
 /storage/logs/*
 /storage/app/*
-/storage/*
+# /storage/*
