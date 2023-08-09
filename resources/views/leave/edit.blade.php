@@ -1,4 +1,4 @@
-{{ Form::model($leave, ['route' => ['leave.update', $leave->id], 'method' => 'PUT']) }}
+{{ Form::model($leave, ['route' => ['leave.update', $leave->id], 'method' => 'PUT','enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     <div class="row">
         <div class="col-md-12">
