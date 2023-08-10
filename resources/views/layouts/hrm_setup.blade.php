@@ -8,6 +8,8 @@
 
         <a href="{{ route('leavetype.index') }}" class="list-group-item list-group-item-action border-0 {{ (Request::route()->getName() == 'leavetype.index' ? 'active' : '')}}">{{__('Leave Type')}}<div class="float-end"><i class="ti ti-chevron-right"></i></div></a>
 
+        <a href="{{ route('permittype.index') }}" class="list-group-item list-group-item-action border-0 {{ (Request::route()->getName() == 'permittype.index' ? 'active' : '')}}">{{__('Permit Type')}}<div class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+
         <a href="{{ route('document.index') }}" class="list-group-item list-group-item-action border-0 {{ (Request::route()->getName() == 'document.index' ? 'active' : '')}}">{{__('Document Type')}}<div class="float-end"><i class="ti ti-chevron-right"></i></div></a>
 
         <a href="{{ route('paysliptype.index') }}" class="list-group-item list-group-item-action border-0 {{ (request()->is('paysliptype*') ? 'active' : '')}}">{{__('Payslip Type')}}<div class="float-end"><i class="ti ti-chevron-right"></i></div></a>

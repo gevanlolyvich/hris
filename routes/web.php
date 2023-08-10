@@ -79,6 +79,7 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
+use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 
@@ -821,6 +822,13 @@ Route::resource('incometype', IncomeTypeController::class)->middleware(
     ]
 );
 Route::resource('leavetype', LeaveTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('permittype', PermitTypeController::class)->middleware(
     [
         'auth',
         'XSS',
