@@ -172,7 +172,7 @@ class AttendanceRequestController extends Controller
                     'start_time'    => $request->start_time,
                     'end_time'      => $request->end_time,
                     'reason'        => $request->reason,
-                    'docs'          => $document_path,
+                    'docs'          => $document_path ? $document_path : $attendance_request->docs,
                 ];
 
                 //* Update Data

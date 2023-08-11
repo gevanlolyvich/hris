@@ -17,11 +17,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id');
             $table->foreignId('permit_type_id');
-            $table->date('date');
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->string('total_permit_days');
             $table->text('reason');
             $table->string('docs')->nullable();
+            $table->string('status');
             $table->boolean('is_approved')->nullable();
             $table->foreignId('approved_by')->nullable();
             $table->foreignId('created_by')->nullable();

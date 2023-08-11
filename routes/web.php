@@ -79,6 +79,7 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
+use App\Http\Controllers\PermitController;
 use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
@@ -707,6 +708,20 @@ Route::post('leave/jsoncount', [LeaveController::class, 'jsoncount'])->name('lea
     ]
 );
 Route::resource('leave', LeaveController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('permit', PermitController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.edit')->middleware(
     [
         'auth',
         'XSS',

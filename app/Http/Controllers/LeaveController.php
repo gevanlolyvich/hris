@@ -21,7 +21,6 @@ class LeaveController extends Controller
 {
     public function index()
     {
-
         if (\Auth::user()->can('Manage Leave')) {
             $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             if (\Auth::user()->type == 'employee') {
