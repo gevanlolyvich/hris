@@ -1,4 +1,4 @@
-{{ Form::model($leave, ['route' => ['leave.update', $leave->id], 'method' => 'PUT','enctype' => 'multipart/form-data']) }}
+{{ Form::model($permit, ['route' => ['permit.update', $permit->id], 'method' => 'PUT','enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     <div class="row">
         <div class="col-md-12">
@@ -8,15 +8,21 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-md-12">
             <div class="form-group">
-                {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                {{ Form::select('leave_type_id', $leavetypes, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
+                {{ Form::label('permit_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
+                {{ Form::select('permit_type_id', $permittype, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
             </div>
         </div>
-    </div>
+    </div> --}}
     <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                {{ Form::label('permit_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
+                {{ Form::select('permit_type_id', $permittype, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
+            </div>
+        </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
@@ -29,26 +35,12 @@
                 {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                {{ Form::label('location', __('Location'), ['class' => 'col-form-label']) }}
-                {{ Form::text('location', null, ['class' => 'form-control', 'autocomplete' => 'off', 'placeholder' => 'Select Location']) }}
-            </div>
-        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
             <div class="form-group">
-                {{ Form::label('leave_reason', __('Leave Reason'), ['class' => 'col-form-label']) }}
-                {{ Form::textarea('leave_reason', null, ['class' => 'form-control', 'placeholder' => __('Leave Reason'),'rows'=>'3']) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-group">
-                {{ Form::label('remark', __('Remark'), ['class' => 'col-form-label']) }}
-                {{ Form::textarea('remark', null, ['class' => 'form-control', 'placeholder' => __('Leave Remark'),'rows'=>'3']) }}
+                {{ Form::label('reason', __('Reason'), ['class' => 'col-form-label']) }}
+                {{ Form::textarea('reason', null, ['class' => 'form-control', 'placeholder' => __('Reason'),'rows'=>'3']) }}
             </div>
         </div>
     </div>
@@ -75,12 +67,12 @@
                     {{ Form::label('status', __('Status'), ['class' => 'col-form-label']) }}
                     <select name="status" id="" class="form-control select2">
                         <option value="">{{ __('Select Status') }}</option>
-                        <option value="pending" @if ($leave->status == 'Pending') selected="" @endif>{{ __('Pending') }}
+                        {{-- <option value="pending" @if ($permit->status == 'Pending') selected="" @endif>{{ __('Pending') }}
                         </option>
-                        <option value="approval" @if ($leave->status == 'Approval') selected="" @endif>{{ __('Approval') }}
+                        <option value="approval" @if ($permit->status == 'Approval') selected="" @endif>{{ __('Approval') }}
                         </option>
-                        <option value="reject" @if ($leave->status == 'Reject') selected="" @endif>{{ __('Reject') }}
-                        </option>
+                        <option value="reject" @if ($permit->status == 'Reject') selected="" @endif>{{ __('Reject') }}
+                        </option> --}}
                     </select>
                 </div>
             </div>

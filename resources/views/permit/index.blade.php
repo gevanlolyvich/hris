@@ -2,17 +2,17 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Request Attendance') }}
+    {{ __('Manage Attendance Permit') }}
 @endsection
 
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Request Attendance') }}</li>
+    <li class="breadcrumb-item">{{ __('Attendance Permit') }}</li>
 @endsection
 
 @section('action-button')
-    {{-- <a href="{{ route('attendancerequest.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+    {{-- <a href="{{ route('leave.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Export') }}">
         <i class="ti ti-file-export"></i>
     </a> --}}
@@ -23,7 +23,7 @@
     </a> --}}
 
     @can('Create Leave')
-        <a href="#" data-url="{{ route('attendancerequest.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Request Attendance') }}"
+        <a href="#" data-url="{{ route('permit.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Attendance Permit') }}"
             data-size="lg" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
@@ -43,31 +43,33 @@
                                 @if (\Auth::user()->type != 'employee')
                                     <th>{{ __('Employee') }}</th>
                                 @endif
-                                <th>{{ __('Date') }}</th>
-                                <th>{{ __('Start Time') }}</th>
-                                <th>{{ __('End Time') }}</th>
+                                <th>{{ __('Permit Type') }}</th>
+                                <th>{{ __('Start Date') }}</th>
+                                <th>{{ __('End Date') }}</th>
+                                <th>{{ __('Total Days') }}</th>
                                 <th>{{ __('Reason') }}</th>
-                                <th>{{ __('Document') }}</th>
-                                {{-- <th>{{ __('Leave Reason') }}</th> --}}
+                                <th>{{ __('Attachment') }}</th>
                                 <th>{{ __('status') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($attendance_requests as $attendance_request)
+                            @foreach ($permits as $permit)
                                 <tr>
                                     @if (\Auth::user()->type != 'employee')
-                                        <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}
+                                        <td>{{ !empty(\Auth::user()->getEmployee($permit->employee_id)) ? \Auth::user()->getEmployee($permit->employee_id)->name : '' }}
                                         </td>
                                     @endif
-                                    <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
-                                    <td>{{ $attendance_request->start_time }}</td>
-                                    <td>{{ $attendance_request->end_time }}</td>
-                                    <td>{{ $attendance_request->reason }}</td>                                   
+                                    <td>{{ $permit->permitType->name }}
+                                    </td>
+                                    <td>{{ \Auth::user()->dateFormat($permit->start_date) }}</td>
+                                    <td>{{ \Auth::user()->dateFormat($permit->end_date) }}</td>
+                                    <td>{{ $permit->total_permit_days }}</td>
+                                    <td>{{ $permit->reason }}</td>
                                     <td>
-                                        @if ($attendance_request->docs)
+                                        @if ($permit->docs)
                                             <div class="action-btn bg-info ms-2">
-                                                <a href="{{ $attendance_request->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                <a href="{{ $permit->docs }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-original-title="{{ __('View') }}">
                                                     <i class="ti ti-file text-white"></i>
@@ -75,63 +77,80 @@
                                             </div>
                                         @else
                                         -
-                                        @endif
+                                        @endif 
                                     </td>
                                     <td>
-                                        @if (is_null($attendance_request->is_approved))
-                                            <div class="badge bg-warning p-2 px-3 rounded">Waiting</div>
-                                        @endif
-                                        @if ($attendance_request->is_approved == 1)
-                                            <div class="badge bg-success p-2 px-3 rounded">Approved</div>
-                                        @endif
-                                        @if ($attendance_request->is_approved === 0)
-                                            <div class="badge bg-danger p-2 px-3 rounded">Rejected</div>
+                                        @if ($permit->status == 'Pending')
+                                            <div class="badge bg-warning p-2 px-3 rounded">{{ $permit->status }}</div>
+                                        @elseif($permit->status == 'Approved')
+                                            <div class="badge bg-success p-2 px-3 rounded">{{ $permit->status }}</div>
+                                        @elseif($permit->status == "Reject")
+                                            <div class="badge bg-danger p-2 px-3 rounded">{{ $permit->status }}</div>
                                         @endif
                                     </td>
 
                                     <td class="Action">
                                         <span>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if ($attendance_request->is_approved == null)
+                                                @if ($permit->status == 'Pending')
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                                 data-size="lg"
-                                                                data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
+                                                                data-url="{{ URL::to('leave/' . $permit->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                title="" data-title="{{ __('Edit Attendance Request') }}"
+                                                                title="" data-title="{{ __('Edit Leave') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
                                                         </div>
                                                     @endcan
+                                                @elseif ($permit->status == 'Reject')
+                                                    @can('Delete Leave')
+                                                        <div class="action-btn bg-danger ms-2">
+                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                                aria-label="Delete"><i
+                                                                    class="ti ti-trash text-white text-white"></i></a>
+                                                            </form>
+                                                        </div>
+                                                    @endcan
                                                 @endif
+                                                <div class="action-btn bg-success ms-2">
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                        data-url="{{ URL::to('leave/' . $permit->id . '/action') }}"
+                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                        title="" data-title="{{ __('Leave Action') }}"
+                                                        data-bs-original-title="{{ __('Manage Leave') }}">
+                                                        <i class="ti ti-caret-right text-white"></i>
+                                                    </a>
+                                                </div>
                                             @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/action') }}"
+                                                        data-url="{{ URL::to('leave/' . $permit->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Attendance Request Action') }}"
-                                                        data-bs-original-title="{{ __('Manage Attendance Request') }}">
+                                                        title="" data-title="{{ __('Leave Action') }}"
+                                                        data-bs-original-title="{{ __('Manage Leave') }}">
                                                         <i class="ti ti-caret-right text-white"></i>
                                                     </a>
                                                 </div>
                                                 @can('Edit Leave')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                            data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
+                                                            data-url="{{ URL::to('permit/' . $permit->id . '/edit') }}"
                                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Edit Attendance Request') }}"
+                                                            title="" data-title="{{ __('Edit Attendance Permit') }}"
                                                             data-bs-original-title="{{ __('Edit') }}">
                                                             <i class="ti ti-pencil text-white"></i>
                                                         </a>
                                                     </div>
                                                 @endcan
-                                            @endif
 
-                                            @can('Delete Leave')
+                                                @can('Delete Leave')
                                                 <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                         aria-label="Delete"><i
@@ -139,6 +158,9 @@
                                                     </form>
                                                 </div>
                                             @endcan
+                                            @endif
+                                            
+                                            
                                         </span>
 
                                     </td>

@@ -1,7 +1,7 @@
 @php
     $setting = App\Models\Utility::settings();
 @endphp
-{{ Form::open(['url' => 'leave', 'method' => 'post','enctype' => 'multipart/form-data']) }}
+{{ Form::open(['url' => 'permit', 'method' => 'post','enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     @if (\Auth::user()->type != 'employee')
         <div class="row">
@@ -14,19 +14,17 @@
         </div>
     @endif
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4">
             <div class="form-group">
-                {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                <select name="leave_type_id" id="leave_type_id" class="form-control select">
-                    @foreach ($leavetypes as $leave)
-                        <option value="{{ $leave->id }}">{{ $leave->title }} (<p class="float-right pr-5">
-                                {{ $leave->days }}</p>)</option>
+                {{ Form::label('permit_type_id', __('Permit Type'), ['class' => 'col-form-label']) }}
+                <select name="permit_type_id" id="permit_type_id" class="form-control select">
+                     <option value="" >Select Permit Type</option>
+                    @foreach ($permittypes as $permit)
+                        <option value="{{ $permit->id }}">{{ $permit->name }}</option>
                     @endforeach
                 </select>
             </div>
         </div>
-    </div>
-    <div class="row">
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
@@ -39,46 +37,25 @@
                 {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                {{ Form::label('location', __('Location'), ['class' => 'col-form-label']) }}
-                {{ Form::text('location', null, ['class' => 'form-control', 'autocomplete' => 'off', 'placeholder' => 'Select Location']) }}
-            </div>
-        </div>
     </div>
     <div class="row">
         <div class="col-md-12">
             <div class="form-group">
-                {{ Form::label('leave_reason', __('Leave Reason'), ['class' => 'col-form-label']) }}
-                {{ Form::textarea('leave_reason', null, ['class' => 'form-control', 'placeholder' => __('Leave Reason'), 'rows' => '3']) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-group">
-                {{ Form::label('remark', __('Remark'), ['class' => 'col-form-label']) }}
-                {{ Form::textarea('remark', null, ['class' => 'form-control', 'placeholder' => __('Leave Remark'), 'rows' => '3']) }}
+                {{ Form::label('reason', __('Reason'), ['class' => 'col-form-label']) }}
+                {{ Form::textarea('reason', null, ['class' => 'form-control', 'placeholder' => __('Reason'), 'rows' => '3']) }}
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
-            {{-- <div class="col-md-12 mb-6">
-                <label for="file" class="form-label">Download sample product CSV file</label>
-                <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-employee.csv' }}"
-                    class="btn btn-sm btn-primary rounded">
-                    <i class="ti ti-download"></i> {{ __('Download') }}
-                </a>
-            </div> --}}
             <div class="form-group">
                 {{-- {{ Form::label('document', __('Document'), ['class' => 'form-label']) }} --}}
                 <label for="document" class="form-label">
-                    {{ __('Document') }}
-                    <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-doc-leave.docx' }}"
+                    {{ __('Attachment') }}
+                    {{-- <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-doc-leave.docx' }}"
                     class="btn btn-sm btn-primary rounded">
-                    <i class="ti ti-download"></i> {{ __('Sample') }}
-                </a>
+                        <i class="ti ti-download"></i> {{ __('Sample') }}
+                    </a> --}}
                 </label>
                 <div class="choose-files ">
                     <label for="document">
@@ -92,7 +69,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            @if(isset($setting['is_enabled']) && $setting['is_enabled'] =='on')
+            {{-- @if(isset($setting['is_enabled']) && $setting['is_enabled'] =='on')
             <div class="form-group">
                 {{ Form::label('synchronize_type', __('Synchroniz in Google Calendar ?'), ['class' => 'form-label']) }}
                 <div class=" form-switch">
@@ -101,7 +78,7 @@
                     <label class="form-check-label" for="switch-shadow"></label>
                 </div>
             </div>
-            @endif
+            @endif --}}
         </div>
     </div>
 </div>

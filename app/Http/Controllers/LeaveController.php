@@ -7,7 +7,9 @@ use App\Models\Employee;
 use App\Models\Leave as LocalLeave;
 use App\Models\LeaveType;
 use App\Mail\LeaveActionSend;
+use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
+use App\Models\AttendanceStatus;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +21,6 @@ class LeaveController extends Controller
 {
     public function index()
     {
-
         if (\Auth::user()->can('Manage Leave')) {
             $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             if (\Auth::user()->type == 'employee') {
@@ -55,7 +56,6 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
-
         if (\Auth::user()->can('Create Leave')) {
             $validator = \Validator::make(
                 $request->all(),
@@ -65,6 +65,7 @@ class LeaveController extends Controller
                     'end_date' => 'required',
                     'leave_reason' => 'required',
                     'remark' => 'required',
+                    'location' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -76,10 +77,10 @@ class LeaveController extends Controller
 
             $employee = Employee::where('user_id', '=', Auth::user()->id)->first();
             $leave_type = LeaveType::find($request->leave_type_id);
-
             $startDate = new \DateTime($request->start_date);
             $endDate = new \DateTime($request->end_date);
             $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
+            // return $total_leave_days;
             if ($leave_type->days >= $total_leave_days) {
                 $leave    = new LocalLeave();
                 if (\Auth::user()->type == "employee") {
@@ -87,13 +88,25 @@ class LeaveController extends Controller
                 } else {
                     $leave->employee_id = $request->employee_id;
                 }
+
+                $employee = Employee::find($leave->employee_id);
+                $document_path = null;
+                if ($request->file('document')) {
+                    $docs = $request->file('document');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
                 $leave->leave_type_id    = $request->leave_type_id;
                 $leave->applied_on       = date('Y-m-d');
                 $leave->start_date       = $request->start_date;
                 $leave->end_date         = $request->end_date;
-                $leave->total_leave_days = $total_leave_days;
+                $leave->total_leave_days = $total_leave_days + 1;
                 $leave->leave_reason     = $request->leave_reason;
                 $leave->remark           = $request->remark;
+                $leave->location         = $request->location;
+                $leave->document_path    = $document_path;
                 $leave->status           = 'Pending';
                 $leave->created_by       = \Auth::user()->creatorId();
 
@@ -175,6 +188,7 @@ class LeaveController extends Controller
                         'end_date' => 'required',
                         'leave_reason' => 'required',
                         'remark' => 'required',
+                        'location'  => 'required'
                     ]
                 );
                 if ($validator->fails()) {
@@ -183,6 +197,14 @@ class LeaveController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
                 $leave_type = LeaveType::find($request->leave_type_id);
+                $employee = Employee::find($leave->employee_id);
+                $document_path = null;
+                if ($request->file('document')) {
+                    $docs = $request->file('document');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
 
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
@@ -192,9 +214,11 @@ class LeaveController extends Controller
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
-                    $leave->total_leave_days = $total_leave_days;
+                    $leave->total_leave_days = $total_leave_days + 1;
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
+                    $leave->location         = $request->location;
+                    $leave->document_path    = $document_path ? $document_path : $leave->document_path;
 
                     $leave->save();
 
@@ -236,19 +260,61 @@ class LeaveController extends Controller
 
     public function changeaction(Request $request)
     {
-
+        // return $request;
+        $dates = [];
         $leave = LocalLeave::find($request->leave_id);
 
         $leave->status = $request->status;
+        $leave->note = $request->note;
         if ($leave->status == 'Approval') {
             $startDate               = new \DateTime($leave->start_date);
             $endDate                 = new \DateTime($leave->end_date);
             $total_leave_days        = $startDate->diff($endDate)->days;
-            $leave->total_leave_days = $total_leave_days;
+            $leave->total_leave_days = $total_leave_days + 1;
             $leave->status           = 'Approve';
+            $leave->note             = $request->note;
         }
 
         $leave->save();
+
+        if ($leave->start_date == $leave->end_date) {
+            array_push($dates, $leave->start_date);
+        } else {
+            $period = new \DatePeriod(
+                new \DateTime($leave->start_date),
+                new \DateInterval('P1D'),
+                new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($leave->end_date))))
+            );
+
+            foreach ($period as $key => $value) {
+                array_push($dates, $value->format('Y-m-d'));
+            }
+        }
+
+        $leaveAttendance = AttendanceStatus::find(4);
+        for ($i = 0; $i < count($dates); $i++) {
+            $date = $dates[$i];
+
+            AttendanceEmployee::create([
+                'employee_id'           => $leave->employee_id,
+                'date'                  => $date,
+                'attendance_status_id'  => $leaveAttendance->id,
+                'status'                => $leaveAttendance->name,
+                'clock_in'              => '00:00:00',
+                'clock_out'             => '00:00:00',
+                'late'                  => '00:00:00',
+                'early_leaving'         => '00:00:00',
+                'work_hours'            => '00:00:00',
+                'overtime'              => '00:00:00',
+                'total_rest'            => '00:00:00',
+                'created_by'            => $leave->employee_id,
+                'attendance_type_id'    => null, //* ON SITE
+                'coord_in'              => null,
+                'coord_out'             => null,
+                'is_valid'              => true,
+                'validate_by'           => Auth::user()->id,
+            ]);
+        }
 
         // twilio  
         $setting = Utility::settings(\Auth::user()->creatorId());

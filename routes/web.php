@@ -79,6 +79,8 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
+use App\Http\Controllers\PermitController;
+use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 
@@ -712,6 +714,20 @@ Route::resource('leave', LeaveController::class)->middleware(
     ]
 );
 
+Route::resource('permit', PermitController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.edit')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::get('calender/leave', [LeaveController::class, 'calender'])->name('leave.calender')->middleware(
     [
         'auth',
@@ -821,6 +837,13 @@ Route::resource('incometype', IncomeTypeController::class)->middleware(
     ]
 );
 Route::resource('leavetype', LeaveTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('permittype', PermitTypeController::class)->middleware(
     [
         'auth',
         'XSS',
@@ -1227,6 +1250,7 @@ Route::get('import/timesheet/file', [TimeSheetController::class, 'importFile'])-
 Route::post('import/timesheet', [TimeSheetController::class, 'import'])->name('timesheet.import');
 Route::get('export/timesheet', [TimeSheetController::class, 'export'])->name('timesheet.export');
 Route::get('export/timesheet/export', [ReportController::class, 'exportTimeshhetReport'])->name('timesheet.report.export');
+Route::get('export/attendancerequest', [AttendanceRequestController::class, 'export'])->name('attendancerequest.export');
 
 //leave export
 Route::get('export/leave', [LeaveController::class, 'export'])->name('leave.export');

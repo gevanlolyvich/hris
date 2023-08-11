@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LeaveExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
 use App\Models\AttendanceStatus;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceRequestController extends Controller
 {
@@ -54,6 +56,7 @@ class AttendanceRequestController extends Controller
 
     public function store(Request $request)
     {
+
         //* Data Validation 
         $validator = Validator::make(
             $request->all(),
@@ -70,18 +73,23 @@ class AttendanceRequestController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
+        $date = date_create($request->date);
         //* Role Validation
         $employee = Employee::where('user_id', Auth::user()->id)->first();
+
         if (Auth::user()->type == 'employee') {
             $employee_id = $employee->id;
         } else {
             $employee_id = $request->employee_id;
         }
 
+        $attendance = AttendanceEmployee::where('employee_id', $employee_id)->where('date', $date)->first();
+        if ($attendance) {
+            return redirect()->back()->with('error', __('You were present on that date already'));
+        }
+
         //* Custom Form data
         $employee = Employee::find($employee_id);
-        $date = date_create($request->date);
-
         $document_path = null;
         if ($request->file('document')) {
             $docs = $request->file('document');
@@ -164,7 +172,7 @@ class AttendanceRequestController extends Controller
                     'start_time'    => $request->start_time,
                     'end_time'      => $request->end_time,
                     'reason'        => $request->reason,
-                    'docs'          => $document_path,
+                    'docs'          => $document_path ? $document_path : $attendance_request->docs,
                 ];
 
                 //* Update Data
@@ -222,6 +230,12 @@ class AttendanceRequestController extends Controller
         }
 
         if ($form['is_approved']) {
+            //* Check availability attendance
+            $attendance = AttendanceEmployee::where('employee_id', $attendance_request->employee->id)->where('date', $date)->first();
+            if ($attendance) {
+                return redirect()->back()->with('error', __('You were present on that date already'));
+            }
+
             //* Method Create Attendance
             $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
                 ->where('days', date('l'))
@@ -314,5 +328,13 @@ class AttendanceRequestController extends Controller
         });
 
         return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));
+    }
+
+    public function export(Request $request)
+    {
+        $name = 'Leave' . date('Y-m-d i:h:s');
+        $data = Excel::download(new LeaveExport(), $name . '.xlsx');
+
+        return $data;
     }
 }
