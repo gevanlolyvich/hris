@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AccountList;
 use App\Models\Announcement;
 use App\Models\AttendanceEmployee;
+use App\Models\AttendanceType;
 use App\Models\Employee;
 use App\Models\Event;
 use App\Models\LandingPageSection;
@@ -13,6 +14,7 @@ use App\Models\Job;
 use App\Models\Payees;
 use App\Models\Payer;
 use App\Models\ShiftTime;
+use App\Models\ShiftType;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Utility;
@@ -91,9 +93,12 @@ class HomeController extends Controller
                 $shift_times = ShiftTime::where('shift_type_id',\Auth::user()->employee->shift_type->id)
                                 ->where('days',date('l'))
                                 ->first();
+                $shift_type = ShiftType::where('id',\Auth::user()->employee->shift_type->id)
+                                ->first();
 
                 $officeTime['startTime']    = $shift_times->start_time;
                 $officeTime['endTime']      = $shift_times->end_time;
+                $officeTime['name']         = $shift_type->name;
                 $officeTime['is_working']   = $shift_times->is_working;
                 $officeTime['is_cross_day'] = $shift_times->start_time > $shift_times->end_time ? true : false;
 
@@ -123,7 +128,10 @@ class HomeController extends Controller
                 $default_clock_out_cross_day              = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
                 $yesterdayOfficeTime['default_clock_out'] = $default_clock_out_cross_day;
 
-                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime'));
+                // get all attendance type
+                $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');;
+
+                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type'));
             }
             else
             {

@@ -23,7 +23,7 @@
 
     @if (\Auth::user()->type == 'employee')
         <div class="col-xxl-6">
-            <div class="card">
+            <div class="card" style="height: 947px;">
                 <div class="card-header">
                     <div class="row">
                         <div class="col-9">
@@ -51,20 +51,42 @@
             </div>
         </div>
         <div class="col-xxl-6">
-            <div class="card"style="height: 230px;">
+            <div class="card"style="height: 462px;">
                 <div class="card-header">
                     <h5>{{ __('Mark Attandance') }}</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted pb-0-5">
-                        @if ($officeTime['is_working'])
-                            {{ __('My Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}</p>
+                    @if ($officeTime['is_working'])
+                        <h6>{{ __($officeTime['name'])}}</h6>
+                        <p class="text-muted pb-0-5">
+                            {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}
+                        </p>
+                        {{-- Condition for showing employee already clock in or not --}}
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} ()")}}</h5>
+                        @elseif (empty($employeeAttendance))
                         @else
-                            {{ __('No Working Hour') }}
+                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} ()")}}</h5>
                         @endif
+                    @else
+                        <h6 class="text-muted pb-0-5">
+                            {{ __('No Working Hour') }}
+                        </h6>
+                    @endif
                     <div class="row">
-                        <div class="col-md-6 float-right border-right">
+                        {{-- Show form for attendance type and notes --}}
+                        <div class="col-md-12">
                             {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post']) }}
+                            <div class="form-group">
+                                {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
+                                {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
+                            </div>
+                            <div class="form-group">
+                                {{-- {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!} --}}
+                                {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
+                            </div>
+                        </div>
+                        <div class="col-md-6 float-right border-right">
                             {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
                             @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
                                 <button type="submit" value="0" name="in" id="clock_in"
