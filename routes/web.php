@@ -727,6 +727,19 @@ Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.
         'XSS',
     ]
 );
+Route::get('permit/{id}/action', [PermitController::class, 'action'])->name('permit.action')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('permit/changeaction', [PermitController::class, 'changeaction'])->name('permit.changeaction')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 Route::get('calender/leave', [LeaveController::class, 'calender'])->name('leave.calender')->middleware(
     [
