@@ -244,6 +244,12 @@ class AttendanceEmployeeController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Retrieve the latitude and longitude from the request
+        $latitude   = $request->input('latitude_out');
+        $longitude  = $request->input('longitude_out');
+        $coord_in = "$latitude, $longitude";
+        $coord_out = "$latitude, $longitude";
+
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
         $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
 
@@ -304,6 +310,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->clock_out     = $time;
                         $attendanceEmployee->early_leaving = $earlyLeaving;
                         $attendanceEmployee->overtime      = $overtime;
+                        $attendanceEmployee->coord_out     = $coord_out;
 
                         // calculate work hours
                         $totalWorkSeconds     = time() - strtotime($yesterday_date . $attendanceEmployee->clock_in);
@@ -357,6 +364,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->early_leaving = $earlyLeaving;
                         $attendanceEmployee->overtime      = $overtime;
                         $attendanceEmployee->total_rest    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
 
                         $attendanceEmployee->save();
 
@@ -377,6 +385,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->late          = '00:00:00';
                         $attendanceEmployee->total_rest    = '00:00:00';
                         $attendanceEmployee->work_hours    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
                         $attendanceEmployee->save();
 
                         return redirect()->route('home')->with('success', __('Employee successfully Clock Out.'));
@@ -391,6 +400,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->overtime      = '00:00:00';
                         $attendanceEmployee->total_rest    = '00:00:00';
                         $attendanceEmployee->work_hours    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
 
                         $attendanceEmployee->save();
 
@@ -448,6 +458,7 @@ class AttendanceEmployeeController extends Controller
                         $workhours             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
                         $attendanceEmployee->work_hours      = $workhours;
+                        $attendanceEmployee->coord_out       = $coord_out;
                         $attendanceEmployee->save();
 
                         return redirect()->route('home')->with('success', __('Employee successfully Clock Out.'));
@@ -493,6 +504,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->early_leaving = $earlyLeaving;
                         $attendanceEmployee->overtime      = $overtime;
                         $attendanceEmployee->total_rest    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
 
                         $attendanceEmployee->save();
 
@@ -535,6 +547,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->late          = '00:00:00';
                         $attendanceEmployee->total_rest    = '00:00:00';
                         $attendanceEmployee->work_hours    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
                         $attendanceEmployee->save();
 
                         return redirect()->route('home')->with('success', __('Employee successfully Clock Out.'));
@@ -576,6 +589,7 @@ class AttendanceEmployeeController extends Controller
                         $attendanceEmployee->early_leaving = '00:00:00';
                         $attendanceEmployee->overtime      = '00:00:00';
                         $attendanceEmployee->total_rest    = '00:00:00';
+                        $attendanceEmployee->coord_out     = $coord_out;
 
                         $attendanceEmployee->save();
 
@@ -605,11 +619,14 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
+        // return $request;
         $settings = Utility::settings();
 
         // Retrieve the latitude and longitude from the request
         $latitude   = $request->input('latitude');
         $longitude  = $request->input('longitude');
+        $coord_in = "$latitude, $longitude";
+        $coord_out = "$latitude, $longitude";
         $note       = $request->input('notes');
 
         if ($settings['ip_restrict'] == 'on') {
@@ -650,8 +667,7 @@ class AttendanceEmployeeController extends Controller
                     if ($attendance != null) {
                         $attendance            = AttendanceEmployee::find($attendance->id);
                         $attendance->clock_out = $endTime;
-                        $attendance->latitude  = $latitude;
-                        $attendance->longitude = $longitude;
+                        $attendance->coord_out = $coord_out;
                         $attendance->note      = $note;
                         $attendance->save();
                     }
@@ -685,8 +701,7 @@ class AttendanceEmployeeController extends Controller
                         $employeeAttendance->overtime               = '00:00:00';
                         $employeeAttendance->total_rest             = '00:00:00';
                         $employeeAttendance->work_hours             = '00:00:00';
-                        $employeeAttendance->latitude               = $latitude;
-                        $employeeAttendance->longitude              = $longitude;
+                        $employeeAttendance->coord_in               = $coord_in;
                         $employeeAttendance->note                   = $note;
                         $employeeAttendance->created_by             = \Auth::user()->id;
 
@@ -711,8 +726,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->early_leaving = '00:00:00';
                     $employeeAttendance->overtime      = '00:00:00';
                     $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->latitude      = $latitude;
-                    $employeeAttendance->longitude     = $longitude;
+                    $employeeAttendance->coord_in      = $coord_in;
                     $employeeAttendance->note          = $note;
                     $employeeAttendance->created_by    = \Auth::user()->id;
 
@@ -733,8 +747,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->early_leaving = '00:00:00';
                     $employeeAttendance->overtime      = '00:00:00';
                     $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->latitude      = $latitude;
-                    $employeeAttendance->longitude     = $longitude;
+                    $employeeAttendance->coord_in      = $coord_in;
                     $employeeAttendance->note          = $note;
                     $employeeAttendance->created_by    = \Auth::user()->id;
 
@@ -758,8 +771,7 @@ class AttendanceEmployeeController extends Controller
                     if ($attendance != null) {
                         $attendance            = AttendanceEmployee::find($attendance->id);
                         $attendance->clock_out = $endTime;
-                        $attendance->latitude  = $latitude;
-                        $attendance->longitude = $longitude;
+                        $attendance->coord_out = $coord_out;
                         $attendance->note      = $note;
                         $attendance->save();
                     }
@@ -791,8 +803,7 @@ class AttendanceEmployeeController extends Controller
                         $employeeAttendance->overtime               = '00:00:00';
                         $employeeAttendance->total_rest             = '00:00:00';
                         $employeeAttendance->work_hours             = '00:00:00';
-                        $employeeAttendance->latitude               = $latitude;
-                        $employeeAttendance->longitude              = $longitude;
+                        $employeeAttendance->coord_in               = $coord_in;
                         $employeeAttendance->note                   = $note;
                         $employeeAttendance->created_by             = \Auth::user()->id;
 
@@ -815,8 +826,7 @@ class AttendanceEmployeeController extends Controller
                         $employeeAttendance->overtime               = '00:00:00';
                         $employeeAttendance->total_rest             = '00:00:00';
                         $employeeAttendance->work_hours             = '00:00:00';
-                        $employeeAttendance->latitude               = $latitude;
-                        $employeeAttendance->longitude              = $longitude;
+                        $employeeAttendance->coord_in               = $coord_in;
                         $employeeAttendance->note                   = $note;
                         $employeeAttendance->created_by             = \Auth::user()->id;
 
@@ -842,8 +852,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->early_leaving = '00:00:00';
                     $employeeAttendance->overtime      = '00:00:00';
                     $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->latitude      = $latitude;
-                    $employeeAttendance->longitude     = $longitude;
+                    $employeeAttendance->coord_in      = $coord_in;
                     $employeeAttendance->note          = $note;
                     $employeeAttendance->created_by    = \Auth::user()->id;
 
@@ -864,8 +873,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->early_leaving = '00:00:00';
                     $employeeAttendance->overtime      = '00:00:00';
                     $employeeAttendance->total_rest    = '00:00:00';
-                    $employeeAttendance->latitude      = $latitude;
-                    $employeeAttendance->longitude     = $longitude;
+                    $employeeAttendance->coord_in      = $coord_in;
                     $employeeAttendance->note          = $note;
                     $employeeAttendance->created_by    = \Auth::user()->id;
 

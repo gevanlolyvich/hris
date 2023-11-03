@@ -63,6 +63,8 @@
                                 var longitude = position.coords.longitude;
                                 document.getElementById("latitude").value = latitude;
                                 document.getElementById("longitude").value = longitude;
+                                document.getElementById("latitude_out").value = latitude;
+                                document.getElementById("longitude_out").value = longitude;
 
                                 console.log(latitude, longitude);
                             });
@@ -128,14 +130,20 @@
                             {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                             @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
+                                <input type="hidden" name="latitude_out" id="latitude_out" value="1">
+                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === $officeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                                <input type="hidden" name="latitude_out" id="latitude_out" value="2">
+                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === '00:00:00')
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                                <input type="hidden" name="latitude_out" id="latitude_out" value="3">
+                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @else
