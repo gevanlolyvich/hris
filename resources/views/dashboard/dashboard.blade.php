@@ -55,6 +55,28 @@
                 <div class="card-header">
                     <h5>{{ __('Mark Attandance') }}</h5>
                 </div>
+                <script>
+                    function getLocation() {
+                        if ("geolocation" in navigator) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                var latitude = position.coords.latitude;
+                                var longitude = position.coords.longitude;
+                                document.getElementById("latitude").value = latitude;
+                                document.getElementById("longitude").value = longitude;
+
+                                console.log(latitude, longitude);
+                            });
+                        } else {
+                            alert("Geolocation is not supported by your browser.");
+                        }
+                    }
+
+                    // Automatically call getLocation when the page loads
+                    window.addEventListener("load", getLocation);
+                    window.onload = function () {
+                        getLocation();
+                    }
+                </script>                
                 <div class="card-body">
                     @if ($officeTime['is_working'])
                         <h6>{{ __($officeTime['name'])}}</h6>
@@ -74,9 +96,9 @@
                         </h6>
                     @endif
                     <div class="row">
-                        {{-- Show form for attendance type and notes --}}
+                        {{-- Show form for attendance type and notes --}}                      
                         <div class="col-md-12">
-                            {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post']) }}
+                            {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form']) }}
                             <div class="form-group">
                                 {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
                                 {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
@@ -85,6 +107,8 @@
                                 {{-- {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!} --}}
                                 {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
                             </div>
+                            <input type="hidden" name="latitude" id="latitude" value="0">
+                            <input type="hidden" name="longitude" id="longitude" value="0">
                         </div>
                         <div class="col-md-6 float-right border-right">
                             {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
@@ -92,27 +116,27 @@
                                 <button type="submit" value="0" name="in" id="clock_in"
                                     class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
                             @elseif (empty($employeeAttendance))
-                                <button type="submit" value="0" name="in" id="clock_in"
+                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
                                     class="btn btn-primary">{{ __('CLOCK IN') }}</button>
                             @else
                                 <button type="submit" value="0" name="in" id="clock_in"
                                     class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
                             @endif
                             {{ Form::close() }}
-                        </div>
+                        </div>                                                    
                         <div class="col-md-6 float-left">
                             {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                             @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
-                                <button type="submit" value="1" name="out" id="clock_out"
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === $officeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <button type="submit" value="1" name="out" id="clock_out"
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === '00:00:00')
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <button type="submit" value="1" name="out" id="clock_out"
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @else
                                 <button type="submit" value="1" name="out" id="clock_out"
