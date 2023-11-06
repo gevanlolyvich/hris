@@ -39,7 +39,7 @@ class TravelController extends Controller
     {
         if(\Auth::user()->can('Create Travel'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('travel.create', compact('employees'));
         }
@@ -124,7 +124,7 @@ class TravelController extends Controller
 
         if(\Auth::user()->can('Edit Travel'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             if($travel->created_by == \Auth::user()->creatorId())
             {
                 return view('travel.edit', compact('travel', 'employees'));

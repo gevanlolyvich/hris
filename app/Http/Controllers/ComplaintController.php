@@ -42,14 +42,14 @@ class ComplaintController extends Controller
             {
                 $user             = \Auth::user();
                 $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             }
             else
             {
                 $user             = \Auth::user();
                 $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees = Employee::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
 
@@ -140,13 +140,13 @@ class ComplaintController extends Controller
             {
                 $user             = \Auth::user();
                 $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
                 $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             if($complaint->created_by == \Auth::user()->creatorId())
             {

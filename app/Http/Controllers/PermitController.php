@@ -37,9 +37,9 @@ class PermitController extends Controller
     {
         if (Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->get()->pluck('name', 'id');
+                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $permittypes   = PermitType::get();
 
@@ -117,7 +117,7 @@ class PermitController extends Controller
 
         if (Auth::user()->can('Edit Leave')) {
             if ($permit->created_by == Auth::user()->creatorId()) {
-                $employees  = Employee::get()->pluck('name', 'id');
+                $employees  = Employee::orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
 
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));

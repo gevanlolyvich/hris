@@ -17,7 +17,7 @@ class MeetingController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Meeting')) {
-            $employees = Employee::get();
+            $employees = Employee::orderby('name', 'asc')->get();
             if (Auth::user()->type == 'employee') {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
                 $meetings         = LocalMeeting::orderBy('meetings.id', 'desc')
@@ -42,11 +42,11 @@ class MeetingController extends Controller
     {
         if (\Auth::user()->can('Create Meeting')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', \Auth::user()->id)->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
                 $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
                 $departments = Department::where('created_by', '=', Auth::user()->creatorId())->get();
-                $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('meeting.create', compact('employees', 'departments', 'branch'));
@@ -151,9 +151,9 @@ class MeetingController extends Controller
             $meeting = LocalMeeting::find($meeting);
             if ($meeting->created_by == Auth::user()->creatorId()) {
                 if (Auth::user()->type == 'employee') {
-                    $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', Auth::user()->id)->get()->pluck('name', 'id');
+                    $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 } else {
-                    $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                    $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
 
                 return view('meeting.edit', compact('meeting', 'employees'));
@@ -231,11 +231,11 @@ class MeetingController extends Controller
         if($request->department_id)
         {
             
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             
         }
         return response()->json($employees);
@@ -243,7 +243,7 @@ class MeetingController extends Controller
 
     public function calender()
     {
-        $employees = Employee::get();
+        $employees = Employee::orderby('name', 'asc')->get();
             if (Auth::user()->type == 'employee') {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
                 $meetings         = LocalMeeting::orderBy('meetings.id', 'desc')

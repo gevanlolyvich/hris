@@ -50,7 +50,7 @@ class HomeController extends Controller
                     }
                 )->get();
 
-                $employees = Employee::get();
+                $employees = Employee::orderby('name', 'asc')->get();
                 $meetings  = Meeting::orderBy('meetings.id', 'desc')->take(5)->leftjoin('meeting_employees', 'meetings.id', '=', 'meeting_employees.meeting_id')->where('meeting_employees.employee_id', '=', $emp->id)->orWhere(
                     function ($q) {
                         $q->where('meetings.department_id', '["0"]')->where('meetings.employee_id', '["0"]');

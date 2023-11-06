@@ -18,7 +18,7 @@ class LeaveReportExport implements FromCollection, WithHeadings
     {
         $data    = Leave::all();
         $employees = Employee::where('created_by', \Auth::user()->creatorId());
-        $employees = $employees->get();
+        $employees = $employees->orderby('name', 'asc')->get();
 
         foreach ($employees as $employee) {
 

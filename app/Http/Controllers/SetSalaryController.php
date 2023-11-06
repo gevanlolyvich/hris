@@ -230,7 +230,7 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->type == "employee")
         {
-            $employees = Employee::where('user_id', \Auth::user()->id)->get();
+            $employees = Employee::where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }

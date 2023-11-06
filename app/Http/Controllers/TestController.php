@@ -20,7 +20,7 @@ class TestController extends Controller
         $apis =['http://172.16.0.11:3050'];
         $locations = ['-6.233798952272397, 106.8479844300084'];
         $date = date('Y-m-d');
-        $employees = Employee::where('is_active', 1)->get();
+        $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get();
 
         for ($a=0; $a < count($apis); $a++) { 
             $responses = Http::withHeaders([
@@ -154,7 +154,7 @@ class TestController extends Controller
         $locations = ['-6.233798952272397, 106.8479844300084'];
         $date = date('Y-m-d');
         $tomorrow = date("Y-m-d", strtotime('tomorrow'));
-        $employees = Employee::where('is_active', 1)->get();
+        $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get();
         $presentAttendance = AttendanceStatus::where('id',1)->first();
         // return $tomorrow;
 

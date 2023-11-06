@@ -40,7 +40,7 @@ class PromotionController extends Controller
         if(\Auth::user()->can('Create Promotion'))
         {
             $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees    = Employee::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees    = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('promotion.create', compact('employees', 'designations'));
         }
@@ -115,7 +115,7 @@ class PromotionController extends Controller
     public function edit(Promotion $promotion)
     {
         $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employees    = Employee::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $employees    = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
         if(\Auth::user()->can('Edit Promotion'))
         {
             if($promotion->created_by == \Auth::user()->creatorId())

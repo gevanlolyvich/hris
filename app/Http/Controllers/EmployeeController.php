@@ -386,7 +386,7 @@ class EmployeeController extends Controller
             if (!empty($request->designation)) {
                 $employees->where('designation_id', $request->designation);
             }
-            $employees = $employees->get();
+            $employees = $employees->orderby('name', 'asc')->get();
 
             $brances = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $brances->prepend('All', '');
@@ -437,7 +437,7 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('branch_id', $request->branch)->get()->pluck('name', 'id')->toArray();
+        $employees = Employee::where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($employees);
     }

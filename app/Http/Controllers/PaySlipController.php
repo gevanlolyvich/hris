@@ -144,7 +144,7 @@ class PaySlipController extends Controller
                 $setting  = Utility::settings(\Auth::user()->creatorId());
                 $emp = Employee::where('id', $payslipEmployee->employee_id = \Auth::user()->id)->first();
                 if (isset($setting['twilio_payslip_notification']) && $setting['twilio_payslip_notification'] == 1) {
-                    $employeess = Employee::where($request->employee_id)->get();
+                    $employeess = Employee::where($request->employee_id)->orderby('name', 'asc')->get();
                     foreach ($employeess as $key => $employee) {
                         $msg = ("payslip generated of") . ' ' . $month . '.';
                         Utility::send_twilio_msg($emp->phone, $msg);
@@ -342,7 +342,7 @@ class PaySlipController extends Controller
 
     public function bulk_pay_create($date)
     {
-        $Employees       = PaySlip::where('salary_month', $date)->where('created_by', \Auth::user()->creatorId())->get();
+        $Employees       = PaySlip::where('salary_month', $date)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
         $unpaidEmployees = PaySlip::where('salary_month', $date)->where('created_by', \Auth::user()->creatorId())->where('status', '=', 0)->get();
 
         return view('payslip.bulkcreate', compact('Employees', 'unpaidEmployees', 'date'));
@@ -368,7 +368,7 @@ class PaySlipController extends Controller
             ]
         )->first();
 
-        $payslip = PaySlip::where('employee_id', '=', $employees->id)->get();
+        $payslip = PaySlip::where('employee_id', '=', $employees->id)->orderby('name', 'asc')->get();
 
         return view('payslip.employeepayslip', compact('payslip'));
     }

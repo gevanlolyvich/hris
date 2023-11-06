@@ -133,7 +133,7 @@ class AttendanceEmployeeController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Attendance')) {
-            $employees = User::where('created_by', '=', Auth::user()->creatorId())->where('type', '=', "employee")->get()->pluck('name', 'id');
+            $employees = User::where('created_by', '=', Auth::user()->creatorId())->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.create', compact('employees'));
         } else {
@@ -234,7 +234,7 @@ class AttendanceEmployeeController extends Controller
     {
         if (\Auth::user()->can('Edit Attendance')) {
             $attendanceEmployee = AttendanceEmployee::where('id', $id)->first();
-            $employees          = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees          = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.edit', compact('attendanceEmployee', 'employees'));
         } else {
@@ -899,7 +899,7 @@ class AttendanceEmployeeController extends Controller
 
             $employees = [];
             if (!empty($request->branch) && !empty($request->department)) {
-                $employees = Employee::where('created_by', \Auth::user()->creatorId())->where('branch_id', $request->branch)->where('department_id', $request->department)->get();
+                $employees = Employee::where('created_by', \Auth::user()->creatorId())->where('branch_id', $request->branch)->where('department_id', $request->department)->orderby('name', 'asc')->get();
             }
 
 
