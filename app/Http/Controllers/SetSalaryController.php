@@ -25,7 +25,7 @@ class SetSalaryController extends Controller
                 [
                     'created_by' => \Auth::user()->creatorId(),
                 ]
-            )->get();
+            )->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }

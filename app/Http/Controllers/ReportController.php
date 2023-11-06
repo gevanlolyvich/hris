@@ -134,7 +134,7 @@ class ReportController extends Controller
             }
 
 
-            $employees = $employees->get();
+            $employees = $employees->orderby('name', 'asc')->get();
 
             $leaves        = [];
             $totalApproved = $totalReject = $totalPending = 0;
@@ -516,7 +516,7 @@ class ReportController extends Controller
                 $data['department'] = !empty(Department::find($request->department)) ? Department::find($request->department)->name : '';
             }
 
-            $employees = $employees->get()->pluck('name', 'id');
+            $employees = $employees->orderBy('name', 'asc')->get()->pluck('name', 'id');
 
 
             if (!empty($request->month)) {
@@ -751,7 +751,7 @@ class ReportController extends Controller
             $data['department'] = !empty(Department::find($department)) ? Department::find($department)->name : '';
         }
 
-        $employees = $employees->get()->pluck('name', 'id');
+        $employees = $employees->orderby('name', 'asc')->get()->pluck('name', 'id');
 
 
         $currentdate = strtotime($filter_month);
