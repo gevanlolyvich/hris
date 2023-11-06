@@ -56,28 +56,75 @@
                     <h5>{{ __('Mark Attandance') }}</h5>
                 </div>
                 <script>
-                    function getLocation() {
+                    async function getLocation() {
+                      return new Promise((resolve, reject) => {
                         if ("geolocation" in navigator) {
-                            navigator.geolocation.getCurrentPosition(function(position) {
-                                var latitude = position.coords.latitude;
-                                var longitude = position.coords.longitude;
-                                document.getElementById("latitude").value = latitude;
-                                document.getElementById("longitude").value = longitude;
-                                document.getElementById("latitude_out").value = latitude;
-                                document.getElementById("longitude_out").value = longitude;
-
-                                console.log(latitude, longitude);
-                            });
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              const latitude = position.coords.latitude;
+                              const longitude = position.coords.longitude;
+                              resolve({ latitude, longitude });
+                            },
+                            (error) => {
+                              if (error.code === 1) {
+                                reject(new Error("User denied Geolocation"));
+                              } else {
+                                reject(error);
+                              }
+                            }
+                          );
                         } else {
-                            alert("Geolocation is not supported by your browser.");
+                          reject(new Error("Geolocation is not supported by your browser."));
                         }
+                      });
                     }
 
                     // Automatically call getLocation when the page loads
-                    window.addEventListener("load", getLocation);
-                    window.onload = function () {
-                        getLocation();
-                    }
+                    window.addEventListener("load", async () => {
+                      try {
+                        const { latitude, longitude } = await getLocation();
+
+                        console.log(latitude, longitude);
+                  
+                        const clockInButton = document.getElementById("clock_in");
+                        const clockOutButton = document.getElementById("clock_out");
+                        if (latitude !== 0 && longitude !== 0 && clockInButton) {
+                            const latElement = document.getElementById("latitude");
+                            const longElement = document.getElementById("longitude");
+                            if (latElement) {
+                                latElement.value = latitude;
+                            }
+                            if (longElement) {
+                                longElement.value = longitude
+                            }
+                          clockInButton.disabled = false;
+                        }
+                        if (latitude !== 0 && longitude !== 0 && clockOutButton) {
+                          const latOutElement = document.getElementById("latitude_out");
+                          const longOutElement = document.getElementById("longitude_out");
+                          if (latOutElement) {
+                              latOutElement.value = latitude;
+                          }
+                          if (longOutElement) {
+                              longOutElement.value = longitude
+                          }
+                          clockOutButton.disabled = false;
+                        }
+                      } catch (error) {
+                        console.error(error);
+                        if (error.message === "User denied Geolocation") {
+                          // Handle the case where the user denied geolocation access
+                          const clockInButton = document.getElementById("clock_in");
+                          const clockOutButton = document.getElementById("clock_out");
+                          if (clockInButton) {
+                            clockInButton.disabled = true;
+                          }
+                          if (clockOutButton) {
+                            clockOutButton.disabled = true;
+                          }
+                        }
+                      }
+                    });
                 </script>                
                 <div class="card-body">
                     @if ($officeTime['is_working'])
@@ -119,7 +166,7 @@
                                     class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
                             @elseif (empty($employeeAttendance))
                                 <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                    class="btn btn-primary">{{ __('CLOCK IN') }}</button>
+                                    class="btn btn-primary" disabled>{{ __('CLOCK IN') }}</button>
                             @else
                                 <button type="submit" value="0" name="in" id="clock_in"
                                     class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
