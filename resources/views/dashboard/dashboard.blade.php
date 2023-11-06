@@ -63,7 +63,8 @@
                             (position) => {
                               const latitude = position.coords.latitude;
                               const longitude = position.coords.longitude;
-                              resolve({ latitude, longitude });
+                              const accuracy = position.coords.accuracy;
+                              resolve({ latitude, longitude, accuracy });
                             },
                             (error) => {
                               if (error.code === 1) {
@@ -82,33 +83,41 @@
                     // Automatically call getLocation when the page loads
                     window.addEventListener("load", async () => {
                       try {
-                        const { latitude, longitude } = await getLocation();
+                        const { latitude, longitude, accuracy } = await getLocation();
 
-                        console.log(latitude, longitude);
+                        console.log(`${latitude}, ${longitude}, ${accuracy}`);
                   
                         const clockInButton = document.getElementById("clock_in");
                         const clockOutButton = document.getElementById("clock_out");
                         if (latitude !== 0 && longitude !== 0 && clockInButton) {
                             const latElement = document.getElementById("latitude");
                             const longElement = document.getElementById("longitude");
+                            const accElement = document.getElementById("accuracy");
                             if (latElement) {
                                 latElement.value = latitude;
                             }
                             if (longElement) {
                                 longElement.value = longitude
                             }
-                          clockInButton.disabled = false;
+                            if (accElement) {
+                                accElement.value = accuracy;
+                            }
+                            clockInButton.disabled = false;
                         }
                         if (latitude !== 0 && longitude !== 0 && clockOutButton) {
-                          const latOutElement = document.getElementById("latitude_out");
-                          const longOutElement = document.getElementById("longitude_out");
-                          if (latOutElement) {
-                              latOutElement.value = latitude;
-                          }
-                          if (longOutElement) {
-                              longOutElement.value = longitude
-                          }
-                          clockOutButton.disabled = false;
+                            const latOutElement = document.getElementById("latitude_out");
+                            const longOutElement = document.getElementById("longitude_out");
+                            const accElement = document.getElementById("accuracy_out");
+                            if (latOutElement) {
+                                latOutElement.value = latitude;
+                            }
+                            if (longOutElement) {
+                                longOutElement.value = longitude
+                            }
+                            if (accElement) {
+                                accElement.value = accuracy;
+                            }
+                            clockOutButton.disabled = false;
                         }
                       } catch (error) {
                         console.error(error);
@@ -158,6 +167,7 @@
                             </div>
                             <input type="hidden" name="latitude" id="latitude" value="0">
                             <input type="hidden" name="longitude" id="longitude" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy" value="0">
                         </div>
                         <div class="col-md-6 float-right border-right">
                             {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
@@ -177,20 +187,23 @@
                             {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                             @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude_out" id="latitude_out" value="1">
-                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === $officeTime['default_clock_out'])
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude_out" id="latitude_out" value="2">
-                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === '00:00:00')
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude_out" id="latitude_out" value="3">
-                                <input type="hidden" name="longitude_out" id="longitude_out" value="0">
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
                             @else

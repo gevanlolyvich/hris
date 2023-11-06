@@ -245,10 +245,11 @@ class AttendanceEmployeeController extends Controller
     public function update(Request $request, $id)
     {
         // Retrieve the latitude and longitude from the request
-        $latitude   = $request->input('latitude_out');
-        $longitude  = $request->input('longitude_out');
-        $coord_in = "$latitude, $longitude";
-        $coord_out = "$latitude, $longitude";
+        $latitude   = $request->input('latitude');
+        $longitude  = $request->input('longitude');
+        $accuracy  = $request->input('accuracy');
+        $coord_in = "$latitude, $longitude, $accuracy";
+        $coord_out = "$latitude, $longitude, $accuracy";
 
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
         $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
@@ -625,8 +626,9 @@ class AttendanceEmployeeController extends Controller
         // Retrieve the latitude and longitude from the request
         $latitude   = $request->input('latitude');
         $longitude  = $request->input('longitude');
-        $coord_in = "$latitude, $longitude";
-        $coord_out = "$latitude, $longitude";
+        $accuracy  = $request->input('accuracy');
+        $coord_in = "$latitude, $longitude, $accuracy";
+        $coord_out = "$latitude, $longitude, $accuracy";
         $note       = $request->input('notes');
 
         if ($settings['ip_restrict'] == 'on') {
