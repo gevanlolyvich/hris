@@ -686,7 +686,7 @@
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_name *', __('Company Name *'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_name', null, ['class' => 'form-control', 'placeholder' => 'Enter yore company name']) }}
+                                    {{ Form::text('company_name', null, ['class' => 'form-control', 'placeholder' => 'Enter your company name']) }}
 
                                     @error('company_name')
                                         <span class="invalid-company_name" role="alert">
@@ -697,7 +697,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_address', __('Address'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_address', null, ['class' => 'form-control ', 'placeholder' => 'Enter yore Address']) }}
+                                    {{ Form::text('company_address', null, ['class' => 'form-control ', 'placeholder' => 'Enter your Address']) }}
                                     @error('company_address')
                                         <span class="invalid-company_address" role="alert">
                                             <strong class="text-danger">{{ $message }}</strong>
@@ -706,7 +706,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_city', __('City'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_city', null, ['class' => 'form-control ', 'placeholder' => 'Enter yore City']) }}
+                                    {{ Form::text('company_city', null, ['class' => 'form-control ', 'placeholder' => 'Enter your City']) }}
                                     @error('company_city')
                                         <span class="invalid-company_city" role="alert">
                                             <strong class="text-danger">{{ $message }}</strong>
@@ -715,7 +715,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_state', __('State'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_state', null, ['class' => 'form-control ', 'placeholder' => 'Enter yore State']) }}
+                                    {{ Form::text('company_state', null, ['class' => 'form-control ', 'placeholder' => 'Enter your State']) }}
                                     @error('company_state')
                                         <span class="invalid-company_state" role="alert">
                                             <strong class="text-danger">{{ $message }}</strong>
@@ -724,7 +724,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_zipcode', __('Zip/Post Code'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_zipcode', null, ['class' => 'form-control', 'placeholder' => 'Enter yore Zip/Post Code']) }}
+                                    {{ Form::text('company_zipcode', null, ['class' => 'form-control', 'placeholder' => 'Enter your Zip/Post Code']) }}
                                     @error('company_zipcode')
                                         <span class="invalid-company_zipcode" role="alert">
                                             <strong class="text-danger">{{ $message }}</strong>
@@ -733,7 +733,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_country', __('Country'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_country', null, ['class' => 'form-control ', 'placeholder' => 'Enter yore Country']) }}
+                                    {{ Form::text('company_country', null, ['class' => 'form-control ', 'placeholder' => 'Enter your Country']) }}
                                     @error('company_country')
                                         <span class="invalid-company_country" role="alert"><strong
                                                 class="text-danger">{{ $message }}</strong></span>
@@ -741,7 +741,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_telephone', __('Telephone'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_telephone', null, ['class' => 'form-control', 'placeholder' => 'Enter yore Telephone']) }}
+                                    {{ Form::text('company_telephone', null, ['class' => 'form-control', 'placeholder' => 'Enter your Telephone']) }}
                                     @error('company_telephone')
                                         <span class="invalid-company_telephone" role="alert"><strong
                                                 class="text-danger">{{ $message }}</strong></span>
@@ -749,7 +749,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_email', __('System Email *'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_email', null, ['class' => 'form-control', 'placeholder' => 'Enter yore System Email']) }}
+                                    {{ Form::text('company_email', null, ['class' => 'form-control', 'placeholder' => 'Enter your System Email']) }}
                                     @error('company_email')
                                         <span class="invalid-company_email" role="alert"><strong
                                                 class="text-danger">{{ $message }}</strong></span>
@@ -757,7 +757,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     {{ Form::label('company_email_from_name', __('Email (From Name) *'), ['class' => 'col-form-label']) }}
-                                    {{ Form::text('company_email_from_name', null, ['class' => 'form-control ', 'placeholder' => 'Enter yore Email']) }}
+                                    {{ Form::text('company_email_from_name', null, ['class' => 'form-control ', 'placeholder' => 'Enter your Email']) }}
                                     @error('company_email_from_name')
                                         <span class="invalid-company_email_from_name" role="alert"><strong
                                                 class="text-danger">{{ $message }}</strong></span>

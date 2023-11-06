@@ -40,7 +40,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
                     <div>
                         <div class="form-group mb-3">
                             <label class="form-label">{{ __('Email') }}</label>
-                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter Yore Email" required autocomplete="email" autofocus>
+                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter Your Email" required autocomplete="email" autofocus>
                             @error('email')
                                 <span class="error invalid-email text-danger" role="alert">
                                     <small>{{ $message }}</small>
@@ -49,7 +49,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
                         </div>
                         <div class="form-group mb-3">
                             <label class="form-label">{{ __('Password') }}</label>
-                            <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" placeholder="Enter Yore Password" required autocomplete="current-password">
+                            <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" placeholder="Enter Your Password" required autocomplete="current-password">
                             @error('password')
                             <span class="error invalid-password text-danger" role="alert">
                                 <small>{{ $message }}</small>
