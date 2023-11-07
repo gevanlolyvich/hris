@@ -29,7 +29,16 @@ class AttendanceEmployeeController extends Controller
 
                 $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
 
-                $attendanceEmployee = AttendanceEmployee::where('employee_id', $emp);
+                $userId = \Auth::user()->employee->user_id;
+                $employees = Employee::where('managed_by', $userId)->orderby('name', 'asc')->pluck('id');
+
+                // Check if employee managing other employee or not
+                if ($employees->isNotEmpty()) {
+                    $employees[] = $emp;
+                    $attendanceEmployee = AttendanceEmployee::whereIn('employee_id', $employees);
+                } else {
+                    $attendanceEmployee = AttendanceEmployee::where('employee_id', $emp);
+                }
 
                 if ($request->type == 'monthly' && !empty($request->month)) {
                     $month = date('m', strtotime($request->month));
@@ -78,7 +87,7 @@ class AttendanceEmployeeController extends Controller
                     $employee->where('department_id', $request->department);
                 }
 
-                $employee = $employee->get()->pluck('id');
+                $employee = $employee->orderby('name', 'asc')->get()->pluck('id');
 
                 $attendanceEmployee = AttendanceEmployee::whereIn('employee_id', $employee);
 
@@ -122,9 +131,10 @@ class AttendanceEmployeeController extends Controller
 
                 $attendanceEmployee = $attendanceEmployee->get();
             }
-            // return $attendanceEmployee;
 
-            return view('attendance.index', compact('attendanceEmployee', 'branch', 'department'));
+            $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
+
+            return view('attendance.index', compact('attendanceEmployee', 'branch', 'department', 'emp'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

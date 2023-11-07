@@ -190,9 +190,10 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                @if (\Auth::user()->type != 'employee')
+                                {{-- @if (\Auth::user()->type != 'employee')
                                     <th>{{ __('Employee') }}</th>
-                                @endif
+                                @endif --}}
+                                <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Shift') }}</th>
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Status') }}</th>
@@ -202,9 +203,10 @@
                                 <th>{{ __('Early Leaving') }}</th>
                                 <th>{{ __('Overtime') }}</th>
                                 <th>{{ __('Work Hours') }}</th>
-                                @if (Gate::check('Edit Attendance') || Gate::check('Delete Attendance'))
+                                {{-- @if (Gate::check('Edit Attendance') || Gate::check('Delete Attendance'))
                                     <th width="200px">{{ __('Action') }}</th>
-                                @endif
+                                @endif --}}
+                                <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -249,9 +251,10 @@
 
                             @foreach ($attendanceEmployee as $attendance)
                                 <tr>
-                                    @if (\Auth::user()->type != 'employee')
+                                    {{-- @if (\Auth::user()->type != 'employee')
                                         <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
-                                    @endif
+                                    @endif --}}
+                                    <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                     <td>{{ $attendance->employee->shift_type->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                     <td>{{ $attendance->status }}</td>
@@ -264,7 +267,7 @@
                                     <td>{{ $attendance->overtime }}</td>
                                     <td>{{ $attendance->work_hours }}</td>
                                     <td class="Action">
-                                        @if (Gate::check('Edit Attendance') || Gate::check('Delete Attendance'))
+                                        @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
                                             <span>
                                                 @can('Edit Attendance')
                                                     <div class="action-btn bg-info ms-2">
