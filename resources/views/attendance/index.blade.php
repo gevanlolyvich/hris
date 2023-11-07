@@ -269,8 +269,29 @@
                                     <td class="Action">
                                         @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
                                             <span>
+                                                 {{-- @can('Validate Attendance') --}}
+                                                @if (!$attendance->is_valid)
+                                                <div class="action-btn bg-info ms-2">
+                                                    {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
+                                                    <button type="submit" class="mx-3 btn btn-sm align-items-center bs-pass-para"
+                                                        data-bs-toggle="tooltip" title="Validate" aria-label="Validate">
+                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                    </button>
+                                                    {!! Form::close() !!}
+                                                </div>
+                                                @else
+                                                <div class="action-btn bg-success ms-2">
+                                                    <button type="submit" class="mx-3 btn btn-sm align-items-center"
+                                                        data-bs-toggle="tooltip" title="Already Validate" aria-label="Already Validated" disabled>
+                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                    </button>
+                                                </div>
+                                                @endif
+                                                
+                                            {{-- @endcan --}}
+
                                                 @can('Edit Attendance')
-                                                    <div class="action-btn bg-info ms-2">
+                                                    <div class="action-btn bg-warning ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                                             data-url="{{ URL::to('attendanceemployee/' . $attendance->id . '/edit') }}"
                                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"

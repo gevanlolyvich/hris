@@ -787,6 +787,15 @@ Route::post('attendanceemployee/attendance', [AttendanceEmployeeController::clas
     ]
 );
 
+// routes/web.php
+Route::patch('attendanceemployee/validate/{id}', [AttendanceEmployeeController::class, 'validateAttendance'])->name('attendanceemployee.validateAttendance')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+
 Route::resource('attendanceemployee', AttendanceEmployeeController::class)->middleware(
     [
         'auth',

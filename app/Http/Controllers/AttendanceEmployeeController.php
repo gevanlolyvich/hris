@@ -1018,4 +1018,19 @@ class AttendanceEmployeeController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
+
+    public function validateAttendance($id)
+    {
+        if (\Auth::user()->can('Edit Attendance')) {
+            $attendance = AttendanceEmployee::where('id', $id)->first();
+
+            $attendance->is_valid = true;
+            $attendance->validate_by = \Auth::user()->employee->id;
+            $attendance->save();
+
+            return redirect()->route('attendanceemployee.index')->with('success', __('Attendance successfully validated.'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
 }
