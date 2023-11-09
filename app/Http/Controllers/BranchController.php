@@ -44,6 +44,9 @@ class BranchController extends Controller
             $validator = \Validator::make(
                 $request->all(), [
                                    'name' => 'required',
+                                   'tolerance' => 'required',
+                                   'latitude' => 'required',
+                                   'longitude' => 'required',
                                ]
             );
             if($validator->fails())
@@ -55,6 +58,9 @@ class BranchController extends Controller
 
             $branch             = new Branch();
             $branch->name       = $request->name;
+            $branch->tolerance  = $request->tolerance;
+            $branch->latitude   = $request->latitude;
+            $branch->longitude  = $request->longitude;
             $branch->created_by = \Auth::user()->creatorId();
             $branch->save();
 
@@ -100,6 +106,9 @@ class BranchController extends Controller
                 $validator = \Validator::make(
                     $request->all(), [
                                        'name' => 'required',
+                                       'tolerance' => 'required',
+                                       'latitude' => 'required',
+                                       'longitude' => 'required',
                                    ]
                 );
                 if($validator->fails())
@@ -110,6 +119,9 @@ class BranchController extends Controller
                 }
 
                 $branch->name = $request->name;
+                $branch->tolerance  = $request->tolerance;
+                $branch->latitude   = $request->latitude;
+                $branch->longitude  = $request->longitude;
                 $branch->save();
 
                 return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));

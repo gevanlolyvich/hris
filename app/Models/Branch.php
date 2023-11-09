@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Branch extends Model
 {
     protected $fillable = [
-        'name','created_by'
+        'name',
+        'latitude',
+        'longitude',
+        'tolerance',
+        'created_by',
     ];
 
     
