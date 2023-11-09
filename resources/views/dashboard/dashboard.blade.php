@@ -22,227 +22,148 @@
 
 
     @if (\Auth::user()->type == 'employee')
-        <div class="col-xxl-6">
-            <div class="card" style="height: 947px;">
-                <div class="card-header">
-                    <div class="row">
-                        <div class="col-9">
-                            <h5>{{ __('Calendar') }}</h5>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label for=""></label>
-                                @if (isset($setting['is_enabled']) && $setting['is_enabled'] == 'on')
-                                    <select class="form-control" name="calender_type" id="calender_type"
-                                        onchange="get_data()">
-                                        <option value="google_calender">{{ __('Google Calender') }}</option>
-                                        <option value="local_calender" selected="true">
-                                            {{ __('Local Calender') }}</option>
-                                    </select>
-                                @endif
-                                <input type="hidden" id="path_admin" value="{{ url('/') }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id='event_calendar' class='calendar'></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xxl-6">
-            <div class="card"style="height: 462px;">
-                <div class="card-header">
-                    <h5>{{ __('Mark Attandance') }}</h5>
-                </div>
-                <script>
-                    async function getLocation() {
-                      return new Promise((resolve, reject) => {
-                        if ("geolocation" in navigator) {
-                          navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                              const latitude = position.coords.latitude;
-                              const longitude = position.coords.longitude;
-                              const accuracy = position.coords.accuracy;
-                              resolve({ latitude, longitude, accuracy });
-                            },
-                            (error) => {
-                              if (error.code === 1) {
-                                reject(new Error("User denied Geolocation"));
-                              } else {
-                                reject(error);
-                              }
-                            }
-                          );
-                        } else {
-                          reject(new Error("Geolocation is not supported by your browser."));
-                        }
-                      });
-                    }
-
-                    // Automatically call getLocation when the page loads
-                    window.addEventListener("load", async () => {
-                      try {
-                        const { latitude, longitude, accuracy } = await getLocation();
-
-                        console.log(`${latitude}, ${longitude}, ${accuracy}`);
-                  
-                        const clockInButton = document.getElementById("clock_in");
-                        const clockOutButton = document.getElementById("clock_out");
-                        if (latitude !== 0 && longitude !== 0 && clockInButton) {
-                            const latElement = document.getElementById("latitude");
-                            const longElement = document.getElementById("longitude");
-                            const accElement = document.getElementById("accuracy");
-                            if (latElement) {
-                                latElement.value = latitude;
-                            }
-                            if (longElement) {
-                                longElement.value = longitude
-                            }
-                            if (accElement) {
-                                accElement.value = accuracy;
-                            }
-                            clockInButton.disabled = false;
-                        }
-                        if (latitude !== 0 && longitude !== 0 && clockOutButton) {
-                            const latOutElement = document.getElementById("latitude_out");
-                            const longOutElement = document.getElementById("longitude_out");
-                            const accElement = document.getElementById("accuracy_out");
-                            if (latOutElement) {
-                                latOutElement.value = latitude;
-                            }
-                            if (longOutElement) {
-                                longOutElement.value = longitude
-                            }
-                            if (accElement) {
-                                accElement.value = accuracy;
-                            }
-                            clockOutButton.disabled = false;
-                        }
-                      } catch (error) {
-                        console.error(error);
-                        if (error.message === "User denied Geolocation") {
-                          // Handle the case where the user denied geolocation access
-                          const clockInButton = document.getElementById("clock_in");
-                          const clockOutButton = document.getElementById("clock_out");
-                          if (clockInButton) {
-                            clockInButton.disabled = true;
-                          }
-                          if (clockOutButton) {
-                            clockOutButton.disabled = true;
-                          }
-                        }
-                      }
-                    });
-                </script>                
-                <div class="card-body">
-                    @if ($officeTime['is_working'])
-                        <h6>{{ __($officeTime['name'])}}</h6>
-                        <p class="text-muted pb-0-5">
-                            {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}
-                        </p>
-                        {{-- Condition for showing employee already clock in or not --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} ()")}}</h5>
-                        @elseif (empty($employeeAttendance))
-                        @else
-                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} ()")}}</h5>
-                        @endif
+    <div class="col-xxl-5">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ __('Mark Attandance') }}</h5>
+            </div>               
+            <div class="card-body">
+                @if ($officeTime['is_working'])
+                    <h6>{{ __($officeTime['name'])}}</h6>
+                    <p class="text-muted pb-0-5">
+                        {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}
+                    </p>
+                    {{-- Condition for showing employee already clock in or not --}}
+                    @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} ()")}}</h5>
+                    @elseif (empty($employeeAttendance))
                     @else
-                        <h6 class="text-muted pb-0-5">
-                            {{ __('No Working Hour') }}
-                        </h6>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} ()")}}</h5>
                     @endif
-                    <div class="row">
-                        {{-- Show form for attendance type and notes --}}                      
-                        <div class="col-md-12">
-                            {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form']) }}
-                            <div class="form-group">
-                                {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
-                                {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
-                            </div>
-                            <div class="form-group">
-                                {{-- {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!} --}}
-                                {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
-                            </div>
-                            <input type="hidden" name="latitude" id="latitude" value="0">
-                            <input type="hidden" name="longitude" id="longitude" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy" value="0">
+                @else
+                    <h6 class="text-muted pb-0-5">
+                        {{ __('No Working Hour') }}
+                    </h6>
+                @endif
+                <div class="row d-flex flex-column align-items-center">
+                    {{-- Show form for attendance type and notes --}}                      
+                    <div class="col-md-12">
+                        {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form']) }}
+                        <div class="form-group">
+                            {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
+                            {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
                         </div>
-                        <div class="col-md-6 float-right border-right">
-                            {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                                <button type="submit" value="0" name="in" id="clock_in"
-                                    class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
-                            @elseif (empty($employeeAttendance))
-                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                    class="btn btn-primary" disabled>{{ __('CLOCK IN') }}</button>
-                            @else
-                                <button type="submit" value="0" name="in" id="clock_in"
-                                    class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
-                            @endif
-                            {{ Form::close() }}
-                        </div>                                                    
-                        <div class="col-md-6 float-left">
-                            {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
-                            @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude" id="latitude_out" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
-                            @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === $officeTime['default_clock_out'])
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude" id="latitude_out" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
-                            @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance) && $employeeAttendance->clock_out === '00:00:00')
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude" id="latitude_out" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
-                            @else
-                                <button type="submit" value="1" name="out" id="clock_out"
-                                    class="btn btn-danger disabled" disabled>{{ __('CLOCK OUT') }}</button>
-                            @endif
-                            {{ Form::close() }}
+                        <div class="form-group">
+                            {{-- {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!} --}}
+                            {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
                         </div>
+                        <input type="hidden" name="latitude" id="latitude" value="0">
+                        <input type="hidden" name="longitude" id="longitude" value="0">
+                        <input type="hidden" name="accuracy" id="accuracy" value="0">
                     </div>
-                </div>
-            </div>
-            <div class="card" style="height: 462px;">
-                <div class="card-header card-body table-border-style">
-                    <h5>{{ __('Meeting schedule') }}</h5>
-                </div>
-                <div class="card-body" style="height: 320px">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ __('Meeting title') }}</th>
-                                    <th>{{ __('Meeting Date') }}</th>
-                                    <th>{{ __('Meeting Time') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="list">
-                                @foreach ($meetings as $meeting)
-                                    <tr>
-                                        <td>{{ $meeting->title }}</td>
-                                        <td>{{ \Auth::user()->dateFormat($meeting->date) }}</td>
-                                        <td>{{ \Auth::user()->timeFormat($meeting->time) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="col-md-6 text-center mx-auto mt-1">
+                        {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                            <button type="submit" value="0" name="in" id="clock_in"
+                                class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
+                        @elseif (empty($employeeAttendance))
+                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                class="btn btn-primary" disabled>{{ __('CLOCK IN') }}</button>
+                        @else
+                            <button type="submit" value="0" name="in" id="clock_in"
+                                class="btn btn-primary disabled" disabled>{{ __('CLOCK IN') }}</button>
+                        @endif
+                        {{ Form::close() }}
+                    </div>                                                    
+                    <div class="col-md-6 text-center mx-auto mt-2">
+                        {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
+                        {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
+                        @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
+                            <input type="hidden" name="latitude" id="latitude_out" value="0">
+                            <input type="hidden" name="longitude" id="longitude_out" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
+                        @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance))
+                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                            <input type="hidden" name="latitude" id="latitude_out" value="0">
+                            <input type="hidden" name="longitude" id="longitude_out" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
+                        @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
+                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                            <input type="hidden" name="latitude" id="latitude_out" value="0">
+                            <input type="hidden" name="longitude" id="longitude_out" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                class="btn btn-danger">{{ __('CLOCK OUT') }}</button>
+                        @else
+                            <button type="submit" value="1" name="out" id="clock_out"
+                                class="btn btn-danger disabled" disabled>{{ __('CLOCK OUT') }}</button>
+                        @endif
+                        {{ Form::close() }}
                     </div>
                 </div>
             </div>
         </div>
+        <div class="card">
+            <div class="card-header card-body table-border-style">
+                <h5>{{ __('Meeting schedule') }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{{ __('Meeting title') }}</th>
+                                <th>{{ __('Meeting Date') }}</th>
+                                <th>{{ __('Meeting Time') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="list">
+                            @foreach ($meetings as $meeting)
+                                <tr>
+                                    <td>{{ $meeting->title }}</td>
+                                    <td>{{ \Auth::user()->dateFormat($meeting->date) }}</td>
+                                    <td>{{ \Auth::user()->timeFormat($meeting->time) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-7">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-9">
+                        <h5>{{ __('Calendar') }}</h5>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for=""></label>
+                            @if (isset($setting['is_enabled']) && $setting['is_enabled'] == 'on')
+                                <select class="form-control" name="calender_type" id="calender_type"
+                                    onchange="get_data()">
+                                    <option value="google_calender">{{ __('Google Calender') }}</option>
+                                    <option value="local_calender" selected="true">
+                                        {{ __('Local Calender') }}</option>
+                                </select>
+                            @endif
+                            <input type="hidden" id="path_admin" value="{{ url('/') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id='event_calendar' class='calendar'></div>
+            </div>
+        </div>
+    </div>
         <div class="col-xl-12 col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-body table-border-style">
@@ -560,6 +481,86 @@
 
 @push('script-page')
     <script src="{{ asset('assets/js/plugins/main.min.js') }}"></script>
+    <script>
+        async function getLocation() {
+          return new Promise((resolve, reject) => {
+            if ("geolocation" in navigator) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const latitude = position.coords.latitude;
+                  const longitude = position.coords.longitude;
+                  const accuracy = position.coords.accuracy;
+                  resolve({ latitude, longitude, accuracy });
+                },
+                (error) => {
+                  if (error.code === 1) {
+                    reject(new Error("User denied Geolocation"));
+                  } else {
+                    reject(error);
+                  }
+                }
+              );
+            } else {
+              reject(new Error("Geolocation is not supported by your browser."));
+            }
+          });
+        }
+
+        // Automatically call getLocation when the page loads
+        window.addEventListener("load", async () => {
+          try {
+            const { latitude, longitude, accuracy } = await getLocation();
+
+            console.log(`${latitude}, ${longitude}, ${accuracy}`);
+      
+            const clockInButton = document.getElementById("clock_in");
+            const clockOutButton = document.getElementById("clock_out");
+            if (latitude !== 0 && longitude !== 0 && clockInButton) {
+                const latElement = document.getElementById("latitude");
+                const longElement = document.getElementById("longitude");
+                const accElement = document.getElementById("accuracy");
+                if (latElement) {
+                    latElement.value = latitude;
+                }
+                if (longElement) {
+                    longElement.value = longitude
+                }
+                if (accElement) {
+                    accElement.value = accuracy;
+                }
+                clockInButton.disabled = false;
+            }
+            if (latitude !== 0 && longitude !== 0 && clockOutButton) {
+                const latOutElement = document.getElementById("latitude_out");
+                const longOutElement = document.getElementById("longitude_out");
+                const accElement = document.getElementById("accuracy_out");
+                if (latOutElement) {
+                    latOutElement.value = latitude;
+                }
+                if (longOutElement) {
+                    longOutElement.value = longitude
+                }
+                if (accElement) {
+                    accElement.value = accuracy;
+                }
+                clockOutButton.disabled = false;
+            }
+          } catch (error) {
+            console.error(error);
+            if (error.message === "User denied Geolocation") {
+              // Handle the case where the user denied geolocation access
+              const clockInButton = document.getElementById("clock_in");
+              const clockOutButton = document.getElementById("clock_out");
+              if (clockInButton) {
+                clockInButton.disabled = true;
+              }
+              if (clockOutButton) {
+                clockOutButton.disabled = true;
+              }
+            }
+          }
+        });
+    </script> 
 
     @if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
     <script type="text/javascript">
