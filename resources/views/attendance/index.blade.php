@@ -1,7 +1,4 @@
-
-
-
- @extends('layouts.admin')
+@extends('layouts.admin')
 @section('page-title')
     {{ __('Manage Attendance List') }}
 @endsection
@@ -11,6 +8,14 @@
     <li class="breadcrumb-item">{{ __('Attendance List') }}</li>
 @endsection
 
+@push('css-page')
+    <style>
+        #openStreetMapContainer {
+            height: 400px; /* You can adjust the height as needed */
+            width: 100%;
+        }
+    </style>
+@endpush
 
 @push('script-page')
     <script>
@@ -32,6 +37,48 @@
 
         $('input[name="type"]:radio:checked').trigger('change');
     </script>
+
+    <!-- Add this script at the end of your Blade template -->
+    <script>
+        $(document).ready(function() {
+            var map = null;
+
+            $('.map-link').click(function() {
+                var coordinates = $(this).data('coordinates').split(', ');
+            
+                // Convert the radius string to a number
+                var radius = parseFloat(coordinates[2]);
+
+            
+                // Open the modal
+                $('#openStreetMapModal').modal('show');
+            
+                // Initialize the map after the modal is fully shown
+                $('#openStreetMapModal').on('shown.bs.modal', function () {
+                    // If a map already exists, remove it
+                    if (map !== null) {
+                        map.remove();
+                    }
+
+                    map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                
+                    // Add a marker for the location
+                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+                
+                    // Add a circle with the converted radius
+                    var circle = L.circle([coordinates[0], coordinates[1]], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: radius,
+                    }).addTo(map);
+                });
+            });
+        });
+    </script>
 @endpush
 @section('action-button')
 <!-- <a class="btn btn-sm btn-primary collapsed" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
@@ -40,6 +87,21 @@
     </a> -->
 @endsection
 @section('content')
+<!-- Update the modal structure in your Blade template -->
+<div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">OpenStreetMap Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="openStreetMapContainer" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="col-sm-12">
             <div class=" mt-2 " id="multiCollapseExample1">
@@ -258,9 +320,26 @@
                                     <td>{{ $attendance->employee->shift_type->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                     <td>{{ $attendance->status }}</td>
-                                    <td>{{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                    <!-- Modify Clock In and Clock Out columns in your table -->
+                                    <td>
+                                        @if ($attendance->coord_in)
+                                            <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}">
+                                                <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                            </a>
+                                        @else
+                                            {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                        @endif
                                     </td>
-                                    <td>{{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                    <td>
+                                        @if ($attendance->coord_out)
+                                        <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}">
+                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                        </a>
+                                        @else
+                                        <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                        </a>
+                                        @endif
                                     </td>
                                     <td>{{ $attendance->late }}</td>
                                     <td>{{ $attendance->early_leaving }}</td>
@@ -282,7 +361,7 @@
                                                 @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <button type="submit" class="mx-3 btn btn-sm align-items-center"
-                                                        data-bs-toggle="tooltip" title="Already Validate" aria-label="Already Validated" disabled>
+                                                        data-bs-toggle="tooltip" title="Already Validated" aria-label="Already Validated" disabled>
                                                         <i class="ti ti-checks text-white text-white"></i>
                                                     </button>
                                                 </div>
@@ -326,5 +405,3 @@
         </div>
     </div>
 @endsection
-
-
