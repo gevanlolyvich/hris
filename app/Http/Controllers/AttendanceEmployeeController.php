@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Utilities\DistanceCalculator;
 
 class AttendanceEmployeeController extends Controller
 {
@@ -630,16 +631,18 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
-        // return $request;
         $settings = Utility::settings();
 
         // Retrieve the latitude and longitude from the request
         $latitude   = $request->input('latitude');
         $longitude  = $request->input('longitude');
-        $accuracy  = $request->input('accuracy');
-        $coord_in = "$latitude, $longitude, $accuracy";
-        $coord_out = "$latitude, $longitude, $accuracy";
-        $note       = $request->input('notes');
+        $accuracy   = $request->input('accuracy');
+        $coord_in   = "$latitude, $longitude, $accuracy";
+        $coord_out  = "$latitude, $longitude, $accuracy";
+
+        // Retrieve the additional information
+        $note               = $request->input('notes');
+        $attendance_type    = $request->input('attendance_type');
 
         if ($settings['ip_restrict'] == 'on') {
             $userIp = request()->ip();
@@ -647,6 +650,16 @@ class AttendanceEmployeeController extends Controller
             if (!empty($ip)) {
                 return redirect()->back()->with('error', __('this ip is not allowed to clock in & clock out.'));
             }
+        }
+
+        $is_valid = null;
+        if ($attendance_type == '1') {
+            // check employee clock in location with branch to validate attendance
+
+            $branch_data = Branch::where('id', \Auth::user()->employee->branch_id)->first();
+            $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
+
+            $is_valid = ($accuracy + (float)$branch_data['tolerance']) >= $distance ? true : null;
         }
 
         $date = date("Y-m-d");
@@ -715,6 +728,8 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->work_hours             = '00:00:00';
                     $employeeAttendance->coord_in               = $coord_in;
                     $employeeAttendance->note                   = $note;
+                    $employeeAttendance->is_valid               = $is_valid;
+                    $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->created_by             = \Auth::user()->id;
 
                     $employeeAttendance->save();
@@ -736,6 +751,8 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->work_hours             = '00:00:00';
                     $employeeAttendance->coord_in               = $coord_in;
                     $employeeAttendance->note                   = $note;
+                    $employeeAttendance->is_valid               = $is_valid;
+                    $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->created_by             = \Auth::user()->id;
 
                     $employeeAttendance->save();
@@ -748,38 +765,42 @@ class AttendanceEmployeeController extends Controller
         } else {
             $checkDb = AttendanceEmployee::where('employee_id', '=', \Auth::user()->id)->get()->toArray();
             if (empty($checkDb)) {
-                $employeeAttendance                = new AttendanceEmployee();
-                $employeeAttendance->employee_id   = $employeeId;
-                $employeeAttendance->date          = $date;
-                $employeeAttendance->status        = 'No Working Hour';
-                $employeeAttendance->clock_in      = $time;
-                $employeeAttendance->clock_out     = '00:00:00';
-                $employeeAttendance->late          = '00:00:00';
-                $employeeAttendance->early_leaving = '00:00:00';
-                $employeeAttendance->overtime      = '00:00:00';
-                $employeeAttendance->total_rest    = '00:00:00';
-                $employeeAttendance->coord_in      = $coord_in;
-                $employeeAttendance->note          = $note;
-                $employeeAttendance->created_by    = \Auth::user()->id;
+                $employeeAttendance                         = new AttendanceEmployee();
+                $employeeAttendance->employee_id            = $employeeId;
+                $employeeAttendance->date                   = $date;
+                $employeeAttendance->status                 = 'No Working Hour';
+                $employeeAttendance->clock_in               = $time;
+                $employeeAttendance->clock_out              = '00:00:00';
+                $employeeAttendance->late                   = '00:00:00';
+                $employeeAttendance->early_leaving          = '00:00:00';
+                $employeeAttendance->overtime               = '00:00:00';
+                $employeeAttendance->total_rest             = '00:00:00';
+                $employeeAttendance->coord_in               = $coord_in;
+                $employeeAttendance->note                   = $note;
+                $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->attendance_type_id     = $attendance_type;
+                $employeeAttendance->created_by             = \Auth::user()->id;
 
                 $employeeAttendance->save();
 
                 return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
             }
             foreach ($checkDb as $check) {
-                $employeeAttendance                = new AttendanceEmployee();
-                $employeeAttendance->employee_id   = $employeeId;
-                $employeeAttendance->date          = $date;
-                $employeeAttendance->status        = 'No Working Hour';
-                $employeeAttendance->clock_in      = $time;
-                $employeeAttendance->clock_out     = '00:00:00';
-                $employeeAttendance->late          = '00:00:00';
-                $employeeAttendance->early_leaving = '00:00:00';
-                $employeeAttendance->overtime      = '00:00:00';
-                $employeeAttendance->total_rest    = '00:00:00';
-                $employeeAttendance->coord_in      = $coord_in;
-                $employeeAttendance->note          = $note;
-                $employeeAttendance->created_by    = \Auth::user()->id;
+                $employeeAttendance                         = new AttendanceEmployee();
+                $employeeAttendance->employee_id            = $employeeId;
+                $employeeAttendance->date                   = $date;
+                $employeeAttendance->status                 = 'No Working Hour';
+                $employeeAttendance->clock_in               = $time;
+                $employeeAttendance->clock_out              = '00:00:00';
+                $employeeAttendance->late                   = '00:00:00';
+                $employeeAttendance->early_leaving          = '00:00:00';
+                $employeeAttendance->overtime               = '00:00:00';
+                $employeeAttendance->total_rest             = '00:00:00';
+                $employeeAttendance->coord_in               = $coord_in;
+                $employeeAttendance->note                   = $note;
+                $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->attendance_type_id     = $attendance_type;
+                $employeeAttendance->created_by             = \Auth::user()->id;
 
                 $employeeAttendance->save();
 
