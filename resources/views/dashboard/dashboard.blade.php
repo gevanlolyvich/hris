@@ -78,27 +78,27 @@
                     <div class="col-md-6 text-center mx-auto mt-3">
                         {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                         {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
-                        @if (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                        @if ($yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out'])
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        @elseif ($officeTime['is_cross_day'] && !empty($employeeAttendance))
+                        @elseif ($employeeAttendance)
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
+                        {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button> --}}
                         @else
                             <button type="submit" value="1" name="out" id="clock_out"
                                 class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>

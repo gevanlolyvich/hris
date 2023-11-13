@@ -100,12 +100,14 @@ class HomeController extends Controller
                 $officeTime['is_cross_day'] = $shift_times->start_time > $shift_times->end_time ? true : false;
 
                 // calculate default clock out for yesterday cross day shift
-                $clockoutSeconds                          = strtotime($shift_times->end_time) - strtotime($date) - 3600;
+                $clockoutSeconds                          = strtotime($shift_times->end_time) - strtotime($date);
                 $hours                                    = floor($clockoutSeconds / 3600);
                 $mins                                     = floor($clockoutSeconds / 60 % 60);
                 $secs                                     = floor($clockoutSeconds % 60);
                 $default_clock_out_cross_day              = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                $today_absolute_out_time                  = sprintf('%02d:%02d:%02d', $hours + 1, $mins, $secs);
                 $officeTime['default_clock_out']          = $default_clock_out_cross_day;
+                $officeTime['absolute_out']               = strtotime("$date $today_absolute_out_time");
 
                 // create shift and office time for yesterday
                 $yesterday_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
@@ -118,12 +120,14 @@ class HomeController extends Controller
                 $yesterdayOfficeTime['is_cross_day'] = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
 
                 // calculate default clock out for yesterday cross day shift
-                $clockoutSeconds                          = strtotime($yesterday_shift_times->end_time) - strtotime($date) - 3600;
+                $clockoutSeconds                          = strtotime($yesterday_shift_times->end_time) - strtotime($date);
                 $hours                                    = floor($clockoutSeconds / 3600);
                 $mins                                     = floor($clockoutSeconds / 60 % 60);
                 $secs                                     = floor($clockoutSeconds % 60);
                 $default_clock_out_cross_day              = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                $yesterday_absolute_out_time              = sprintf('%02d:%02d:%02d', $hours + 1, $mins, $secs);
                 $yesterdayOfficeTime['default_clock_out'] = $default_clock_out_cross_day;
+                $yesterdayOfficeTime['absolute_out']      = strtotime("$date $yesterday_absolute_out_time");
 
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');;
