@@ -21,10 +21,7 @@
 
 
 @section('content')
-        <div class="col-3">
-            @include('layouts.hrm_setup')
-        </div>
-        <div class="col-9">
+        <div class="col-12">
             <div class="card">
                 <div class="card-body table-border-style">
 
