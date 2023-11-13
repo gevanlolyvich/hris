@@ -37,7 +37,7 @@
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
                 {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
-                <div id="map"></div>
+                <div id="openStreetMapContainer" style="height: 400px;"></div>
             </div>
         </div>
     </div>
@@ -76,13 +76,3 @@
 </div>
 {{ Form::close() }}
 
-<script>
-    const branchData = ({{ Js::from($branch)}});
-    var map = L.map('map').setView([branchData.latitude, branchData.longitude], 14);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
-        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
-    }).addTo(map);
-</script>
