@@ -338,8 +338,6 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->overtime      = $overtime;
                     $attendanceEmployee->coord_out     = $coord_out;
 
-                    return $attendanceEmployee;
-
                     // calculate work hours
                     $totalWorkSeconds     = time() - strtotime($yesterday_date . $attendanceEmployee->clock_in);
                     $hours                = floor($totalWorkSeconds / 3600);
