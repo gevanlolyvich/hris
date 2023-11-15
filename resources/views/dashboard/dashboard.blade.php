@@ -31,14 +31,14 @@
                 @if ($officeTime['is_working'])
                     <h6>{{ __($officeTime['name'])}}</h6>
                     <p class="text-muted pb-0-5">
-                        {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime']) }}
+                        {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime'] . ' WIB') }}
                     </p>
                     {{-- Condition for showing employee already clock in or not --}}
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} ()")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} WIB")}}</h5>
                     @elseif (empty($employeeAttendance))
                     @else
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} ()")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} WIB")}}</h5>
                     @endif
                 @else
                     <h6 class="text-muted pb-0-5">
@@ -47,8 +47,27 @@
                 @endif
                 <div class="row d-flex flex-column align-items-center">
                     {{-- Show form for attendance type and notes --}}                      
+                    {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
+                    {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label']) }}
+                    <div class="col-md-6 col-lg-12 text-center mx-auto">
+                        <button type="button" class="btn btn-info btn-lg btn-block " id="load"><i
+                            class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                        </button>
+                        <div id="camera" style="display: none; position: relative" class="col-12">
+                            <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                            <button type="button" class="btn btn-info btn-lg btn-block custBtn" id="takepic" style="display: none;"><i
+                                class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                            </button>
+                        </div>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <div id="output" style="display: none;">
+                            <img id="photo" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                        </div>
+                        <label for="picture">
+                            <input type="hidden" name="picture" id="picture">
+                        </label>      
+                    </div>
                     <div class="col-md-12">
-                        {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form']) }}
                         <div class="form-group">
                             {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
                             {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
@@ -79,17 +98,19 @@
                         {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                         {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
                         @if ($yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out'])
-                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT']) }}
+                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                            <input type="hidden" name="picture_out" id="picture_out">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         @elseif ($employeeAttendance)
-                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                            <input type="hidden" name="picture_out" id="picture_out">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
@@ -484,6 +505,16 @@
                 height: 750px; /* Adjust for smaller screens */
             }
         }
+
+        .custBtn{
+            position: absolute;
+            top: 83%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            border: none;
+            cursor: pointer;
+        }
     </style>
 @endpush
 
@@ -684,4 +715,106 @@
         }
     </script>
     @endif
+
+    <script>
+        /* JS comes here */
+        (function() {
+    
+            var width = 320; // We will scale the photo width to this
+            var height = 0; // This will be computed based on the input stream
+    
+            var streaming = false;
+    
+            var video = null;
+            var canvas = null;
+            var photo = null;
+            var takepic = null;
+            var loadbutton = document.getElementById('load');
+    
+            loadbutton.addEventListener('click', startup, false);
+    
+            function startup() {
+                video = document.getElementById('video');
+                canvas = document.getElementById('canvas');
+                photo = document.getElementById('photo');
+                takepic = document.getElementById('takepic');
+                document.getElementById('load').style.display = 'none';
+                document.getElementById('camera').style.display = 'block';
+                // document.getElementById('camera').style.height = '0';
+                document.getElementById('output').style.display = 'block';
+                //document.getElementById('output').style['margin-top'] = '';
+    
+                takepic.style.display = '';
+                //takepic.style.position = 'relative';
+                // takepic.style.bottom = '50px';
+                // takepic.style['margin-left'] = 'auto';
+                // // takepic.style['margin-right'] = 'auto';
+    
+                navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function(err) {
+                        console.log("An error occurred: " + err);
+                    });
+    
+                video.addEventListener('canplay', function(ev) {
+                    if (!streaming) {
+                        height = video.videoHeight / (video.videoWidth / width);
+    
+                        if (isNaN(height)) {
+                            height = width / (4 / 3);
+                        }
+    
+                        video.setAttribute('width', width);
+                        video.setAttribute('height', height);
+                        document.getElementById('camera').style.width = width;
+                        document.getElementById('camera').style.height = height;
+                        canvas.setAttribute('width', width);
+                        canvas.setAttribute('height', height);
+                        photo.setAttribute('width', width);
+                        photo.setAttribute('height', height);
+                        streaming = true;
+                    }
+                }, false);
+    
+                takepic.addEventListener('click', function(ev) {
+                    takepicture();
+                    ev.preventDefault();
+                }, false);
+    
+                clearphoto();
+            }
+    
+    
+            function clearphoto() {
+                var context = canvas.getContext('2d');
+                context.fillStyle = "#AAA";
+                context.fillRect(0, 0, canvas.width, canvas.height);
+    
+                var data = canvas.toDataURL('image/png');
+                photo.setAttribute('src', data);
+            }
+    
+            function takepicture() {
+                var context = canvas.getContext('2d');
+                if (width && height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                    context.drawImage(video, 0, 0, width, height);
+    
+                    var data = canvas.toDataURL('image/png');
+                    photo.setAttribute('src', data);
+                    document.getElementById('picture').value = data;
+                    document.getElementById('picture_out').value = data;
+                } else {
+                    clearphoto();
+                }
+            }
+        })();
+    </script>
 @endpush

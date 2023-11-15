@@ -56,7 +56,6 @@ class AttendanceRequestController extends Controller
 
     public function store(Request $request)
     {
-
         //* Data Validation 
         $validator = Validator::make(
             $request->all(),

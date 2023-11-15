@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Utilities\DistanceCalculator;
 
 class AttendanceEmployeeController extends Controller
@@ -257,6 +258,18 @@ class AttendanceEmployeeController extends Controller
     {
         // Retrieve the latitude and longitude from the request
 
+        $picture_path = null;
+        $employee = Employee::where('user_id', Auth::user()->id)->first();
+
+        // process image file
+        if ($request->input('picture_out')) {
+            $base64ImageData = $request->input('picture_out');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
+            Storage::disk('public')->put('uploads/attendance/'.$pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/'. $pictureName;
+        }
+
         $latitude   = $request->input('latitude');
         $longitude  = $request->input('longitude');
         $accuracy  = $request->input('accuracy');
@@ -345,7 +358,8 @@ class AttendanceEmployeeController extends Controller
                     $secs                 = floor($totalWorkSeconds % 60);
                     $workhours            = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
-                    $attendanceEmployee->work_hours      = $workhours;
+                    $attendanceEmployee->work_hours    = $workhours;
+                    $attendanceEmployee->picture_out   = $picture_path;
 
                     $attendanceEmployee->save();
 
@@ -391,6 +405,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->overtime      = $overtime;
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
 
                     $attendanceEmployee->save();
 
@@ -408,6 +423,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->save();
 
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
@@ -423,6 +439,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
 
                     $attendanceEmployee->save();
 
@@ -477,6 +494,7 @@ class AttendanceEmployeeController extends Controller
 
                     $attendanceEmployee->work_hours      = $workhours;
                     $attendanceEmployee->coord_out       = $coord_out;
+                    $attendanceEmployee->picture_out     = $picture_path;
                     $attendanceEmployee->save();
 
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
@@ -522,6 +540,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->overtime      = $overtime;
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
 
                     $attendanceEmployee->save();
 
@@ -539,6 +558,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->save();
 
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
@@ -553,6 +573,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->overtime      = '00:00:00';
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
+                    $attendanceEmployee->picture_out   = $picture_path;
 
                     $attendanceEmployee->save();
 
@@ -580,6 +601,17 @@ class AttendanceEmployeeController extends Controller
     public function attendance(Request $request)
     {
         $settings = Utility::settings();
+
+        $picture_path = null;
+        $employee = Employee::where('user_id', Auth::user()->id)->first();
+        // process image file
+        if ($request->input('picture')) {
+            $base64ImageData = $request->input('picture');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
+            Storage::disk('public')->put('uploads/attendance/'.$pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/'. $pictureName;
+        }
 
         // Retrieve the latitude and longitude from the request
         $latitude   = $request->input('latitude');
@@ -678,6 +710,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->note                   = $note;
                     $employeeAttendance->is_valid               = $is_valid;
                     $employeeAttendance->attendance_type_id     = $attendance_type;
+                    $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
 
                     $employeeAttendance->save();
@@ -701,6 +734,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->note                   = $note;
                     $employeeAttendance->is_valid               = $is_valid;
                     $employeeAttendance->attendance_type_id     = $attendance_type;
+                    $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
 
                     $employeeAttendance->save();
@@ -727,6 +761,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->note                   = $note;
                 $employeeAttendance->is_valid               = $is_valid;
                 $employeeAttendance->attendance_type_id     = $attendance_type;
+                $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
 
                 $employeeAttendance->save();
@@ -748,6 +783,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->note                   = $note;
                 $employeeAttendance->is_valid               = $is_valid;
                 $employeeAttendance->attendance_type_id     = $attendance_type;
+                $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
 
                 $employeeAttendance->save();
