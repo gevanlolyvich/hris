@@ -42,12 +42,21 @@
     <script>
         $(document).ready(function() {
             var map = null;
+            var imageSrc = null
 
             $('.map-link').click(function() {
                 var coordinates = $(this).data('coordinates').split(', ');
 
-                $('#clockImage').attr('src', $(this).data('image'))
-                console.log($(this).data('image'));
+                imageSrc = $(this).data('image');
+                console.log(`image = ${imageSrc}`);
+                console.log(imageSrc.length);
+                if (imageSrc.length) {
+                    console.log('RENDERIIIIIIIIIING');
+                    $('#clockImage').attr('src', imageSrc)
+                    document.getElementById('photos').style.display = '';
+                } else {
+                    document.getElementById('photos').style.display = 'none';
+                }
             
                 // Convert the radius string to a number
                 var radius = parseFloat(coordinates[2]);
@@ -99,14 +108,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="clock-images mx-d-flex flex-column align-items-center">
+                <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
                     <div class="text-center mx-auto">
                         <strong>Clock In / Out Image Capture:</strong>
                         <br>
                         <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-2">
+                        <br>
                     </div>
                 </div>
-                <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%"></div>
+                <div class="text-center mx-auto">
+                    <strong>Clock In / Out Location</strong>
+                    <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%"></div>
+                </div>
             </div>
         </div>
     </div>
