@@ -747,12 +747,13 @@
                         document.getElementById('load').style.display = 'none';
                         document.getElementById('camera').style.display = 'block';
                         document.getElementById('output').style.display = 'block';
-                            
+
                         takepic.style.display = '';
                         video.srcObject = stream;
                         video.play();
                     })
                     .catch(function(err) {
+                        alert("Please Allow Camera Access To Take Picture For Clock In / Out");
                         console.log("An error occurred: " + err);
                     });
     

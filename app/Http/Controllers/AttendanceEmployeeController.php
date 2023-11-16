@@ -32,11 +32,17 @@ class AttendanceEmployeeController extends Controller
                 $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
 
                 $userId = \Auth::user()->employee->user_id;
-                $employees = Employee::where('managed_by', $userId)->orderby('name', 'asc')->pluck('id');
+                $subordinates = \Auth::user()->employee->subordinatesFlatten();
 
                 // Check if employee managing other employee or not
-                if ($employees->isNotEmpty()) {
-                    $employees[] = $emp;
+                if ($subordinates->isNotEmpty()) {
+                    $employees = collect();
+                    foreach ($subordinates as $subordinate) {
+                        $employees->push($subordinate->id);
+                    }
+
+                    $employees->push($emp);
+
                     $attendanceEmployee = AttendanceEmployee::whereIn('employee_id', $employees);
                 } else {
                     $attendanceEmployee = AttendanceEmployee::where('employee_id', $emp);
