@@ -352,4 +352,9 @@ class Employee extends Model
 
         return $result;
     }
+
+    public function shift_histories(): HasMany
+    {
+        return $this->hasMany(ShiftHistory::class);
+    }
 }

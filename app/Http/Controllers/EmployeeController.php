@@ -9,6 +9,7 @@ use App\Models\Document;
 use App\Models\Employee;
 use App\Models\EmployeeDocument;
 use App\Mail\UserCreate;
+use App\Models\ShiftHistory;
 use App\Models\User;
 use App\Models\Utility;
 use File;
@@ -25,6 +26,7 @@ use App\Models\Termination;
 use App\Models\ExperienceCertificate;
 use App\Models\JoiningLetter;
 use App\Models\ShiftType;
+use Illuminate\Support\Facades\Log;
 
 //use Faker\Provider\File;
 
@@ -150,6 +152,13 @@ class EmployeeController extends Controller
                 ]
             );
 
+            ShiftHistory::create(
+                [
+                    'shift_type_id' => $request['shift_type_id'],
+                    'employee_id' => $employee->id,
+                ]
+            );
+
             if ($request->hasFile('document')) {
                 foreach ($request->document as $key => $document) {
 
@@ -250,6 +259,16 @@ class EmployeeController extends Controller
             }
 
             $employee = Employee::findOrFail($id);
+
+            // create shift history when employee changing it's shift
+            if ($employee->shift_type_id !== (int)$request['shift_type_id']) {
+                ShiftHistory::create(
+                    [
+                        'shift_type_id' => $request['shift_type_id'],
+                        'employee_id' => $employee->id,
+                    ]
+                );
+            }
 
             if ($request->document) {
                 foreach ($request->document as $key => $document) {
