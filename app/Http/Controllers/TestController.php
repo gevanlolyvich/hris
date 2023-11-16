@@ -93,7 +93,7 @@ class TestController extends Controller
                 if ($cross_day && strtotime($parsed_data[$i]['max']) > $absolute_in  && empty($attendance)) {
                     $clock_in = $parsed_data[$i]['max'];
                 } elseif (strtotime($parsed_data[$i]['min']) > $absolute_in  && empty($attendance)) {
-                    $clock_in = $parsed_data[$i]['max'];
+                    $clock_in = $parsed_data[$i]['min'];
                 }
 
                 if ($yesterday_cross_day && strtotime($parsed_data[$i]['max']) < $yesterday_absolute_out) {
@@ -104,6 +104,12 @@ class TestController extends Controller
 
                 // * Calculating late
                 $late = '00:00:00';
+                if ($parsed_data[$i]['personel_id'] == 2) {
+                    Log::info($clock_in);
+                    Log::info(strtotime($clock_in) > strtotime($shift_times->start_time));
+                    Log::info(strtotime($clock_in));
+                    Log::info(strtotime($shift_times->start_time));
+                }
                 if (strtotime($clock_in) > strtotime($shift_times->start_time)) {
                     $totalLateSeconds = strtotime($clock_in) - strtotime($shift_times->start_time);
                     $late_hours = floor($totalLateSeconds / 3600);
@@ -178,8 +184,8 @@ class TestController extends Controller
                     $new_attendance->date                 = $date;
                     $new_attendance->attendance_status_id = $presentAttendance->id;
                     $new_attendance->status               = $presentAttendance->name;
-                    $new_attendance->clock_in             = $attendances[$i]['first_time'] . ':00';
-                    $new_attendance->clock_out            = $attendances[$i]['last_time'] . ':00';
+                    $new_attendance->clock_in             = $clock_in . ':00';
+                    $new_attendance->clock_out            = $clock_out . ':00';
                     $new_attendance->late                 = $shift_times->is_working ? $late : '00:00:00';
                     $new_attendance->work_hours           = $shift_times->is_working ? $workhours : '00:00:00';
                     $new_attendance->overtime             = $shift_times->is_working ? $overtime : '00:00:00';
