@@ -40,10 +40,10 @@
                                         <span>
                                             @can('Edit Branch')
                                                 <div class="action-btn bg-info ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center"
+                                                    <a href="#" class="mx-3 btn btn-sm align-items-center edit-branch"
                                                         data-url="{{ URL::to('branch/' . $branch->id . '/edit') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip" title=""
-                                                        data-title="{{ __('Edit Branch') }}" id="edit-branch"
+                                                        data-title="{{ __('Edit Branch') }}"
                                                         data-bs-original-title="{{ __('Edit') }}">
                                                         <i class="ti ti-pencil text-white"></i>
                                                     </a>
@@ -118,7 +118,7 @@
                 })
             })
 
-            $('#edit-branch').click(function () {
+            $('.edit-branch').click(function () {
                 $('#commonModal').on('shown.bs.modal', function () {
                     // If a map already exists, remove it
                     if (map !== null) {
@@ -127,7 +127,8 @@
     
                     let latitude = document.getElementById("latitude").value;
                     let longitude = document.getElementById("longitude").value;
-                    map = L.map('openStreetMapContainer').setView([latitude, longitude], 15);
+
+                    map = L.map('openStreetMapContainer').setView([latitude || '-6.17436', longitude || '106.82596'], 15);
     
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
@@ -150,16 +151,11 @@
             })
 
             // Remove map and layer when modal is closed
-            // $('#commonModal').on('hidden.bs.modal', function () {
-            //     if (map !== null) {
-            //         map.remove();
-            //         map = null;
-            //     }
-            
-            //     if (layer !== null) {
-            //         layer.clearLayers();
-            //     }
-            // });
+            $('#commonModal').on('hidden.bs.modal', function () {
+                if (layer !== null) {
+                    layer.clearLayers();
+                }
+            });
         });
     </script>
 @endpush
