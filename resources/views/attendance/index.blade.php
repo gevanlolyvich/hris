@@ -48,10 +48,7 @@
                 var coordinates = $(this).data('coordinates').split(', ');
 
                 imageSrc = $(this).data('image');
-                console.log(`image = ${imageSrc}`);
-                console.log(imageSrc.length);
                 if (imageSrc.length) {
-                    console.log('RENDERIIIIIIIIIING');
                     $('#clockImage').attr('src', imageSrc)
                     document.getElementById('photos').style.display = '';
                 } else {
