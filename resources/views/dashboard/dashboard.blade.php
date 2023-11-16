@@ -738,23 +738,17 @@
                 canvas = document.getElementById('canvas');
                 photo = document.getElementById('photo');
                 takepic = document.getElementById('takepic');
-                document.getElementById('load').style.display = 'none';
-                document.getElementById('camera').style.display = 'block';
-                // document.getElementById('camera').style.height = '0';
-                document.getElementById('output').style.display = 'block';
-                //document.getElementById('output').style['margin-top'] = '';
-    
-                takepic.style.display = '';
-                //takepic.style.position = 'relative';
-                // takepic.style.bottom = '50px';
-                // takepic.style['margin-left'] = 'auto';
-                // // takepic.style['margin-right'] = 'auto';
     
                 navigator.mediaDevices.getUserMedia({
                         video: true,
                         audio: false
                     })
                     .then(function(stream) {
+                        document.getElementById('load').style.display = 'none';
+                        document.getElementById('camera').style.display = 'block';
+                        document.getElementById('output').style.display = 'block';
+                            
+                        takepic.style.display = '';
                         video.srcObject = stream;
                         video.play();
                     })
