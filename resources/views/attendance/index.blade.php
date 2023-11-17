@@ -44,7 +44,8 @@
             var map = null;
             var imageSrc = null
 
-            $('.map-link').click(function() {
+            $('body').on('click', '.map-link', function() {
+                console.log('CLICKEEEDDDDD!!!');
                 var coordinates = $(this).data('coordinates').split(', ');
 
                 imageSrc = $(this).data('image');
@@ -101,21 +102,21 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Clock In / Out Location</h5>
+                <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Out Data')}}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding-top: 0.35rem">
                 <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
                     <div class="text-center mx-auto">
-                        <strong>Clock In / Out Image Capture:</strong>
+                        <strong>{{__('Clock In / Out Image Capture')}}</strong>
                         <br>
-                        <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-2">
+                        <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-2 mt-1">
                         <br>
                     </div>
                 </div>
                 <div class="text-center mx-auto">
-                    <strong>Clock In / Out Location</strong>
-                    <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%"></div>
+                    <strong>{{__('Clock In / Out Location')}}</strong>
+                    <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%" class="mt-1"></div>
                 </div>
             </div>
         </div>
