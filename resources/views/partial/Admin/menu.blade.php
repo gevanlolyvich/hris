@@ -257,6 +257,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                             <a class="dash-link"
                                                 href="{{ route('permit.index') }}">{{ __('Permit Attendance') }}</a>
                                         </li>
+                                        <li class="dash-item">
+                                            <a class="dash-link"
+                                                href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
+                                        </li>
                                     </ul>
                                 </li>
                             @endcan

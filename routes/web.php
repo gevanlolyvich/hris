@@ -83,6 +83,7 @@ use App\Http\Controllers\PermitController;
 use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\EmployeeAttendanceHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1412,3 +1413,7 @@ Route::any('/interview-schedule/get_interview-schedule_data', [InterviewSchedule
 Route::any('leave/get_leave_data', [LeaveController::class, 'get_leave_data'])->name('leave.get_leave_data')->middleware(['auth', 'XSS']);
 
 Route::any('/meeting/get_meeting_data', [MeetingController::class, 'get_meeting_data'])->name('meeting.get_meeting_data')->middleware(['auth', 'XSS']);
+
+Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController::class)
+    ->only(['index', 'show'])
+    ->middleware(['auth', 'XSS']);
