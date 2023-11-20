@@ -96,7 +96,7 @@ class EventController extends Controller
             $event->save();
 
             // slack 
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['event_notification']) && $setting['event_notification'] == 1) {
                 $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -104,7 +104,7 @@ class EventController extends Controller
             }
 
             //telegram
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['telegram_ticket_notification']) && $setting['telegram_ticket_notification'] == 1) {
                 $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -112,7 +112,7 @@ class EventController extends Controller
             }
 
             //twilio
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             $departments = Department::where('branch_id', $request->branch_id)->first();
             $employees = Employee::where('employee_id', $request->employee_id)->first();
@@ -128,7 +128,7 @@ class EventController extends Controller
 
             if (in_array('0', $request->employee_id)) {
                 $departmentEmployee = Employee::whereIn('department_id', $request->department_id)->get()->pluck('id');
-                $departmentEmployee = $departmentEmployee;
+                // $departmentEmployee = $departmentEmployee;
             } else {
                 $departmentEmployee = $request->employee_id;
             }
@@ -270,7 +270,18 @@ class EventController extends Controller
         }
         else
         {
-            $data =LocalEvent::get();
+            $data = null;
+            if ($request->get('user_type') === 'employee') {
+                $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                ->where('event_employees.employee_id', '=', $request->get('empId'))
+                ->orWhere(
+                    function ($q) {
+                        $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
+                    }
+                )->get();
+            } else {
+                $data = LocalEvent::get();
+            }
             
             foreach($data as $val)
             {

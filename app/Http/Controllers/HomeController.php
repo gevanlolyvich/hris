@@ -57,29 +57,29 @@ class HomeController extends Controller
                     }
                 )->get();
 
-                $events    = Event::select('events.*', 'events.id as event_id_pk', 'event_employees.*')
-                    ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                    ->where('event_employees.employee_id', '=', $emp->id)
-                    ->orWhere(
-                        function ($q) {
-                            $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
-                        }
-                    )->get();
+                // $events    = Event::select('events.*', 'events.id as event_id_pk', 'event_employees.*')
+                //     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                //     ->where('event_employees.employee_id', '=', $emp->id)
+                //     ->orWhere(
+                //         function ($q) {
+                //             $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
+                //         }
+                //     )->get();
 
-                $arrEvents = [];
-                foreach ($events as $event) {
+                // $arrEvents = [];
+                // foreach ($events as $event) {
 
-                    $arr['id']              = $event['id'];
-                    $arr['title']           = $event['title'];
-                    $arr['start']           = $event['start_date'];
-                    $arr['end']             = $event['end_date'];
-                    $arr['className']       = $event['color'];
-                    // $arr['borderColor']     = "#fff";
-                    $arr['url']             = route('eventsshow', (!empty($event['event_id_pk'])) ? $event['event_id_pk'] : '');
-                    // $arr['textColor']       = "white";
+                //     $arr['id']              = $event['id'];
+                //     $arr['title']           = $event['title'];
+                //     $arr['start']           = $event['start_date'];
+                //     $arr['end']             = $event['end_date'];
+                //     $arr['className']       = $event['color'];
+                //     // $arr['borderColor']     = "#fff";
+                //     $arr['url']             = route('eventsshow', (!empty($event['event_id_pk'])) ? $event['event_id_pk'] : '');
+                //     // $arr['textColor']       = "white";
 
-                    $arrEvents[] = $arr;
-                }
+                //     $arrEvents[] = $arr;
+                // }
 
                 $date               = date("Y-m-d");
                 $dateYesterday      = date("Y-m-d", strtotime('yesterday'));
@@ -130,26 +130,26 @@ class HomeController extends Controller
                 $yesterdayOfficeTime['absolute_out']      = strtotime("$date $yesterday_absolute_out_time");
 
                 // get all attendance type
-                $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');;
+                $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type'));
             } else {
-                $events    = Event::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $arrEvents = [];
+                // $events    = Event::where('created_by', '=', \Auth::user()->creatorId())->get();
+                // $arrEvents = [];
 
-                foreach ($events as $event) {
-                    $arr['id']    = $event['id'];
-                    $arr['title'] = $event['title'];
-                    $arr['start'] = $event['start_date'];
-                    $arr['end']   = $event['end_date'];
+                // foreach ($events as $event) {
+                //     $arr['id']    = $event['id'];
+                //     $arr['title'] = $event['title'];
+                //     $arr['start'] = $event['start_date'];
+                //     $arr['end']   = $event['end_date'];
 
-                    $arr['className'] = $event['color'];
-                    // $arr['borderColor']     = "#fff";
-                    // $arr['textColor']       = "white";
-                    $arr['url']             = route('event.edit', $event['id']);
+                //     $arr['className'] = $event['color'];
+                //     // $arr['borderColor']     = "#fff";
+                //     // $arr['textColor']       = "white";
+                //     $arr['url']             = route('event.edit', $event['id']);
 
-                    $arrEvents[] = $arr;
-                }
+                //     $arrEvents[] = $arr;
+                // }
 
 
 
@@ -183,7 +183,7 @@ class HomeController extends Controller
 
                 $meetings = Meeting::where('created_by', '=', \Auth::user()->creatorId())->limit(5)->get();
 
-                return view('dashboard.dashboard', compact('arrEvents', 'announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {

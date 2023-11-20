@@ -621,7 +621,8 @@
                 method: "POST",
                 data: {
                     "_token": "{{ csrf_token() }}",
-                    'calender_type': calender_type
+                    'calender_type': calender_type,
+                    'user_type': "{{ Auth::user()->type }}",
                 },
                 success: function(data) {
                     (function() {
@@ -677,7 +678,9 @@
                 method: "POST",
                 data: {
                     "_token": "{{ csrf_token() }}",
-                    'calender_type': calender_type
+                    'calender_type': calender_type,
+                    'user_type': "{{ Auth::user()->type }}",
+                    'empId': "{{ Auth::user()->employee->id }}",
                 },
                 success: function(data) {
                     (function() {
@@ -711,7 +714,6 @@
                     })();
                 }
             });
-
         }
     </script>
     @endif
@@ -784,7 +786,6 @@
     
                 clearphoto();
             }
-    
     
             function clearphoto() {
                 var context = canvas.getContext('2d');
