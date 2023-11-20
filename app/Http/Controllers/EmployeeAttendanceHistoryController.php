@@ -51,7 +51,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
                     $employees = Employee::whereIn('id', $employees);
                 } else {
-                    $employees = Employee::where('employee_id', $emp);
+                    $employees = Employee::where('id', $emp);
                 }
 
                 $employees = $employees->orderby('name', 'asc')->get();
