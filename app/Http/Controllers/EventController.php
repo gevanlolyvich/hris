@@ -19,7 +19,7 @@ class EventController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Event')) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
             $events    = LocalEvent::where('created_by', '=', \Auth::user()->creatorId())->get();
             $today_date = date('m');
             $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')->whereNotNull(['start_date','end_date'])->whereMonth('start_date',$today_date)->whereMonth('end_date',$today_date)->get();
@@ -50,7 +50,7 @@ class EventController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Event')) {
-            $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
             $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
 
@@ -96,7 +96,7 @@ class EventController extends Controller
             $event->save();
 
             // slack 
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['event_notification']) && $setting['event_notification'] == 1) {
                 $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -104,7 +104,7 @@ class EventController extends Controller
             }
 
             //telegram
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['telegram_ticket_notification']) && $setting['telegram_ticket_notification'] == 1) {
                 $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -112,13 +112,13 @@ class EventController extends Controller
             }
 
             //twilio
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             $departments = Department::where('branch_id', $request->branch_id)->first();
             $employees = Employee::where('employee_id', $request->employee_id)->first();
 
             if (isset($setting['twilio_event_notification']) && $setting['twilio_event_notification'] == 1) {
-                $employeess = Employee::where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->get();
+                $employeess = Employee::where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->orderby('name', 'asc')->get();
                 foreach ($employeess as $key => $employee) {
                     $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
 
@@ -128,7 +128,7 @@ class EventController extends Controller
 
             if (in_array('0', $request->employee_id)) {
                 $departmentEmployee = Employee::whereIn('department_id', $request->department_id)->get()->pluck('id');
-                $departmentEmployee = $departmentEmployee;
+                // $departmentEmployee = $departmentEmployee;
             } else {
                 $departmentEmployee = $request->employee_id;
             }
@@ -168,7 +168,7 @@ class EventController extends Controller
         // if (\Auth::user()->can('Edit Event')) {
             $event = LocalEvent::find($event);
             if ($event->created_by == Auth::user()->creatorId()) {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
                 return view('event.edit', compact('event', 'employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
@@ -243,9 +243,9 @@ class EventController extends Controller
     public function getemployee(Request $request)
     {
         if (in_array('0', $request->department_id)) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         } else {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($employees);
@@ -253,7 +253,7 @@ class EventController extends Controller
 
     public function showData($id)
     {   
-        $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
         $event = LocalEvent::find($id);
             
           return view('event.edit', compact('event', 'employees'));
@@ -270,7 +270,18 @@ class EventController extends Controller
         }
         else
         {
-            $data =LocalEvent::get();
+            $data = null;
+            if ($request->get('user_type') === 'employee') {
+                $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                ->where('event_employees.employee_id', '=', $request->get('empId'))
+                ->orWhere(
+                    function ($q) {
+                        $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
+                    }
+                )->get();
+            } else {
+                $data = LocalEvent::get();
+            }
             
             foreach($data as $val)
             {

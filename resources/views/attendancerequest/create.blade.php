@@ -45,7 +45,7 @@
                 {{ Form::label('document', __('Document'), ['class' => 'col-form-label']) }}
                 <div class="choose-files ">
                     <label for="document">
-                        <div class=" bg-primary document "> <i
+                        <div class="bg-primary document"> <i
                                 class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                         </div>
                         <input style="margin-top: -50px" type="file" class="form-control file" name="document"  onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">

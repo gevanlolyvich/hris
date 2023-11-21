@@ -95,11 +95,10 @@
                                                 @if ($permit->status == 'Pending')
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center"
-                                                                data-size="lg"
-                                                                data-url="{{ URL::to('leave/' . $permit->id . '/edit') }}"
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                                data-url="{{ URL::to('permit/' . $permit->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                title="" data-title="{{ __('Edit Leave') }}"
+                                                                title="" data-title="{{ __('Edit Attendance Permit') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
@@ -108,7 +107,7 @@
                                                 @elseif ($permit->status == 'Reject')
                                                     @can('Delete Leave')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
+                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['permit.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                                 aria-label="Delete"><i
@@ -119,7 +118,7 @@
                                                 @endif
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $permit->id . '/action') }}"
+                                                        data-url="{{ URL::to('permit/' . $permit->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Leave Action') }}"
                                                         data-bs-original-title="{{ __('Manage Leave') }}">
@@ -129,7 +128,7 @@
                                             @else
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $permit->id . '/action') }}"
+                                                        data-url="{{ URL::to('permit/' . $permit->id . '/action') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Leave Action') }}"
                                                         data-bs-original-title="{{ __('Manage Leave') }}">
@@ -150,7 +149,7 @@
 
                                                 @can('Delete Leave')
                                                 <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['permit.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                         aria-label="Delete"><i

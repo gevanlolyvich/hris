@@ -44,6 +44,9 @@ class BranchController extends Controller
             $validator = \Validator::make(
                 $request->all(), [
                                    'name' => 'required',
+                                   'tolerance' => 'required',
+                                   'latitude' => 'required',
+                                   'longitude' => 'required',
                                ]
             );
             if($validator->fails())
@@ -55,6 +58,9 @@ class BranchController extends Controller
 
             $branch             = new Branch();
             $branch->name       = $request->name;
+            $branch->tolerance  = $request->tolerance;
+            $branch->latitude   = $request->latitude;
+            $branch->longitude  = $request->longitude;
             $branch->created_by = \Auth::user()->creatorId();
             $branch->save();
 
@@ -100,6 +106,9 @@ class BranchController extends Controller
                 $validator = \Validator::make(
                     $request->all(), [
                                        'name' => 'required',
+                                       'tolerance' => 'required',
+                                       'latitude' => 'required',
+                                       'longitude' => 'required',
                                    ]
                 );
                 if($validator->fails())
@@ -110,6 +119,9 @@ class BranchController extends Controller
                 }
 
                 $branch->name = $request->name;
+                $branch->tolerance  = $request->tolerance;
+                $branch->latitude   = $request->latitude;
+                $branch->longitude  = $request->longitude;
                 $branch->save();
 
                 return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));
@@ -175,11 +187,11 @@ class BranchController extends Controller
     {
         if(in_array('0', $request->department_id))
         {
-            $employees = Employee::get()->pluck('name', 'id')->toArray();
+            $employees = Employee::orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::whereIn('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::whereIn('department_id', $request->department_id)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($employees);

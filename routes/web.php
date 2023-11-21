@@ -83,6 +83,7 @@ use App\Http\Controllers\PermitController;
 use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\EmployeeAttendanceHistoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -727,6 +728,19 @@ Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.
         'XSS',
     ]
 );
+Route::get('permit/{id}/action', [PermitController::class, 'action'])->name('permit.action')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('permit/changeaction', [PermitController::class, 'changeaction'])->name('permit.changeaction')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 Route::get('calender/leave', [LeaveController::class, 'calender'])->name('leave.calender')->middleware(
     [
@@ -773,6 +787,15 @@ Route::post('attendanceemployee/attendance', [AttendanceEmployeeController::clas
         'XSS',
     ]
 );
+
+// routes/web.php
+Route::patch('attendanceemployee/validate/{id}', [AttendanceEmployeeController::class, 'validateAttendance'])->name('attendanceemployee.validateAttendance')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 
 Route::resource('attendanceemployee', AttendanceEmployeeController::class)->middleware(
     [
@@ -1390,3 +1413,7 @@ Route::any('/interview-schedule/get_interview-schedule_data', [InterviewSchedule
 Route::any('leave/get_leave_data', [LeaveController::class, 'get_leave_data'])->name('leave.get_leave_data')->middleware(['auth', 'XSS']);
 
 Route::any('/meeting/get_meeting_data', [MeetingController::class, 'get_meeting_data'])->name('meeting.get_meeting_data')->middleware(['auth', 'XSS']);
+
+Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController::class)
+    ->only(['index', 'show'])
+    ->middleware(['auth', 'XSS']);

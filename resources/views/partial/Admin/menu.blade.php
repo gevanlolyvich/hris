@@ -257,6 +257,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                             <a class="dash-link"
                                                 href="{{ route('permit.index') }}">{{ __('Permit Attendance') }}</a>
                                         </li>
+                                        <li class="dash-item">
+                                            <a class="dash-link"
+                                                href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
+                                        </li>
                                     </ul>
                                 </li>
                             @endcan
@@ -693,18 +697,17 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     Gate::check('Manage Deduction Options') ||
                     Gate::check('Manage Expense Type') ||
                     Gate::check('Manage Income Type') ||
-                    Gate::check('Manage
-                                             Payment Type') ||
+                    Gate::check('Manage Payment Type') ||
                     Gate::check('Manage Leave Type') ||
                     Gate::check('Manage Training Type') ||
                     Gate::check('Manage Job Category') ||
                     Gate::check('Manage Job Stage'))
                     <li class="dash-item dash-hasmenu">
-                        <a href="{{route('branch.index')}}" class="dash-link"><span class="dash-micon"><i
+                        <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-table"></i></span><span
-                                class="dash-mtext">{{ __('HRM System Setup') }}</span></a>
-                        </li>
-                        <!-- <ul class="dash-submenu">
+                                class="dash-mtext">{{ __('HRM System Setup') }}</span><span class="dash-arrow"><i
+                                    data-feather="chevron-right"></i></span></a>
+                        <ul class="dash-submenu">
                             @can('Manage Branch')
                                 <li class="dash-item {{ request()->is('branch*') ? 'active' : '' }}">
                                     <a class="dash-link"
@@ -723,6 +726,16 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('designation.index') }}">{{ __('Designation') }}</a>
                                 </li>
                             @endcan
+                            @can('Manage Leave Type')
+                                <li class="dash-item {{ request()->is('leavetype*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('leavetype.index') }}">{{ __('Leave Type') }}</a>
+                                </li>
+                            @endcan
+                            <li class="dash-item {{ request()->is('permittype*') ? 'active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('permittype.index') }}">{{ __('Permit Type') }}</a>
+                            </li>
                             @can('Manage Document Type')
                                 <li class="dash-item {{ request()->is('document*') ? 'active' : '' }}">
                                     <a class="dash-link"
@@ -787,12 +800,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('paymenttype.index') }}">{{ __('Payment Type') }}</a>
                                 </li>
                             @endcan
-                            @can('Manage Leave Type')
-                                <li class="dash-item {{ request()->is('leavetype*') ? 'active' : '' }}">
-                                    <a class="dash-link"
-                                        href="{{ route('leavetype.index') }}">{{ __('Leave Type') }}</a>
-                                </li>
-                            @endcan
                             @can('Manage Termination Type')
                                 <li
                                     class="dash-item {{ request()->is('terminationtype*') ? 'active' : '' }}">
@@ -833,13 +840,17 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
                             @can('Manage Competencies')
                                 <li class="dash-item {{ request()->is('competencies*') ? 'active' : '' }}">
-
                                     <a class="dash-link"
                                         href="{{ route('competencies.index') }}">{{ __('Competencies') }}</a>
                                 </li>
                             @endcan
+
+                            <li class="dash-item {{ request()->is('contract_type*') ? 'active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('contract_type.index') }}">{{ __('Contract Type') }}</a>
+                            </li>
                         </ul>
-                    </li> -->
+                    </li>
                 @endif
                 <!--constant-->
 

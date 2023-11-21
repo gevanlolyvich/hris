@@ -9,6 +9,7 @@ use App\Models\Document;
 use App\Models\Employee;
 use App\Models\EmployeeDocument;
 use App\Mail\UserCreate;
+use App\Models\ShiftHistory;
 use App\Models\User;
 use App\Models\Utility;
 use File;
@@ -25,6 +26,7 @@ use App\Models\Termination;
 use App\Models\ExperienceCertificate;
 use App\Models\JoiningLetter;
 use App\Models\ShiftType;
+use Illuminate\Support\Facades\Log;
 
 //use Faker\Provider\File;
 
@@ -40,9 +42,9 @@ class EmployeeController extends Controller
 
         if (\Auth::user()->can('Manage Employee')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->get();
+                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get();
             } else {
-                $employees = Employee::where('created_by', \Auth::user()->creatorId())->get();
+                $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
             }
 
             return view('employee.index', compact('employees'));
@@ -59,7 +61,7 @@ class EmployeeController extends Controller
             $branches         = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $departments      = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees        = User::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');;
+            $employees        = Employee::get()->pluck('name', 'id');
             $shift_types      = ShiftType::get()->pluck('name', 'id');
 
             // $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
@@ -150,6 +152,13 @@ class EmployeeController extends Controller
                 ]
             );
 
+            ShiftHistory::create(
+                [
+                    'shift_type_id' => $request['shift_type_id'],
+                    'employee_id' => $employee->id,
+                ]
+            );
+
             if ($request->hasFile('document')) {
                 foreach ($request->document as $key => $document) {
 
@@ -218,8 +227,8 @@ class EmployeeController extends Controller
             $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
-            $employees        = User::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');;
             $employeesId  = ($employee->employee_id);
+            $employees    = Employee::get()->pluck('name', 'id');
             $shift_types  = ShiftType::get()->pluck('name', 'id');
 
             // return $employee;
@@ -250,6 +259,16 @@ class EmployeeController extends Controller
             }
 
             $employee = Employee::findOrFail($id);
+
+            // create shift history when employee changing it's shift
+            if ($employee->shift_type_id !== (int)$request['shift_type_id']) {
+                ShiftHistory::create(
+                    [
+                        'shift_type_id' => $request['shift_type_id'],
+                        'employee_id' => $employee->id,
+                    ]
+                );
+            }
 
             if ($request->document) {
                 foreach ($request->document as $key => $document) {
@@ -386,7 +405,7 @@ class EmployeeController extends Controller
             if (!empty($request->designation)) {
                 $employees->where('designation_id', $request->designation);
             }
-            $employees = $employees->get();
+            $employees = $employees->orderby('name', 'asc')->get();
 
             $brances = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $brances->prepend('All', '');
@@ -437,7 +456,7 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('branch_id', $request->branch)->get()->pluck('name', 'id')->toArray();
+        $employees = Employee::where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($employees);
     }

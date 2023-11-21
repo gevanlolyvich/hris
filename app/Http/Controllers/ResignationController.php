@@ -38,7 +38,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Create Resignation'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('resignation.create', compact('employees'));
         }
@@ -129,7 +129,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Edit Resignation'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             if($resignation->created_by == \Auth::user()->creatorId())
             {
 

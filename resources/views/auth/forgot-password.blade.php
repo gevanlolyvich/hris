@@ -48,7 +48,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
                     <div class="">
                         <div class="form-group mb-3">
                             <label for="email" class="form-label">{{ __('Email') }}</label>
-                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}"  placeholder="Enter Yore Email" autocomplete="email" autofocus>
+                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}"  placeholder="Enter Your Email" autocomplete="email" autofocus>
                             {{-- @error('email')
                             <span class="error invalid-email text-danger" role="alert">
                                 <small>{{ $message }}</small>

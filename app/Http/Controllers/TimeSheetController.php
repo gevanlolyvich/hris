@@ -24,7 +24,7 @@ class TimeSheetController extends Controller
             }
             else
             {
-                $employeesList = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'user_id');
+                $employeesList = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
                 $employeesList->prepend('All', '');
 
                 $timesheets = TimeSheet::where('created_by', \Auth::user()->creatorId());
@@ -55,7 +55,7 @@ class TimeSheetController extends Controller
 
         if(\Auth::user()->can('Create TimeSheet'))
         {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'user_id');
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
 
             return view('timeSheet.create', compact('employees'));
         }
@@ -111,7 +111,7 @@ class TimeSheetController extends Controller
 
         if(\Auth::user()->can('Edit TimeSheet'))
         {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'user_id');
+            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
             $timeSheet = Timesheet::find($id);
 
             return view('timeSheet.edit', compact('timeSheet', 'employees'));

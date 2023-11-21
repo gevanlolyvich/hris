@@ -105,7 +105,7 @@
         </div> --}}
         <div class="form-group col-md-12 letter d-none">
             {{ Form::label('cover_letter', __('Cover Letter'), ['class' => 'form-label']) }}
-            {{ Form::textarea('cover_letter', null, ['class' => 'form-control' ,'placeholder'=>'enter yore cover letter']) }}
+            {{ Form::textarea('cover_letter', null, ['class' => 'form-control' ,'placeholder'=>'enter your cover letter']) }}
         </div>
         @foreach ($questions as $question)
             <div class="form-group col-md-12  question question_{{ $question->id }} d-none">

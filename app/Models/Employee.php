@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use SebastianBergmann\CodeCoverage\Percentage;
 
 class Employee extends Model
@@ -286,7 +288,6 @@ class Employee extends Model
         }
     }
 
-
     public static function login_user($name)
     {
         $user = User::where('id', $name)->first();
@@ -303,5 +304,57 @@ class Employee extends Model
         } else {
             return $employee->salary;
         }
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'managed_by', 'id');
+    }
+
+    public function recursiveManager(): BelongsTo
+    {
+        return $this->manager()->with('recursiveManager');
+    }
+
+    public function managersFlatten()
+    {
+        $result = collect();
+        $item = $this->recursiveManager;
+        if ($item instanceof Employee){
+            $result->push($item);
+            $result = $result->merge($item->managersFlatten());
+        }
+
+        return $result;
+    }
+
+    public function subordinate(): HasMany
+    {
+        return $this->hasMany(self::class, 'managed_by');
+    }
+
+    public function subordinateRecursive(): HasMany
+    {
+        return $this->subordinate()->with('subordinateRecursive');
+    }
+
+    public function subordinatesFlatten()
+    {
+        $result = collect();
+        $subordinates = $this->subordinateRecursive;
+
+        foreach ($subordinates as $subordinate) {
+            if ($subordinate instanceof Employee) {
+                $result->push($subordinate);
+                $result = $result->merge($subordinate->subordinatesFlatten());
+            }
+        }
+
+        return $result;
+    }
+
+    public function shift_histories(): HasMany
+    {
+        return $this->hasMany(ShiftHistory::class);
     }
 }
