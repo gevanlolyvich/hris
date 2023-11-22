@@ -120,7 +120,7 @@
                         </thead>
                         <tbody>
                             @foreach ($events as $event)
-                                @if (str_contains($event->employee_id, \Auth::user()->employee->id) || \Auth::user()->type != 'employee')
+                                @if (str_contains($event->employee_id, \Auth::user()?->employee?->id) || \Auth::user()->type != 'employee')
                                     <tr>
                                         <td>{{ $event->title }}</td>
                                         <td>{{ $event->location ?? '-' }}</td>
