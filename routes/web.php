@@ -1417,3 +1417,5 @@ Route::any('/meeting/get_meeting_data', [MeetingController::class, 'get_meeting_
 Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController::class)
     ->only(['index', 'show'])
     ->middleware(['auth', 'XSS']);
+
+Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->middleware(['auth', 'XSS']);

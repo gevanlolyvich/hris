@@ -13,6 +13,7 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
@@ -22,7 +23,15 @@ class EventController extends Controller
             $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
             $events    = LocalEvent::where('created_by', '=', \Auth::user()->creatorId())->get();
             $today_date = date('m');
-            $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')->whereNotNull(['start_date','end_date'])->whereMonth('start_date',$today_date)->whereMonth('end_date',$today_date)->get();
+            $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                ->whereNotNull(['start_date','end_date'])
+                ->Where(
+                    function ($q) use ($today_date) {
+                        Log::info($today_date);
+                        $q->whereMonth('start_date',$today_date)
+                          ->orWhereMonth('end_date',$today_date);
+                    }
+                )->get();
             $arrEvents = [];
             foreach ($events as $event) {
                 $arr['id']    = $event['id'];
@@ -62,7 +71,6 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-
         if (\Auth::user()->can('Create Event')) {
 
             $validator = \Validator::make(
@@ -75,6 +83,7 @@ class EventController extends Controller
                     'start_date' => 'required',
                     'end_date' => 'required',
                     'color' => 'required',
+                    'location' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -83,16 +92,29 @@ class EventController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $event                = new LocalEvent();
-            $event->branch_id     = $request->branch_id;
-            $event->department_id = json_encode($request->department_id);
-            $event->employee_id   = json_encode($request->employee_id);
-            $event->title         = $request->title;
-            $event->start_date    = $request->start_date;
-            $event->end_date      = $request->end_date;
-            $event->color         = $request->color;
-            $event->description   = $request->description;
-            $event->created_by    = \Auth::user()->creatorId();
+            $document_path = null;
+            if ($request->file('myDocument')) {
+                Log::info('Document detected');
+                $docs = $request->file('myDocument');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/events', $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
+                Log::info($document_path);
+            }
+
+            $event                 = new LocalEvent();
+            $event->branch_id      = $request->branch_id;
+            $event->department_id  = json_encode($request->department_id);
+            $event->employee_id    = json_encode($request->employee_id);
+            $event->title          = $request->title;
+            $event->start_date     = $request->start_date;
+            $event->end_date       = $request->end_date;
+            $event->color          = $request->color;
+            $event->description    = $request->description;
+            $event->document       = $document_path;
+            $event->created_by     = \Auth::user()->creatorId();
+            $event->location       = $request->location;
+            $event->location_coord = "$request->latitude, $request->longitude";
             $event->save();
 
             // slack 
@@ -157,19 +179,25 @@ class EventController extends Controller
         }
     }
 
-    public function show(LocalEvent $event)
+    public function show($event)
     {
-        return redirect()->route('event.index');
+        $event = LocalEvent::find($event);
+        $event_employees = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');
+        $employees = Employee::whereIn('id', $event_employees)->get();
+        return view('event.show', compact('event', 'employees'));
     }
 
     public function edit($event)
     {
-
         // if (\Auth::user()->can('Edit Event')) {
-            $event = LocalEvent::find($event);
-            if ($event->created_by == Auth::user()->creatorId()) {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-                return view('event.edit', compact('event', 'employees'));
+            $event                        = LocalEvent::find($event);
+            $created_by                   = \Auth::user()->creatorId();
+            $employees                    = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch                       = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $departments                  = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
+            list($latitude, $longitude)  = explode(', ', $event->location_coord ?? "0, 0");
+            if ($event->created_by == $created_by) {
+                return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -189,6 +217,7 @@ class EventController extends Controller
                         'start_date' => 'required',
                         'end_date' => 'required',
                         'color' => 'required',
+                        'location' => 'required',
                     ]
                 );
                 if ($validator->fails()) {
@@ -197,11 +226,22 @@ class EventController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $event->title       = $request->title;
-                $event->start_date  = $request->start_date;
-                $event->end_date    = $request->end_date;
-                $event->color       = $request->color;
-                $event->description = $request->description;
+                $document_path = null;
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/events', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
+                $event->title          = $request->title;
+                $event->start_date     = $request->start_date;
+                $event->end_date       = $request->end_date;
+                $event->color          = $request->color;
+                $event->description    = $request->description;
+                $event->document       = $document_path ? $document_path : $event->document;
+                $event->location       = $request->location;
+                $event->location_coord = "$request->latitude, $request->longitude";
                 $event->save();
 
                 return redirect()->back()->with('success', __('Event successfully updated.'));
@@ -282,24 +322,24 @@ class EventController extends Controller
             } else {
                 $data = LocalEvent::get();
             }
-            
+
             foreach($data as $val)
             {
                 $end_date=date_create($val->end_date);
                 date_add($end_date,date_interval_create_from_date_string("1 days"));
                 $arrayJson[] = [
-                    "id"=> $val->id,
+                    "id"=> $val->event_id ?? $val->id,
                     "title" => $val->title,
                     "start" => $val->start_date,
                     "end" => date_format($end_date,"Y-m-d H:i:s"),
                     "className" => $val->color,
                     "allDay" => true,
-                    "url"=> route('event.edit', $val['id']),
+                    "url"=> route('event.edit', $val['event_id'] ?? $val['id']),
 
                 ];
             }
         }
-        
+
         return $arrayJson;
     }
 
