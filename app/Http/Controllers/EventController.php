@@ -334,7 +334,7 @@ class EventController extends Controller
                     "end" => date_format($end_date,"Y-m-d H:i:s"),
                     "className" => $val->color,
                     "allDay" => true,
-                    "url"=> route('event.edit', $val['event_id'] ?? $val['id']),
+                    "url"=> route('event.show', $val['event_id'] ?? $val['id']),
 
                 ];
             }

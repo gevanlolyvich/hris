@@ -269,44 +269,44 @@ if (!empty($mode_setting['theme_color'])) {
     </script>
 
     <script>
-        $(document).on('click', '.local_calender .fc-daygrid-event', function(e) {
-            // if (!$(this).hasClass('project')) {
-            e.preventDefault();
-            var event = $(this);
-            var title = $(this).find('.fc-event-title').html();
-            console.log(title);
-            var size = 'md';
-            var url = $(this).attr('href');
-            $("#commonModal .modal-title ").html(title);
-            $("#commonModal .modal-dialog").addClass('modal-' + size);
-            $.ajax({
-                url: url,
-                success: function(data) {
-                    $('#commonModal .body').html(data);
-                    $("#commonModal").modal('show');
-                    if ($(".d_week").length > 0) {
-                        $($(".d_week")).each(function(index, element) {
-                            var id = $(element).attr('id');
+        // $(document).on('click', '.local_calender .fc-daygrid-event', function(e) {
+        //     // if (!$(this).hasClass('project')) {
+        //     e.preventDefault();
+        //     var event = $(this);
+        //     var title = $(this).find('.fc-event-title').html();
+        //     console.log(title);
+        //     var size = 'md';
+        //     var url = $(this).attr('href');
+        //     $("#commonModal .modal-title ").html(title);
+        //     $("#commonModal .modal-dialog").addClass('modal-' + size);
+        //     $.ajax({
+        //         url: url,
+        //         success: function(data) {
+        //             $('#commonModal .body').html(data);
+        //             $("#commonModal").modal('show');
+        //             if ($(".d_week").length > 0) {
+        //                 $($(".d_week")).each(function(index, element) {
+        //                     var id = $(element).attr('id');
 
-                            (function() {
-                                const d_week = new Datepicker(document.querySelector('#' +
-                                    id), {
-                                    buttonClass: 'btn',
-                                    format: 'yyyy-mm-dd',
-                                });
-                            })();
+        //                     (function() {
+        //                         const d_week = new Datepicker(document.querySelector('#' +
+        //                             id), {
+        //                             buttonClass: 'btn',
+        //                             format: 'yyyy-mm-dd',
+        //                         });
+        //                     })();
 
-                        });
-                    }
+        //                 });
+        //             }
 
-                },
-                error: function(data) {
-                    data = data.responseJSON;
-                    toastrs('Error', data.error, 'error')
-                }
-            });
-            // }
-        });
+        //         },
+        //         error: function(data) {
+        //             data = data.responseJSON;
+        //             toastrs('Error', data.error, 'error')
+        //         }
+        //     });
+        //     // }
+        // });
     </script>
 
     <script src="https://js.pusher.com/5.0/pusher.min.js"></script>

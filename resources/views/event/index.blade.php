@@ -67,14 +67,12 @@
                                             <div class="px-3">
                                                 <div class="row align-items-center">
                                                     <div class="col ml-n2">
-                                                        <h5 class="text-sm mb-0 fc-event-title-container">
-                                                            <a href="#" data-size="lg"
-                                                                data-url="{{ route('event.edit', $event->id) }}"
-                                                                data-ajax-popup="true" data-title="{{ __('Edit Event') }}"
-                                                                class="fc-event-title text-primary">
+                                                        <h5 class="text-sm mb-0">
+                                                            <a href="{{ route('event.show', $event->id)}}">
                                                                 {{ $event->title }}
                                                             </a>
-                                                        </h5><br>
+                                                        </h5>
+                                                        <br>
                                                         <p class="card-text small text-dark mt-0">
                                                             {{ __('Start Date : ') }}
                                                             {{ \Auth::user()->dateFormat($event->start_date) }}<br>
@@ -88,7 +86,6 @@
                                     @endforeach
                                 @else
                                     <div class="text-center">
-
                                     </div>
                                 @endif
                             </div>
@@ -254,6 +251,7 @@
                             handleWindowResize: true,
                             events: data,
                         });
+                        console.log(data);
                         calendar.render();
                     })();
                 }
