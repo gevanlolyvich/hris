@@ -182,9 +182,8 @@ class EventController extends Controller
     public function show($event)
     {
         $event = LocalEvent::find($event);
-        $event_employees = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');
-        $employees = Employee::whereIn('id', $event_employees)->get();
-        return view('event.show', compact('event', 'employees'));
+        $event_employees = EventEmployee::where('event_id', $event->id)->get();
+        return view('event.show', compact('event', 'event_employees'));
     }
 
     public function edit($event)
@@ -311,15 +310,16 @@ class EventController extends Controller
         else
         {
             $data = null;
-            if ($request->get('user_type') === 'employee') {
+            if ($request->get('user_type') === 'employee' || \Auth::user()->type == 'employee') {
                 $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                ->where('event_employees.employee_id', '=', $request->get('empId'))
+                ->where('event_employees.employee_id', $request->get('empId') ?? \Auth::user()->employee->id)
                 ->orWhere(
                     function ($q) {
                         $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
                     }
                 )->get();
             } else {
+                Log::info('All');
                 $data = LocalEvent::get();
             }
 

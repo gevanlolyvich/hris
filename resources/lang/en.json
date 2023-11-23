@@ -1652,5 +1652,7 @@
     "Work Hours": "Work Hours",
     "All Events": "All Assignments",
     "Event Location": "Assignment Location",
-    "Enter Event Location": "Enter Assignment Location"
+    "Enter Event Location": "Enter Assignment Location",
+    "Report Document": "Report Document",
+    "Clock In / Clock Out": "Clock In / Clock Out"
 }

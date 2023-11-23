@@ -71,6 +71,7 @@ use App\Http\Controllers\ZoomMeetingController;
 use App\Http\Controllers\ContractTypeController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventEmployeeController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\SaturationDeductionController;
 use App\Http\Controllers\LoanController;
@@ -481,7 +482,6 @@ Route::resource('event', EventController::class)->middleware(
         'XSS',
     ]
 );
-
 
 
 Route::get('import/event/file', [EventController::class, 'importFile'])->name('event.file.import');
@@ -1419,3 +1419,5 @@ Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController
     ->middleware(['auth', 'XSS']);
 
 Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->middleware(['auth', 'XSS']);
+
+Route::post('eventemployee', [EventEmployeeController::class, 'report'])->name('eventemployee.report')->middleware(['auth', 'XSS']);
