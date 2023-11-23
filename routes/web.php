@@ -1421,3 +1421,4 @@ Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController
 Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->middleware(['auth', 'XSS']);
 
 Route::post('eventemployee', [EventEmployeeController::class, 'report'])->name('eventemployee.report')->middleware(['auth', 'XSS']);
+Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attendance'])->name('eventemployee.attendance')->middleware(['auth', 'XSS']);

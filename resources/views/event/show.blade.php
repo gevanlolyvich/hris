@@ -22,6 +22,16 @@
             border-bottom-right-radius: 10px;
             border-bottom-left-radius: 10px;
         }
+
+        .custBtn{
+            position: absolute;
+            top: 83%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            border: none;
+            cursor: pointer;
+        }
     </style>
 @endpush
 
@@ -55,51 +65,93 @@
     </script>
 
     <script>
+        async function getLocation() {
+          return new Promise((resolve, reject) => {
+            if ("geolocation" in navigator) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const latitude = position.coords.latitude;
+                  const longitude = position.coords.longitude;
+                  const accuracy = position.coords.accuracy;
+                  resolve({ latitude, longitude, accuracy });
+                },
+                (error) => {
+                  if (error.code === 1) {
+                    alert("User denied Geolocation");
+                    reject(new Error("User denied Geolocation"));
+                  } else {
+                    reject(error);
+                  }
+                }
+              );
+            } else {
+              reject(new Error("Geolocation is not supported by your browser."));
+            }
+          });
+        }
+
         $(document).ready(function() {
             var map = null;
             var imageSrc = null
 
-            $('body').on('click', '.clock-input', function() {
-                // var coordinates = $(this).data('coordinates').split(', ');
+            $('body').on('click', '.clock-input', async function() {
+                try {
+                    let eventPId = $(this).data('event-employee-id');
+                    document.getElementById('eventemployeeidAttendance').value = eventPId;
+                    document.getElementById('eventemployeeidAttendanceOut').value = eventPId;
 
-                // imageSrc = $(this).data('image');
-                // if (imageSrc.length) {
-                //     $('#clockImage').attr('src', imageSrc)
-                //     document.getElementById('photos').style.display = '';
-                // } else {
-                //     document.getElementById('photos').style.display = 'none';
-                // }
-            
-                // // Convert the radius string to a number
-                // var radius = parseFloat(coordinates[2]);
+                    const { latitude, longitude, accuracy } = await getLocation();
 
+                    const latElement = document.getElementById("latitude");
+                    const longElement = document.getElementById("longitude");
+                    const accElement = document.getElementById("accuracy");
+
+                    const latOutElement = document.getElementById("latitude_out");
+                    const longOutElement = document.getElementById("longitude_out");
+                    const accOutElement = document.getElementById("accuracy_out");
+
+                    if (latElement) {
+                        latElement.value = latitude;
+                    }
+                    if (longElement) {
+                        longElement.value = longitude
+                    }
+                    if (accElement) {
+                        accElement.value = accuracy;
+                    }
+
+                    if (latOutElement) {
+                        latOutElement.value = latitude;
+                    }
+                    if (longOutElement) {
+                        longOutElement.value = longitude
+                    }
+                    if (accOutElement) {
+                        accOutElement.value = accuracy;
+                    }
+                    
+                    let clock_in = $(this).data('clock-in');
+                    if (!clock_in){
+                        document.getElementById("clock_in").disabled = false;
+                        document.getElementById("clock_out").disabled = true;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    if (error.message === "User denied Geolocation") {
+                      // Handle the case where the user denied geolocation access
+                      const clockInButton = document.getElementById("clock_in");
+                      const clockOutButton = document.getElementById("clock_out");
+                      if (clockInButton) {
+                        clockInButton.disabled = true;
+                      }
+                      if (clockOutButton) {
+                        clockOutButton.disabled = true;
+                      }
+                    }
+                }
             
                 // Open the modal
                 $('#clockInOutInputModal').modal('show');
-            
-                // Initialize the map after the modal is fully shown
-                // $('#openStreetMapModal').on('shown.bs.modal', function () {
-                //     // If a map already exists, remove it
-                //     if (map !== null) {
-                //         map.remove();
-                //     }
-
-                //     map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]], 17);
-                //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                //         attribution: '© OpenStreetMap contributors'
-                //     }).addTo(map);
-                
-                //     // Add a marker for the location
-                //     var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
-                
-                //     // Add a circle with the converted radius
-                //     var circle = L.circle([coordinates[0], coordinates[1]], {
-                //         color: 'blue',
-                //         fillColor: '#f0023',
-                //         fillOpacity: 0.2,
-                //         radius: radius,
-                //     }).addTo(map);
-                // });
             });
 
             $('body').on('click', '.report-input', function() {
@@ -115,8 +167,6 @@
                 if (notes) {
                     document.getElementById('note').value = notes;
                 }
-
-
             });
 
             $('#reportInputModal').on('hidden.bs.modal', function () {
@@ -124,6 +174,16 @@
                 if (file) {
                     file.style.display = 'none';
                 }
+            });
+
+            $('#clockInOutInputModal').on('hidden.bs.modal', function () {
+                document.getElementById('load').style.display = '';
+                document.getElementById('camera').style.display = 'none';
+                document.getElementById('output').style.display = 'none';
+            
+                var tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
             });
         });
     </script>
@@ -138,6 +198,102 @@
             });
         })
     </script>
+
+    <script>
+        /* JS comes here */
+        (function() {
+
+            var width = 320; // We will scale the photo width to this
+            var height = 0; // This will be computed based on the input stream
+
+            var streaming = false;
+
+            var video = null;
+            var canvas = null;
+            var photo = null;
+            var takepic = null;
+            var loadbutton = document.getElementById('load');
+
+            loadbutton.addEventListener('click', startup, false);
+
+            function startup() {
+                video = document.getElementById('video');
+                canvas = document.getElementById('canvas');
+                photo = document.getElementById('photo');
+                takepic = document.getElementById('takepic');
+
+                navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    })
+                    .then(function(stream) {
+                        document.getElementById('load').style.display = 'none';
+                        document.getElementById('camera').style.display = 'block';
+                        document.getElementById('output').style.display = 'block';
+
+                        takepic.style.display = '';
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function(err) {
+                        alert("Please Allow Camera Access To Take Picture For Clock In / Out");
+                        console.log("An error occurred: " + err);
+                    });
+
+                video.addEventListener('canplay', function(ev) {
+                    if (!streaming) {
+                        height = video.videoHeight / (video.videoWidth / width);
+
+                        if (isNaN(height)) {
+                            height = width / (4 / 3);
+                        }
+
+                        video.setAttribute('width', width);
+                        video.setAttribute('height', height);
+                        document.getElementById('camera').style.width = width;
+                        document.getElementById('camera').style.height = height;
+                        canvas.setAttribute('width', width);
+                        canvas.setAttribute('height', height);
+                        photo.setAttribute('width', width);
+                        photo.setAttribute('height', height);
+                        streaming = true;
+                    }
+                }, false);
+
+                takepic.addEventListener('click', function(ev) {
+                    takepicture();
+                    ev.preventDefault();
+                }, false);
+
+                clearphoto();
+            }
+
+            function clearphoto() {
+                var context = canvas.getContext('2d');
+                context.fillStyle = "#AAA";
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                var data = canvas.toDataURL('image/png');
+                photo.setAttribute('src', data);
+            }
+
+            function takepicture() {
+                var context = canvas.getContext('2d');
+                if (width && height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                    context.drawImage(video, 0, 0, width, height);
+
+                    var data = canvas.toDataURL('image/png');
+                    photo.setAttribute('src', data);
+                    document.getElementById('picture').value = data;
+                    document.getElementById('picture_out').value = data;
+                } else {
+                    clearphoto();
+                }
+            }
+        })();
+    </script>
 @endpush
 
 @section('content')
@@ -149,11 +305,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="padding-top: 0.35rem">
-                    {{-- <div class="row d-flex flex-column align-items-center">
-                        {{ Form::open(['url' => 'event/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
-                        {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label']) }}
-                        <div class="col-md-6 col-lg-12 text-center mx-auto">
-                            <button type="button" class="btn btn-info btn-lg btn-block " id="load"><i
+                    <div class="row d-flex flex-column align-items-center">
+                        {{ Form::open(['route' => ['eventemployee.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                        <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
+                            <button type="button" class="btn btn-info btn-lg btn-block" id="load"><i
                                 class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
                             </button>
                             <div id="camera" style="display: none; position: relative" class="col-12">
@@ -170,34 +325,28 @@
                                 <input type="hidden" name="picture" id="picture">
                             </label>      
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
-                                {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
-                            </div>
-                            <div class="form-group">
-                                {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
-                            </div>
-                            <input type="hidden" name="latitude" id="latitude" value="0">
-                            <input type="hidden" name="longitude" id="longitude" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy" value="0">
-                        </div>
-                        <div class="col-md-6 text-center mx-auto mt-1">
+                        <hr>
+                        <input type="hidden" name="latitude" id="latitude" value="0">
+                        <input type="hidden" name="longitude" id="longitude" value="0">
+                        <input type="hidden" name="accuracy" id="accuracy" value="0">
+                        <input type="hidden" name="eventemployeeidAttendance" id="eventemployeeidAttendance" value="">
+                        <div class="col-md-6 text-center mx-auto mt-3">
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
                                 class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                             {{ Form::close() }}
                         </div>                                                    
                         <div class="col-md-6 text-center mx-auto mt-3">
-                            {{ Form::model($eventP, ['route' => ['event.attendance', $eventP->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
+                            {{ Form::open(['route' => ['eventemployee.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
+                                <input type="hidden" name="eventemployeeidAttendanceOut" id="eventemployeeidAttendanceOut" value="">
                                 <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                             {{ Form::close() }}
                         </div>
-                    </div> --}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -339,7 +488,7 @@
                                         @if ((\Auth::user()?->employee?->id == $eventP->employee->id) || \Auth::user()->type != 'employee')
                                             <td>
                                                 <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
-                                                    data-event_employee-id="{{ $eventP->id }}"
+                                                    data-event-employee-id="{{ $eventP->id }}"
                                                     data-clock-in="{{ $eventP->clock_in }}"
                                                     data-bs-original-title="{{ __('Clock In / Clock Out') }}">
                                                     <i class="fa fa-solid fa-clock"></i>

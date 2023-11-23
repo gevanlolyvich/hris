@@ -572,15 +572,15 @@
             if (latitude !== 0 && longitude !== 0 && clockOutButton) {
                 const latOutElement = document.getElementById("latitude_out");
                 const longOutElement = document.getElementById("longitude_out");
-                const accElement = document.getElementById("accuracy_out");
+                const accOutElement = document.getElementById("accuracy_out");
                 if (latOutElement) {
                     latOutElement.value = latitude;
                 }
                 if (longOutElement) {
                     longOutElement.value = longitude
                 }
-                if (accElement) {
-                    accElement.value = accuracy;
+                if (accOutElement) {
+                    accOutElement.value = accuracy;
                 }
                 clockOutButton.disabled = false;
             }
