@@ -117,7 +117,7 @@
                         </thead>
                         <tbody>
                             @foreach ($events as $event)
-                                @if (str_contains($event->employee_id, \Auth::user()?->employee?->id) || \Auth::user()->type != 'employee')
+                                @if (str_contains($event->employee_id, \Auth::user()?->employee?->id) || \Auth::user()->type != 'employee' || array_intersect(json_decode($event->employee_id, true), \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()))
                                     <tr>
                                         <td>{{ $event->title }}</td>
                                         <td>{{ $event->location ?? '-' }}</td>
@@ -141,7 +141,7 @@
                                             <span>
                                                 <div class="action-btn bg-success ms-2">
                                                     <a href="{{ route('event.show', $event->id)}}" class="mx-3 btn btn-sm  align-items-center"><i
-                                                        class="fa fa-solid fa-info"></i>
+                                                        class="fa fa-solid fa-info text-white"></i>
                                                     </a>
                                                 </div>
                                                 @if (\Auth::user()->type == 'employee')

@@ -20,18 +20,47 @@ class EventController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Event')) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
-            $events    = LocalEvent::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $events    = LocalEvent::where('created_by', \Auth::user()->creatorId())->get();
+            $current_month_event = null;
             $today_date = date('m');
-            $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
-                ->whereNotNull(['start_date','end_date'])
-                ->Where(
-                    function ($q) use ($today_date) {
-                        Log::info($today_date);
-                        $q->whereMonth('start_date',$today_date)
-                          ->orWhereMonth('end_date',$today_date);
-                    }
-                )->get();
+
+            if (\Auth::user()->type != 'employee') {
+                $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                    ->whereNotNull(['start_date','end_date'])
+                    ->Where(
+                        function ($q) use ($today_date) {
+                            Log::info($today_date);
+                            $q->whereMonth('start_date',$today_date)
+                              ->orWhereMonth('end_date',$today_date);
+                        }
+                    )->get();
+            } else {
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
+                $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
+                    ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                    ->whereIn('event_employees.employee_id', $employee_id)
+                    ->whereNotNull(['start_date','end_date'])
+                    ->Where(
+                        function ($q) use ($today_date) {
+                            Log::info($today_date);
+                            $q->whereMonth('start_date',$today_date)
+                              ->orWhereMonth('end_date',$today_date);
+                        }
+                    )->distinct()->get();
+                
+                Log::info(json_encode($events, JSON_PRETTY_PRINT));
+            }
             $arrEvents = [];
             foreach ($events as $event) {
                 $arr['id']    = $event['id'];
@@ -50,7 +79,7 @@ class EventController extends Controller
             // $arrEvents = str_replace('"[', '[', str_replace(']"', ']', json_encode($arrEvents)));
             $arrEvents =  json_encode($arrEvents);
 
-            return view('event.index', compact('arrEvents', 'employees','current_month_event','events'));
+            return view('event.index', compact('arrEvents','current_month_event','events'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -305,19 +334,30 @@ class EventController extends Controller
         {
             $type ='event';
             $arrayJson =  Utility::getCalendarData($type);
-            // dd($type, $arrayJson);
         }
         else
         {
             $data = null;
             if ($request->get('user_type') === 'employee' || \Auth::user()->type == 'employee') {
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
                 $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                ->where('event_employees.employee_id', $request->get('empId') ?? \Auth::user()->employee->id)
+                ->whereIn('event_employees.employee_id', $employee_id)
                 ->orWhere(
                     function ($q) {
                         $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
                     }
-                )->get();
+                )->groupBy('events.id')->get();
             } else {
                 Log::info('All');
                 $data = LocalEvent::get();
@@ -340,6 +380,7 @@ class EventController extends Controller
             }
         }
 
+        Log::info(json_encode($arrayJson, JSON_PRETTY_PRINT));
         return $arrayJson;
     }
 
