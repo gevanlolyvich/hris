@@ -29,7 +29,6 @@ class EventController extends Controller
                     ->whereNotNull(['start_date','end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
-                            Log::info($today_date);
                             $q->whereMonth('start_date',$today_date)
                               ->orWhereMonth('end_date',$today_date);
                         }
@@ -53,13 +52,10 @@ class EventController extends Controller
                     ->whereNotNull(['start_date','end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
-                            Log::info($today_date);
                             $q->whereMonth('start_date',$today_date)
                               ->orWhereMonth('end_date',$today_date);
                         }
                     )->distinct()->get();
-                
-                Log::info(json_encode($events, JSON_PRETTY_PRINT));
             }
             $arrEvents = [];
             foreach ($events as $event) {
@@ -123,12 +119,10 @@ class EventController extends Controller
 
             $document_path = null;
             if ($request->file('myDocument')) {
-                Log::info('Document detected');
                 $docs = $request->file('myDocument');
                 $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
                 $path = $docs->storeAs('uploads/events', $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
-                Log::info($document_path);
             }
 
             $event                 = new LocalEvent();
@@ -223,9 +217,12 @@ class EventController extends Controller
             $employees                    = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch                       = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
             $departments                  = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
-            list($latitude, $longitude)  = explode(', ', $event->location_coord ?? "0, 0");
+            $event_employees              = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');
+            $selected_departments         = Department::whereIn('id', json_decode($event->department_id, true))->select('id', 'branch_id', 'name')->get();
+            $selected_employees           = Employee::whereIn('id', json_decode($event->employee_id, true))->select('id', 'user_id', 'department_id', 'name')->get();
+            list($latitude, $longitude)   = explode(', ', $event->location_coord ?? "0, 0");
             if ($event->created_by == $created_by) {
-                return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude'));
+                return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude', 'selected_departments', 'selected_employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -236,6 +233,7 @@ class EventController extends Controller
 
     public function update(Request $request, LocalEvent $event)
     {
+        // return $request;
         if (\Auth::user()->can('Edit Event')) {
             if ($event->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
@@ -262,6 +260,39 @@ class EventController extends Controller
                     $document_path = env('APP_URL') . '/storage/' . $path;
                 }
 
+                // * Employee Data
+                $request_employee_id = $request->employee_id ?? array();
+                $to_be_remove_array = null;
+                $presist_employee_array = null;
+                foreach (json_decode($event->employee_id) as $empId) {
+                    if (!in_array($empId, $request_employee_id)) {
+                        $to_be_remove_array[] = $empId;
+                    } else {
+                        $presist_employee_array[] = $empId;
+                    }
+                }
+
+                $new_employee_array = array_diff($request_employee_id, $presist_employee_array);
+
+                // remove old not use event employee
+                if ($to_be_remove_array) {
+                    EventEmployee::where('event_id', $event->id)->whereIn('employee_id', $to_be_remove_array)->delete();
+                }
+
+                // create new event employee
+                if ($new_employee_array) {
+                    foreach ($new_employee_array as $employee) {
+                        $eventEmployee              = new EventEmployee();
+                        $eventEmployee->event_id    = $event->id;
+                        $eventEmployee->employee_id = $employee;
+                        $eventEmployee->created_by  = \Auth::user()->creatorId();
+                        $eventEmployee->save();
+                    }
+                }
+
+                $event->branch_id      = $request->branch_id;
+                $event->department_id  = json_encode($request->department_id);
+                $event->employee_id    = json_encode($request->employee_id);
                 $event->title          = $request->title;
                 $event->start_date     = $request->start_date;
                 $event->end_date       = $request->end_date;
@@ -359,7 +390,6 @@ class EventController extends Controller
                     }
                 )->groupBy('events.id')->get();
             } else {
-                Log::info('All');
                 $data = LocalEvent::get();
             }
 
@@ -380,7 +410,6 @@ class EventController extends Controller
             }
         }
 
-        Log::info(json_encode($arrayJson, JSON_PRETTY_PRINT));
         return $arrayJson;
     }
 

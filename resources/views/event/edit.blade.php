@@ -4,7 +4,25 @@
 
 @if (Auth::user()->type == 'company')
     {{ Form::model($event, ['route' => ['event.update', $event->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
-    <div class="modal-body modal-lg">
+    <div class="modal-body modal-lg" id="event-edit-modal">
+        <div class="row" style="padding-left: 13px">
+            <div class="col-4 choices__list choices__list--multiple" style="">
+                <h6>{{__('Selected Department')}}</h6>
+                @foreach ($selected_departments as $department)
+                    <div class="choices__item disable">
+                        {{ $department->name }}
+                    </div>
+                @endforeach
+            </div>
+            <div class="col-8 choices__list choices__list--multiple" style="">
+                <h6>{{__('Selected Employee')}}</h6>
+                @foreach ($selected_employees as $employee)
+                    <div class="choices__item disable">
+                        {{ $employee->name }}
+                    </div>
+                @endforeach
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
@@ -14,19 +32,23 @@
                         <option value="">{{ __('Select Branch') }}</option>
                         <option value="0">{{ __('All Branch') }}</option>
                         @foreach ($branch as $branch)
-                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                            @if ($event->branch_id === $branch->id)
+                                <option selected value="{{ $branch->id }}">{{ $branch->name}}</option>
+                            @else
+                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
             </div>
-    
+
             <div class="col-md-4">
                 <div class="form-group">
                     {{ Form::label('department_id', __('Department'), ['class' => 'col-form-label']) }}
                     <div class="department_div">
                         <select class="form-control department_id" name="department_id[]"
-                             placeholder="Select Designation" >
-                        <option value="">{{ __('Select Designation') }}</option>
+                             placeholder="Select Department" >
+                        <option value="">{{ __('Select Department') }}</option>
                         </select>
                     </div>
                 </div>

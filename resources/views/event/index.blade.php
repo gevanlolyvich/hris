@@ -391,6 +391,9 @@
 
             $('.edit-event').click(function () {
                 $('#commonModal').on('shown.bs.modal', function () {
+                    var b_id = $('#branch_id').val();
+                    getDepartment(b_id);
+
                     // If a map already exists, remove it
                     if (map !== null) {
                         map?.remove();
