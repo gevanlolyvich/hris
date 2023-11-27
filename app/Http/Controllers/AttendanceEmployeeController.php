@@ -646,6 +646,14 @@ class AttendanceEmployeeController extends Controller
             $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
 
             $is_valid = ($accuracy + (float)$branch_data['tolerance']) >= $distance ? true : null;
+        } else if ($attendance_type == '3' && !empty($employee->coordinate)) {
+            $home_coordinate = explode(', ', $employee->coordinate);
+            $home_latitude = $home_coordinate[0];
+            $home_longitude = $home_coordinate[1];
+            $home_tolerance = $home_coordinate[2];
+            $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$home_latitude, (float)$home_longitude);
+
+            $is_valid = ($accuracy + (float)$home_tolerance) >= $distance ? true : null;
         }
 
         $date = date("Y-m-d");
