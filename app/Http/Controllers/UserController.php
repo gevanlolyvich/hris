@@ -8,6 +8,7 @@ use App\Mail\UserCreate;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Utility;
+use App\Models\EmployeeHomeHistory;
 use File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -214,7 +215,6 @@ class UserController extends Controller
             [
                 'name' => 'required|max:120',
                 'email' => 'required|email|unique:users,email,' . $userDetail['id'],
-                'profile' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -255,8 +255,21 @@ class UserController extends Controller
         $user->save();
 
         if (\Auth::user()->type == 'employee') {
-            $employee        = Employee::where('user_id', $user->id)->first();
-            $employee->email = $request['email'];
+            $coordinate = "$request->latitude, $request->longitude, $request->accuracy";
+
+            $employee             = Employee::where('user_id', $user->id)->first();
+
+            if ($employee->coordinate != $coordinate || $employee->address != $request->address) {
+                EmployeeHomeHistory::create([
+                    'employee_id' => $employee->id,
+                    'coordinate' => $coordinate,
+                    'address' => $request->address,
+                ]);
+            }
+            $employee->name       = $request->name;
+            $employee->email      = $request->email;
+            $employee->coordinate = $coordinate;
+            $employee->address    = $request->address;
             $employee->save();
         }
 

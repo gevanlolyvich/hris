@@ -358,4 +358,9 @@ class Employee extends Model
     {
         return $this->hasMany(EventEmployee::class, 'employee_id');
     }
+
+    public function home_histories(): HasMany
+    {
+        return $this->hasMany(EmployeeHomeHistory::class);
+    }
 }

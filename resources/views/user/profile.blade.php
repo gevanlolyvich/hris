@@ -10,6 +10,47 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
             offset: 300
         })
     </script>
+
+    <script>
+        async function getLocation() {
+          return new Promise((resolve, reject) => {
+            if ("geolocation" in navigator) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const latitude = position.coords.latitude;
+                  const longitude = position.coords.longitude;
+                  const accuracy = position.coords.accuracy;
+                  resolve({ latitude, longitude, accuracy });
+                },
+                (error) => {
+                  if (error.code === 1) {
+                    reject(new Error("User denied Geolocation"));
+                  } else {
+                    reject(error);
+                  }
+                }
+              );
+            } else {
+              reject(new Error("Geolocation is not supported by your browser."));
+            }
+          });
+        }
+
+        $('#coordinate').on('click', async function () {
+            try {
+                const { latitude, longitude, accuracy } = await getLocation();
+                console.log(`${latitude}, ${longitude}, ${accuracy}`);
+    
+                document.getElementById('latitude').value = latitude;
+                document.getElementById('longitude').value = longitude;
+                document.getElementById('accuracy').value = accuracy;
+
+                alert('Success Getting Current Location Coordinate');
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    </script>
 @endpush
 @section('page-title')
     {{ __('Profile') }}
@@ -53,6 +94,9 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         <div class="card-body">
                             {{ Form::model($userDetail, ['route' => ['update.account'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                             @csrf
+                            <input type="hidden" name="latitude" id="latitude" value="0">
+                            <input type="hidden" name="longitude" id="longitude" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy" value="0">
                             <div class="row">
                                 <div class="col-lg-6 col-sm-6">
                                     <div class="form-group">
@@ -76,6 +120,24 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                             <span class="invalid-feedback text-danger text-xs"
                                                 role="alert">{{ $message }}</span>
                                         @enderror
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
+                                        <input class="form-control @error('address') is-invalid @enderror" name="address"
+                                            type="text" id="address" placeholder="{{ __('Enter Your Address') }}"
+                                            value="{{ $userDetail->employee->address }}" required autocomplete="address">
+                                        @error('address')
+                                            <span class="invalid-feedback text-danger text-xs"
+                                                role="alert">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="address" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
+                                        <button type="button" class="btn bg-primary form-control" id="coordinate">{{__("Get Current Location Coordinate")}}</button>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6">
@@ -104,7 +166,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 </div>
                             </div>
                             </form>
-
                         </div>
 
                     </div>
