@@ -127,6 +127,8 @@ class EventController extends Controller
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
+            } elseif (strtotime($request->start_date) > strtotime($request->end_date)) {
+                return redirect()->back()->with('error', 'Assignment Creation Failed: Start Date Must Be Before End Date');
             }
 
             $document_path = null;
@@ -251,6 +253,9 @@ class EventController extends Controller
                 $validator = \Validator::make(
                     $request->all(),
                     [
+                        'branch_id' => 'required',
+                        'department_id' => 'required',
+                        'employee_id' => 'required',
                         'title' => 'required',
                         'start_date' => 'required',
                         'end_date' => 'required',
@@ -262,6 +267,8 @@ class EventController extends Controller
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
+                } elseif (strtotime($request->start_date) > strtotime($request->end_date)) {
+                    return redirect()->back()->with('error', 'Assignment Creation Failed: Start Date Must Be Before End Date');
                 }
 
                 $document_path = null;
