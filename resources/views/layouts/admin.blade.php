@@ -73,8 +73,8 @@ if (!empty($mode_setting['theme_color'])) {
 
    
 
-    <meta name="url" content="{{ url('') . '/' . config('chatify.routes.prefix') }}"
-        data-user="{{ Auth::user()->id }}">
+    {{-- <meta name="url" content="{{ url('') . '/' . config('chatify.routes.prefix') }}"
+        data-user="{{ Auth::user()->id }}"> --}}
 
     <link rel='stylesheet' href='https://unpkg.com/nprogress@0.2.0/nprogress.css' />
     @stack('css-page')
@@ -260,7 +260,7 @@ if (!empty($mode_setting['theme_color'])) {
     <script>
     var toster_pos="{{$SITE_RTL =='on' ?'left' : 'right'}}";
    </script>
-    <script src="{{ asset('js/chatify/autosize.js') }}"></script>
+    {{-- <script src="{{ asset('js/chatify/autosize.js') }}"></script> --}}
     <script src='https://unpkg.com/nprogress@0.2.0/nprogress.js'></script>
 
 
@@ -358,7 +358,7 @@ if (!empty($mode_setting['theme_color'])) {
 
     @stack('script-page')
     @stack('scripts')
-    @include('Chatify::layouts.footerLinks')
+    {{-- @include('Chatify::layouts.footerLinks') --}}
 </body>
 
 </html>

@@ -594,13 +594,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     </li>
                 @endcan
                      <!--chats-->
-                @if (\Auth::user()->type != 'super admin')
+                {{-- @if (\Auth::user()->type != 'super admin')
                 <li class="dash-item">
                     <a href="{{ url('chats') }}" class="dash-link"><span class="dash-micon"><i
                                 class="ti ti-messages"></i></span><span
                             class="dash-mtext">{{ __('Messenger') }}</span></a>
                 </li>
-            @endif
+                @endif --}}
                
                 @if (\Auth::user()->type == 'super admin')
                     <li class="dash-item ">

@@ -183,7 +183,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-        \Chatify\ChatifyServiceProvider::class,
+        // \Chatify\ChatifyServiceProvider::class,
         /*
          * Package Service Providers...
          */
@@ -220,7 +220,7 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Utility' => App\Models\Utility::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-        'Chatify' => Chatify\Facades\ChatifyMessenger::class,
+        // 'Chatify' => Chatify\Facades\ChatifyMessenger::class,
     ])->toArray(),
 
 ];
