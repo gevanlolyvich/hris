@@ -20,11 +20,11 @@ class EventController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Event')) {
-            $events    = LocalEvent::where('created_by', \Auth::user()->creatorId())->get();
             $current_month_event = null;
             $today_date = date('m');
 
             if (\Auth::user()->type != 'employee') {
+                $events    = LocalEvent::get();
                 $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
                     ->whereNotNull(['start_date','end_date'])
                     ->Where(
@@ -45,6 +45,12 @@ class EventController extends Controller
                 {
                     $employee_id[] = \Auth::user()->employee->id;
                 }
+
+                $events    = LocalEvent::select('events.id', 'events.title', 'events.location', 'events.start_date','events.end_date', 'events.created_by', 'events.document', 'events.employee_id')
+                    ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                    ->whereIn('event_employees.employee_id', $employee_id)
+                    ->whereOr('events.created_by', \Auth::user()->id)
+                    ->distinct()->get();
 
                 $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
@@ -84,11 +90,17 @@ class EventController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Event')) {
-            $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
+            // $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch = null;
+            if (\Auth::user()->type != 'employee') {
+                $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            }
+            else {
+                $branch      = Branch::where('id', \Auth::user()->employee->branch_id)->get();
+            }
+            // $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
 
-            return view('event.create', compact('employees', 'branch', 'departments'));
+            return view('event.create', compact('branch'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -135,7 +147,7 @@ class EventController extends Controller
             $event->color          = $request->color;
             $event->description    = $request->description;
             $event->document       = $document_path;
-            $event->created_by     = \Auth::user()->creatorId();
+            $event->created_by     = \Auth::user()->id;
             $event->location       = $request->location;
             $event->location_coord = "$request->latitude, $request->longitude";
             $event->save();
@@ -329,11 +341,14 @@ class EventController extends Controller
 
     public function getdepartment(Request $request)
     {
-
-        if ($request->branch_id == 0) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+        if (\Auth::user()->type != 'employee') {
+            if ($request->branch_id == 0) {
+                $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            } else {
+                $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            }
         } else {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('created_by', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->department_id)->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($departments);
@@ -341,10 +356,27 @@ class EventController extends Controller
 
     public function getemployee(Request $request)
     {
-        if (in_array('0', $request->department_id)) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        if (\Auth::user()->type != 'employee') {
+            if (in_array('0', $request->department_id)) {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            } else {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            }
         } else {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $subordinates = \Auth::user()->employee->subordinatesFlatten();
+            if ($subordinates->isNotEmpty()) {
+                $employee_ids = collect();
+                foreach ($subordinates as $subordinate) {
+                    $employee_ids->push($subordinate->id);
+                }
+                
+                $employee_ids->push(\Auth::user()->employee->id);
+
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('id', $employee_ids)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+
+            } else {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            }
         }
 
         return response()->json($employees);
