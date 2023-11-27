@@ -13,6 +13,9 @@ class Event extends Model
         'end_date',
         'color',
         'description',
+        'document',
+        'location',
+        'location_coord',
         'created_by',
     ];
 }

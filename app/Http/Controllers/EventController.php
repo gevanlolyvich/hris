@@ -13,16 +13,56 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
     public function index()
     {
         if (\Auth::user()->can('Manage Event')) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
-            $events    = LocalEvent::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $current_month_event = null;
             $today_date = date('m');
-            $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')->whereNotNull(['start_date','end_date'])->whereMonth('start_date',$today_date)->whereMonth('end_date',$today_date)->get();
+
+            if (\Auth::user()->type != 'employee') {
+                $events    = LocalEvent::get();
+                $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                    ->whereNotNull(['start_date','end_date'])
+                    ->Where(
+                        function ($q) use ($today_date) {
+                            $q->whereMonth('start_date',$today_date)
+                              ->orWhereMonth('end_date',$today_date);
+                        }
+                    )->get();
+            } else {
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
+                $events    = LocalEvent::select('events.id', 'events.title', 'events.location', 'events.start_date','events.end_date', 'events.created_by', 'events.document', 'events.employee_id')
+                    ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                    ->whereIn('event_employees.employee_id', $employee_id)
+                    ->whereOr('events.created_by', \Auth::user()->id)
+                    ->distinct()->get();
+
+                $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
+                    ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
+                    ->whereIn('event_employees.employee_id', $employee_id)
+                    ->whereNotNull(['start_date','end_date'])
+                    ->Where(
+                        function ($q) use ($today_date) {
+                            $q->whereMonth('start_date',$today_date)
+                              ->orWhereMonth('end_date',$today_date);
+                        }
+                    )->distinct()->get();
+            }
             $arrEvents = [];
             foreach ($events as $event) {
                 $arr['id']    = $event['id'];
@@ -41,7 +81,7 @@ class EventController extends Controller
             // $arrEvents = str_replace('"[', '[', str_replace(']"', ']', json_encode($arrEvents)));
             $arrEvents =  json_encode($arrEvents);
 
-            return view('event.index', compact('arrEvents', 'employees','current_month_event','events'));
+            return view('event.index', compact('arrEvents','current_month_event','events'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -50,11 +90,17 @@ class EventController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Event')) {
-            $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
+            // $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch = null;
+            if (\Auth::user()->type != 'employee') {
+                $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            }
+            else {
+                $branch      = Branch::where('id', \Auth::user()->employee->branch_id)->get();
+            }
+            // $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
 
-            return view('event.create', compact('employees', 'branch', 'departments'));
+            return view('event.create', compact('branch'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -62,7 +108,6 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-
         if (\Auth::user()->can('Create Event')) {
 
             $validator = \Validator::make(
@@ -75,24 +120,38 @@ class EventController extends Controller
                     'start_date' => 'required',
                     'end_date' => 'required',
                     'color' => 'required',
+                    'location' => 'required',
                 ]
             );
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
+            } elseif (strtotime($request->start_date) > strtotime($request->end_date)) {
+                return redirect()->back()->with('error', 'Assignment Creation Failed: Start Date Must Be Before End Date');
             }
 
-            $event                = new LocalEvent();
-            $event->branch_id     = $request->branch_id;
-            $event->department_id = json_encode($request->department_id);
-            $event->employee_id   = json_encode($request->employee_id);
-            $event->title         = $request->title;
-            $event->start_date    = $request->start_date;
-            $event->end_date      = $request->end_date;
-            $event->color         = $request->color;
-            $event->description   = $request->description;
-            $event->created_by    = \Auth::user()->creatorId();
+            $document_path = null;
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/events', $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
+            }
+
+            $event                 = new LocalEvent();
+            $event->branch_id      = $request->branch_id;
+            $event->department_id  = json_encode($request->department_id);
+            $event->employee_id    = json_encode($request->employee_id);
+            $event->title          = $request->title;
+            $event->start_date     = $request->start_date;
+            $event->end_date       = $request->end_date;
+            $event->color          = $request->color;
+            $event->description    = $request->description;
+            $event->document       = $document_path;
+            $event->created_by     = \Auth::user()->id;
+            $event->location       = $request->location;
+            $event->location_coord = "$request->latitude, $request->longitude";
             $event->save();
 
             // slack 
@@ -157,19 +216,27 @@ class EventController extends Controller
         }
     }
 
-    public function show(LocalEvent $event)
+    public function show($event)
     {
-        return redirect()->route('event.index');
+        $event = LocalEvent::find($event);
+        $event_employees = EventEmployee::where('event_id', $event->id)->get();
+        return view('event.show', compact('event', 'event_employees'));
     }
 
     public function edit($event)
     {
-
         // if (\Auth::user()->can('Edit Event')) {
-            $event = LocalEvent::find($event);
-            if ($event->created_by == Auth::user()->creatorId()) {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-                return view('event.edit', compact('event', 'employees'));
+            $event                        = LocalEvent::find($event);
+            $created_by                   = \Auth::user()->creatorId();
+            $employees                    = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch                       = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $departments                  = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $event_employees              = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');
+            $selected_departments         = Department::whereIn('id', json_decode($event->department_id, true))->select('id', 'branch_id', 'name')->get();
+            $selected_employees           = Employee::whereIn('id', json_decode($event->employee_id, true))->select('id', 'user_id', 'department_id', 'name')->get();
+            list($latitude, $longitude)   = explode(', ', $event->location_coord ?? "0, 0");
+            if ($event->created_by == $created_by) {
+                return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude', 'selected_departments', 'selected_employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -180,28 +247,79 @@ class EventController extends Controller
 
     public function update(Request $request, LocalEvent $event)
     {
+        // return $request;
         if (\Auth::user()->can('Edit Event')) {
             if ($event->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
                     $request->all(),
                     [
+                        'branch_id' => 'required',
+                        'department_id' => 'required',
+                        'employee_id' => 'required',
                         'title' => 'required',
                         'start_date' => 'required',
                         'end_date' => 'required',
                         'color' => 'required',
+                        'location' => 'required',
                     ]
                 );
                 if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
+                } elseif (strtotime($request->start_date) > strtotime($request->end_date)) {
+                    return redirect()->back()->with('error', 'Assignment Creation Failed: Start Date Must Be Before End Date');
                 }
 
-                $event->title       = $request->title;
-                $event->start_date  = $request->start_date;
-                $event->end_date    = $request->end_date;
-                $event->color       = $request->color;
-                $event->description = $request->description;
+                $document_path = null;
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/events', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
+                // * Employee Data
+                $request_employee_id = $request->employee_id ?? array();
+                $to_be_remove_array = null;
+                $presist_employee_array = null;
+                foreach (json_decode($event->employee_id) as $empId) {
+                    if (!in_array($empId, $request_employee_id)) {
+                        $to_be_remove_array[] = $empId;
+                    } else {
+                        $presist_employee_array[] = $empId;
+                    }
+                }
+
+                $new_employee_array = array_diff($request_employee_id, $presist_employee_array);
+
+                // remove old not use event employee
+                if ($to_be_remove_array) {
+                    EventEmployee::where('event_id', $event->id)->whereIn('employee_id', $to_be_remove_array)->delete();
+                }
+
+                // create new event employee
+                if ($new_employee_array) {
+                    foreach ($new_employee_array as $employee) {
+                        $eventEmployee              = new EventEmployee();
+                        $eventEmployee->event_id    = $event->id;
+                        $eventEmployee->employee_id = $employee;
+                        $eventEmployee->created_by  = \Auth::user()->creatorId();
+                        $eventEmployee->save();
+                    }
+                }
+
+                $event->branch_id      = $request->branch_id;
+                $event->department_id  = json_encode($request->department_id);
+                $event->employee_id    = json_encode($request->employee_id);
+                $event->title          = $request->title;
+                $event->start_date     = $request->start_date;
+                $event->end_date       = $request->end_date;
+                $event->color          = $request->color;
+                $event->description    = $request->description;
+                $event->document       = $document_path ? $document_path : $event->document;
+                $event->location       = $request->location;
+                $event->location_coord = "$request->latitude, $request->longitude";
                 $event->save();
 
                 return redirect()->back()->with('success', __('Event successfully updated.'));
@@ -230,11 +348,14 @@ class EventController extends Controller
 
     public function getdepartment(Request $request)
     {
-
-        if ($request->branch_id == 0) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+        if (\Auth::user()->type != 'employee') {
+            if ($request->branch_id == 0) {
+                $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            } else {
+                $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            }
         } else {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('created_by', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->department_id)->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($departments);
@@ -242,10 +363,27 @@ class EventController extends Controller
 
     public function getemployee(Request $request)
     {
-        if (in_array('0', $request->department_id)) {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        if (\Auth::user()->type != 'employee') {
+            if (in_array('0', $request->department_id)) {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            } else {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            }
         } else {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $subordinates = \Auth::user()->employee->subordinatesFlatten();
+            if ($subordinates->isNotEmpty()) {
+                $employee_ids = collect();
+                foreach ($subordinates as $subordinate) {
+                    $employee_ids->push($subordinate->id);
+                }
+                
+                $employee_ids->push(\Auth::user()->employee->id);
+
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('id', $employee_ids)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+
+            } else {
+                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            }
         }
 
         return response()->json($employees);
@@ -266,40 +404,51 @@ class EventController extends Controller
         {
             $type ='event';
             $arrayJson =  Utility::getCalendarData($type);
-            // dd($type, $arrayJson);
         }
         else
         {
             $data = null;
-            if ($request->get('user_type') === 'employee') {
+            if ($request->get('user_type') === 'employee' || \Auth::user()->type == 'employee') {
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
                 $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                ->where('event_employees.employee_id', '=', $request->get('empId'))
+                ->whereIn('event_employees.employee_id', $employee_id)
                 ->orWhere(
                     function ($q) {
                         $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
                     }
-                )->get();
+                )->groupBy('events.id')->get();
             } else {
                 $data = LocalEvent::get();
             }
-            
+
             foreach($data as $val)
             {
                 $end_date=date_create($val->end_date);
                 date_add($end_date,date_interval_create_from_date_string("1 days"));
                 $arrayJson[] = [
-                    "id"=> $val->id,
+                    "id"=> $val->event_id ?? $val->id,
                     "title" => $val->title,
                     "start" => $val->start_date,
                     "end" => date_format($end_date,"Y-m-d H:i:s"),
                     "className" => $val->color,
                     "allDay" => true,
-                    "url"=> route('event.edit', $val['id']),
+                    "url"=> route('event.show', $val['event_id'] ?? $val['id']),
 
                 ];
             }
         }
-        
+
         return $arrayJson;
     }
 

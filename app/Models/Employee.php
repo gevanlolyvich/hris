@@ -61,7 +61,6 @@ class Employee extends Model
 
     public function get_net_salary()
     {
-
         //allowance
 
         $allowances      = Allowance::where('employee_id', '=', $this->id)->get();
@@ -75,7 +74,6 @@ class Employee extends Model
             }
         }
 
-
         //commission
         $commissions      = Commission::where('employee_id', '=', $this->id)->get();
 
@@ -88,8 +86,6 @@ class Employee extends Model
                 $total_commission = $commission->amount + $total_commission;
             }
         }
-
-
 
         //Loan
         $loans      = Loan::where('employee_id', '=', $this->id)->get();
@@ -356,5 +352,10 @@ class Employee extends Model
     public function shift_histories(): HasMany
     {
         return $this->hasMany(ShiftHistory::class);
+    }
+    
+    public function assignment(): HasMany
+    {
+        return $this->hasMany(EventEmployee::class, 'employee_id');
     }
 }

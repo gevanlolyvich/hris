@@ -53,20 +53,20 @@
         <div class="ms-auto">
             <ul class="list-unstyled">
 
-                @php
+                {{-- @php
                     $unseenCounter = App\Models\ChMessage::where('to_id', Auth::user()->id)
                         ->where('seen', 0)
                         ->count();
-                @endphp
+                @endphp --}}
 
                 {{-- unread message --}}
-                @php
+                {{-- @php
                     $unreadCounter = App\Models\ChMessage::where('to_id', Auth::user()->id)
                         ->where('seen', 0)
                         ->count();
-                @endphp
+                @endphp --}}
 
-                @if (Auth::user()->type != 'super admin')
+                {{-- @if (Auth::user()->type != 'super admin')
                     <li class="dash-h-item">
                         <a class="dash-head-link me-0" href="{{ url('/chats') }}">
                             <i class="ti ti-message-circle"></i>
@@ -75,9 +75,9 @@
                                     class="sr-only"></span>
                         </a>
                     </li>
-                @endif
+                @endif --}}
 
-                @if (\Auth::user()->type != 'super admin')
+                {{-- @if (\Auth::user()->type != 'super admin')
                     <li class="dropdown dash-h-item drp-notification">
                         <a class="dash-head-link dropdown-toggle arrow-none me-0 " data-bs-toggle="dropdown"
                             href="#" role="button" aria-haspopup="false" aria-expanded="false" id="msg-btn">
@@ -97,7 +97,6 @@
                             <div class="noti-body dropdown-list-message-msg">
                                 <div style="display: flex;">
                                     <a href="#" class="show-listView"><i class="fas fa-arrow-left"></i></a>
-                                    {{-- unread messages --}}
                                     <div class="count-listOfContacts">
                                     </div>
                                 </div>
@@ -110,7 +109,7 @@
                             </div>
                         </div>
                     </li>
-                @endif
+                @endif --}}
                 @php
                     $currantLang = basename(\App::getLocale());
                 @endphp

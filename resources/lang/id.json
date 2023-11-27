@@ -1650,5 +1650,9 @@
   "Work Hours": "Jam Bekerja",
   "All Events": "Semua Penugasan",
   "Event Location": "Lokasi Penugasan",
-  "Enter Event Location": "Masukkan Lokasi Penugasan"
+  "Enter Event Location": "Masukkan Lokasi Penugasan",
+  "Report Document": "Dokumen Laporan",
+  "Clock In / Clock Out": "Jam Masuk / Jam Keluar",
+  "Clock In / Clock Out Data": "Data Jam Masuk / Jam Keluar",
+    "Report Data": "Data Laporan"
 }

@@ -246,8 +246,16 @@
                                     </a>
                                     @endif
                                 </td>
-                                <td>{{ $attendance->late }}</td>
-                                <td>{{ $attendance->early_leaving }}</td>
+                                <td>
+                                    <span @if($attendance->late != '00:00:00') class="btn btn-danger btn-sm text-center disabled" @endif>
+                                        {{ $attendance->late }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span @if($attendance->early_leaving != '00:00:00') class="btn btn-danger btn-sm text-center disabled" @endif>
+                                        {{ $attendance->early_leaving }}
+                                    </span>
+                                </td>
                                 <td>{{ $attendance->overtime }}</td>
                                 <td>{{ $attendance->work_hours }}</td>
                                 <td class="Action">

@@ -2,10 +2,10 @@
     $setting = App\Models\Utility::settings();
 @endphp
 
-{{ Form::open(['url' => 'event', 'method' => 'post']) }}
+{{ Form::open(['url' => ['event'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     <div class="row">
-         <div class="col-md-4">
+        <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
                 <select class="form-control select" name="branch_id" id="branch_id"
@@ -52,15 +52,30 @@
         <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
             <div class="form-group">
                 {{ Form::label('start_date', __('Event start Date'), ['class' => 'col-form-label']) }}
-                {{ Form::datetimeLocal('start_date', null, ['class' => 'form-control datetime-local ', 'autocomplete'=>'off']) }}
+                {{ Form::date('start_date', null, ['class' => 'form-control datetime-local ', 'autocomplete'=>'off']) }}
             </div>
         </div>
         <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
             <div class="form-group">
                 {{ Form::label('end_date', __('Event End Date'), ['class' => 'col-form-label']) }}
-                {{ Form::datetimeLocal('end_date', null, ['class' => 'form-control datetime-local ','autocomplete'=>'off' ]) }}
+                {{ Form::date('end_date', null, ['class' => 'form-control datetime-local ','autocomplete'=>'off' ]) }}
             </div>
         </div>
+        <div class="col-md-12 col-sm-12 col-lg-12 col-xl-12">
+            <div class="form-group">
+                {{ Form::label('location', __('Event Location'), ['class' => 'col-form-label']) }}
+                {{ Form::text('location', null, ['class' => 'form-control ', 'placeholder' => __('Enter Event Location')]) }}
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+                {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
+                <div id="openStreetMapContainer" style="height: 400px;"></div>
+                <input type="hidden" name="latitude" id="latitude" value="0">
+                <input type="hidden" name="longitude" id="longitude" value="0">
+            </div>
+        </div>
+        <div></div>
         <div class="col-md-12 col-sm-12 col-lg-12 col-xl-12">
             <div class="form-group">
                 {{ Form::label('color', __('Event Select Color'), ['class' => 'col-form-label d-block mb-3']) }}
@@ -79,13 +94,30 @@
             {{ Form::textarea('description', null, ['class' => 'form-control', 'placeholder' => __('Enter Event Description'),'rows'=>'5']) }}
         </div>
 
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
+                <div>
+                    <label for="myDocument">
+                    <div class="btn btn-block btn-primary bg-primary document"> <i
+                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                        </div>
+                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="myDocument">
+                    </label>
+                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
+                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         @if(isset($setting['is_enabled']) && $setting['is_enabled'] =='on')
         <div class="form-group col-md-6">
-            {{ Form::label('synchronize_type', __('Synchroniz in Google Calendar ?'), ['class' => 'form-label']) }}
+            {{ Form::label('synchronize_type', __('Synchroniz in Google Calendar ?'), ['class' => 'col-form-label']) }}
             <div class=" form-switch">
                 <input type="checkbox" class="form-check-input mt-2" name="synchronize_type" id="switch-shadow"
                     value="google_calender">
-                <label class="form-check-label" for="switch-shadow"></label>
+                <label for="switch-shadow"></label>
             </div>
         </div>
         @endif
@@ -98,3 +130,8 @@
 
 </div>
 {{ Form::close() }}
+
+{{-- load cdn js leaflet --}}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
