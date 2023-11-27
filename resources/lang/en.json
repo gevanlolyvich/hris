@@ -1656,5 +1656,9 @@
     "Report Document": "Report Document",
     "Clock In / Clock Out": "Clock In / Clock Out",
     "Clock In / Clock Out Data": "Clock In / Clock Out Data",
-    "Report Data": "Report Data"
+    "Report Data": "Report Data",
+    "Coordinate": "Coordinate",
+    "Get Current Location Coordinate": "Get Current Location Coordinate",
+    "Enter Your Address": "Enter Your Address",
+    "Home Address Changes": "Home Address Changes"
 }

@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
+use App\Models\EmployeeHomeHistory;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\ShiftHistory;
@@ -159,7 +160,8 @@ class EmployeeAttendanceHistoryController extends Controller
 
         // Getting shift changes
         $shift_changes = ShiftHistory::where('employee_id', $empId)->get();
+        $home_changes = EmployeeHomeHistory::where('employee_id', $empId)->get();
 
-        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'id'));
+        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id'));
     }
 }
