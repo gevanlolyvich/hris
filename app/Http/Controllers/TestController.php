@@ -61,7 +61,7 @@ class TestController extends Controller
             }));
             
             LogAttendance::insert($parsed_data);
-    
+
             for ($i=0; $i < count($parsed_data); $i++) {
                 $employee = Employee::where('personel_id', $parsed_data[$i]['personel_id'])->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
                 $shift_times = ShiftTime::where('shift_type_id',$employee->shift_type->id)
@@ -196,6 +196,7 @@ class TestController extends Controller
                     $new_attendance->coord_in             = $parsed_data[$i]['coordinate'];
                     $new_attendance->is_valid             = true;
                     $new_attendance->validate_by          = 1; //* System
+                    $new_attendance->shift_type_id        = $employee->shift_type_id;
                     $new_attendance->save();
                 }
             }

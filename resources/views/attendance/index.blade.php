@@ -222,7 +222,7 @@
                                     <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                 @endif --}}
                                 <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
-                                <td>{{ $attendance->employee->shift_type->name }}</td>
+                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                 <td>{{ $attendance->status }}</td>
                                 <!-- Modify Clock In and Clock Out columns in your table -->

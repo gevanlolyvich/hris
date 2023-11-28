@@ -9,6 +9,7 @@ class AttendanceEmployee extends Model
     protected $fillable = [
         'employee_id',
         'date',
+        'shift_type_id',
         'attendance_status_id',
         'status',
         'clock_in',
@@ -40,5 +41,10 @@ class AttendanceEmployee extends Model
     public function attendanceStatus()
     {
         return $this->belongsTo(AttendanceStatus::class, 'attendance_status_id', 'id');
+    }
+
+    public function shift_type()
+    {
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
     }
 }
