@@ -14,7 +14,7 @@ class ShiftController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->can('Manage Warning')) {
+        if (Auth::user()->can('Manage Shift')) {
             $shifts = ShiftType::all();
 
             return view('shift.index', compact('shifts'));
@@ -25,7 +25,7 @@ class ShiftController extends Controller
 
     public function create()
     {
-        if (Auth::user()->can('Create Warning')) {
+        if (Auth::user()->can('Create Shift')) {
             if (Auth::user()->type == 'employee') {
                 $user             = Auth::user();
                 $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
@@ -44,7 +44,7 @@ class ShiftController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->can('Create Warning')) {
+        if (Auth::user()->can('Create Shift')) {
 
             $validator = Validator::make(
                 $request->all(),
@@ -93,13 +93,17 @@ class ShiftController extends Controller
     public function edit(ShiftType $shift)
     {
         // return $shift;
-        $shift_type = ShiftType::where('id', $shift->id)->first();
-        return view('shift.edit', compact('shift', 'shift_type'));
+        if (Auth::user()->can('Edit Shift')) {
+            $shift_type = ShiftType::where('id', $shift->id)->first();
+            return view('shift.edit', compact('shift', 'shift_type'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 
     public function update(Request $request, ShiftType $shift)
     {
-        if (Auth::user()->can('Edit Warning')) {
+        if (Auth::user()->can('Edit Shift')) {
             if (Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
@@ -153,7 +157,7 @@ class ShiftController extends Controller
     // * Soft Delete
     public function destroy(ShiftType $shift)
     {
-        if (Auth::user()->can('Delete Warning')) {
+        if (Auth::user()->can('Delete Shift')) {
             //* Destroy shift times 
             $shift_times = ShiftTime::where('shift_type_id', $shift->id)->get()->pluck('id');
             ShiftTime::destroy($shift_times);
