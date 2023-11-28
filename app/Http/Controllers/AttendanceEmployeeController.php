@@ -606,6 +606,21 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'attendance_type' => 'required',
+                'latitude' => 'required',
+                'longitude' => 'required',
+                'accuracy' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return redirect()->back()->with('error', $messages->first());
+        }
+
         $settings = Utility::settings();
 
         $picture_path = null;
