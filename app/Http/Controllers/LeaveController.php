@@ -144,8 +144,13 @@ class LeaveController extends Controller
         // return $leave;
         if (\Auth::user()->can('Edit Leave')) {
             if ($leave->created_by == \Auth::user()->creatorId()) {
-                $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-                $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('title', 'id');
+                $employees = null;
+                if (Auth::user()->type == 'employee') {
+                    $employees = Employee::where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                } else {
+                    $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                }
+                $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get();
 
                 return view('leave.edit', compact('leave', 'employees', 'leavetypes'));
             } else {
@@ -176,7 +181,6 @@ class LeaveController extends Controller
 
     public function update(Request $request, $leave)
     {
-
         $leave = LocalLeave::find($leave);
         if (\Auth::user()->can('Edit Leave')) {
             if ($leave->created_by == Auth::user()->created_by) {
@@ -210,7 +214,6 @@ class LeaveController extends Controller
                 $endDate = new \DateTime($request->end_date);
                 $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
                 if ($leave_type->days >= $total_leave_days) {
-                    $leave->employee_id      = $request->employee_id;
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
