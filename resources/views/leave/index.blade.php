@@ -183,6 +183,15 @@
 
 @push('script-page')
     <script>
+        $(document).ready(function () {
+            console.log('ready');
+            $('#commonModal').on('shown.bs.modal', function () {
+                console.log('new modal show up');
+                $('.status').on('click', function () {
+                    $('#commonModal').modal('hide');
+                })
+            });
+        })
         $(document).on('change', '#employee_id', function() {
             var employee_id = $(this).val();
 

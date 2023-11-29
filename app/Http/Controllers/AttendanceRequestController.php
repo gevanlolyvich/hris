@@ -216,6 +216,7 @@ class AttendanceRequestController extends Controller
         $attendance_request = AttendanceRequest::find($request->attendance_request_id);
         $date = $attendance_request->date;
 
+        $form = null;
         if ($request->status == 'Approved') {
             $form = [
                 'is_approved'   => true,
@@ -227,6 +228,8 @@ class AttendanceRequestController extends Controller
                 'approved_by'   => Auth::user()->id
             ];
         }
+
+        $form_attendance = null;
 
         if ($form['is_approved']) {
             //* Check availability attendance
@@ -323,7 +326,10 @@ class AttendanceRequestController extends Controller
 
         DB::transaction(function () use ($attendance_request, $form, $form_attendance) {
             AttendanceRequest::where('id', $attendance_request->id)->update($form);
-            AttendanceEmployee::create($form_attendance);
+
+            if ($form_attendance) {
+                AttendanceEmployee::create($form_attendance);
+            }
         });
 
         return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));

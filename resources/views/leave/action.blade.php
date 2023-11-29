@@ -81,8 +81,8 @@
 
 @if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
 <div class="modal-footer">
-    <input type="submit" value="{{ __('Approved') }}" class="btn btn-success rounded" name="status">
-    <input type="submit" value="{{ __('Reject') }}" class="btn btn-danger rounded" name="status">
+    <input value="{{ __('Approved') }}" class="btn btn-success rounded bs-pass-para status" name="status">
+    <input value="{{ __('Reject') }}" class="btn btn-danger rounded bs-pass-para status" name="status">
 </div>
 @endif
 
