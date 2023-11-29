@@ -89,11 +89,11 @@
             <div class="form-group">
                 {{ Form::label('color', __('Event Select Color'), ['class' => 'col-form-label d-block mb-3']) }}
                 <div class="btn-group-toggle btn-group-colors event-tag" data-toggle="buttons">
-                    <label class="btn bg-info active p-3"><input type="radio" name="color" value="event-info" checked class="d-none"></label>
-                    <label class="btn bg-warning p-3"><input type="radio" name="color" value="event-warning" class="d-none"></label>
-                    <label class="btn bg-danger p-3"><input type="radio" name="color" value="event-danger" class="d-none"></label>
-                    <label class="btn bg-success p-3"><input type="radio" name="color" value="event-success" class="d-none"></label>
-                    <label class="btn p-3" style="background-color: #51459d !important"><input type="radio" name="color" class="d-none" value="event-primary"></label>
+                    <label id="color-info" class="btn bg-info p-3"><input type="radio" name="color" value="event-info" class="d-none"></label>
+                    <label id="color-warning" class="btn bg-warning p-3"><input type="radio" name="color" value="event-warning" class="d-none"></label>
+                    <label id="color-danger" class="btn bg-danger p-3"><input type="radio" name="color" value="event-danger" class="d-none"></label>
+                    <label id="color-success" class="btn bg-success p-3"><input type="radio" name="color" value="event-success" class="d-none"></label>
+                    <label id="color-primary" class="btn p-3" style="background-color: #51459d !important"><input type="radio" name="color" class="d-none" value="event-primary"></label>
                 </div>
             </div>
         </div>

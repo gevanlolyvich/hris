@@ -104,30 +104,27 @@
                 {{ Form::label('color', __('Event Select Color'), ['class' => 'col-form-label d-block mb-3']) }}
                 <div class=" btn-group-toggle btn-group-colors event-tag" data-toggle="buttons">
                     <label
-                        class="btn bg-info p-3 {{ $event->color == 'event-info'
-                            ? 'custom_color_radio_button
-                                                                        '
-                            : '' }} "><input
+                        class="btn bg-info p-3 {{ $event->color == 'event-info' ? 'btn-outline-primary' : '' }} "><input
                             type="radio" name="color" class="d-none" value="event-info"
                             {{ $event->color == 'event-info' ? 'checked' : '' }}></label>
 
                     <label
-                        class="btn bg-warning p-3 {{ $event->color == 'event-warning' ? 'custom_color_radio_button' : '' }}"><input
+                        class="btn bg-warning p-3 {{ $event->color == 'event-warning' ? 'btn-outline-primary' : '' }}"><input
                             type="radio" class="d-none" name="color" value="event-warning"
                             {{ $event->color == 'event-warning' ? 'checked' : '' }}></label>
 
                     <label
-                        class="btn bg-danger p-3 {{ $event->color == 'event-danger' ? 'custom_color_radio_button' : '' }}"><input
+                        class="btn bg-danger p-3 {{ $event->color == 'event-danger' ? 'btn-outline-primary' : '' }}"><input
                             type="radio" name="color" class="d-none" value="event-danger"
                             {{ $event->color == 'event-danger' ? 'checked' : '' }}></label>
 
 
                     <label
-                        class="btn bg-success p-3 {{ $event->color == 'event-success' ? 'custom_color_radio_button' : '' }}"><input
+                        class="btn bg-success p-3 {{ $event->color == 'event-success' ? 'btn-outline-primary' : '' }}"><input
                             type="radio" class="d-none" name="color" value="event-success"
                             {{ $event->color == 'event-success' ? 'checked' : '' }}></label>
 
-                    <label class="btn p-3 {{ $event->color == 'event-primary' ? 'custom_color_radio_button' : '' }}"
+                    <label class="btn p-3 {{ $event->color == 'event-primary' ? 'btn-outline-primary' : '' }}"
                         style="background-color: #51459d !important"><input type="radio" class="d-none" name="color"
                             value="event-primary" {{ $event->color == 'event-primary' ? 'checked' : '' }}></label>
                 </div>

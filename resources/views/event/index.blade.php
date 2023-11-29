@@ -348,12 +348,29 @@
 
         $(document).ready(function () {
             $('#create-event').click(function () {
-            })
+                $('#commonModal').on('shown.bs.modal', function () {
+                    $('.btn-group-colors label').on('click', function () {
+                        // Remove the 'btn-outline-dark' class from all labels
+                        $('.btn-group-colors label').removeClass('btn-outline-primary');
+
+                        // Add the 'btn-outline-dark' class to the clicked label
+                        $(this).addClass('btn-outline-primary');
+                    });
+                })
+            });
 
             $('.edit-event').click(function () {
                 $('#commonModal').on('shown.bs.modal', function () {
                     var b_id = $('#branch_id').val();
                     getDepartment(b_id);
+
+                    $('.btn-group-colors label').on('click', function () {
+                        // Remove the 'btn-outline-dark' class from all labels
+                        $('.btn-group-colors label').removeClass('btn-outline-primary');
+
+                        // Add the 'btn-outline-dark' class to the clicked label
+                        $(this).addClass('btn-outline-primary');
+                    });
                 })
             })
 
