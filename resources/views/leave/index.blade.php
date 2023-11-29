@@ -184,14 +184,16 @@
 @push('script-page')
     <script>
         $(document).ready(function () {
-            console.log('ready');
             $('#commonModal').on('shown.bs.modal', function () {
-                console.log('new modal show up');
                 $('.status').on('click', function () {
                     $('#commonModal').modal('hide');
+                    
+                    var buttonValue = $(this).data("status");
+                    $("#hiddenStatus").val(buttonValue);
                 })
             });
-        })
+        });
+
         $(document).on('change', '#employee_id', function() {
             var employee_id = $(this).val();
 
@@ -203,13 +205,11 @@
                     "_token": "{{ csrf_token() }}",
                 },
                 success: function(data) {
-
                     $('#leave_type_id').empty();
                     $('#leave_type_id').append(
                         '<option value="">{{ __('Select Leave Type') }}</option>');
 
                     $.each(data, function(key, value) {
-
                         if (value.total_leave == value.days) {
                             $('#leave_type_id').append('<option value="' + value.id +
                                 '" disabled>' + value.title + '&nbsp(' + value.total_leave +

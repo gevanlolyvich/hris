@@ -159,11 +159,12 @@
 @push('script-page')
     <script>
         $(document).ready(function () {
-            console.log('ready');
             $('#commonModal').on('shown.bs.modal', function () {
-                console.log('new modal show up');
                 $('.status').on('click', function () {
                     $('#commonModal').modal('hide');
+
+                    var buttonValue = $(this).data("status");
+                    $("#hiddenStatus").val(buttonValue);
                 })
             });
         })

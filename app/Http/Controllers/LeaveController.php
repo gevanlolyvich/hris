@@ -179,7 +179,7 @@ class LeaveController extends Controller
 
         $leave = LocalLeave::find($leave);
         if (\Auth::user()->can('Edit Leave')) {
-            if ($leave->created_by == Auth::user()->creatorId()) {
+            if ($leave->created_by == Auth::user()->created_by) {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -266,12 +266,12 @@ class LeaveController extends Controller
 
         $leave->status = $request->status;
         $leave->note = $request->note;
-        if ($leave->status == 'Approval') {
+        if ($leave->status == 'Approved') {
             $startDate               = new \DateTime($leave->start_date);
             $endDate                 = new \DateTime($leave->end_date);
             $total_leave_days        = $startDate->diff($endDate)->days;
             $leave->total_leave_days = $total_leave_days + 1;
-            $leave->status           = 'Approve';
+            $leave->status           = 'Approved';
             $leave->note             = $request->note;
         }
 
@@ -291,33 +291,35 @@ class LeaveController extends Controller
             }
         }
 
-        $leaveAttendance = AttendanceStatus::find(4);
-        for ($i = 0; $i < count($dates); $i++) {
-            $date = $dates[$i];
-
-            AttendanceEmployee::create([
-                'employee_id'           => $leave->employee_id,
-                'date'                  => $date,
-                'attendance_status_id'  => $leaveAttendance->id,
-                'status'                => $leaveAttendance->name,
-                'clock_in'              => '00:00:00',
-                'clock_out'             => '00:00:00',
-                'late'                  => '00:00:00',
-                'early_leaving'         => '00:00:00',
-                'work_hours'            => '00:00:00',
-                'overtime'              => '00:00:00',
-                'total_rest'            => '00:00:00',
-                'created_by'            => $leave->employee_id,
-                'attendance_type_id'    => null, //* ON SITE
-                'coord_in'              => null,
-                'coord_out'             => null,
-                'is_valid'              => true,
-                'validate_by'           => Auth::user()->id,
-            ]);
+        if ($request->status == 'Approved') {
+            $leaveAttendance = AttendanceStatus::find(4);
+            for ($i = 0; $i < count($dates); $i++) {
+                $date = $dates[$i];
+    
+                AttendanceEmployee::create([
+                    'employee_id'           => $leave->employee_id,
+                    'date'                  => $date,
+                    'attendance_status_id'  => $leaveAttendance->id,
+                    'status'                => $leaveAttendance->name,
+                    'clock_in'              => '00:00:00',
+                    'clock_out'             => '00:00:00',
+                    'late'                  => '00:00:00',
+                    'early_leaving'         => '00:00:00',
+                    'work_hours'            => '00:00:00',
+                    'overtime'              => '00:00:00',
+                    'total_rest'            => '00:00:00',
+                    'created_by'            => $leave->employee_id,
+                    'attendance_type_id'    => null, //* ON SITE
+                    'coord_in'              => null,
+                    'coord_out'             => null,
+                    'is_valid'              => true,
+                    'validate_by'           => Auth::user()->id,
+                ]);
+            }
         }
 
         // twilio  
-        $setting = Utility::settings(\Auth::user()->creatorId());
+        $setting = Utility::settings();
         $emp = Employee::find($leave->employee_id);
         if (isset($setting['twilio_leave_approve_notification']) && $setting['twilio_leave_approve_notification'] == 1) {
             $msg = __("Your leave has been") . ' ' . $leave->status . '.';
@@ -376,7 +378,7 @@ class LeaveController extends Controller
 
     public function calender(Request $request)
     {
-        $created_by = Auth::user()->creatorId();
+        $created_by = Auth::user()->created_by;
         $Meetings = LocalLeave::where('created_by', $created_by)->get();
         // dd($Meetings);
         $today_date = date('m');
