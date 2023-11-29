@@ -85,10 +85,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
 
 
-                                <li class="dash-item">
+                                {{-- <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('report.timesheet') }}">{{ __('Timesheet') }}</a>
-                                </li>
+                                </li> --}}
                             @endcan
 
 
@@ -221,16 +221,16 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Timesheet') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
-                            @can('Manage TimeSheet')
+                            {{-- @can('Manage TimeSheet')
                                 <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('timesheet.index') }}">{{ __('Timesheet') }}</a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                             @can('Manage Leave')
                                 <li class="dash-item">
                                     <a class="dash-link"
-                                        href="{{ route('leave.index') }}">{{ __('Manage Leave') }}</a>
+                                        href="{{ route('leave.index') }}">{{ __('Leave') }}</a>
                                 </li>
                             @endcan
                             @can('Manage Attendance')
