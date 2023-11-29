@@ -62,8 +62,8 @@
 
     @if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
     <div class="modal-footer">
-        <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $leave->status == 'Reject' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
-        <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $leave->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>
+        <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $attendance_request->is_approved == '1' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
+        <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $attendance_request->is_approved == '1' ? 'disabled' : ''}}>{{ __('Reject') }}</button>
         <input type="hidden" name="status" id="hiddenStatus">
     </div>
     @endif
