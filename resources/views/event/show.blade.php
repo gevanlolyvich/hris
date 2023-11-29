@@ -751,7 +751,7 @@
                                         <td>
                                             {{ !empty(\Auth::user()->getDesignation($eventP->employee->designation_id)) ? \Auth::user()->getDesignation($eventP->employee->designation_id)->name : '' }}
                                         </td>
-                                        @if ((\Auth::user()?->employee?->id == $eventP->employee->id))
+                                        @if (\Auth::user()?->employee?->id == $eventP->employee->id || \Auth::user()->type != 'employee')
                                             <td>
                                                 <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
                                                     data-event-employee-id="{{ $eventP->id }}"
