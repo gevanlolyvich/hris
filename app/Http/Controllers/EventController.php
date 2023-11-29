@@ -24,8 +24,9 @@ class EventController extends Controller
             $today_date = date('m');
 
             if (\Auth::user()->type != 'employee') {
-                $events    = LocalEvent::get();
+                $events    = LocalEvent::orderby('start_date', 'DESC')->get();
                 $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                    ->orderby('start_date', 'DESC')
                     ->whereNotNull(['start_date','end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
@@ -50,7 +51,7 @@ class EventController extends Controller
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
                     ->whereIn('event_employees.employee_id', $employee_id)
                     ->whereOr('events.created_by', \Auth::user()->id)
-                    ->distinct()->get();
+                    ->orderby('events.start_date', 'DESC')->distinct()->get();
 
                 $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
@@ -61,7 +62,7 @@ class EventController extends Controller
                             $q->whereMonth('start_date',$today_date)
                               ->orWhereMonth('end_date',$today_date);
                         }
-                    )->distinct()->get();
+                    )->orderby('events.start_date', 'DESC')->distinct()->get();
             }
             $arrEvents = [];
             foreach ($events as $event) {
