@@ -299,6 +299,7 @@ class LeaveController extends Controller
             for ($i = 0; $i < count($dates); $i++) {
                 $date = $dates[$i];
     
+                AttendanceEmployee::where('employee_id', $leave->employee_id)->where('date', $date)->delete();
                 AttendanceEmployee::create([
                     'employee_id'           => $leave->employee_id,
                     'date'                  => $date,
