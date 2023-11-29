@@ -196,7 +196,6 @@
 
         function get_data() {
             var calender_type = $('#calender_type :selected').val();
-            console.log(calender_type);
             $('#calendar').removeClass('local_calender');
             $('#calendar').removeClass('google_calender');
             if(calender_type==undefined){
@@ -238,7 +237,6 @@
                             handleWindowResize: true,
                             events: data,
                         });
-                        console.log(data);
                         calendar.render();
                     })();
                 }
@@ -320,9 +318,6 @@
     <script>
         $(document).ready(() => {
             $(document).on('change', '[name="myDocument"]', function () {
-                console.log(this.files[0]);
-                console.log(this.files[0].name);
-                console.log(window.URL.createObjectURL(this.files[0]));
                 const file = document.getElementById('uploadFile');
                 file.style.display = '';
                 file.style['max-width'] = '';
@@ -334,6 +329,7 @@
     <script>
         let map = null;
         let layer = L.layerGroup();
+        let mapOpened = false;
 
         function onMapClick(e, map) {
             const latitude = document.getElementById("latitude");
@@ -352,62 +348,12 @@
 
         $(document).ready(function () {
             $('#create-event').click(function () {
-                $('#commonModal').on('shown.bs.modal', function () {
-                    // If a map already exists, remove it
-                    if (map !== null) {
-                        map?.remove();
-                    }
-    
-                    map = L.map('openStreetMapContainer').setView([-6.17436,106.82596], 15);
-    
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
-                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
-                    }).addTo(map);
-
-                    if(map.hasLayer(layer)){
-                        layer.clearLayers();
-                    }
-
-                    map.on('click', function (e) {
-                        onMapClick(e, map)
-                    });
-                })
             })
 
             $('.edit-event').click(function () {
                 $('#commonModal').on('shown.bs.modal', function () {
                     var b_id = $('#branch_id').val();
                     getDepartment(b_id);
-
-                    // If a map already exists, remove it
-                    if (map !== null) {
-                        map?.remove();
-                    }
-    
-                    let latitude = document.getElementById("latitude").value;
-                    let longitude = document.getElementById("longitude").value;
-
-                    map = L.map('openStreetMapContainer').setView([latitude || '-6.17436', longitude || '106.82596'], 15);
-    
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
-                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
-                    }).addTo(map);
-
-                    if(map.hasLayer(layer)){
-                        layer.clearLayers();
-                    }
-
-                    let marker = L.marker([latitude, longitude]).addTo(map);
-                    layer.addLayer(marker);
-                    map.addLayer(layer);
-
-                    map.on('click', function (e) {
-                        onMapClick(e, map)
-                    });
                 })
             })
 
@@ -416,7 +362,75 @@
                 if (layer !== null) {
                     layer.clearLayers();
                 }
+
+                mapOpened = false;
             });
+
+            $('body').on('click', '#get-location', function () {
+                let query = document.getElementById('location-input');
+
+                if (query.value) {
+                    $.ajax({
+                        url: `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query.value)}&format=json`,
+                        type: 'GET',
+                        success: function(data) {
+                            if (data.length) {
+                                let lat = document.getElementById("latitude");
+                                let lon = document.getElementById("longitude");
+                                lat.value = data[0].lat;
+                                lon.value = data[0].lon;
+
+                                if (map) {
+                                    map.setView([lat.value, lon.value])
+                                    let marker = L.marker([lat.value, lon.value]).addTo(map);
+                                    layer.addLayer(marker);
+                                    map.addLayer(layer);
+                                }
+                            } else {
+                                alert('Location Not Found');
+                            }
+                        }
+                    });
+                }
+            })
+
+            $('body').on('click', '#show-map', function () {
+                mapOpened = mapOpened ? false : true;
+                if (mapOpened) {
+                    document.getElementById('map-box').style.display = '';
+
+                    if (map !== null) {
+                        map?.remove();
+                    }
+
+                    let latitude = document.getElementById("latitude").value;
+                    let longitude = document.getElementById("longitude").value;
+
+                    map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
+                        
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
+                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
+                    }).addTo(map);
+                        
+                    if(map.hasLayer(layer)){
+                        layer.clearLayers();
+                    }
+
+                    if (Number(latitude) != 0 && Number(longitude) != 0) {
+                        let marker = L.marker([latitude, longitude]).addTo(map);
+                        layer.addLayer(marker);
+                        map.addLayer(layer);
+                    }
+                        
+                    map.on('click', function (e) {
+                        onMapClick(e, map)
+                    });
+                } else {
+                    document.getElementById('map-box').style.display = 'none';
+                }
+            })
         });
     </script>
 @endpush
