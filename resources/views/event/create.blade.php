@@ -61,13 +61,21 @@
                 {{ Form::date('end_date', null, ['class' => 'form-control datetime-local ','autocomplete'=>'off' ]) }}
             </div>
         </div>
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xl-12">
+        <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
             <div class="form-group">
                 {{ Form::label('location', __('Event Location'), ['class' => 'col-form-label']) }}
-                {{ Form::text('location', null, ['class' => 'form-control ', 'placeholder' => __('Enter Event Location')]) }}
+                {{ Form::text('location', null, ['class' => 'form-control ', 'id' => 'location-input', 'placeholder' => __('Enter Event Location')]) }}
             </div>
         </div>
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
+            <div class="form-group">
+                {{ Form::label('location action', __('Location Action'), ['class' => 'col-form-label']) }}
+                <br>
+                <button class="btn bg-primary btn-lg text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
+                <button class="btn bg-primary btn-lg text-white" type="button" id="show-map">{{__('Show Map')}}</button>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12" style="display: none;" id="map-box">
             <div class="form-group">
                 {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
                 <div id="openStreetMapContainer" style="height: 400px;"></div>
@@ -75,16 +83,17 @@
                 <input type="hidden" name="longitude" id="longitude" value="0">
             </div>
         </div>
+
         <div></div>
         <div class="col-md-12 col-sm-12 col-lg-12 col-xl-12">
             <div class="form-group">
                 {{ Form::label('color', __('Event Select Color'), ['class' => 'col-form-label d-block mb-3']) }}
                 <div class="btn-group-toggle btn-group-colors event-tag" data-toggle="buttons">
-                    <label class="btn bg-info active p-3"><input type="radio" name="color" value="event-info" checked class="d-none"></label>
-                    <label class="btn bg-warning p-3"><input type="radio" name="color" value="event-warning" class="d-none"></label>
-                    <label class="btn bg-danger p-3"><input type="radio" name="color" value="event-danger" class="d-none"></label>
-                    <label class="btn bg-success p-3"><input type="radio" name="color" value="event-success" class="d-none"></label>
-                    <label class="btn p-3" style="background-color: #51459d !important"><input type="radio" name="color" class="d-none" value="event-primary"></label>
+                    <label id="color-info" class="btn bg-info p-3"><input type="radio" name="color" value="event-info" class="d-none"></label>
+                    <label id="color-warning" class="btn bg-warning p-3"><input type="radio" name="color" value="event-warning" class="d-none"></label>
+                    <label id="color-danger" class="btn bg-danger p-3"><input type="radio" name="color" value="event-danger" class="d-none"></label>
+                    <label id="color-success" class="btn bg-success p-3"><input type="radio" name="color" value="event-success" class="d-none"></label>
+                    <label id="color-primary" class="btn p-3" style="background-color: #51459d !important"><input type="radio" name="color" class="d-none" value="event-primary"></label>
                 </div>
             </div>
         </div>

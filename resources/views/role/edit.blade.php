@@ -107,6 +107,11 @@
                                 'Career',
                                 'Report',
                                 'Performance Type',
+                                'Shift',
+                                'Assignment',
+                                'Permit Type',
+                                'Permit',
+                                'Request Attendance',
                             ];
                             if (Auth::user()->type == 'super admin') {
                                 $modules[] = 'Language';
@@ -203,6 +208,14 @@
                                                 </div>
                                             @endif
                                         @endif
+                                        @if (in_array('Approval ' . $module, (array) $permissions))
+                                                @if ($key = array_search('Approval ' . $module, $permissions))
+                                                    <div class="col-md-3 custom-control custom-checkbox">
+                                                        {{ Form::checkbox('permissions[]', $key, $role->permission, ['class' => 'form-check-input isscheck isscheck_' . str_replace(' ', '', $module), 'id' => 'permission' . $key]) }}
+                                                        {{ Form::label('permission' . $key, 'Approval', ['class' => 'form-label font-weight-500']) }}<br>
+                                                    </div>
+                                                @endif
+                                            @endif
                                     </div>
                                 </td>
                             </tr>

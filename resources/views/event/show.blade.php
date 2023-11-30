@@ -197,6 +197,10 @@
  
                 let myDocument = $(this).data('document');
                 let note = $(this).data('note');
+
+                if (myDocument || note) {
+                    document.getElementById('report-data-not-exist').style.display = 'none';
+                }
  
                 if (myDocument) {
                     document.getElementById('document-form-data').style.display = '';
@@ -219,7 +223,11 @@
                 pictureIn = $(this).data('picture-in');
                 pictureOut = $(this).data('picture-out');
 
-                if (clockIn?.length || coordIn?.length || pictureIn?.length) {
+                if (clockIn?.length || clockOut?.length) {
+                    document.getElementById('clock-data-not-exist').style.display = 'none';
+                }
+
+                if (clockIn?.length || coordIn?.length > 1 || pictureIn?.length) {
                     document.getElementById('clock-in-data').style.display = '';
 
                     if (clockIn?.length) {
@@ -232,7 +240,7 @@
                     }
                 }
 
-                if (clockOut?.length || coordOut?.length || pictureOut?.length) {
+                if (clockOut?.length || coordOut?.length > 1 || pictureOut?.length) {
                     document.getElementById('clock-out-data').style.display = '';
 
                     if (clockOut?.length) {
@@ -316,6 +324,8 @@
                 document.getElementById('document-form-data').style.display = 'none';
                 document.getElementById('note-form-data').style.display = 'none';
 
+                document.getElementById('report-data-not-exist').style.display = '';
+
                 document.getElementById('document-name').textContent = '';
                 document.getElementById('document-data').href = '#';
                 document.getElementById('note-data').textContent = '';
@@ -330,6 +340,8 @@
 
                 document.getElementById('photosIn').style.display = 'none';
                 document.getElementById('photosOut').style.display = 'none';
+
+                document.getElementById('clock-data-not-exist').style.display = '';
 
                 // Remove the map instances and their containers
                 if (mapIn !== null && coordIn?.length > 1) {
@@ -583,6 +595,9 @@
                         <textarea name="note-data" class="form-control" id="note-data" rows="3"></textarea>
                     </div>
                 </div>
+                <div class="form-group text-center" id="report-data-not-exist">
+                    <h5>Data Doesn't Exist</h5>
+                </div>
             </div>
         </div>
     </div>
@@ -633,6 +648,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="form-group text-center" id="clock-data-not-exist">
+                    <h5>Data Doesn't Exist</h5>
                 </div>
             </div>
         </div>
@@ -733,7 +751,7 @@
                                         <td>
                                             {{ !empty(\Auth::user()->getDesignation($eventP->employee->designation_id)) ? \Auth::user()->getDesignation($eventP->employee->designation_id)->name : '' }}
                                         </td>
-                                        @if ((\Auth::user()?->employee?->id == $eventP->employee->id))
+                                        @if (\Auth::user()?->employee?->id == $eventP->employee->id || \Auth::user()->type != 'employee')
                                             <td>
                                                 <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
                                                     data-event-employee-id="{{ $eventP->id }}"

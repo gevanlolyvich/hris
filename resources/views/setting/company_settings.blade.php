@@ -401,7 +401,7 @@
                                                                 <img id="image1" alt="your image"
                                                                     src="{{ $logo . (isset($company_logo_light) && !empty($company_logo_light) ? $company_logo_light : 'light_logo.png') }}"
                                                                     width="150px"
-                                                                    class="big-logo"style="filter: drop-shadow(2px 3px 7px #011c4b);">
+                                                                    class="big-logo">
                                                             </a>
                                                         </div>
                                                         <div class="choose-files mt-5">

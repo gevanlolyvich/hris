@@ -85,10 +85,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
 
 
-                                <li class="dash-item">
+                                {{-- <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('report.timesheet') }}">{{ __('Timesheet') }}</a>
-                                </li>
+                                </li> --}}
                             @endcan
 
 
@@ -221,16 +221,16 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Timesheet') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
-                            @can('Manage TimeSheet')
+                            {{-- @can('Manage TimeSheet')
                                 <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('timesheet.index') }}">{{ __('Timesheet') }}</a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                             @can('Manage Leave')
                                 <li class="dash-item">
                                     <a class="dash-link"
-                                        href="{{ route('leave.index') }}">{{ __('Manage Leave') }}</a>
+                                        href="{{ route('leave.index') }}">{{ __('Leave') }}</a>
                                 </li>
                             @endcan
                             @can('Manage Attendance')
@@ -391,7 +391,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
 
                 <!-- HR-->
-                @if ( Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Termination') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday'))
+                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Termination') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i

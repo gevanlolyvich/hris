@@ -4,7 +4,7 @@
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-                {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee')]) }}
+                {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee'), 'disabled' => 'disabled']) }}
             </div>
         </div>
     </div>
@@ -12,7 +12,17 @@
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                {{ Form::select('leave_type_id', $leavetypes, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
+                <select name="leave_type_id" id="leave_type_id" class="form-control select">
+                    @foreach ($leavetypes as $leavee)
+                        @if ($leave->leave_type_id == $leavee->id)
+                            <option value="{{ $leavee->id }}" selected>{{ $leavee->title }} (<p class="float-right pr-5">
+                                    {{ $leavee->days }}</p>)</option>
+                        @else
+                            <option value="{{ $leavee->id }}">{{ $leavee->title }} (<p class="float-right pr-5">
+                                    {{ $leavee->days }}</p>)</option>
+                        @endif
+                    @endforeach
+                </select>
             </div>
         </div>
     </div>

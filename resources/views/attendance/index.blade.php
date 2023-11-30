@@ -222,7 +222,7 @@
                                     <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                 @endif --}}
                                 <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
-                                <td>{{ $attendance->employee->shift_type->name }}</td>
+                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                 <td>{{ $attendance->status }}</td>
                                 <!-- Modify Clock In and Clock Out columns in your table -->
@@ -232,27 +232,29 @@
                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                         </a>
                                     @else
-                                        {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                        <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
+                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                        </a>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($attendance->coord_out)
-                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_out }}" data-image="{{ $attendance->picture_out }}">
-                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
-                                    </a>
+                                        <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_out }}" data-image="{{ $attendance->picture_out }}">
+                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                        </a>
                                     @else
-                                    <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
-                                    </a>
+                                        <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                        </a>
                                     @endif
                                 </td>
                                 <td>
-                                    <span @if($attendance->late != '00:00:00') class="btn btn-danger btn-sm text-center disabled" @endif>
+                                    <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                         {{ $attendance->late }}
                                     </span>
                                 </td>
                                 <td>
-                                    <span @if($attendance->early_leaving != '00:00:00') class="btn btn-danger btn-sm text-center disabled" @endif>
+                                    <span @if($attendance->early_leaving != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                         {{ $attendance->early_leaving }}
                                     </span>
                                 </td>

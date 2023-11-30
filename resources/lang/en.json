@@ -1660,5 +1660,7 @@
     "Coordinate": "Coordinate",
     "Get Current Location Coordinate": "Get Current Location Coordinate",
     "Enter Your Address": "Enter Your Address",
-    "Home Address Changes": "Home Address Changes"
+    "Home Address Changes": "Home Address Changes",
+    "Search Location": "Search Location",
+    "Show Map": "Show Map"
 }

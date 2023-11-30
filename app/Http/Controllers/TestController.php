@@ -11,6 +11,7 @@ use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -61,9 +62,19 @@ class TestController extends Controller
             }));
             
             LogAttendance::insert($parsed_data);
-    
-            for ($i=0; $i < count($parsed_data); $i++) {
-                $employee = Employee::where('personel_id', $parsed_data[$i]['personel_id'])->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
+
+            $final_data = DB::table('log_attendances')
+                ->select('personel_id', DB::raw('MIN(min) as min'), DB::raw('MAX(max) as max'), 'coordinate', 'date')
+                ->where('date', date('Y-m-d'))
+                ->groupBy('personel_id')
+                ->get();
+            // Log::info(json_encode($final_data, JSON_PRETTY_PRINT));
+
+            // foreach ($final_data as $f_data)
+            // for ($i=0; $i < count($final_data); $i++)
+            foreach ($final_data as $f_data) {
+                Log::info(json_encode($f_data, JSON_PRETTY_PRINT));
+                $employee = Employee::where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
                 $shift_times = ShiftTime::where('shift_type_id',$employee->shift_type->id)
                     ->where('days',date('l'))
                     ->select(['is_working', 'start_time', 'end_time'])
@@ -90,26 +101,20 @@ class TestController extends Controller
                 $yesterday_clock_in = $yesterday_attendance['clock_in'] ?? null;
                 $yesterday_clock_out = null;
 
-                if ($cross_day && strtotime($parsed_data[$i]['max']) > $absolute_in  && empty($attendance)) {
-                    $clock_in = $parsed_data[$i]['max'];
-                } elseif (strtotime($parsed_data[$i]['min']) > $absolute_in  && empty($attendance)) {
-                    $clock_in = $parsed_data[$i]['min'];
+                if ($cross_day && strtotime($f_data->max) > $absolute_in  && empty($attendance)) {
+                    $clock_in = $f_data->max;
+                } elseif (strtotime($f_data->min) > $absolute_in  && empty($attendance)) {
+                    $clock_in = $f_data->min;
                 }
 
-                if ($yesterday_cross_day && strtotime($parsed_data[$i]['max']) < $yesterday_absolute_out) {
-                    $yesterday_clock_out = $parsed_data[$i]['max'];
-                } elseif (strtotime($parsed_data[$i]['max']) < $absolute_out) {
-                    $clock_out = $parsed_data[$i]['max'];
+                if ($yesterday_cross_day && strtotime($f_data->max) < $yesterday_absolute_out) {
+                    $yesterday_clock_out = $f_data->max;
+                } elseif (strtotime($f_data->max) < $absolute_out) {
+                    $clock_out = $f_data->max;
                 }
 
                 // * Calculating late
                 $late = '00:00:00';
-                if ($parsed_data[$i]['personel_id'] == 2) {
-                    Log::info($clock_in);
-                    Log::info(strtotime($clock_in) > strtotime($shift_times->start_time));
-                    Log::info(strtotime($clock_in));
-                    Log::info(strtotime($shift_times->start_time));
-                }
                 if (strtotime($clock_in) > strtotime($shift_times->start_time)) {
                     $totalLateSeconds = strtotime($clock_in) - strtotime($shift_times->start_time);
                     $late_hours = floor($totalLateSeconds / 3600);
@@ -165,20 +170,23 @@ class TestController extends Controller
 
                 // ? Create / Update Attendance
                 if ($yesterday_clock_out && $yesterday_attendance) {
+                    Log::info('Updating Yesterday Attendace Data');
                     $yesterday_attendance->clock_out     = $yesterday_clock_out;
                     $yesterday_attendance->work_hours    = $yesterday_shift_times->is_working ? $workhours : '00:00:00';
                     $yesterday_attendance->overtime      = $yesterday_shift_times->is_working ? $workhours : '00:00:00';
                     $yesterday_attendance->early_leaving = $yesterday_shift_times->is_working ? $early_leaving : '00:00:00';
-                    $yesterday_attendance->coord_out     = $parsed_data[$i]['coordinate'];
+                    $yesterday_attendance->coord_out     = $f_data->coordinate;
                     $yesterday_attendance->save();
                 } elseif ($attendance && $clock_out) {
+                    Log::info('Updating Today Attendace Data');
                     $attendance->clock_out     = $clock_out;
                     $attendance->work_hours    = $shift_times->is_working ? $workhours : '00:00:00';
                     $attendance->overtime      = $shift_times->is_working ? $workhours : '00:00:00';
                     $attendance->early_leaving = $shift_times->is_working ? $early_leaving : '00:00:00';
-                    $attendance->coord_out     = $parsed_data[$i]['coordinate'];
+                    $attendance->coord_out     = $f_data->coordinate;
                     $attendance->save();
                 } else {
+                    Log::info('Creating New Attendace Data');
                     $new_attendance = new AttendanceEmployee();
                     $new_attendance->employee_id          = $employee->id;
                     $new_attendance->date                 = $date;
@@ -193,9 +201,10 @@ class TestController extends Controller
                     $new_attendance->total_rest           = '00:00:00';
                     $new_attendance->created_by           = $employee->user_id;
                     $new_attendance->attendance_type_id   = 1; //* ON SITE
-                    $new_attendance->coord_in             = $parsed_data[$i]['coordinate'];
+                    $new_attendance->coord_in             = $f_data->coordinate;
                     $new_attendance->is_valid             = true;
                     $new_attendance->validate_by          = 1; //* System
+                    $new_attendance->shift_type_id        = $employee->shift_type_id;
                     $new_attendance->save();
                 }
             }
