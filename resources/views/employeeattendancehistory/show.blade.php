@@ -144,59 +144,84 @@
             </div>
         </div>
     </div>
-  </div>
+</div>
 
-<div class="col-sm-12">
-  <div class=" mt-2 " id="multiCollapseExample1">
-      <div class="card">
-          <div class="card-body">
-              {{ Form::open(array('route' => array('employeeattendancehistory.show', $id),'method'=>'get','id'=>'employeeattendancehistory_filter')) }}
-              <div class="row align-items-center justify-content-end">
-                  <div class="col-xl-10">
-                      <div class="row">
-                          <div class="col-3">
-                              <label class="form-label">{{__('Type')}}</label>
-                              <br>
-                              <div class="form-check form-check-inline form-group">
-                                  <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':'checked'}}>
-                                  <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
-                              </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body fulls-card">
+                <div class="row text-center">
+                    <div class="col-3">
+                        <h6 style="margin-bottom: 0px">{{ $employee->name }}</h6>
+                    </div>
+                    <div class="col-3">
+                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col-3">
+                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col-3">
+                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+      <div class="mt-2" id="multiCollapseExample1">
+          <div class="card">
+              <div class="card-body">
+                  {{ Form::open(array('route' => array('employeeattendancehistory.show', $id),'method'=>'get','id'=>'employeeattendancehistory_filter')) }}
+                  <div class="row align-items-center justify-content-end">
+                      <div class="col-xl-10">
+                          <div class="row">
+                              <div class="col-3">
+                                  <label class="form-label">{{__('Type')}}</label>
+                                  <br>
                                   <div class="form-check form-check-inline form-group">
-                                      <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':''}}>
-                                      <label class="form-check-label" for="daily">{{__('Daily')}}</label>
+                                      <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':'checked'}}>
+                                      <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
                                   </div>
-                          </div>
-                          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 month">
-                              <div class="btn-box">
-                                  {{Form::label('month',__('Month'),['class'=>'form-label'])}}
-                                  {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
+                                      <div class="form-check form-check-inline form-group">
+                                          <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':''}}>
+                                          <label class="form-check-label" for="daily">{{__('Daily')}}</label>
+                                      </div>
                               </div>
-                          </div>
-                          <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
-                              <div class="btn-box">
-                                  {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
-                                  {{ Form::date('date',isset($_GET['date'])?$_GET['date']:'', array('class' => 'form-control month-btn')) }}
+                              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 month">
+                                  <div class="btn-box">
+                                      {{Form::label('month',__('Month'),['class'=>'form-label'])}}
+                                      {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
+                                  </div>
+                              </div>
+                              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
+                                  <div class="btn-box">
+                                      {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
+                                      {{ Form::date('date',isset($_GET['date'])?$_GET['date']:'', array('class' => 'form-control month-btn')) }}
+                                  </div>
                               </div>
                           </div>
                       </div>
-                  </div>
-                  <div class="col-auto mt-4">
-                      <div class="row">
-                          <div class="col-auto">
-                              <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
-                                  <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
-                              </a>
-                              <a href="{{route('employeeattendancehistory.show', $id)}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
-                                  <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
-                              </a>
+                      <div class="col-auto mt-4">
+                          <div class="row">
+                              <div class="col-auto">
+                                  <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                                      <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                                  </a>
+                                  <a href="{{route('employeeattendancehistory.show', $id)}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                      <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                                  </a>
+                              </div>
                           </div>
                       </div>
                   </div>
               </div>
+              {{ Form::close() }}
           </div>
-          {{ Form::close() }}
       </div>
-  </div>
+    </div>
 </div>
 
 <div class="row">
