@@ -90,10 +90,10 @@
     </script>
 @endpush
 @section('action-button')
-<!-- <a class="btn btn-sm btn-primary collapsed" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
-        aria-expanded="false" aria-controls="multiCollapseExample1" data-bs-toggle="tooltip" title="{{ __('Filter') }}">
-        <i class="ti ti-filter"></i>
-    </a> -->
+    <a href="{{ route('attendanceemployee.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+        data-bs-original-title="{{ __('Export') }}">
+        <i class="ti ti-file-export"></i>
+    </a>
 @endsection
 @section('content')
 <!-- Update the modal structure in your Blade template -->
