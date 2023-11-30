@@ -68,12 +68,13 @@
                         </label>      
                     </div>
                     <div class="col-md-12">
-                        <div class="form-group">
-                            {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label']) !!}
-                            {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder'=>'Choose attendance type']) }}
+                        <div class="form-group mb-1">
+                            {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                            {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
                         </div>
                         <div class="form-group">
-                            {{-- {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!} --}}
+                            {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
                             {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
                         </div>
                         <input type="hidden" name="latitude" id="latitude" value="0">
@@ -82,10 +83,13 @@
                     </div>
                     <div class="col-md-6 text-center mx-auto mt-1">
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in"
                                 class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                        @elseif (empty($employeeAttendance))
+                        @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out'])))
+                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                        @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
                                 class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                         @else
@@ -97,7 +101,7 @@
                     <div class="col-md-6 text-center mx-auto mt-3">
                         {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                         {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
-                        @if ($yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out'])
+                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out'])
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">

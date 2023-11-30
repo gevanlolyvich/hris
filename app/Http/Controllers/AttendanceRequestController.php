@@ -216,6 +216,7 @@ class AttendanceRequestController extends Controller
         $attendance_request = AttendanceRequest::find($request->attendance_request_id);
         $date = $attendance_request->date;
 
+        $form = null;
         if ($request->status == 'Approved') {
             $form = [
                 'is_approved'   => true,
@@ -228,13 +229,9 @@ class AttendanceRequestController extends Controller
             ];
         }
 
-        if ($form['is_approved']) {
-            //* Check availability attendance
-            $attendance = AttendanceEmployee::where('employee_id', $attendance_request->employee->id)->where('date', $date)->first();
-            if ($attendance) {
-                return redirect()->back()->with('error', __('You were present on that date already'));
-            }
+        $form_attendance = null;
 
+        if ($form['is_approved']) {
             //* Method Create Attendance
             $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
                 ->where('days', date('l'))
@@ -245,12 +242,17 @@ class AttendanceRequestController extends Controller
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
 
-                $totalLateSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $startTime);
+                $totalLateSeconds = strtotime($date . $attendance_request->start_time) - strtotime($date . $startTime);
 
-                $hours = floor($totalLateSeconds / 3600);
-                $mins  = floor($totalLateSeconds / 60 % 60);
-                $secs  = floor($totalLateSeconds % 60);
-                $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+                if ($totalLateSeconds > 0) {
+                    $hours = floor($totalLateSeconds / 3600);
+                    $mins  = floor($totalLateSeconds / 60 % 60);
+                    $secs  = floor($totalLateSeconds % 60);
+                    $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                } else {
+                    $late  = '00:00:00';
+                }
 
                 //work hours
                 $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
@@ -261,11 +263,14 @@ class AttendanceRequestController extends Controller
 
                 //early Leaving
                 $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($date . $attendance_request->end_time);
-                $hours                    = floor($totalEarlyLeavingSeconds / 3600);
-                $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
-                $secs                     = floor($totalEarlyLeavingSeconds % 60);
-                $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
+                if ($totalEarlyLeavingSeconds > 0) {
+                    $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                } else {
+                    $earlyLeaving             = '00:00:00';
+                }
 
                 if (strtotime($date . $attendance_request->end_time) > strtotime($date . $endTime)) {
                     //Overtime
@@ -323,7 +328,12 @@ class AttendanceRequestController extends Controller
 
         DB::transaction(function () use ($attendance_request, $form, $form_attendance) {
             AttendanceRequest::where('id', $attendance_request->id)->update($form);
-            AttendanceEmployee::create($form_attendance);
+
+
+            if ($form_attendance && $form['is_approved']) {
+                AttendanceEmployee::where('employee_id', $form_attendance['employee_id'])->where('date', $form_attendance['date'])->delete();
+                AttendanceEmployee::create($form_attendance);
+            }
         });
 
         return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));

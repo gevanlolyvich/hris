@@ -606,6 +606,21 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'attendance_type' => 'required',
+                'latitude' => 'required',
+                'longitude' => 'required',
+                'accuracy' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return redirect()->back()->with('error', $messages->first());
+        }
+
         $settings = Utility::settings();
 
         $picture_path = null;
@@ -646,6 +661,14 @@ class AttendanceEmployeeController extends Controller
             $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
 
             $is_valid = ($accuracy + (float)$branch_data['tolerance']) >= $distance ? true : null;
+        } else if ($attendance_type == '3' && !empty($employee->coordinate)) {
+            $home_coordinate = explode(', ', $employee->coordinate);
+            $home_latitude = $home_coordinate[0];
+            $home_longitude = $home_coordinate[1];
+            $home_tolerance = $home_coordinate[2];
+            $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$home_latitude, (float)$home_longitude);
+
+            $is_valid = ($accuracy + (float)$home_tolerance) >= $distance ? true : null;
         }
 
         $date = date("Y-m-d");
@@ -718,6 +741,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
+                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
 
                     $employeeAttendance->save();
 
@@ -742,6 +766,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
+                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
 
                     $employeeAttendance->save();
 
@@ -769,6 +794,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->attendance_type_id     = $attendance_type;
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
+                $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
 
                 $employeeAttendance->save();
 
@@ -791,6 +817,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->attendance_type_id     = $attendance_type;
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
+                $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
 
                 $employeeAttendance->save();
 

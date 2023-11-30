@@ -22,7 +22,7 @@
 @endpush
 
 @push('script-page')
-  <script>
+    <script>
         $(document).ready(function() {
             var map = null;
             var imageSrc = null
@@ -69,6 +69,37 @@
                     }).addTo(map);
                 });
             });
+
+            $('body').on('click', '.home-coordinate', function () {
+                var coordinates = $(this).data('coordinates').split(', ');
+
+                // Open the modal
+                $('#openStreetMapHomeModal').modal('show');
+            
+                // Initialize the map after the modal is fully shown
+                $('#openStreetMapHomeModal').on('shown.bs.modal', function () {
+                    // If a map already exists, remove it
+                    if (map !== null) {
+                        map.remove();
+                    }
+
+                    map = L.map('openStreetMapHomeContainer').setView([coordinates[0], coordinates[1]], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                
+                    // Add a marker for the location
+                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+                
+                    // Add a circle with the converted radius
+                    var circle = L.circle([coordinates[0], coordinates[1]], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: coordinates[2],
+                    }).addTo(map);
+                });
+            })
         });
     </script>
 @endpush
@@ -98,6 +129,22 @@
       </div>
   </div>
 </div>
+
+<div class="modal fade" id="openStreetMapHomeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{__('Coordinate')}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding-top: 0.35rem">
+                <div class="text-center mx-auto">
+                    <div id="openStreetMapHomeContainer" style="height: 400px; border-radius: 5%" class="mt-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
 
 <div class="col-sm-12">
   <div class=" mt-2 " id="multiCollapseExample1">
@@ -341,7 +388,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-12 col-md-12">
+            <div class="col-sm-12 col-md-6">
                 <div class="card">
                     <div class="card-header card-body employee-detail-body fulls-card table-border-style">
                         <h5>{{__('Shift Changes')}}</h5>
@@ -360,6 +407,41 @@
                                         <tr>
                                             <td>{{ \Auth::user()->dateFormat($shiftChange->created_at) }}</td>
                                             <td>{{ $shiftChange->shiftType->name }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card">
+                    <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                        <h5>{{__('Home Address Changes')}}</h5>
+                        <hr>
+                        <br>
+                        <div class="table-responsive">
+                            <table class="table" id="pc-dt-simple">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Address') }}</th>
+                                        <th>{{ __('Coordinate') }}</th>
+                                    </tr>
+                                </thead> 
+                                <tbody>
+                                    @foreach ($home_changes as $home)
+                                        <tr>
+                                            <td>{{ \Auth::user()->dateFormat($home->created_at) }}</td>
+                                            <td>{{ $home->address }}</td>
+                                            <td>
+                                                @if(!empty($home->coordinate))
+                                                    <a href="#" class="btn btn-primary btn-sm home-coordinate" data-coordinates="{{ $home->coordinate }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i>
+                                                    </a>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

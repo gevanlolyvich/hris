@@ -19,13 +19,14 @@ class EventController extends Controller
 {
     public function index()
     {
-        if (\Auth::user()->can('Manage Event')) {
+        if (\Auth::user()->can('Manage Assignment')) {
             $current_month_event = null;
             $today_date = date('m');
 
             if (\Auth::user()->type != 'employee') {
-                $events    = LocalEvent::get();
+                $events    = LocalEvent::orderby('start_date', 'DESC')->get();
                 $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                    ->orderby('start_date', 'DESC')
                     ->whereNotNull(['start_date','end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
@@ -50,7 +51,7 @@ class EventController extends Controller
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
                     ->whereIn('event_employees.employee_id', $employee_id)
                     ->whereOr('events.created_by', \Auth::user()->id)
-                    ->distinct()->get();
+                    ->orderby('events.start_date', 'DESC')->distinct()->get();
 
                 $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
@@ -61,7 +62,7 @@ class EventController extends Controller
                             $q->whereMonth('start_date',$today_date)
                               ->orWhereMonth('end_date',$today_date);
                         }
-                    )->distinct()->get();
+                    )->orderby('events.start_date', 'DESC')->distinct()->get();
             }
             $arrEvents = [];
             foreach ($events as $event) {
@@ -89,7 +90,7 @@ class EventController extends Controller
 
     public function create()
     {
-        if (\Auth::user()->can('Create Event')) {
+        if (\Auth::user()->can('Create Assignment')) {
             // $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch = null;
             if (\Auth::user()->type != 'employee') {
@@ -108,7 +109,7 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
-        if (\Auth::user()->can('Create Event')) {
+        if (\Auth::user()->can('Create Assignment')) {
 
             $validator = \Validator::make(
                 $request->all(),
@@ -225,7 +226,7 @@ class EventController extends Controller
 
     public function edit($event)
     {
-        // if (\Auth::user()->can('Edit Event')) {
+        if (\Auth::user()->can('Edit Assignment')) {
             $event                        = LocalEvent::find($event);
             $created_by                   = \Auth::user()->creatorId();
             $employees                    = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
@@ -235,21 +236,21 @@ class EventController extends Controller
             $selected_departments         = Department::whereIn('id', json_decode($event->department_id, true))->select('id', 'branch_id', 'name')->get();
             $selected_employees           = Employee::whereIn('id', json_decode($event->employee_id, true))->select('id', 'user_id', 'department_id', 'name')->get();
             list($latitude, $longitude)   = explode(', ', $event->location_coord ?? "0, 0");
-            if ($event->created_by == $created_by) {
+            if ($event->created_by == $created_by || \Auth::user()->type != 'employee') {
                 return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude', 'selected_departments', 'selected_employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        // } else {
-        //     return response()->json(['error' => __('Permission denied.')], 401);
-        // }
+        } else {
+            return response()->json(['error' => __('Permission denied.')], 401);
+        }
     }
 
     public function update(Request $request, LocalEvent $event)
     {
         // return $request;
-        if (\Auth::user()->can('Edit Event')) {
-            if ($event->created_by == \Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Edit Assignment')) {
+            if ($event->created_by == \Auth::user()->creatorId() || \Auth::user()->type != 'employee') {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -333,7 +334,7 @@ class EventController extends Controller
 
     public function destroy(LocalEvent $event)
     {
-        if (\Auth::user()->can('Delete Event')) {
+        if (\Auth::user()->can('Delete Assignment')) {
             if ($event->created_by == \Auth::user()->creatorId()) {
                 $event->delete();
 

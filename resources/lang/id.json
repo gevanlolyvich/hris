@@ -1654,5 +1654,11 @@
   "Report Document": "Dokumen Laporan",
   "Clock In / Clock Out": "Jam Masuk / Jam Keluar",
   "Clock In / Clock Out Data": "Data Jam Masuk / Jam Keluar",
-    "Report Data": "Data Laporan"
+  "Report Data": "Data Laporan",
+  "Coordinate": "Koordinat",
+  "Get Current Location Coordinate": "Dapatkan Koordinat Lokasi",
+  "Enter Your Address": "Masukan Alamat Anda",
+  "Home Address Changes": "Perubahan Alamat Rumah",
+  "Search Location": "Cari Lokasi",
+  "Show Map": "Tampilkan Peta"
 }

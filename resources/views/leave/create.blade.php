@@ -3,16 +3,14 @@
 @endphp
 {{ Form::open(['url' => 'leave', 'method' => 'post','enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
-    @if (\Auth::user()->type != 'employee')
-        <div class="row">
-            <div class="col-md-12">
-                <div class="form-group">
-                    {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-                    {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'id' => 'employee_id', 'placeholder' => __('Select Employee')]) }}
-                </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
+                {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'id' => 'employee_id', 'placeholder' => __('Select Employee')]) }}
             </div>
         </div>
-    @endif
+    </div>
     <div class="row">
         <div class="col-md-12">
             <div class="form-group">
