@@ -15,14 +15,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceRequestController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->can('Manage Leave')) {
-            $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Leave')) {
+            $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->created_by)->get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
                 $employee = Employee::where('user_id', '=', $user->id)->first();
@@ -39,11 +40,11 @@ class AttendanceRequestController extends Controller
 
     public function create()
     {
-        if (Auth::user()->can('Create Leave')) {
+        if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', '=', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             // $leavetypes      = LeaveType::where('created_by', '=', Auth::user()->creatorId())->get();
             // $leavetypes_days = LeaveType::where('created_by', '=', Auth::user()->creatorId())->get();
@@ -105,7 +106,7 @@ class AttendanceRequestController extends Controller
             'end_time'      => $request->end_time,
             'reason'        => $request->reason,
             'docs'          => $document_path,
-            'created_by'    => Auth::user()->creatorId()
+            'created_by'    => Auth::user()->id,
         ];
 
         //* Input to DB
@@ -122,8 +123,8 @@ class AttendanceRequestController extends Controller
     {
         $attendance_request = AttendanceRequest::find($id);
 
-        if (Auth::user()->can('Edit Leave')) {
-            if ($attendance_request->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Edit Leave')) {
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
                 return view('attendancerequest.edit', compact('employees', 'attendance_request'));
@@ -138,8 +139,8 @@ class AttendanceRequestController extends Controller
     public function update(Request $request, $attendance_request_id)
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
-        if (Auth::user()->can('Edit Leave')) {
-            if ($attendance_request->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Edit Leave')) {
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $validator = Validator::make(
                     $request->all(),
                     [
@@ -172,6 +173,7 @@ class AttendanceRequestController extends Controller
                     'end_time'      => $request->end_time,
                     'reason'        => $request->reason,
                     'docs'          => $document_path ? $document_path : $attendance_request->docs,
+                    'is_approved'   => null,
                 ];
 
                 //* Update Data
@@ -188,8 +190,8 @@ class AttendanceRequestController extends Controller
     public function destroy($attendance_request_id)
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
-        if (Auth::user()->can('Delete Leave')) {
-            if ($attendance_request->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Delete Leave')) {
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $attendance_request->delete();
                 return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
             } else {
