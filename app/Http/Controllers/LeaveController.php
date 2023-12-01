@@ -25,8 +25,20 @@ class LeaveController extends Controller
             $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
-                $employee = Employee::where('user_id', '=', $user->id)->first();
-                $leaves   = LocalLeave::where('employee_id', '=', $employee->id)->get();
+                
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
+                $leaves   = LocalLeave::whereIn('employee_id', $employee_id)->get();
             } else {
                 $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             }
