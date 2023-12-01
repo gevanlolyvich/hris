@@ -151,16 +151,10 @@
                                                     @endif
                                             @endcan
                                             @endif
-                                            
-                                            
                                         </span>
-
                                     </td>
                                 </tr>
                             @endforeach
-
-
-
                         </tbody>
                     </table>
                 </div>
@@ -213,6 +207,17 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="myDocument"]', function () {
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
     </script>
 @endpush
 

@@ -66,6 +66,7 @@ class LeaveController extends Controller
                     'leave_reason' => 'required',
                     'remark' => 'required',
                     'location' => 'required',
+                    'myDocument' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -91,8 +92,8 @@ class LeaveController extends Controller
 
                 $employee = Employee::find($leave->employee_id);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/leaves', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
@@ -203,8 +204,8 @@ class LeaveController extends Controller
                 $leave_type = LeaveType::find($request->leave_type_id);
                 $employee = Employee::find($leave->employee_id);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/leaves', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
