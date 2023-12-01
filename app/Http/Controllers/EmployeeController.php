@@ -35,7 +35,7 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -171,11 +171,11 @@ class EmployeeController extends Controller
 
                     $image_path      = $dir . $fileNameToStore;
 
-                    if (\File::exists($image_path)) {
-                        \File::delete($image_path);
+                    if (File::exists($image_path)) {
+                        File::delete($image_path);
                     }
 
-                    $path = \Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
+                    $path = Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
 
                     if ($path['flag'] == 1) {
                         $url = $path['url'];
@@ -284,11 +284,11 @@ class EmployeeController extends Controller
 
                         $image_path      = $dir . $fileNameToStore;
 
-                        if (\File::exists($image_path)) {
-                            \File::delete($image_path);
+                        if (File::exists($image_path)) {
+                            File::delete($image_path);
                         }
 
-                        $path = \Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
+                        $path = Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
 
                         if ($path['flag'] == 1) {
                             $url = $path['url'];
@@ -300,7 +300,7 @@ class EmployeeController extends Controller
 
                         if (!empty($employee_document)) {
                             if ($employee_document->document_value) {
-                                \File::delete(storage_path('app/public/uploads/document/' . $employee_document->document_value));
+                                File::delete(storage_path('app/public/uploads/document/' . $employee_document->document_value));
                             }
                             $employee_document->document_value = $fileNameToStore;
                             $employee_document->save();
@@ -326,7 +326,7 @@ class EmployeeController extends Controller
             if (\Auth::user()->type != 'employee') {
                 return redirect()->route('employee.index')->with('success', 'Employee successfully updated.');
             } else {
-                return redirect()->route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id))->with('success', 'Employee successfully updated.');
+                return redirect()->route('employee.show', Crypt::encrypt($employee->id))->with('success', 'Employee successfully updated.');
             }
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -336,7 +336,7 @@ class EmployeeController extends Controller
     public function destroy($id)
     {
 
-        if (Auth::user()->can('Delete Employee')) {
+        if (\Auth::user()->can('Delete Employee')) {
             $employee      = Employee::findOrFail($id);
             $user          = User::where('id', '=', $employee->user_id)->first();
             $emp_documents = EmployeeDocument::where('employee_id', $employee->employee_id)->get();
@@ -345,7 +345,7 @@ class EmployeeController extends Controller
             $dir = storage_path('app/public/uploads/document/');
             foreach ($emp_documents as $emp_document) {
                 $emp_document->delete();
-                \File::delete(storage_path('app/public/uploads/document/' . $emp_document->document_value));
+                File::delete(storage_path('app/public/uploads/document/' . $emp_document->document_value));
                 if (!empty($emp_document->document_value)) {
                     // unlink($dir . $emp_document->document_value);
                 }
@@ -359,7 +359,6 @@ class EmployeeController extends Controller
 
     public function show($id)
     {
-
         if (\Auth::user()->can('Show Employee')) {
             $empId        = Crypt::decrypt($id);
             $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
@@ -427,7 +426,7 @@ class EmployeeController extends Controller
     {
         if (\Auth::user()->can('Show Employee Profile')) {
             try {
-                $empId        = \Illuminate\Support\Facades\Crypt::decrypt($id);
+                $empId        = Crypt::decrypt($id);
             } catch (\RuntimeException $e) {
                 return redirect()->back()->with('error', __('Employee not avaliable'));
             }
