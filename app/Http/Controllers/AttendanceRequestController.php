@@ -42,12 +42,10 @@ class AttendanceRequestController extends Controller
     {
         if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
-            // $leavetypes      = LeaveType::where('created_by', '=', Auth::user()->creatorId())->get();
-            // $leavetypes_days = LeaveType::where('created_by', '=', Auth::user()->creatorId())->get();
 
             return view('attendancerequest.create', compact('employees'));
         } else {
@@ -65,6 +63,7 @@ class AttendanceRequestController extends Controller
                 'start_time' => 'required',
                 'end_time' => 'required',
                 'reason' => 'required',
+                'myDocument' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -91,8 +90,8 @@ class AttendanceRequestController extends Controller
         //* Custom Form data
         $employee = Employee::find($employee_id);
         $document_path = null;
-        if ($request->file('document')) {
-            $docs = $request->file('document');
+        if ($request->file('myDocument')) {
+            $docs = $request->file('myDocument');
             $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
             $path = $docs->storeAs('uploads/attendance_requests', $docName, 'public');
             $document_path = env('APP_URL') . '/storage/' . $path;
@@ -159,8 +158,8 @@ class AttendanceRequestController extends Controller
                 //* Custom Form
                 $date = date_create($request->date);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $attendance_request->employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/attendance_requests', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
