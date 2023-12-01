@@ -40,9 +40,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                @if (\Auth::user()->type != 'employee')
-                                    <th>{{ __('Employee') }}</th>
-                                @endif
+                                <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
@@ -56,10 +54,7 @@
                         <tbody>
                             @foreach ($attendance_requests as $attendance_request)
                                 <tr>
-                                    @if (\Auth::user()->type != 'employee')
-                                        <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}
-                                        </td>
-                                    @endif
+                                    <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}</td>
                                     <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
                                     <td>{{ $attendance_request->start_time }}</td>
                                     <td>{{ $attendance_request->end_time }}</td>
@@ -92,7 +87,16 @@
                                     <td class="Action">
                                         <span>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if ($attendance_request->is_approved != 1)
+                                                <div class="action-btn bg-success ms-2">
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                        data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/action') }}"
+                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                        title="" data-title="{{ __('Attendance Request Action') }}"
+                                                        data-bs-original-title="{{ __('Manage Attendance Request') }}">
+                                                        <i class="ti ti-caret-right text-white"></i>
+                                                    </a>
+                                                </div>
+                                                @if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1)
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"

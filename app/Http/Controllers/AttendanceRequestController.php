@@ -26,10 +26,22 @@ class AttendanceRequestController extends Controller
             $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->created_by)->get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
-                $employee = Employee::where('user_id', '=', $user->id)->first();
-                $attendance_requests   = AttendanceRequest::where('employee_id', '=', $employee->id)->get();
+
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
+                $attendance_requests   = AttendanceRequest::wherein('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
             } else {
-                $attendance_requests = AttendanceRequest::orderBy('id', 'DESC')->get();
+                $attendance_requests = AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
             }
             // return $attendance_requests;
             return view('attendancerequest.index', compact('attendance_requests'));
