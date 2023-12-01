@@ -247,10 +247,9 @@ class AttendanceRequestController extends Controller
         if ($form['is_approved']) {
             //* Method Create Attendance
             $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
-                ->where('days', date('l'))
+                ->where('days', date('l', strtotime($attendance_request->date)))
                 ->first();
-
-
+            
             if ($shift_times->is_working) {
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
@@ -317,6 +316,13 @@ class AttendanceRequestController extends Controller
                     'validate_by'           => Auth::user()->id,
                 ];
             } else {
+                //work hours
+                $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
+                $hours                    = floor($totalWorkHoursSeconds / 3600);
+                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
+                $secs                     = floor($totalWorkHoursSeconds % 60);
+                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                 $form_attendance = [
                     'employee_id'           => $attendance_request->employee->id,
                     'date'                  => $date,
@@ -326,8 +332,8 @@ class AttendanceRequestController extends Controller
                     'clock_out'             => $attendance_request->end_time . ':00',
                     'late'                  => '00:00:00',
                     'early_leaving'         => '00:00:00',
-                    'work_hours'            => '00:00:00',
-                    'overtime'              => '00:00:00',
+                    'work_hours'            => $workHours,
+                    'overtime'              => $workHours,
                     'total_rest'            => '00:00:00',
                     'created_by'            => $attendance_request->employee->user_id,
                     'attendance_type_id'    => 1, //* ON SITE
