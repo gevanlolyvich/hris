@@ -143,7 +143,7 @@ class LeaveController extends Controller
 
         // return $leave;
         if (\Auth::user()->can('Edit Leave')) {
-            if ($leave->created_by == \Auth::user()->creatorId()) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $employees = null;
                 if (Auth::user()->type == 'employee') {
                     $employees = Employee::where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
@@ -183,7 +183,7 @@ class LeaveController extends Controller
     {
         $leave = LocalLeave::find($leave);
         if (\Auth::user()->can('Edit Leave')) {
-            if ($leave->created_by == Auth::user()->created_by) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -221,6 +221,7 @@ class LeaveController extends Controller
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
                     $leave->location         = $request->location;
+                    $leave->status           = 'Pending';
                     $leave->document_path    = $document_path ? $document_path : $leave->document_path;
 
                     $leave->save();
@@ -240,7 +241,7 @@ class LeaveController extends Controller
     public function destroy(LocalLeave $leave)
     {
         if (\Auth::user()->can('Delete Leave')) {
-            if ($leave->created_by == \Auth::user()->creatorId()) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $leave->delete();
 
                 return redirect()->route('leave.index')->with('success', __('Leave successfully deleted.'));
