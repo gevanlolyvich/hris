@@ -14,6 +14,7 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendanceExport;
