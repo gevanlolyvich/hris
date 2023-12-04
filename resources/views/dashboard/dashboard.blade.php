@@ -55,9 +55,18 @@
                         </button>
                         <div id="camera" style="display: none; position: relative" class="col-12">
                             <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
-                            <button type="button" class="btn btn-info btn-lg btn-block custBtn" id="takepic" style="display: none;"><i
-                                class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
-                            </button>
+                            <div class="row allign-center text-center">
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-info btn-sm custBtn1" id="takepic" style="display: none;"><i
+                                        class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-danger btn-sm custBtn2" id="closecamera" style="display: none;">
+                                        {{ __('Close The Camera') }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <canvas id="canvas" style="display: none;"></canvas>
                         <div id="output" style="display: none;">
@@ -510,10 +519,20 @@
             }
         }
 
-        .custBtn{
+        .custBtn1{
             position: absolute;
             top: 83%;
-            left: 50%;
+            left: 31%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            border: none;
+            cursor: pointer;
+        }
+
+        .custBtn2{
+            position: absolute;
+            top: 83%;
+            left: 66%;
             transform: translate(-50%, -50%);
             -ms-transform: translate(-50%, -50%);
             border: none;
@@ -744,6 +763,7 @@
                 canvas = document.getElementById('canvas');
                 photo = document.getElementById('photo');
                 takepic = document.getElementById('takepic');
+                closecamera = document.getElementById('closecamera');
     
                 navigator.mediaDevices.getUserMedia({
                         video: true,
@@ -755,6 +775,7 @@
                         document.getElementById('output').style.display = 'block';
 
                         takepic.style.display = '';
+                        closecamera.style.display = '';
                         video.srcObject = stream;
                         video.play();
                     })
@@ -787,6 +808,12 @@
                     takepicture();
                     ev.preventDefault();
                 }, false);
+
+                closecamera.addEventListener('click', function(ev) {
+                    console.log('Camera Must Be Close');
+                    closeCamera();
+                    ev.preventDefault();
+                }, false)
     
                 clearphoto();
             }
@@ -809,11 +836,28 @@
     
                     var data = canvas.toDataURL('image/png');
                     photo.setAttribute('src', data);
-                    document.getElementById('picture').value = data;
-                    document.getElementById('picture_out').value = data;
+                    let pictureIn = document.getElementById('picture');
+                    let pictureOut = document.getElementById('picture_out');
+
+                    if (pictureIn) {
+                        pictureIn.value = data;
+                    }
+                    if (pictureOut) {
+                        pictureOut.value = data;
+                    }
                 } else {
                     clearphoto();
                 }
+            }
+
+            function closeCamera() {
+                document.getElementById('load').style.display = '';
+                document.getElementById('camera').style.display = 'none';
+                document.getElementById('output').style.display = 'none';
+            
+                var tracks = video.srcObject?.getTracks();
+                tracks?.forEach(track => track.stop());
+                video.srcObject = null;
             }
         })();
     </script>

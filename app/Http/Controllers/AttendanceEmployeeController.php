@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Utilities\DistanceCalculator;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AttendanceExport;
 
 class AttendanceEmployeeController extends Controller
 {
@@ -151,7 +153,7 @@ class AttendanceEmployeeController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Attendance')) {
-            $employees = User::where('created_by', '=', Auth::user()->creatorId())->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = User::where('created_by', '=', Auth::user()->created_by)->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.create', compact('employees'));
         } else {
@@ -233,7 +235,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->overtime               = $overtime;
                 $employeeAttendance->total_rest             = '00:00:00';
                 $employeeAttendance->work_hours             = $workhours;
-                $employeeAttendance->created_by             = \Auth::user()->creatorId();
+                $employeeAttendance->created_by             = \Auth::user()->created_by;
 
                 $employeeAttendance->save();
 
@@ -961,5 +963,13 @@ class AttendanceEmployeeController extends Controller
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
+
+    public function export(Request $request)
+    {
+        $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
+        $data = Excel::download(new AttendanceExport(), $name . '.xlsx');
+
+        return $data;
     }
 }

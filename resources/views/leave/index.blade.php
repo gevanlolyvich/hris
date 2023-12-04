@@ -40,9 +40,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                @if (\Auth::user()->type != 'employee')
-                                    <th>{{ __('Employee') }}</th>
-                                @endif
+                                <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Leave Type') }}</th>
                                 {{-- <th>{{ __('Applied On') }}</th> --}}
                                 <th>{{ __('Start Date') }}</th>
@@ -57,10 +55,7 @@
                         <tbody>
                             @foreach ($leaves as $leave)
                                 <tr>
-                                    @if (\Auth::user()->type != 'employee')
-                                        <td>{{ !empty(\Auth::user()->getEmployee($leave->employee_id)) ? \Auth::user()->getEmployee($leave->employee_id)->name : '' }}
-                                        </td>
-                                    @endif
+                                    <td>{{ !empty(\Auth::user()->getEmployee($leave->employee_id)) ? \Auth::user()->getEmployee($leave->employee_id)->name : '' }}</td>
                                     <td>{{ !empty(\Auth::user()->getLeaveType($leave->leave_type_id)) ? \Auth::user()->getLeaveType($leave->leave_type_id)->title : '' }}
                                     </td>
                                     {{-- <td>{{ \Auth::user()->dateFormat($leave->applied_on) }}</td> --}}
@@ -94,8 +89,17 @@
 
                                     <td class="Action">
                                         <span>
+                                            <div class="action-btn bg-success ms-2">
+                                                <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                    data-url="{{ URL::to('leave/' . $leave->id . '/action') }}"
+                                                    data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Leave Action') }}"
+                                                    data-bs-original-title="{{ __('Manage Leave') }}">
+                                                    <i class="ti ti-caret-right text-white"></i>
+                                                </a>
+                                            </div>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if ($leave->status == 'Pending')
+                                                @if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != 'Approved')
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
@@ -108,7 +112,6 @@
                                                             </a>
                                                         </div>
                                                     @endcan
-                                                @elseif ($leave->status == 'Reject')
                                                     @can('Delete Leave')
                                                         <div class="action-btn bg-danger ms-2">
                                                             {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
@@ -120,25 +123,7 @@
                                                         </div>
                                                     @endcan
                                                 @endif
-                                                <div class="action-btn bg-success ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $leave->id . '/action') }}"
-                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Leave Action') }}"
-                                                        data-bs-original-title="{{ __('Manage Leave') }}">
-                                                        <i class="ti ti-caret-right text-white"></i>
-                                                    </a>
-                                                </div>
                                             @else
-                                                <div class="action-btn bg-success ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('leave/' . $leave->id . '/action') }}"
-                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Leave Action') }}"
-                                                        data-bs-original-title="{{ __('Manage Leave') }}">
-                                                        <i class="ti ti-caret-right text-white"></i>
-                                                    </a>
-                                                </div>
                                                 @can('Edit Leave')
                                                     @if ($leave->status != 'Approved')
                                                         <div class="action-btn bg-info ms-2">
@@ -166,16 +151,10 @@
                                                     @endif
                                             @endcan
                                             @endif
-                                            
-                                            
                                         </span>
-
                                     </td>
                                 </tr>
                             @endforeach
-
-
-
                         </tbody>
                     </table>
                 </div>
@@ -228,6 +207,17 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="myDocument"]', function () {
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
     </script>
 @endpush
 

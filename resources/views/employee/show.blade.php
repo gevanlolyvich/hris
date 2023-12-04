@@ -69,183 +69,203 @@
 <div class="row">
     <div class="col-xl-12">
         <div class="row">
-            <div class="col-sm-12 col-md-6">
-
-                    <div class="card " style="height: 200px;">
-                    <div class="card-body employee-detail-body fulls-card">
-                    <h5>{{__('Personal Detail')}}</h5>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Employee ID')}} : </strong>
-                                    <span>{{$employeesId}}</span>
-                                </div>
+            <div class="col-12">
+                <div class="card " style="height: 200px;">
+                <div class="card-header card-body employee-detail-body fulls-card">
+                <h5>{{__('Personal Detail')}}</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Employee ID')}} : </strong>
+                                <span>{{$employeesId}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm font-style">
-                                    <strong class="font-bold">{{__('Name')}} :</strong>
-                                    <span>{{$employee->name}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm font-style">
+                                <strong class="font-bold">{{__('Name')}} :</strong>
+                                <span>{{$employee->name}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm font-style">
-                                    <strong class="font-bold">{{__('Email')}} :</strong>
-                                    <span>{{$employee->email}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm font-style">
+                                <strong class="font-bold">{{__('Email')}} :</strong>
+                                <span>{{$employee->email}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Date of Birth')}} :</strong>
-                                    <span>{{\Auth::user()->dateFormat($employee->dob)}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Date of Birth')}} :</strong>
+                                <span>{{\Auth::user()->dateFormat($employee->dob)}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Phone')}} :</strong>
-                                    <span>{{$employee->phone}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Phone')}} :</strong>
+                                <span>{{$employee->phone}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Address')}} :</strong>
-                                    <span>{{$employee->address}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Address')}} :</strong>
+                                <span>{{$employee->address}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Salary Type')}} :</strong>
-                                    <span>{{!empty($employee->salaryType)?$employee->salaryType->name:''}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Salary Type')}} :</strong>
+                                <span>{{!empty($employee->salaryType)?$employee->salaryType->name:''}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Basic Salary')}} :</strong>
-                                    <span>{{$employee->salary}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Basic Salary')}} :</strong>
+                                <span>{{$employee->salary}}</span>
                             </div>
                         </div>
                     </div>
-                    </div>
-            </div>
-            <div class="col-sm-12 col-md-6">
-
-                    <div class="card " style="height:200px">
-                    <div class="card-body employee-detail-body fulls-card">
-                        <h5>{{__('Company Detail')}}</h5>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Branch')}} : </strong>
-                                    <span>{{!empty($employee->branch)?$employee->branch->name:''}}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm font-style">
-                                    <strong class="font-bold">{{__('Department')}} :</strong>
-                                    <span>{{!empty($employee->department)?$employee->department->name:''}}</span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Designation')}} :</strong>
-                                    <span>{{!empty($employee->designation)?$employee->designation->name:''}}</span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Date Of Joining')}} :</strong>
-                                    <span>{{\Auth::user()->dateFormat($employee->company_doj)}}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
+                </div>
+                </div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-sm-12 col-md-6">
-
-                    <div class="card " style="height:200px">
-                    <div class="card-body employee-detail-body fulls-card">
-                        <h5>{{__('Document Detail')}}</h5>
-                        <hr>
-                        <div class="row">
-                            @php
-                                $employeedoc = $employee->documents()->pluck('document_value','document_id');
-                                $logo=\App\Models\Utility::get_file('uploads/document');
-                            @endphp
-                            @if(!$documents->isEmpty())
-                            @foreach($documents as $key=>$document)
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{$document->name }} : </strong>
-                                    <span><a href="{{ (!empty($employeedoc[$document->id])?$logo.'/'.$employeedoc[$document->id]:'') }}" target="_blank">{{ (!empty($employeedoc[$document->id])?$employeedoc[$document->id]:'') }}</a></span>
-                                </div>
+                <div class="card " style="height:200px">
+                <div class="card-header card-body employee-detail-body fulls-card">
+                    <h5>{{__('Company Detail')}}</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Branch')}} : </strong>
+                                <span>{{!empty($employee->branch)?$employee->branch->name:''}}</span>
                             </div>
-                            @endforeach
-                            @else
-                              <div class="text-center">
-                                No Document Type Added.!
-                              </div>
-                            @endif
-
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm font-style">
+                                <strong class="font-bold">{{__('Department')}} :</strong>
+                                <span>{{!empty($employee->department)?$employee->department->name:''}}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Designation')}} :</strong>
+                                <span>{{!empty($employee->designation)?$employee->designation->name:''}}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Date Of Joining')}} :</strong>
+                                <span>{{\Auth::user()->dateFormat($employee->company_doj)}}</span>
+                            </div>
                         </div>
                     </div>
-                    </div>
+                </div>
+                </div>
             </div>
             <div class="col-sm-12 col-md-6">
-
-                    <div class="card " style="height:200px">
-                    <div class="card-body employee-detail-body fulls-card">
-                    <h5>{{__('Bank Account Detail')}}</h5>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Account Holder Name')}} : </strong>
-                                    <span>{{$employee->account_holder_name}}</span>
-                                </div>
+                <div class="card " style="height:200px">
+                <div class="card-header card-body employee-detail-body fulls-card">
+                    <h5>{{__('Document Detail')}}</h5>
+                    <hr>
+                    <div class="row">
+                        @php
+                            $employeedoc = $employee->documents()->pluck('document_value','document_id');
+                            $logo=\App\Models\Utility::get_file('uploads/document');
+                        @endphp
+                        @if(!$documents->isEmpty())
+                        @foreach($documents as $key=>$document)
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{$document->name }} : </strong>
+                                <span><a href="{{ (!empty($employeedoc[$document->id])?$logo.'/'.$employeedoc[$document->id]:'') }}" target="_blank">{{ (!empty($employeedoc[$document->id])?$employeedoc[$document->id]:'') }}</a></span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm font-style">
-                                    <strong class="font-bold">{{__('Account Number')}} :</strong>
-                                    <span>{{$employee->account_number}}</span>
-                                </div>
+                        </div>
+                        @endforeach
+                        @else
+                          <div class="text-center">
+                            No Document Type Added.!
+                          </div>
+                        @endif
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                <div class="card-header card-body employee-detail-body fulls-card">
+                <h5>{{__('Bank Account Detail')}}</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Account Holder Name')}} : </strong>
+                                <span>{{$employee->account_holder_name}}</span>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Bank Name')}} :</strong>
-                                    <span>{{$employee->bank_name}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm font-style">
+                                <strong class="font-bold">{{__('Account Number')}} :</strong>
+                                <span>{{$employee->account_number}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Bank Identifier Code')}} :</strong>
-                                    <span>{{$employee->bank_identifier_code}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Bank Name')}} :</strong>
+                                <span>{{$employee->bank_name}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Branch Location')}} :</strong>
-                                    <span>{{$employee->branch_location}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Bank Identifier Code')}} :</strong>
+                                <span>{{$employee->bank_identifier_code}}</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="info text-sm">
-                                    <strong class="font-bold">{{__('Tax Payer Id')}} :</strong>
-                                    <span>{{$employee->tax_payer_id}}</span>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Branch Location')}} :</strong>
+                                <span>{{$employee->branch_location}}</span>
                             </div>
-
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info text-sm">
+                                <strong class="font-bold">{{__('Tax Payer Id')}} :</strong>
+                                <span>{{$employee->tax_payer_id}}</span>
+                            </div>
                         </div>
                     </div>
+                </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="card ">
+                    <div class="card-header card-body employee-detail-body fulls-card">
+                        <h5>{{__('Shift') }} ({{ $employee->shift_type->name }})</h5>
+                        <hr>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-border-style" id="pc-dt-simple">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('Day') }}</th>
+                                        <th>{{ __('Start') }}</th>
+                                        <th>{{ __('End') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($employee->shift_type->shiftTimes as $shift)
+                                        <tr>
+                                            <td>{{ $shift->days }}</td>
+                                            <td>{{ $shift->start_time }}</td>
+                                            <td>{{ $shift->end_time }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                </div>
             </div>
         </div>
     </div>

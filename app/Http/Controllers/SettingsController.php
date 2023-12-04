@@ -954,7 +954,7 @@ class SettingsController extends Controller
                 $messages = $validator->getMessageBag();
                 return redirect()->back()->with('error', $messages->first());
             }
-            $post['is_enabled'] = $request->is_enabled;
+            $post['is_enabled'] = $request->is_enabled ? 'on' : 'off';
         } else {
             $post['is_enabled'] = 'off';
         }
@@ -977,18 +977,19 @@ class SettingsController extends Controller
         }
         if ($request->google_clender_id) {
             $post['google_clender_id']            = $request->google_clender_id;
-            foreach ($post as $key => $data) {
-                \DB::insert(
-                    'insert into settings (`value`, `name`,`created_by`,`created_at`,`updated_at`) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
-                    [
-                        $data,
-                        $key,
-                        \Auth::user()->id,
-                        date('Y-m-d H:i:s'),
-                        date('Y-m-d H:i:s'),
-                    ]
-                );
-            }
+        }
+    
+        foreach ($post as $key => $data) {
+            \DB::insert(
+                'insert into settings (`value`, `name`,`created_by`,`created_at`,`updated_at`) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                [
+                    $data,
+                    $key,
+                    \Auth::user()->id,
+                    date('Y-m-d H:i:s'),
+                    date('Y-m-d H:i:s'),
+                ]
+            );
         }
         return redirect()->back()->with('success', 'Storage setting successfully updated.');
     }
