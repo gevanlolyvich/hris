@@ -261,10 +261,8 @@
                                 <td>{{ $attendance->overtime }}</td>
                                 <td>{{ $attendance->work_hours }}</td>
                                 <td class="Action">
-                                    @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                        <span>
-                                             {{-- @can('Validate Attendance') --}}
-                                            @if (!$attendance->is_valid)
+                                    <span>
+                                        @if (!$attendance->is_valid && \Auth::user()?->employee?->id != $attendance->employee_id)
                                             <div class="action-btn bg-info ms-2">
                                                 {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
                                                 <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
@@ -276,7 +274,7 @@
                                                 </button>
                                                 {!! Form::close() !!}
                                             </div>
-                                            @else
+                                        @elseif ($attendance->is_valid)
                                             <div class="action-btn bg-success ms-2">
                                                 <button type="submit" class="mx-3 btn btn-sm align-items-center"
                                                     data-bs-toggle="tooltip" disabled
@@ -286,8 +284,18 @@
                                                     <i class="ti ti-checks text-white text-white"></i>
                                                 </button>
                                             </div>
-                                            @endif
-                                        {{-- @endcan --}}
+                                        @else
+                                            <div class="action-btn bg-info ms-2">
+                                                <button type="button" class="mx-3 btn btn-sm align-items-center disabled" disabled
+                                                    data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
+                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
+                                                    style="pointer-events: auto">
+                                                    <i class="ti ti-checks text-white text-white"></i>
+                                                </button>
+                                            </div>
+                                        @endif
+                                        @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
+                                            {{-- @endcan --}}
                                             @can('Edit Attendance')
                                                 <div class="action-btn bg-warning ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
@@ -309,30 +317,8 @@
                                                     </form>
                                                 </div>
                                             @endcan
-                                        </span>
-                                    @else
-                                        <span>
-                                            @if (!$attendance->is_valid)
-                                            <div class="action-btn bg-info ms-2">
-                                                <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
-                                                    data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
-                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
-                                                    style="pointer-events: auto">
-                                                    <i class="ti ti-checks text-white text-white"></i>
-                                                </button>
-                                            </div>
-                                            @else
-                                            <div class="action-btn bg-success ms-2">
-                                                <button type="submit" class="mx-3 btn btn-sm align-items-center"
-                                                    data-bs-toggle="tooltip" title="{{__('Valid')}}" disabled
-                                                    data-bs-original-title="{{__('Valid')}}"
-                                                    style="pointer-events: auto">
-                                                    <i class="ti ti-checks text-white text-white"></i>
-                                                </button>
-                                            </div>
-                                            @endif
-                                        </span>
-                                    @endif
+                                        @endif
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
