@@ -90,7 +90,7 @@
     </script>
 @endpush
 @section('action-button')
-    <a href="{{ route('attendanceemployee.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+    <a href="{{ route('attendanceemployee.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Export') }}">
         <i class="ti ti-file-export"></i>
     </a>
@@ -126,7 +126,7 @@
     <div class=" mt-2 " id="multiCollapseExample1">
         <div class="card">
             <div class="card-body">
-                {{ Form::open(array('route' => array('attendanceemployee.index'),'method'=>'get','id'=>'attendanceemployee_filter')) }}
+            {{ Form::open(array('route' => array('attendanceemployee.index'),'method'=>'get','id'=>'attendanceemployee_filter')) }}
                 <div class="row align-items-center justify-content-end">
                     <div class="col-xl-10">
                         <div class="row">

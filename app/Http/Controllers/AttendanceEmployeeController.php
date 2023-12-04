@@ -1010,8 +1010,17 @@ class AttendanceEmployeeController extends Controller
 
     public function export(Request $request)
     {
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                list($key, $value) = explode('=', $query);
+                $queryArray[$key] = $value;
+            }
+        }
+
         $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
-        $data = Excel::download(new AttendanceExport(), $name . '.xlsx');
+        $data = Excel::download(new AttendanceExport(json_encode($queryArray)), $name . '.xlsx');
 
         return $data;
     }

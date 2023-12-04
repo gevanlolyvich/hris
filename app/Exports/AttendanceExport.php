@@ -11,32 +11,64 @@ use Illuminate\Support\Facades\Log;
 
 class AttendanceExport implements FromCollection, WithHeadings
 {
+    private $urlParameters;
+
+    // Modify the constructor to accept parameters
+    public function __construct($urlParameters)
+    {
+        $this->urlParameters = $urlParameters;
+    }
+
     /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
     {
+        $query = json_decode($this->urlParameters);
         $data = collect();
+        $attendances = null;
         if (\Auth::user()->type == 'employee')
         {
             $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
             $employee_id = null;
-            if (!empty($subordinate_ids))
-            {
+            if (!empty($subordinate_ids)) {
                 $employee_id = $subordinate_ids;
                 $employee_id[] = \Auth::user()->employee->id;
             }
-            else 
-            {
+            else {
                 $employee_id[] = \Auth::user()->employee->id;
             }
           
-            $attendances= AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
+            $attendances= AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
 
-            foreach($attendances as $attendance)
+        } else {
+            $attendances = AttendanceEmployee::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
+        }
+
+        if (!empty($query)) {
+            if ($query->type == 'monthly' && !empty($query->month)) {
+                $month = date('m', strtotime($query->month));
+                $year  = date('Y', strtotime($query->month));
+    
+                $start_date = date($year . '-' . $month . '-01');
+                $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
+    
+                $attendances->whereBetween(
+                    'date',
+                    [
+                        $start_date,
+                        $end_date,
+                    ]
+                );
+            } elseif ($query->type == 'daily' && !empty($query->date)) {
+                $attendances->where('date', $query->date);
+            }
+        }
+
+        $attendances = $attendances->get();
+    
+        foreach($attendances as $attendance)
             {    
-                Log::info($attendance);
-
                 $data->push([
                     $attendance->employee->name,
                     !empty(\Auth::user()->getBranch($attendance->employee->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
@@ -53,28 +85,7 @@ class AttendanceExport implements FromCollection, WithHeadings
                     $attendance->work_hours,
                 ]);
             }
-        } else {
-            $attendances = AttendanceEmployee::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
-            foreach($attendances as $attendance)
-            {    
-                $data->push([
-                  $attendance->employee->name,
-                  !empty(\Auth::user()->getBranch($attendance->employee->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
-                  !empty(\Auth::user()->getDepartment($attendance->employee->department_id)) ? \Auth::user()->getDepartment($attendance->employee->department_id)->name : '-',
-                  !empty(\Auth::user()->getDesignation($attendance->employee->designation_id)) ? \Auth::user()->getDesignation($attendance->employee->designation_id)->name : '-',
-                  $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name,
-                  $attendance->date,
-                  $attendance->status,
-                  $attendance->clock_in,
-                  $attendance->clock_out,
-                  $attendance->late,
-                  $attendance->early_leaving,
-                  $attendance->overtime,
-                  $attendance->work_hours,
-              ]);
-            }
-        }
-    
+
         return $data;
     }
 
