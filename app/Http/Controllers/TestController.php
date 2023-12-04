@@ -181,7 +181,7 @@ class TestController extends Controller
                         $attendance->early_leaving = $shift_times->is_working ? $early_leaving : '00:00:00';
                         $attendance->coord_out     = $f_data->coordinate;
                         $attendance->save();
-                    } elseif ($clock_in) {
+                    } elseif ($clock_in && empty($attendance)) {
                         Log::info('Creating New Attendance Data');
                         $new_attendance = new AttendanceEmployee();
                         $new_attendance->employee_id          = $employee->id;
