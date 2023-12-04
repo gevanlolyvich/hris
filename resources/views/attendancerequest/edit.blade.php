@@ -38,17 +38,29 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('document', __('Document'), ['class' => 'col-form-label']) }}
-                <div class="choose-files ">
-                    <label for="document">
-                        <div class=" bg-primary document "> <i
+            <div class="form-group row">
+                {{ Form::label('document', __('Document'), ['class' => 'col-form-label pb-1 pt-3']) }}
+                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                <div class="col-8">
+                    <label for="myDocument">
+                    <div class="btn btn-block btn-primary bg-primary document"> <i
                                 class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                         </div>
-                        <input style="margin-top: -50px" type="file" class="form-control file" name="document"  onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">
-                        <img id="blah" class="mt-3"  width="100" src="" />
+                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="myDocument">
                     </label>
+                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
+                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                    </div>
                 </div>
+                @if (!empty($attendance_request->docs))
+                    <div class="col-md-4">
+                        <a href="{{ $attendance_request->docs }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                            data-bs-toggle="tooltip"
+                            data-bs-original-title="{{ __('View') }}">
+                            <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

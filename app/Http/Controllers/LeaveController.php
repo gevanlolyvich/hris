@@ -25,8 +25,20 @@ class LeaveController extends Controller
             $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
-                $employee = Employee::where('user_id', '=', $user->id)->first();
-                $leaves   = LocalLeave::where('employee_id', '=', $employee->id)->get();
+                
+                $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
+                $employee_id = null;
+                if (!empty($subordinate_ids))
+                {
+                    $employee_id = $subordinate_ids;
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+                else 
+                {
+                    $employee_id[] = \Auth::user()->employee->id;
+                }
+
+                $leaves   = LocalLeave::whereIn('employee_id', $employee_id)->get();
             } else {
                 $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
             }
@@ -66,6 +78,7 @@ class LeaveController extends Controller
                     'leave_reason' => 'required',
                     'remark' => 'required',
                     'location' => 'required',
+                    'myDocument' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -91,8 +104,8 @@ class LeaveController extends Controller
 
                 $employee = Employee::find($leave->employee_id);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/leaves', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
@@ -143,7 +156,7 @@ class LeaveController extends Controller
 
         // return $leave;
         if (\Auth::user()->can('Edit Leave')) {
-            if ($leave->created_by == \Auth::user()->creatorId()) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $employees = null;
                 if (Auth::user()->type == 'employee') {
                     $employees = Employee::where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
@@ -183,7 +196,7 @@ class LeaveController extends Controller
     {
         $leave = LocalLeave::find($leave);
         if (\Auth::user()->can('Edit Leave')) {
-            if ($leave->created_by == Auth::user()->created_by) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -203,8 +216,8 @@ class LeaveController extends Controller
                 $leave_type = LeaveType::find($request->leave_type_id);
                 $employee = Employee::find($leave->employee_id);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/leaves', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
@@ -221,6 +234,7 @@ class LeaveController extends Controller
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
                     $leave->location         = $request->location;
+                    $leave->status           = 'Pending';
                     $leave->document_path    = $document_path ? $document_path : $leave->document_path;
 
                     $leave->save();
@@ -240,7 +254,7 @@ class LeaveController extends Controller
     public function destroy(LocalLeave $leave)
     {
         if (\Auth::user()->can('Delete Leave')) {
-            if ($leave->created_by == \Auth::user()->creatorId()) {
+            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $leave->delete();
 
                 return redirect()->route('leave.index')->with('success', __('Leave successfully deleted.'));

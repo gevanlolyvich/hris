@@ -90,10 +90,10 @@
     </script>
 @endpush
 @section('action-button')
-<!-- <a class="btn btn-sm btn-primary collapsed" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
-        aria-expanded="false" aria-controls="multiCollapseExample1" data-bs-toggle="tooltip" title="{{ __('Filter') }}">
-        <i class="ti ti-filter"></i>
-    </a> -->
+    <a href="{{ route('attendanceemployee.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+        data-bs-original-title="{{ __('Export') }}">
+        <i class="ti ti-file-export"></i>
+    </a>
 @endsection
 @section('content')
 <!-- Update the modal structure in your Blade template -->
@@ -268,7 +268,10 @@
                                             <div class="action-btn bg-info ms-2">
                                                 {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
                                                 <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
-                                                    data-bs-toggle="tooltip" title="Validate" aria-label="Validate">
+                                                    data-bs-toggle="tooltip" 
+                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
+                                                    title="{{__('Invalid / Required Validation')}}"
+                                                    style="pointer-events: auto">
                                                     <i class="ti ti-checks text-white text-white"></i>
                                                 </button>
                                                 {!! Form::close() !!}
@@ -276,7 +279,10 @@
                                             @else
                                             <div class="action-btn bg-success ms-2">
                                                 <button type="submit" class="mx-3 btn btn-sm align-items-center"
-                                                    data-bs-toggle="tooltip" title="Already Validated" aria-label="Already Validated" disabled>
+                                                    data-bs-toggle="tooltip" disabled
+                                                    data-bs-original-title="{{__('Valid')}}"
+                                                    title="{{__('Valid')}}"
+                                                    style="pointer-events: auto">
                                                     <i class="ti ti-checks text-white text-white"></i>
                                                 </button>
                                             </div>
@@ -303,6 +309,28 @@
                                                     </form>
                                                 </div>
                                             @endcan
+                                        </span>
+                                    @else
+                                        <span>
+                                            @if (!$attendance->is_valid)
+                                            <div class="action-btn bg-info ms-2">
+                                                <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
+                                                    data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
+                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
+                                                    style="pointer-events: auto">
+                                                    <i class="ti ti-checks text-white text-white"></i>
+                                                </button>
+                                            </div>
+                                            @else
+                                            <div class="action-btn bg-success ms-2">
+                                                <button type="submit" class="mx-3 btn btn-sm align-items-center"
+                                                    data-bs-toggle="tooltip" title="{{__('Valid')}}" disabled
+                                                    data-bs-original-title="{{__('Valid')}}"
+                                                    style="pointer-events: auto">
+                                                    <i class="ti ti-checks text-white text-white"></i>
+                                                </button>
+                                            </div>
+                                            @endif
                                         </span>
                                     @endif
                                 </td>

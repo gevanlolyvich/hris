@@ -880,8 +880,8 @@
   "Layout settings" : "Pengaturan tata letak ",
   "Layout Settings" : "Pengaturan Tata Letak ",
   "Lead Detail" : "Detail Utama ",
-  "Leave" : "Tinggalkan ",
-  "Leave " : "Tinggalkan   ",
+  "Leave" : "Cuti ",
+  "Leave " : "Cuti   ",
   "Leave  successfully created." : "Tinggalkan informasi yang berhasil dibuat. ",
   "Leave Action" : "Tinggalkan Tindakan ",
   "Leave Approve/Reject" : "Tinggalkan Persetujuan/Tolak ",
@@ -1660,5 +1660,7 @@
   "Enter Your Address": "Masukan Alamat Anda",
   "Home Address Changes": "Perubahan Alamat Rumah",
   "Search Location": "Cari Lokasi",
-  "Show Map": "Tampilkan Peta"
+  "Show Map": "Tampilkan Peta",
+  "Take A Picture": "Ambil Gambar",
+  "Close The Camera": "Tutup Kamera"
 }

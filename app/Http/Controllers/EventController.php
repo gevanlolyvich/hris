@@ -121,7 +121,6 @@ class EventController extends Controller
                     'start_date' => 'required',
                     'end_date' => 'required',
                     'color' => 'required',
-                    'location' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -236,7 +235,7 @@ class EventController extends Controller
             $selected_departments         = Department::whereIn('id', json_decode($event->department_id, true))->select('id', 'branch_id', 'name')->get();
             $selected_employees           = Employee::whereIn('id', json_decode($event->employee_id, true))->select('id', 'user_id', 'department_id', 'name')->get();
             list($latitude, $longitude)   = explode(', ', $event->location_coord ?? "0, 0");
-            if ($event->created_by == $created_by || \Auth::user()->type != 'employee') {
+            if ($event->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 return view('event.edit', compact('event', 'employees', 'branch', 'departments', 'latitude', 'longitude', 'selected_departments', 'selected_employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
