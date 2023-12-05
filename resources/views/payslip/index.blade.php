@@ -11,35 +11,37 @@
 
 
 @section('content')
-    <div class="col-sm-12 col-lg-12 col-xl-12 col-md-12 mt-4">
-        <div class="card">
-            <div class="card-body">
-                {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                <div class="d-flex align-items-center justify-content-end">
-                    <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
-                        <div class="btn-box">
-                            {{ Form::label('month', __('Select Month'), ['class' => 'form-label']) }}
-                            {{ Form::select('month', $month, null, ['class' => 'form-control select', 'id' => 'month']) }}
+    @if (\Auth::user()->type != 'employee')
+        <div class="col-sm-12 col-lg-12 col-xl-12 col-md-12 mt-4">
+            <div class="card">
+                <div class="card-body">
+                    {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                            <div class="btn-box">
+                                {{ Form::label('month', __('Select Month'), ['class' => 'form-label']) }}
+                                {{ Form::select('month', $month, null, ['class' => 'form-control select', 'id' => 'month']) }}
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                            <div class="btn-box">
+                                {{ Form::label('year', __('Select Year'), ['class' => 'form-label']) }}
+                                {{ Form::select('year', $year, null, ['class' => 'form-control select']) }}
+                            </div>
+                        </div>
+                        <div class="col-auto float-end ms-2 mt-4">
+                            <a href="#" class="btn  btn-primary"
+                                onclick="document.getElementById('payslip_form').submit(); return false;"
+                                data-bs-toggle="tooltip" title="{{ __('payslip') }}"
+                                data-original-title="{{ __('payslip') }}">{{ __('Generate Payslip') }}
+                            </a>
                         </div>
                     </div>
-                    <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
-                        <div class="btn-box">
-                            {{ Form::label('year', __('Select Year'), ['class' => 'form-label']) }}
-                            {{ Form::select('year', $year, null, ['class' => 'form-control select']) }}
-                        </div>
-                    </div>
-                    <div class="col-auto float-end ms-2 mt-4">
-                        <a href="#" class="btn  btn-primary"
-                            onclick="document.getElementById('payslip_form').submit(); return false;"
-                            data-bs-toggle="tooltip" title="{{ __('payslip') }}"
-                            data-original-title="{{ __('payslip') }}">{{ __('Generate Payslip') }}
-                        </a>
-                    </div>
+                    {{ Form::close() }}
                 </div>
-                {{ Form::close() }}
             </div>
         </div>
-    </div>
+    @endif
 
 
     <div class="col-12">
@@ -138,8 +140,6 @@
                         "_token": "{{ csrf_token() }}",
                     },
                     success: function(data) {
-
-
                         var datatable_data = {
                             data: data
                         };
@@ -216,11 +216,9 @@
                             return view + payslip + clickToPaid + edit + deleted + form;
                         }
 
-                        console.clear();
                         var tr = '';
                         // <tr><td class="dataTables-empty" colspan="1">No entries found</td></tr>
                         if (data.length > 0) {
-                            // console.log(data);
                             $.each(data, function(indexInArray, valueOfElement) {
                                 var status =
                                     '<div class="badge bg-danger p-2 px-3 rounded"><a href="#" class="text-white">' +
@@ -275,6 +273,8 @@
                                     } else {
                                         var deleted = '';
                                     }
+                                @else
+                                    var deleted = '';
                                 @endif
                                 var url_employee = valueOfElement['url'];
 
@@ -370,9 +370,6 @@
                         url: url,
                         dataType: "JSON",
                         success: function(data) {
-                            console.log(data);
-
-
                             // show_toastr(data.status, data.msg, 'data.status');
                             show_toastr('success', 'Payslip Deleted Successfully', 'success');
 
@@ -380,10 +377,7 @@
                             setTimeout(function() {
                                 location.reload();
                             }, 800)
-
-
                         },
-
                     });
 
                 }

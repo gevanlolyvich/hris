@@ -304,25 +304,37 @@ class AttendanceEmployeeController extends Controller
             ->first();
         $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
 
-        // calculate default clock out for cross day shift
-        $today_clock_out_second       = strtotime($shift_times->end_time) - strtotime($date) - 3600;
-        $today_hours                  = floor($today_clock_out_second / 3600);
-        $today_mins                   = floor($today_clock_out_second / 60 % 60);
-        $today_secs                   = floor($today_clock_out_second % 60);
-        $default_clock_out            = sprintf('%02d:%02d:%02d', $today_hours, $today_mins, $today_secs);
+        // tomorrow shift
+        $tomorrow_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+            ->where('days', date('l', strtotime('tomorrow')))
+            ->first();
 
         // calculate default clock out for cross day shift
-        $clockoutSeconds              = strtotime($yesterday_shift_times->end_time) - strtotime($date) - 3600;
+        // $today_clock_out_second       = strtotime($shift_times->end_time) - strtotime($date);
+        // $today_hours                  = floor($today_clock_out_second / 3600);
+        // $today_mins                   = floor($today_clock_out_second / 60 % 60);
+        // $today_secs                   = floor($today_clock_out_second % 60);
+        // $default_clock_out            = sprintf('%02d:%02d:%02d', $today_hours, $today_mins, $today_secs);
+
+        // calculate default clock out for cross day shift
+        $clockoutSeconds              = strtotime($yesterday_shift_times->end_time) - strtotime($date);
         $hours                        = floor($clockoutSeconds / 3600);
         $mins                         = floor($clockoutSeconds / 60 % 60);
         $secs                         = floor($clockoutSeconds % 60);
         $default_clock_out_cross_day  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
         // calculate absolute out time
-        $today_absolute_out_time      = sprintf('%02d:%02d:%02d', $today_hours + 1, $today_mins, $today_secs);
-        $today_absolute_out           = strtotime("$date $today_absolute_out_time");
+        // $today_absolute_out_time      = sprintf('%02d:%02d:%02d', $today_hours + 1, $today_mins, $today_secs);
+        // $today_absolute_out           = strtotime("$date $today_absolute_out_time");
         $yesterday_absolute_out_time  = sprintf('%02d:%02d:%02d', $hours + 1, $mins, $secs);
         $yesterday_absolute_out       = strtotime("$date $yesterday_absolute_out_time");
+
+        // calculate abolute in for tommorow
+        $tomorrow_clock_in_second     = strtotime($tomorrow_shift_times->start_time) - strtotime($date) - 3600;
+        $tomorrow_hours               = floor($tomorrow_clock_in_second / 3600);
+        $tomorrow_mins                = floor($tomorrow_clock_in_second / 60 % 60);
+        $tomorrow_secs                = floor($tomorrow_clock_in_second % 60);
+        $tomorrow_absolute_in         = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
 
         $today_cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
         $yesterday_cross_day = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
@@ -476,7 +488,7 @@ class AttendanceEmployeeController extends Controller
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
                 }
             }
-        } elseif ($todayAttendance && ($timestamp < $today_absolute_out || $today_cross_day)) {
+        } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day)) {
             if ($shift_times->is_working) {
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
@@ -630,8 +642,10 @@ class AttendanceEmployeeController extends Controller
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
                 }
             }
-        } else {
+        } elseif ((!$todayAttendance && !$yesterday_cross_day) || (!$yesterdayAttendance && $yesterday_cross_day)) {
             return redirect()->back()->with('error', __('Employee are not allow to clock out with out clock in first'));
+        } else  {
+            return redirect()->back()->with('error', __('Clock Out Data Invalid'));
         }
     }
 
