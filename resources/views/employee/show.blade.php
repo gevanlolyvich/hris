@@ -245,7 +245,7 @@
                         <h5>{{__('Shift') }} ({{ $employee->shift_type->name }})</h5>
                         <hr>
                         <div class="table-responsive">
-                            <table class="table table-striped table-border-style" id="pc-dt-simple">
+                            <table class="table table-border-style" id="pc-dt-simple">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Day') }}</th>
@@ -255,11 +255,19 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($employee->shift_type->shiftTimes as $shift)
-                                        <tr>
-                                            <td>{{ $shift->days }}</td>
-                                            <td>{{ $shift->start_time }}</td>
-                                            <td>{{ $shift->end_time }}</td>
-                                        </tr>
+                                        @if (!empty($shift->start_time) && !empty($shift->end_time))
+                                            <tr>
+                                                <td>{{ $shift->days }}</td>
+                                                <td>{{ $shift->start_time }}</td>
+                                                <td>{{ $shift->end_time }}</td>
+                                            </tr>
+                                        @else
+                                            <tr class="bg-danger">
+                                                <td class="text-white">{{ $shift->days }}</td>
+                                                <td class="text-white">{{__('No Working Hour')}}</td>
+                                                <td class="text-white">{{__('No Working Hour')}}</td>
+                                            </tr>
+                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>

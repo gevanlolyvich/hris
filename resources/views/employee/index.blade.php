@@ -45,7 +45,7 @@
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
                                 <th>{{ __('Designation') }}</th>
-                                <th>{{ __('Date Of Joining') }}</th>
+                                <th>{{ __('Shift') }}</th>
                                 @if (Gate::check('Edit Employee') || Gate::check('Delete Employee'))
                                     <th width="200px">{{ __('Action') }}</th>
                                 @endif
@@ -73,9 +73,7 @@
                                     <td>
                                         {{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '' }}
                                     </td>
-                                    <td>
-                                        {{ \Auth::user()->dateFormat($employee->company_doj) }}
-                                    </td>
+                                    <td>{{ $employee->shift_type?->name ?? '' }}</td>
                                     @if (Gate::check('Edit Employee') || Gate::check('Delete Employee'))
                                         <td class="Action">
                                             @if ($employee->is_active == 1)

@@ -20,7 +20,6 @@
         </div>
     @endif
 
-
     @if (\Auth::user()->type == 'employee')
     <div class="col-xxl-5">
         <div class="card">
@@ -50,20 +49,20 @@
                     {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
                     {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label']) }}
                     <div class="col-md-6 col-lg-12 text-center mx-auto">
-                        <button type="button" class="btn btn-info btn-lg btn-block " id="load"><i
+                        <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load"><i
                             class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
                         </button>
                         <div id="camera" style="display: none; position: relative" class="col-12">
                             <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
                             <div class="row allign-center text-center">
                                 <div class="col-6">
-                                    <button type="button" class="btn btn-info btn-sm custBtn1" id="takepic" style="display: none;"><i
-                                        class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                    <button type="button" class="btn btn-info btn-sm custBtn1" id="takepic" style="display: none;">
+                                        <i class="fa fa-solid fa-camera"></i>
                                     </button>
                                 </div>
                                 <div class="col-6">
                                     <button type="button" class="btn btn-danger btn-sm custBtn2" id="closecamera" style="display: none;">
-                                        {{ __('Close The Camera') }}
+                                        <i class="fa fa-solid fa-window-close"></i>
                                     </button>
                                 </div>
                             </div>
@@ -76,7 +75,7 @@
                             <input type="hidden" name="picture" id="picture">
                         </label>      
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-12" id="other-form" style="display: none;">
                         <div class="form-group mb-1">
                             {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
                             <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
@@ -89,6 +88,7 @@
                         <input type="hidden" name="latitude" id="latitude" value="0">
                         <input type="hidden" name="longitude" id="longitude" value="0">
                         <input type="hidden" name="accuracy" id="accuracy" value="0">
+                        <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}">
                     </div>
                     <div class="col-md-6 text-center mx-auto mt-1">
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
@@ -103,7 +103,7 @@
                                 class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                         @else
                             <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                         @endif
                         {{ Form::close() }}
                     </div>                                                    
@@ -231,12 +231,9 @@
         </div>
     @else
         <div class="col-xxl-12">
-
             {{-- start --}}
             <div class="row">
-
                 <div class="col-lg-4 col-md-6">
-
                     <div class="card">
                         <div class="card-body">
                             <div class="row align-items-center justify-content-between">
@@ -258,9 +255,7 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="col-lg-4 col-md-6">
-
                     <div class="card">
                         <div class="card-body">
                             <div class="row align-items-center justify-content-between">
@@ -283,7 +278,6 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
-
                     <div class="card">
                         <div class="card-body">
                             <div class="row align-items-center justify-content-between">
@@ -307,9 +301,6 @@
                 </div>
             </div>
         </div>
-
-
-
         <div class="col-lg-4 col-md-6">
             <div class="card">
                 <div class="card-body">
@@ -331,10 +322,8 @@
                     </div>
                 </div>
             </div>
-
         </div>
         <div class="col-lg-4 col-md-6">
-
             <div class="card">
                 <div class="card-body">
                     <div class="row align-items-center justify-content-between">
@@ -357,7 +346,6 @@
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-
             <div class="card">
                 <div class="card-body">
                     <div class="row align-items-center justify-content-between">
@@ -387,7 +375,6 @@
         <div class="col-xxl-12">
             <div class="row">
                 <div class="col-xl-5">
-
                     <div class="card">
                         <div class="card-header card-body table-border-style">
                             <h5>{{ __('Meeting schedule') }}</h5>
@@ -415,7 +402,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="card">
                         <div class="card-header card-body table-border-style">
                             <h5>{{ __("Today's Not Clock In") }}</h5>
@@ -441,7 +427,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <div class="col-xl-7">
                     <div class="card">
@@ -522,7 +507,7 @@
         .custBtn1{
             position: absolute;
             top: 83%;
-            left: 31%;
+            left: 40%;
             transform: translate(-50%, -50%);
             -ms-transform: translate(-50%, -50%);
             border: none;
@@ -532,7 +517,7 @@
         .custBtn2{
             position: absolute;
             top: 83%;
-            left: 66%;
+            left: 60%;
             transform: translate(-50%, -50%);
             -ms-transform: translate(-50%, -50%);
             border: none;
@@ -577,7 +562,9 @@
       
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
-            if (latitude !== 0 && longitude !== 0 && clockInButton) {
+            const clockInData = document.getElementById("clockInData");
+
+            if (latitude !== 0 && longitude !== 0 && clockInButton && !clockInData.value) {
                 const latElement = document.getElementById("latitude");
                 const longElement = document.getElementById("longitude");
                 const accElement = document.getElementById("accuracy");
@@ -613,12 +600,26 @@
               // Handle the case where the user denied geolocation access
               const clockInButton = document.getElementById("clock_in");
               const clockOutButton = document.getElementById("clock_out");
+              const otherForm = document.getElementById('other-form');
               if (clockInButton) {
                 clockInButton.disabled = true;
               }
               if (clockOutButton) {
                 clockOutButton.disabled = true;
               }
+              if (otherForm) {
+                  otherForm.style.display = ''
+              }
+            }
+          } finally  {
+            const otherForm = document.getElementById('other-form');
+            const clockInButton = document.getElementById("clock_in");
+            if (!clockInButton.disabled) {
+                if (otherForm) {
+                    otherForm.style.display = ''
+                }
+            } else {
+                otherForm.style.display = 'none';
             }
           }
         });
