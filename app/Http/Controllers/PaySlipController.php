@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PaySlipController extends Controller
 {
@@ -100,6 +102,7 @@ class PaySlipController extends Controller
             $employees = Employee::where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
 
             $employeesSalary = Employee::where('created_by', \Auth::user()->creatorId())->where('salary', '<=', 0)->first();
+            Log::info(json_encode($employeesSalary, JSON_PRETTY_PRINT));
 
             if (!empty($employeesSalary)) {
                 return redirect()->route('payslip.index')->with('error', __('Please set employee salary.'));
@@ -124,7 +127,7 @@ class PaySlipController extends Controller
                 $payslipEmployee->save();
 
                 // slack 
-                $setting = Utility::settings(\Auth::user()->creatorId());
+                $setting = Utility::settings();
                 $month = date('M Y', strtotime($payslipEmployee->salary_month . ' ' . $payslipEmployee->time));
                 if (isset($setting['monthly_payslip_notification']) && $setting['monthly_payslip_notification'] == 1) {
                     $msg = ("payslip generated of") . ' ' . $month . '.';
@@ -132,7 +135,7 @@ class PaySlipController extends Controller
                 }
 
                 // telegram 
-                $setting = Utility::settings(\Auth::user()->creatorId());
+                $setting = Utility::settings();
                 $month = date('M Y', strtotime($payslipEmployee->salary_month . ' ' . $payslipEmployee->time));
                 if (isset($setting['telegram_monthly_payslip_notification']) && $setting['telegram_monthly_payslip_notification'] == 1) {
                     $msg = ("payslip generated of") . ' ' . $month . '.';
@@ -141,7 +144,7 @@ class PaySlipController extends Controller
 
 
                 // twilio
-                $setting  = Utility::settings(\Auth::user()->creatorId());
+                $setting  = Utility::settings();
                 $emp = Employee::where('id', $payslipEmployee->employee_id = \Auth::user()->id)->first();
                 if (isset($setting['twilio_payslip_notification']) && $setting['twilio_payslip_notification'] == 1) {
                     $employeess = Employee::where($request->employee_id)->orderby('name', 'asc')->get();
@@ -208,26 +211,23 @@ class PaySlipController extends Controller
 
             foreach ($paylip_employee as $employee) {
 
-                if (Auth::user()->type == 'employee') {
-                    if (Auth::user()->id == $employee->user_id) {
-                        $tmp   = [];
-                        $tmp[] = $employee->id;
-                        $tmp[] = $employee->name;
-                        $tmp[] = $employee->payroll_type;
-                        $tmp[] = $employee->pay_slip_id;
-                        $tmp[] = !empty($employee->basic_salary) ? \Auth::user()->priceFormat($employee->basic_salary) : '-';
-                        $tmp[] = !empty($employee->net_payble) ? \Auth::user()->priceFormat($employee->net_payble) : '-';
-                        if ($employee->status == 1) {
-                            $tmp[] = 'paid';
-                        } else {
-                            $tmp[] = 'unpaid';
-                        }
-                        $tmp[]  = !empty($employee->pay_slip_id) ? $employee->pay_slip_id : 0;
-                        $tmp['url']  = route('employee.show', Crypt::encrypt($employee->id));
-                        $data[] = $tmp;
+                if (Auth::user()->type == 'employee' && Auth::user()->id == $employee->user_id) {
+                    $tmp   = [];
+                    $tmp[] = $employee->id;
+                    $tmp[] = $employee->name;
+                    $tmp[] = $employee->payroll_type;
+                    $tmp[] = $employee->pay_slip_id;
+                    $tmp[] = !empty($employee->basic_salary) ? \Auth::user()->priceFormat($employee->basic_salary) : '-';
+                    $tmp[] = !empty($employee->net_payble) ? \Auth::user()->priceFormat($employee->net_payble) : '-';
+                    if ($employee->status == 1) {
+                        $tmp[] = 'paid';
+                    } else {
+                        $tmp[] = 'unpaid';
                     }
-                } else {
-
+                    $tmp[]  = !empty($employee->pay_slip_id) ? $employee->pay_slip_id : 0;
+                    $tmp['url']  = route('employee.show', Crypt::encrypt($employee->id));
+                    $data[] = $tmp;
+                } elseif (Auth::user()->type != 'employee') {
                     $tmp   = [];
                     $tmp[] = $employee->id;
                     $tmp[] = \Auth::user()->employeeIdFormat($employee->employee_id);
@@ -519,7 +519,7 @@ class PaySlipController extends Controller
     public function PayslipExport(Request $request)
     {
         $name = 'payslip_' . date('Y-m-d i:h:s');
-        $data = \Excel::download(new PayslipExport($request), $name . '.xlsx'); ob_end_clean();
+        $data = Excel::download(new PayslipExport($request), $name . '.xlsx'); ob_end_clean();
     
         return $data;
     }
