@@ -11,9 +11,11 @@ use App\Models\IpRestrict;
 use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
+use App\Models\LogAttendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendanceExport;
@@ -371,6 +373,16 @@ class AttendanceEmployeeController extends Controller
 
                     $attendanceEmployee->save();
 
+                    $logForm =  [
+                        'personel_id'   => $employee->personel_id,
+                        'date'          => $date,
+                        'coordinate'    => $coord_out,
+                        'min'           => $attendanceEmployee->clock_in,
+                        'max'           => $time,
+                    ];
+    
+                    LogAttendance::create($logForm);
+
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
                 } else {
                     //late
@@ -433,6 +445,16 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->save();
+
+                    $logForm =  [
+                        'personel_id'   => $employee->personel_id,
+                        'date'          => $date,
+                        'coordinate'    => $coord_out,
+                        'min'           => $attendanceEmployee->clock_in,
+                        'max'           => $time,
+                    ];
+    
+                    LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
                 } else {
@@ -505,6 +527,16 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->picture_out     = $picture_path;
                     $attendanceEmployee->save();
 
+                    $logForm =  [
+                        'personel_id'   => $employee->personel_id,
+                        'date'          => $date,
+                        'coordinate'    => $coord_out,
+                        'min'           => $attendanceEmployee->clock_in,
+                        'max'           => $time,
+                    ];
+    
+                    LogAttendance::create($logForm);
+
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
                 } else {
                     //late
@@ -568,6 +600,16 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->save();
+
+                    $logForm =  [
+                        'personel_id'   => $employee->personel_id,
+                        'date'          => $date,
+                        'coordinate'    => $coord_out,
+                        'min'           => $attendanceEmployee->clock_in,
+                        'max'           => $time,
+                    ];
+    
+                    LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
                 } else {
@@ -721,59 +763,40 @@ class AttendanceEmployeeController extends Controller
                     $late             = '00:00:00';
                 }
 
-                $checkDb = AttendanceEmployee::where('employee_id', '=', \Auth::user()->id)->get()->toArray();
                 $presentStatus = AttendanceStatus::where('id', 1)->first();
 
-                if (empty($checkDb)) {
-                    $employeeAttendance                         = new AttendanceEmployee();
-                    $employeeAttendance->employee_id            = $employeeId;
-                    $employeeAttendance->date                   = $date;
-                    $employeeAttendance->attendance_status_id   = $presentStatus->id;
-                    $employeeAttendance->status                 = $presentStatus->name;
-                    $employeeAttendance->clock_in               = $time;
-                    $employeeAttendance->clock_out              = $cross_day ? $default_clock_out_cross_day : '00:00:00';
-                    $employeeAttendance->late                   = $late;
-                    $employeeAttendance->early_leaving          = '00:00:00';
-                    $employeeAttendance->overtime               = '00:00:00';
-                    $employeeAttendance->total_rest             = '00:00:00';
-                    $employeeAttendance->work_hours             = '00:00:00';
-                    $employeeAttendance->coord_in               = $coord_in;
-                    $employeeAttendance->note                   = $note;
-                    $employeeAttendance->is_valid               = $is_valid;
-                    $employeeAttendance->attendance_type_id     = $attendance_type;
-                    $employeeAttendance->picture_in             = $picture_path;
-                    $employeeAttendance->created_by             = \Auth::user()->id;
-                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                $employeeAttendance                         = new AttendanceEmployee();
+                $employeeAttendance->employee_id            = $employeeId;
+                $employeeAttendance->date                   = $date;
+                $employeeAttendance->attendance_status_id   = $presentStatus->id;
+                $employeeAttendance->status                 = $presentStatus->name;
+                $employeeAttendance->clock_in               = $time;
+                $employeeAttendance->clock_out              = $cross_day ? $default_clock_out_cross_day : '00:00:00';
+                $employeeAttendance->late                   = $late;
+                $employeeAttendance->early_leaving          = '00:00:00';
+                $employeeAttendance->overtime               = '00:00:00';
+                $employeeAttendance->total_rest             = '00:00:00';
+                $employeeAttendance->work_hours             = '00:00:00';
+                $employeeAttendance->coord_in               = $coord_in;
+                $employeeAttendance->note                   = $note;
+                $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->attendance_type_id     = $attendance_type;
+                $employeeAttendance->picture_in             = $picture_path;
+                $employeeAttendance->created_by             = \Auth::user()->id;
+                $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                $employeeAttendance->save();
 
-                    $employeeAttendance->save();
+                $logForm =  [
+                    'personel_id'   => $employee->personel_id,
+                    'date'          => $date,
+                    'coordinate'    => $coord_in,
+                    'min'           => $time,
+                    'max'           => $time,
+                ];
 
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
-                }
-                foreach ($checkDb as $check) {
-                    $employeeAttendance                         = new AttendanceEmployee();
-                    $employeeAttendance->employee_id            = $employeeId;
-                    $employeeAttendance->date                   = $date;
-                    $employeeAttendance->attendance_status_id   = $presentStatus->id;
-                    $employeeAttendance->status                 = $presentStatus->name;
-                    $employeeAttendance->clock_in               = $time;
-                    $employeeAttendance->clock_out              = '00:00:00';
-                    $employeeAttendance->late                   = $late;
-                    $employeeAttendance->early_leaving          = '00:00:00';
-                    $employeeAttendance->overtime               = '00:00:00';
-                    $employeeAttendance->total_rest             = '00:00:00';
-                    $employeeAttendance->work_hours             = '00:00:00';
-                    $employeeAttendance->coord_in               = $coord_in;
-                    $employeeAttendance->note                   = $note;
-                    $employeeAttendance->is_valid               = $is_valid;
-                    $employeeAttendance->attendance_type_id     = $attendance_type;
-                    $employeeAttendance->picture_in             = $picture_path;
-                    $employeeAttendance->created_by             = \Auth::user()->id;
-                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                LogAttendance::create($logForm);
 
-                    $employeeAttendance->save();
-
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
-                }
+                return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
             } else {
                 return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
             }
@@ -797,6 +820,16 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
                 $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+
+                $logForm =  [
+                    'personel_id'   => $employee->personel_id,
+                    'date'          => $date,
+                    'coordinate'    => $coord_in,
+                    'min'           => $time,
+                    'max'           => $time,
+                ];
+
+                LogAttendance::create($logForm);
 
                 $employeeAttendance->save();
 
@@ -822,6 +855,16 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
 
                 $employeeAttendance->save();
+
+                $logForm =  [
+                    'personel_id'   => $employee->personel_id,
+                    'date'          => $date,
+                    'coordinate'    => $coord_in,
+                    'min'           => $time,
+                    'max'           => $time,
+                ];
+
+                LogAttendance::create($logForm);
 
                 return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
             }
@@ -967,8 +1010,17 @@ class AttendanceEmployeeController extends Controller
 
     public function export(Request $request)
     {
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                list($key, $value) = explode('=', $query);
+                $queryArray[$key] = $value;
+            }
+        }
+
         $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
-        $data = Excel::download(new AttendanceExport(), $name . '.xlsx');
+        $data = Excel::download(new AttendanceExport(json_encode($queryArray)), $name . '.xlsx');
 
         return $data;
     }
