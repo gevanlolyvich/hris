@@ -22,7 +22,7 @@ class LeaveController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Leave')) {
-            $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId());
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
                 
@@ -38,10 +38,11 @@ class LeaveController extends Controller
                     $employee_id[] = \Auth::user()->employee->id;
                 }
 
-                $leaves   = LocalLeave::whereIn('employee_id', $employee_id)->get();
+                $leaves   = $leaves->whereIn('employee_id', $employee_id);
             } else {
-                $leaves = LocalLeave::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $leaves = $leaves->where('created_by', '=', \Auth::user()->creatorId());
             }
+            $leaves = $leaves->orderBy('start_date', 'DESC')->get();
 
             return view('leave.index', compact('leaves'));
         } else {
