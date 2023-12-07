@@ -9,16 +9,25 @@ class Overtime extends Model
     protected $fillable = [
         'employee_id',
         'title',
-        'number_of_days',
-        'hours',
-        'rate',
+        'date',
+        'clock_in',
+        'clock_out',
+        'coord_in',
+        'coord_out',
+        'pict_in',
+        'pict_out',
+        'description',
+        'document',
+        'report_document',
+        'report_note',
         'created_by',
     ];
 
     public function employee()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id')->first();
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
+
     public static $Overtimetype =[
         'fixed'=>'Fixed',
         'percentage'=> 'Percentage',
