@@ -88,6 +88,22 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            let employeeData = @json(session('employee'));
+
+            if (employeeData) {
+                // do something here with employeeData.name
+                let searchTable = document.getElementsByClassName('dataTable-input');
+
+                if (searchTable?.length) {
+                    searchTable[0].value = employeeData.name;
+                    $(searchTable[0]).trigger('input');
+                }
+            }
+        })
+    </script>
 @endpush
 @section('action-button')
     <a href="{{ route('attendanceemployee.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
@@ -134,11 +150,11 @@
                                 <label class="form-label">{{__('Type')}}</label>
                                 <br>
                                 <div class="form-check form-check-inline form-group">
-                                    <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':'checked'}}>
+                                    <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
                                     <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
                                 </div>
                                     <div class="form-check form-check-inline form-group">
-                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':''}}>
+                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':'checked'}}>
                                         <label class="form-check-label" for="daily">{{__('Daily')}}</label>
                                     </div>
                             </div>
@@ -151,7 +167,7 @@
                             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
                                 <div class="btn-box">
                                     {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
-                                    {{ Form::date('date',isset($_GET['date'])?$_GET['date']:'', array('class' => 'form-control month-btn')) }}
+                                    {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
                                 </div>
                             </div>
                             @if(\Auth::user()->type != 'employee')

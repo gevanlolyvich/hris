@@ -72,21 +72,7 @@ class AttendanceEmployeeController extends Controller
                 } elseif ($request->type == 'daily' && !empty($request->date)) {
                     $attendanceEmployee->where('date', $request->date);
                 } else {
-                    $month      = date('m');
-                    $year       = date('Y');
-                    $start_date = date($year . '-' . $month . '-01');
-                    $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-
-                    // old date
-                    // $end_date   = date($year . '-' . $month . '-t');
-
-                    $attendanceEmployee->whereBetween(
-                        'date',
-                        [
-                            $start_date,
-                            $end_date,
-                        ]
-                    );
+                    $attendanceEmployee->where('date', date('Y-m-d'));
                 }
                 $attendanceEmployee = $attendanceEmployee->orderby('date', 'desc')->get();
             } else {
@@ -810,7 +796,10 @@ class AttendanceEmployeeController extends Controller
 
                 LogAttendance::create($logForm);
 
-                return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
+                return redirect()->route('attendanceemployee.index')->with([
+                    'success' => __('Employee Successfully Clock In.'),
+                    'employee' => $employee,
+                ]);
             } else {
                 return redirect()->back()->with('error', __('Employee are not allow multiple time clock in & clock for every day.'));
             }
@@ -846,8 +835,11 @@ class AttendanceEmployeeController extends Controller
                 LogAttendance::create($logForm);
 
                 $employeeAttendance->save();
-
-                return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
+                
+                return redirect()->route('attendanceemployee.index')->with([
+                    'success' => __('Employee Successfully Clock In.'),
+                    'employee' => $employee,
+                ]);
             }
             foreach ($checkDb as $check) {
                 $employeeAttendance                         = new AttendanceEmployee();
@@ -880,7 +872,10 @@ class AttendanceEmployeeController extends Controller
 
                 LogAttendance::create($logForm);
 
-                return redirect()->route('attendanceemployee.index')->with('success', __('Employee Successfully Clock In.'));
+                return redirect()->route('attendanceemployee.index')->with([
+                    'success' => __('Employee Successfully Clock In.'),
+                    'employee' => $employee,
+                ]);
             }
         }
     }

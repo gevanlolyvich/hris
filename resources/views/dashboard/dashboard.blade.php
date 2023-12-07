@@ -79,7 +79,7 @@
                         <div class="form-group mb-1">
                             {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
                             <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
-                            {{ Form::select('attendance_type', $attendance_type, null, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
+                            {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
                         </div>
                         <div class="form-group">
                             {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
