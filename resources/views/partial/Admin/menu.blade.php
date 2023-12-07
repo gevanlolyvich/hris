@@ -233,6 +233,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('leave.index') }}">{{ __('Leave') }}</a>
                                 </li>
                             @endcan
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('overtime.index') }}">{{ __('Overtime') }}</a>
+                            </li>
                             @can('Manage Attendance')
                                 <li class="dash-item dash-hasmenu">
                                     <a href="#!" class="dash-link"><span

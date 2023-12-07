@@ -1422,5 +1422,7 @@ Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->
 
 Route::post('eventemployee', [EventEmployeeController::class, 'report'])->name('eventemployee.report')->middleware(['auth', 'XSS']);
 Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attendance'])->name('eventemployee.attendance')->middleware(['auth', 'XSS']);
+Route::post('overtime/attendance', [OvertimeController::class, 'attendance'])->name('overtime.attendance')->middleware(['auth', 'XSS']);
+Route::post('overtime/report', [OvertimeController::class, 'report'])->name('overtime.report')->middleware(['auth', 'XSS']);
 
 Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export');

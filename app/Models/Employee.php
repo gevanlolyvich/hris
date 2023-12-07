@@ -213,19 +213,9 @@ class Employee extends Model
         return $other_payment_json;
     }
 
-    public static function overtime($id)
+    public function overtime(): HasMany
     {
-        //Overtime
-        $over_times      = Overtime::where('employee_id', '=', $id)->get();
-        $total_over_time = 0;
-        foreach ($over_times as $over_time) {
-            $total_work      = $over_time->number_of_days * $over_time->hours;
-            $amount          = $total_work * $over_time->rate;
-            $total_over_time = $amount + $total_over_time;
-        }
-        $over_time_json = json_encode($over_times);
-
-        return $over_time_json;
+        return $this->hasMany(Overtime::class, 'employee_id');
     }
 
     public static function employee_id()
