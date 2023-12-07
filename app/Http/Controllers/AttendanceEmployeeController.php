@@ -381,7 +381,10 @@ class AttendanceEmployeeController extends Controller
     
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
+                    return redirect()->route('attendanceemployee.index')->with([
+                        'success' => __('Employee successfully Clock Out.'),
+                        'employee' => $employee,
+                    ]);
                 } else {
                     //late
                     $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
@@ -454,7 +457,10 @@ class AttendanceEmployeeController extends Controller
     
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
+                    return redirect()->route('attendanceemployee.index')->with([
+                        'success' => __('Employee successfully Clock Out.'),
+                        'employee' => $employee,
+                    ]);
                 } else {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
                     $attendanceEmployee->employee_id   = $request->employee_id;
@@ -535,7 +541,10 @@ class AttendanceEmployeeController extends Controller
     
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
+                    return redirect()->route('attendanceemployee.index')->with([
+                        'success' => __('Employee successfully Clock Out.'),
+                        'employee' => $employee,
+                    ]);
                 } else {
                     //late
                     $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
@@ -609,7 +618,10 @@ class AttendanceEmployeeController extends Controller
     
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with('success', __('Employee successfully Clock Out.'));
+                    return redirect()->route('attendanceemployee.index')->with([
+                        'success' => __('Employee successfully Clock Out.'),
+                        'employee' => $employee,
+                    ]);
                 } else {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
                     $attendanceEmployee->employee_id   = $request->employee_id;
