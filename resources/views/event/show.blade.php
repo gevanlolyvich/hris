@@ -315,8 +315,8 @@
                 document.getElementById('camera').style.display = 'none';
                 document.getElementById('output').style.display = 'none';
             
-                var tracks = video.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
+                var tracks = video?.srcObject?.getTracks();
+                tracks?.forEach(track => track.stop());
                 video.srcObject = null;
             });
 
