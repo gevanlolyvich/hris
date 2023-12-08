@@ -33,14 +33,14 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
         <div class="col-xl-6">
             <div class="card-body">
                 <div class="">
-                    <h2 class="mb-3 f-w-600">{{ __('Login') }}</h2>
+                    <h2 class="mb-3 f-w-600">Login</h2>
                 </div>
                 <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate="" id="form_data">
                     @csrf
                     <div>
                         <div class="form-group mb-3">
                             <label class="form-label">{{ __('Email') }}</label>
-                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter Your Email" required autocomplete="email" autofocus>
+                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('Enter Your Email') }}" required autocomplete="email" autofocus>
                             @error('email')
                                 <span class="error invalid-email text-danger" role="alert">
                                     <small>{{ $message }}</small>
@@ -49,7 +49,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
                         </div>
                         <div class="form-group mb-3">
                             <label class="form-label">{{ __('Password') }}</label>
-                            <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" placeholder="Enter Your Password" required autocomplete="current-password">
+                            <input class="form-control @error('password') is-invalid @enderror" id="password" type="password" name="password" placeholder="{{ __('Enter Your Password') }}" required autocomplete="current-password">
                             @error('password')
                             <span class="error invalid-password text-danger" role="alert">
                                 <small>{{ $message }}</small>

@@ -3,7 +3,7 @@
     <div class="row">
         <div class="form-group">
             {{ Form::label('occasion', __('Occasion'), ['class' => 'col-form-label']) }}
-            {{ Form::text('occasion', null, ['class' => 'form-control','placeholder'=>'Enter Occasion']) }}
+            {{ Form::text('occasion', null, ['class' => 'form-control','placeholder'=>__('Enter Holiday')]) }}
         </div>
         <div class="row col-md-12">
         <div class="form-group col-md-6">
@@ -18,7 +18,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <input type="button" value="Cancel" class="btn btn-light" data-bs-dismiss="modal">
+    <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">
      <input type="submit" value="{{ __('Update') }}" class="btn  btn-primary">
 </div>
 {{ Form::close() }}

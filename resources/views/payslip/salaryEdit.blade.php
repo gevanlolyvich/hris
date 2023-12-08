@@ -168,7 +168,7 @@
             </div>
             <div class="col-12 mt-4 text-right">
                 
-                <input type="button" value="Cancel" class="btn btn-light" data-bs-dismiss="modal">
+                <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">
                 <input type="submit" value="{{__('Update')}}" class="btn btn-primary">
             </div>
             {{Form::close()}}

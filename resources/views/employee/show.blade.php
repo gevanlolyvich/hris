@@ -70,7 +70,7 @@
     <div class="col-xl-12">
         <div class="row">
             <div class="col-12">
-                <div class="card " style="height: 200px;">
+                <div class="card">
                 <div class="card-header card-body employee-detail-body fulls-card">
                 <h5>{{__('Personal Detail')}}</h5>
                     <hr>
@@ -130,7 +130,7 @@
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-6">
-                <div class="card " style="height:200px">
+                <div class="card">
                 <div class="card-header card-body employee-detail-body fulls-card">
                     <h5>{{__('Company Detail')}}</h5>
                     <hr>
@@ -164,7 +164,7 @@
                 </div>
             </div>
             <div class="col-sm-12 col-md-6">
-                <div class="card " style="height:200px">
+                <div class="card ">
                 <div class="card-header card-body employee-detail-body fulls-card">
                     <h5>{{__('Document Detail')}}</h5>
                     <hr>

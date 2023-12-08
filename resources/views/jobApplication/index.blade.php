@@ -343,8 +343,8 @@
                                         <div class="pt-3 ps-3">
                                         </div>
                                         <div class="card-header border-0 pb-0 position-relative">
-                                            <h5><a
-                                                    href="{{ route('job-application.show', \Crypt::encrypt($application->id)) }}">{{ $application->name }}</a>
+                                            <h5>
+                                                <a href="{{ route('job-application.show', \Crypt::encrypt($application->id)) }}">{{ $application->name }}</a>
                                             </h5>
                                             <!-- <div class="card-header-right">
 

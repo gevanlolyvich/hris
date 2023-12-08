@@ -30,7 +30,7 @@
                 @if ($officeTime['is_working'])
                     <h6>{{ __($officeTime['name'])}}</h6>
                     <p class="text-muted pb-0-5">
-                        {{ __('Office Time: ' . $officeTime['startTime'] . ' to ' . $officeTime['endTime'] . ' WIB') }}
+                        {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ')}} {{ $officeTime['endTime'] }} WIB
                     </p>
                     {{-- Condition for showing employee already clock in or not --}}
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
@@ -83,7 +83,7 @@
                         </div>
                         <div class="form-group">
                             {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
-                            {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=>'Enter notes for clock in']) !!}
+                            {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=> __('Enter notes for clock in') ]) !!}
                         </div>
                         <input type="hidden" name="latitude" id="latitude" value="0">
                         <input type="hidden" name="longitude" id="longitude" value="0">

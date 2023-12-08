@@ -89,7 +89,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         $(document).ready(function () {
             let employeeData = @json(session('employee'));
 
@@ -99,11 +99,20 @@
 
                 if (searchTable?.length) {
                     searchTable[0].value = employeeData.name;
+                    var event = new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        bubbles: true,
+                        cancelable: true,
+                        keyCode: 13,
+                        code: 'Enter',
+                    });
+                    searchTable[0].dispatchEvent(event);
                     $(searchTable[0]).trigger('input');
+                    searchTable[0].trigger('input');
                 }
             }
         })
-    </script>
+    </script> --}}
 @endpush
 @section('action-button')
     <a href="{{ route('attendanceemployee.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
@@ -212,9 +221,6 @@
                 <table class="table" id="pc-dt-simple">
                     <thead>
                         <tr>
-                            {{-- @if (\Auth::user()->type != 'employee')
-                                <th>{{ __('Employee') }}</th>
-                            @endif --}}
                             <th>{{ __('Employee') }}</th>
                             <th>{{ __('Shift') }}</th>
                             <th>{{ __('Date') }}</th>
@@ -225,118 +231,114 @@
                             <th>{{ __('Early Leaving') }}</th>
                             <th>{{ __('Overtime') }}</th>
                             <th>{{ __('Work Hours') }}</th>
-                            {{-- @if (Gate::check('Edit Attendance') || Gate::check('Delete Attendance'))
-                                <th width="200px">{{ __('Action') }}</th>
-                            @endif --}}
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($attendanceEmployee as $attendance)
-                            <tr>
-                                {{-- @if (\Auth::user()->type != 'employee')
+                            @if ((session('employee') && session('employee')->name == (!empty($attendance->employee) ? $attendance->employee->name : '')) || empty(session('employee')))
+                                <tr>
                                     <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
-                                @endif --}}
-                                <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
-                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
-                                <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
-                                <td>{{ $attendance->status }}</td>
-                                <!-- Modify Clock In and Clock Out columns in your table -->
-                                <td>
-                                    @if ($attendance->coord_in)
-                                        <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
-                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
-                                        </a>
-                                    @else
-                                        <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
-                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
-                                        </a>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($attendance->coord_out)
-                                        <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_out }}" data-image="{{ $attendance->picture_out }}">
-                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
-                                        </a>
-                                    @else
-                                        <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
-                                        </a>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
-                                        {{ $attendance->late }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span @if($attendance->early_leaving != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
-                                        {{ $attendance->early_leaving }}
-                                    </span>
-                                </td>
-                                <td>{{ $attendance->overtime }}</td>
-                                <td>{{ $attendance->work_hours }}</td>
-                                <td class="Action">
-                                    <span>
-                                        @if (!$attendance->is_valid && \Auth::user()?->employee?->id != $attendance->employee_id)
-                                            <div class="action-btn bg-info ms-2">
-                                                {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
-                                                <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
-                                                    data-bs-toggle="tooltip" 
-                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
-                                                    title="{{__('Invalid / Required Validation')}}"
-                                                    style="pointer-events: auto">
-                                                    <i class="ti ti-checks text-white text-white"></i>
-                                                </button>
-                                                {!! Form::close() !!}
-                                            </div>
-                                        @elseif ($attendance->is_valid)
-                                            <div class="action-btn bg-success ms-2">
-                                                <button type="submit" class="mx-3 btn btn-sm align-items-center"
-                                                    data-bs-toggle="tooltip" disabled
-                                                    data-bs-original-title="{{__('Valid')}}"
-                                                    title="{{__('Valid')}}"
-                                                    style="pointer-events: auto">
-                                                    <i class="ti ti-checks text-white text-white"></i>
-                                                </button>
-                                            </div>
+                                    <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
+                                    <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                    <td>{{ $attendance->status }}</td>
+                                    <!-- Modify Clock In and Clock Out columns in your table -->
+                                    <td>
+                                        @if ($attendance->coord_in)
+                                            <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
+                                                <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                            </a>
                                         @else
-                                            <div class="action-btn bg-info ms-2">
-                                                <button type="button" class="mx-3 btn btn-sm align-items-center disabled" disabled
-                                                    data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
-                                                    data-bs-original-title="{{__('Invalid / Required Validation')}}"
-                                                    style="pointer-events: auto">
-                                                    <i class="ti ti-checks text-white text-white"></i>
-                                                </button>
-                                            </div>
+                                            <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
+                                                <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
+                                            </a>
                                         @endif
-                                        @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                            {{-- @endcan --}}
-                                            @can('Edit Attendance')
-                                                <div class="action-btn bg-warning ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                        data-url="{{ URL::to('attendanceemployee/' . $attendance->id . '/edit') }}"
-                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Edit Attendance') }}"
-                                                        data-bs-original-title="{{ __('Edit') }}">
-                                                        <i class="ti ti-pencil text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                            @can('Delete Attendance')
-                                                <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['attendanceemployee.destroy', $attendance->id], 'id' => 'delete-form-' . $attendance->id]) !!}
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                        data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                        aria-label="Delete"><i
-                                                            class="ti ti-trash text-white text-white"></i></a>
-                                                    </form>
-                                                </div>
-                                            @endcan
+                                    </td>
+                                    <td>
+                                        @if ($attendance->coord_out)
+                                            <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_out }}" data-image="{{ $attendance->picture_out }}">
+                                                <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                            </a>
+                                        @else
+                                            <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                                <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                            </a>
                                         @endif
-                                    </span>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td>
+                                        <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            {{ $attendance->late }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span @if($attendance->early_leaving != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            {{ $attendance->early_leaving }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $attendance->overtime }}</td>
+                                    <td>{{ $attendance->work_hours }}</td>
+                                    <td class="Action">
+                                        <span>
+                                            @if (!$attendance->is_valid && \Auth::user()?->employee?->id != $attendance->employee_id)
+                                                <div class="action-btn bg-info ms-2">
+                                                    {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
+                                                    <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-original-title="{{__('Invalid / Required Validation')}}"
+                                                        title="{{__('Invalid / Required Validation')}}"
+                                                        style="pointer-events: auto">
+                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                    </button>
+                                                    {!! Form::close() !!}
+                                                </div>
+                                            @elseif ($attendance->is_valid)
+                                                <div class="action-btn bg-success ms-2">
+                                                    <button type="submit" class="mx-3 btn btn-sm align-items-center"
+                                                        data-bs-toggle="tooltip" disabled
+                                                        data-bs-original-title="{{__('Valid')}}"
+                                                        title="{{__('Valid')}}"
+                                                        style="pointer-events: auto">
+                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <div class="action-btn bg-info ms-2">
+                                                    <button type="button" class="mx-3 btn btn-sm align-items-center disabled" disabled
+                                                        data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
+                                                        data-bs-original-title="{{__('Invalid / Required Validation')}}"
+                                                        style="pointer-events: auto">
+                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                            @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
+                                                {{-- @endcan --}}
+                                                @can('Edit Attendance')
+                                                    <div class="action-btn bg-warning ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                            data-url="{{ URL::to('attendanceemployee/' . $attendance->id . '/edit') }}"
+                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                            title="" data-title="{{ __('Edit Attendance') }}"
+                                                            data-bs-original-title="{{ __('Edit') }}">
+                                                            <i class="ti ti-pencil text-white"></i>
+                                                        </a>
+                                                    </div>
+                                                @endcan
+                                                @can('Delete Attendance')
+                                                    <div class="action-btn bg-danger ms-2">
+                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['attendanceemployee.destroy', $attendance->id], 'id' => 'delete-form-' . $attendance->id]) !!}
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                            aria-label="Delete"><i
+                                                                class="ti ti-trash text-white text-white"></i></a>
+                                                        </form>
+                                                    </div>
+                                                @endcan
+                                            @endif
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

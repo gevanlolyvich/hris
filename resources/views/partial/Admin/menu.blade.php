@@ -150,23 +150,32 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
                 <!-- employee-->
                 @if (Gate::check('Manage Employee'))
-                    @if (\Auth::user()->type == 'employee')
-                        @php
-                            $employee = App\Models\Employee::where('user_id', \Auth::user()->id)->first();
-                        @endphp
-                        <li class="dash-item {{ Request::segment(1) == 'employee' ? 'active' : '' }}">
-                            <a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}"
-                                class="dash-link"><span class="dash-micon"><i
-                                        class="ti ti-user"></i></span><span
-                                    class="dash-mtext">{{ __('Employee') }}</span></a>
+                <li class="dash-item dash-hasmenu">
+                    <a href="#!" class="dash-link"><span class="dash-micon"><i
+                                class="ti ti-user"></i></span><span
+                            class="dash-mtext">{{ __('Employee') }}</span><span class="dash-arrow"><i
+                                data-feather="chevron-right"></i></span></a>
+                    <ul class="dash-submenu">
+                        @if (\Auth::user()->type == 'employee')
+                            @php
+                                $employee = App\Models\Employee::where('user_id', \Auth::user()->id)->first();
+                            @endphp
+                            <li class="dash-item {{ Request::segment(1) == 'employee' ? 'active' : '' }}">
+                                <a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}"
+                                    class="dash-link">{{ __('Employee') }}</a>
+                            </li>
+                        @else
+                            <li class="dash-item {{ Request::segment(1) == 'employee' ? 'active' : '' }}">
+                                <a href="{{ route('employee.index') }}" class="dash-link"><span
+                                        class="dash-micon"><i class="ti ti-user"></i></span><span
+                                        class="dash-mtext">{{ __('Employee') }}</span></a>
+                            </li>
+                        @endif
+                        <li class="dash-item">
+                            <a class="dash-link"
+                                href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                         </li>
-                    @else
-                        <li class="dash-item {{ Request::segment(1) == 'employee' ? 'active' : '' }}">
-                            <a href="{{ route('employee.index') }}" class="dash-link"><span
-                                    class="dash-micon"><i class="ti ti-user"></i></span><span
-                                    class="dash-mtext">{{ __('Employee') }}</span></a>
-                        </li>
-                    @endif
+                    </ul>
                 @endif
                 <!-- employee-->
 
@@ -260,10 +269,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         <li class="dash-item">
                                             <a class="dash-link"
                                                 href="{{ route('permit.index') }}">{{ __('Permit Attendance') }}</a>
-                                        </li>
-                                        <li class="dash-item">
-                                            <a class="dash-link"
-                                                href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                                         </li>
                                     </ul>
                                 </li>
@@ -451,7 +456,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!-- HR-->
 
                <!-- recruitment-->
-                @if (Gate::check('Manage Job') || Gate::check('Manage Job Application') || Gate::check('Manage Job OnBoard') || Gate::check('Manage Custom Question') || Gate::check('Manage Interview Schedule') || Gate::check('Manage Career'))
+                @if ((Gate::check('Manage Job') || Gate::check('Manage Job Application') || Gate::check('Manage Job OnBoard') || Gate::check('Manage Custom Question') || Gate::check('Manage Interview Schedule') || Gate::check('Manage Career')) && \Auth::user()->type != 'employee')
                     <li
                         class="dash-item dash-hasmenu  {{ Request::segment(1) == 'job' || Request::segment(1) == 'job-application' ? 'dash-trigger active' : '' }} ">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i

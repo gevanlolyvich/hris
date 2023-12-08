@@ -7,15 +7,15 @@
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
-            {{ Form::text('name', null, ['class' => 'form-control name' ,'placeholder'=>'enter name']) }}
+            {{ Form::text('name', null, ['class' => 'form-control name' ,'placeholder'=> __('Enter Name')]) }}
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('email', __('Email'), ['class' => 'form-label']) }}
-            {{ Form::text('email', null, ['class' => 'form-control' ,'placeholder'=>'enter email']) }}
+            {{ Form::text('email', null, ['class' => 'form-control' ,'placeholder'=> __('Enter Email')]) }}
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('phone', __('Phone'), ['class' => 'form-label']) }}
-            {{ Form::text('phone', null, ['class' => 'form-control' ,'placeholder'=>'enter phone']) }}
+            {{ Form::text('phone', null, ['class' => 'form-control' ,'placeholder'=> __('Enter Phone')]) }}
         </div>
         <div class="form-group col-md-6 dob d-none">
             {!! Form::label('dob', __('Date of Birth'), ['class' => 'form-label']) !!}

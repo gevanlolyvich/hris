@@ -16,6 +16,7 @@
             <div class="form-group">
                 {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
                 <select name="leave_type_id" id="leave_type_id" class="form-control select">
+                    <option selected disabled>{{__('Select Leave Type')}}</option>
                     @foreach ($leavetypes as $leave)
                         <option value="{{ $leave->id }}">{{ $leave->title }} (<p class="float-right pr-5">
                                 {{ $leave->days }}</p>)</option>
@@ -28,19 +29,19 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select start date']) }}
+                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select Start Date')]) }}
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
+                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select End Date')]) }}
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('location', __('Location'), ['class' => 'col-form-label']) }}
-                {{ Form::text('location', null, ['class' => 'form-control', 'autocomplete' => 'off', 'placeholder' => 'Select Location']) }}
+                {{ Form::text('location', null, ['class' => 'form-control', 'autocomplete' => 'off', 'placeholder' => __('Enter Location')]) }}
             </div>
         </div>
     </div>

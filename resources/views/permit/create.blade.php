@@ -18,7 +18,7 @@
             <div class="form-group">
                 {{ Form::label('permit_type_id', __('Permit Type'), ['class' => 'col-form-label']) }}
                 <select name="permit_type_id" id="permit_type_id" class="form-control select">
-                     <option value="" >Select Permit Type</option>
+                     <option value="" >{{ __('Select Permit Type') }}</option>
                     @foreach ($permittypes as $permit)
                         <option value="{{ $permit->id }}">{{ $permit->name }}</option>
                     @endforeach
@@ -28,13 +28,13 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select start date']) }}
+                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select Start Date')]) }}
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
+                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select End Date')]) }}
             </div>
         </div>
     </div>
