@@ -480,7 +480,7 @@ class AttendanceEmployeeController extends Controller
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
                 }
             }
-        } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day)) {
+        } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
             if ($shift_times->is_working) {
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
