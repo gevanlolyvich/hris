@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 @section('page-title')
-    {{ __('Employee Attendance History List') }}
+    {{ __('Employee History List') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Employee Attendance History') }}</li>
+    <li class="breadcrumb-item">{{ __('Employee History') }}</li>
 @endsection
 
 @push('css-page')
