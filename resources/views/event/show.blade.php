@@ -596,7 +596,7 @@
                     </div>
                 </div>
                 <div class="form-group text-center" id="report-data-not-exist">
-                    <h5>Data Doesn't Exist</h5>
+                    <h5>{{ __("Data Doesn't Exist") }}</h5>
                 </div>
             </div>
         </div>
@@ -650,7 +650,7 @@
                     </div>
                 </div>
                 <div class="form-group text-center" id="clock-data-not-exist">
-                    <h5>Data Doesn't Exist</h5>
+                    <h5>{{ __("Data Doesn't Exist") }}</h5>
                 </div>
             </div>
         </div>

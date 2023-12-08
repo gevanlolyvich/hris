@@ -33,7 +33,7 @@
 </div>
 
 <div class="modal-footer pr-0">
-    <input type="button" value="Cancel" class="btn btn-light" data-bs-dismiss="modal">
+    <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">
     {{Form::submit(__('Create'),array('class'=>'btn  btn-primary'))}}
 </div>
 {{ Form::close() }}

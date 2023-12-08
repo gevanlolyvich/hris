@@ -12,33 +12,33 @@
 
 @section('content')
     @if (\Auth::user()->type != 'employee')
-        <div class="col-sm-12 col-lg-12 col-xl-12 col-md-12 mt-4">
+        <div class="col-sm-12">
             <div class="card">
                 <div class="card-body">
                     {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                    <div class="d-flex align-items-center justify-content-end">
-                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
-                            <div class="btn-box">
-                                {{ Form::label('month', __('Select Month'), ['class' => 'form-label']) }}
-                                {{ Form::select('month', $month, null, ['class' => 'form-control select', 'id' => 'month']) }}
+                        <div class="row align-items-center justify-content-end">
+                            <div class="col-4 month">
+                                <div class="btn-box">
+                                    {{ Form::label('month', __('Select Month'), ['class' => 'form-label']) }}
+                                    {{ Form::select('month', $month, null, ['class' => 'form-control select', 'id' => 'month']) }}
+                                </div>
+                            </div>
+                            <div class="col-4 year">
+                                <div class="btn-box">
+                                    {{ Form::label('year', __('Select Year'), ['class' => 'form-label']) }}
+                                    {{ Form::select('year', $year, null, ['class' => 'form-control select']) }}
+                                </div>
+                            </div>
+                            <div class="col-auto float-end ms-2 mt-4">
+                                <a href="#" class="btn  btn-primary"
+                                    onclick="document.getElementById('payslip_form').submit(); return false;"
+                                    data-bs-toggle="tooltip" title="{{ __('payslip') }}"
+                                    data-original-title="{{ __('payslip') }}">{{ __('Generate Payslip') }}
+                                </a>
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
-                            <div class="btn-box">
-                                {{ Form::label('year', __('Select Year'), ['class' => 'form-label']) }}
-                                {{ Form::select('year', $year, null, ['class' => 'form-control select']) }}
-                            </div>
-                        </div>
-                        <div class="col-auto float-end ms-2 mt-4">
-                            <a href="#" class="btn  btn-primary"
-                                onclick="document.getElementById('payslip_form').submit(); return false;"
-                                data-bs-toggle="tooltip" title="{{ __('payslip') }}"
-                                data-original-title="{{ __('payslip') }}">{{ __('Generate Payslip') }}
-                            </a>
-                        </div>
-                    </div>
                     {{ Form::close() }}
-                </div>
+                 </div>
             </div>
         </div>
     @endif
@@ -49,11 +49,9 @@
             <div class="card-header">
                 {{--                <form> --}}
                 {{-- <div class="d-flex justify-content-between w-100"> --}}
-                <div class="d-flex align-items-center justify-content-start">
-                    <h5>{{ __('Find Employee Payslip') }}</h5>
-                </div>
-                <div class="d-flex align-items-center justify-content-end">
-                    <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                <h5>{{ __('Find Employee Payslip') }}</h5>
+                <div class="row align-items-center justify-content-end mt-4">
+                    <div class="col-4 month">
                         <div class="btn-box">
                             <select class="form-control month_date " name="year" tabindex="-1" aria-hidden="true">
                                 <option value="--">--</option>
@@ -67,20 +65,20 @@
 
                         </div>
                     </div>
-                    <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                    <div class="col-4 year">
                         <div class="btn-box">
                             {{ Form::select('year', $year, null, ['class' => 'form-control year_date ']) }}
                         </div>
                     </div>
 
-                    {{-- <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2"> --}}
-                    {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                    <input type="hidden" name="filter_month" class="filter_month">
-                    <input type="hidden" name="filter_year" class="filter_year">
-                    <input type="submit" value="{{ __('Export') }}" class="btn btn-primary">
-                    {{ Form::close() }}
-                    {{-- </div> --}}
-                    <div class="ml-2 float-end">
+                    <div class="col-auto float-end">
+                        {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_form']) }}
+                            <input type="hidden" name="filter_month" class="filter_month">
+                            <input type="hidden" name="filter_year" class="filter_year">
+                            <input type="submit" value="{{ __('Export') }}" class="btn btn-primary">
+                        {{ Form::close() }}
+                    </div>
+                    <div class="col-auto float-end">
                         @can('Create Pay Slip')
                             <input type="button" value="{{ __('Bulk Payment') }}" class="btn btn-primary" style="margin-left: 5px" id="bulk_payment">
                         @endcan
