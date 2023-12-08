@@ -264,6 +264,8 @@ class AttendanceEmployeeController extends Controller
             $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
             Storage::disk('public')->put('uploads/attendance/'.$pictureName, $imageData);
             $picture_path = env('APP_URL') . '/storage/uploads/attendance/'. $pictureName;
+        } else {
+            return redirect()->back()->with('error', __('The picture field is required.'));
         }
 
         $latitude   = $request->input('latitude');
@@ -324,7 +326,7 @@ class AttendanceEmployeeController extends Controller
         $today_cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
         $yesterday_cross_day = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
 
-        if ($yesterdayAttendance && !$todayAttendance && ($timestamp <= $today_absolute_in || $yesterday_cross_day)) {
+        if ($yesterdayAttendance && !$todayAttendance && ($timestamp <= $today_absolute_in || $yesterday_cross_day || !$today_absolute_in)) {
             if ($yesterday_shift_times->is_working) {
                 $startTime = $yesterday_shift_times->start_time;
                 $endTime = $yesterday_shift_times->end_time;
@@ -668,6 +670,7 @@ class AttendanceEmployeeController extends Controller
                 'latitude' => 'required',
                 'longitude' => 'required',
                 'accuracy' => 'required',
+                'picture' => 'required',
             ]
         );
         if ($validator->fails()) {
