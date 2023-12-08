@@ -56,12 +56,12 @@
                             <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
                             <div class="row allign-center text-center">
                                 <div class="col-6">
-                                    <button type="button" class="btn btn-info btn-sm custBtn1" id="takepic" style="display: none;">
+                                    <button type="button" class="btn btn-info btn-md custBtn1" id="takepic" style="display: none;">
                                         <i class="fa fa-solid fa-camera"></i>
                                     </button>
                                 </div>
                                 <div class="col-6">
-                                    <button type="button" class="btn btn-danger btn-sm custBtn2" id="closecamera" style="display: none;">
+                                    <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera" style="display: none;">
                                         <i class="fa fa-solid fa-window-close"></i>
                                     </button>
                                 </div>
