@@ -5,8 +5,8 @@
 @endsection
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('employeeattendancehistory.index') }}">{{ __('Employee Attendance History List') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Employee Attendance History') }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('employeeattendancehistory.index') }}">{{ __('Employee History List') }}</a></li>
+    <li class="breadcrumb-item">{{ __('Employee History') }}</li>
 @endsection
 
 @section('action-button')
