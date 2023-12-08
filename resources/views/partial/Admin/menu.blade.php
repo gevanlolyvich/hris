@@ -202,7 +202,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif
                 <!-- payroll-->
 
-                @if (\Auth::user()->type == 'employee')
+                @if (\Auth::user()->type == 'employee' && (Gate::check('Manage Set Salary') || Gate::check('Manage Pay Slip')))
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'setsalary' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
