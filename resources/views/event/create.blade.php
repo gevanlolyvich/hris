@@ -25,7 +25,7 @@
                 <div class="department_div">
                     <select class="form-control department_id" name="department_id[]"
                          placeholder="Select Designation" >
-                    <option value="">{{ __('Select Designation') }}</option>
+                    <option value="">{{ __('Select Department') }}</option>
                     </select>
                 </div>
             </div>
@@ -134,7 +134,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <input type="button" value="Cancel" class="btn btn-light" data-bs-dismiss="modal">
+    <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">
     <input type="submit" value="{{ __('Create') }}" class="btn  btn-primary">
 
 </div>

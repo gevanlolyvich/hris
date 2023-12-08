@@ -32,13 +32,13 @@
 
     {{ Form::open(['url' => 'job', 'method' => 'post']) }}
     <div class="row mt-3">
-        <div class="col-md-6 ">
-            <div class="card card-fluid job-card">
-                <div class="card-body ">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
                     <div class="row">
                         <div class="form-group col-md-12">
                             {!! Form::label('title', __('Job Title'), ['class' => 'col-form-label']) !!}
-                            {!! Form::text('title', old('title'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'enter job title']) !!}
+                            {!! Form::text('title', old('title'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=> __('Enter Job Title') ]) !!}
                         </div>
                         <div class="form-group col-md-6">
                             {!! Form::label('branch', __('Branch'), ['class' => 'col-form-label']) !!}
@@ -51,7 +51,7 @@
 
                         <div class="form-group col-md-6">
                             {!! Form::label('position', __('No. of Positions'), ['class' => 'col-form-label']) !!}
-                            {!! Form::text('position', old('positions'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'enter job position']) !!}
+                            {!! Form::text('position', old('positions'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=> __('Enter Job Position')]) !!}
                         </div>
                         <div class="form-group col-md-6">
                             {!! Form::label('status', __('Status'), ['class' => 'col-form-label']) !!}
@@ -59,11 +59,11 @@
                         </div>
                         <div class="form-group col-md-6">
                             {!! Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) !!}
-                            {!! Form::date('start_date', old('start_date'), ['class' => 'form-control ', 'autocomplete' => 'off' ,'placeholder'=>'Select start date']) !!}
+                            {!! Form::date('start_date', old('start_date'), ['class' => 'form-control ', 'autocomplete' => 'off' ,'placeholder'=> __('Select Start Date')]) !!}
                         </div>
                         <div class="form-group col-md-6">
                             {!! Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) !!}
-                            {!! Form::date('end_date', old('end_date'), ['class' => 'form-control ', 'autocomplete' => 'off' ,'placeholder'=>'Select end date']) !!}
+                            {!! Form::date('end_date', old('end_date'), ['class' => 'form-control ', 'autocomplete' => 'off' ,'placeholder'=>__('Select End Date')]) !!}
                         </div>
                         <div class="form-group col-md-12">
                             <label class="col-form-label" for="skill">{{ __('Skill Box') }}</label>
@@ -75,7 +75,7 @@
             </div>
         </div>
         <div class="col-md-6 ">
-            <div class="card card-fluid job-card">
+            <div class="card">
                 <div class="card-body ">
                     <div class="row">
                         <div class="col-md-6">
