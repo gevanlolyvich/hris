@@ -166,9 +166,9 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             </li>
                         @else
                             <li class="dash-item {{ Request::segment(1) == 'employee' ? 'active' : '' }}">
-                                <a href="{{ route('employee.index') }}" class="dash-link"><span
-                                        class="dash-micon"><i class="ti ti-user"></i></span><span
-                                        class="dash-mtext">{{ __('Employee') }}</span></a>
+                                <a href="{{ route('employee.index') }}" class="dash-link">
+                                    {{ __('Employee') }}
+                                </a>
                             </li>
                         @endif
                         <li class="dash-item">
