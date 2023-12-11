@@ -14,9 +14,8 @@ class AllowanceController extends Controller
 
         $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $employee          = Employee::find($id);
-        $Allowancetypes =Allowance::$Allowancetype;
 
-        return view('allowance.create', compact('employee', 'allowance_options','Allowancetypes'));
+        return view('allowance.create', compact('employee', 'allowance_options'));
     }
 
     public function store(Request $request)
@@ -44,17 +43,10 @@ class AllowanceController extends Controller
             $allowance->employee_id      = $request->employee_id;
             $allowance->allowance_option = $request->allowance_option;
             $allowance->title            = $request->title;
-            $allowance->type            = $request->type;
+            $allowance->date             = $request->date;
             $allowance->amount           = $request->amount;
             $allowance->created_by       = \Auth::user()->creatorId();
             $allowance->save();
-
-            if(  $allowance->type == 'percentage' )
-            {
-                $employee          = Employee::find($allowance->employee_id);
-                $empsal  = $allowance->amount * $employee->salary / 100;
-                
-            }
 
             return redirect()->back()->with('success', __('Allowance  successfully created.'));
         }
@@ -77,9 +69,8 @@ class AllowanceController extends Controller
             if($allowance->created_by == \Auth::user()->creatorId())
             {
                 $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $Allowancetypes =Allowance::$Allowancetype;
 
-                return view('allowance.edit', compact('allowance', 'allowance_options','Allowancetypes'));
+                return view('allowance.edit', compact('allowance', 'allowance_options'));
             }
             else
             {
@@ -115,7 +106,7 @@ class AllowanceController extends Controller
 
                 $allowance->allowance_option = $request->allowance_option;
                 $allowance->title            = $request->title;
-                $allowance->type             =$request->type;
+                $allowance->date             = $request->date;
                 $allowance->amount           = $request->amount;
                 $allowance->save();
 
