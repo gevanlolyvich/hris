@@ -11,8 +11,8 @@
             {{ Form::text('title', null, ['class' => 'form-control', 'required' => 'required','placeholder'=>'Enter Title']) }}
         </div>
         <div class="form-group">
-            {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }}
-            {{ Form::select('type', $Allowancetypes, null, ['class' => 'form-control select2 amount_type','required' => 'required']) }}
+            {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
+            {{ Form::date('date', null, ['class' => 'form-control datetime-local ', 'required' => 'required', 'autocomplete'=>'off']) }}
         </div>
         <div class="form-group">
             {{ Form::label('amount', __('Amount'), ['class' => 'col-form-label amount_label']) }}

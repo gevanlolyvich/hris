@@ -202,7 +202,7 @@ class AttendanceRequestController extends Controller
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
         if (\Auth::user()->can('Delete Leave')) {
-            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()?->employee?->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $attendance_request->delete();
                 return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
             } else {

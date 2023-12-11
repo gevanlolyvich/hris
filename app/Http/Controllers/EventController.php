@@ -249,7 +249,7 @@ class EventController extends Controller
     {
         // return $request;
         if (\Auth::user()->can('Edit Assignment')) {
-            if ($event->created_by == \Auth::user()->creatorId() || \Auth::user()->type != 'employee') {
+            if ($event->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -334,7 +334,7 @@ class EventController extends Controller
     public function destroy(LocalEvent $event)
     {
         if (\Auth::user()->can('Delete Assignment')) {
-            if ($event->created_by == \Auth::user()->creatorId()) {
+            if ($event->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $event->delete();
 
                 return redirect()->route('event.index')->with('success', __('Event successfully deleted.'));

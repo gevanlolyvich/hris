@@ -142,6 +142,7 @@ class OvertimeController extends Controller
             $overtime->title          = $request->title;
             $overtime->date           = $request->date;
             $overtime->description    = $request->description;
+            $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
             $overtime->created_by     = \Auth::user()->id;
 
             $document_path = null;
@@ -231,6 +232,7 @@ class OvertimeController extends Controller
                 $overtime->title          = $request->title;
                 $overtime->date           = $request->date;
                 $overtime->description    = $request->description;
+                $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
 
                 if ($overtime->document && $request->file('overtimeDocument')) {
                     $filepath_array = explode('/', $overtime->document);
