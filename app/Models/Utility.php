@@ -432,33 +432,40 @@ class Utility extends Model
                     // get email content language base
                     $content = EmailTemplateLang::where('parent_id', '=', $template->id)->where('lang', 'LIKE', $usr->lang)->first();
 
-                    $content->from = $template->from;
-
-                    if (!empty($content->content)) {
-
-                        $content->content = self::replaceVariable($content->content, $obj);
-                        // send email
-                        try {
-                            Mail::to($mailTo)->send(new CommonEmailTemplate($content, $settings, $mailTo[0]));
-                        } catch (\Exception $e) {
-                            $error = __('E-Mail has been not sent due to SMTP configuration');
-                        }
-
-                        if (isset($error)) {
-                            $arReturn = [
-                                'is_success' => false,
-                                'error' => $error,
-                            ];
+                    if (!empty ($content)) {
+                        $content->from = $template->from;
+    
+                        if (!empty($content->content)) {
+    
+                            $content->content = self::replaceVariable($content->content, $obj);
+                            // send email
+                            try {
+                                Mail::to($mailTo)->send(new CommonEmailTemplate($content, $settings, $mailTo[0]));
+                            } catch (\Exception $e) {
+                                $error = __('E-Mail has been not sent due to SMTP configuration');
+                            }
+    
+                            if (isset($error)) {
+                                $arReturn = [
+                                    'is_success' => false,
+                                    'error' => $error,
+                                ];
+                            } else {
+                                $arReturn = [
+                                    'is_success' => true,
+                                    'error' => false,
+                                ];
+                            }
                         } else {
                             $arReturn = [
-                                'is_success' => true,
-                                'error' => false,
+                                'is_success' => false,
+                                'error' => __('Mail not send, email is empty'),
                             ];
                         }
                     } else {
                         $arReturn = [
                             'is_success' => false,
-                            'error' => __('Mail not send, email is empty'),
+                            'error' => __('Mail not send, email template is not found'),
                         ];
                     }
 
@@ -615,7 +622,7 @@ class Utility extends Model
             'warning_description' => '-',
 
             'employee_termination_name' => '-',
-            'notice_date' => '-',
+            // 'notice_date' => '-',
             'termination_date' => '-',
             'termination_type' => '-',
 
@@ -805,7 +812,7 @@ class Utility extends Model
     public static function send_slack_msg($msg)
     {
 
-        $settings  = Utility::settings(\Auth::user()->creatorId());
+        $settings  = Utility::settings();
         try {
             if (isset($settings['slack_webhook']) && !empty($settings['slack_webhook'])) {
                 $ch = curl_init();
@@ -832,7 +839,7 @@ class Utility extends Model
     public static function send_telegram_msg($resp)
     {
 
-        $settings  = Utility::settings(\Auth::user()->creatorId());
+        $settings  = Utility::settings();
         try {
             $msg = $resp;
             // Set your Bot ID and Chat ID.
@@ -853,14 +860,14 @@ class Utility extends Model
             );
             $context = stream_context_create($options);
             $result  = file_get_contents($url, false, $context);
-            $url     = $url;
+            // $url     = $url;
         } catch (\Exception $e) {
         }
     }
 
     public static function send_twilio_msg($to, $msg)
     {
-        $settings  = Utility::settings(\Auth::user()->creatorId());
+        $settings  = Utility::settings();
         try {
 
             $account_sid    = $settings['twilio_sid'];
