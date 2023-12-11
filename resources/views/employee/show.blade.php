@@ -264,8 +264,8 @@
                                         @else
                                             <tr class="bg-danger">
                                                 <td class="text-white">{{ $shift->days }}</td>
-                                                <td class="text-white">{{__('No Working Hour')}}</td>
-                                                <td class="text-white">{{__('No Working Hour')}}</td>
+                                                <td class="text-white"> - </td>
+                                                <td class="text-white"> - </td>
                                             </tr>
                                         @endif
                                     @endforeach
