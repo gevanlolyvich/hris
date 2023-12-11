@@ -44,6 +44,10 @@
                 @endif
             </div>
         </div>
+        <div class="form-group col-md-6">
+            {{ Form::checkbox('is_work_day', 'yes', null, ['class' => 'form-check-input', 'autocomplete'=>'off']) }}
+            {{ Form::label('is_work_day', __('Is Work Day'), ['class' => 'form-check-label']) }}
+        </div>
     </div>
 </div>
 <div class="modal-footer">
