@@ -128,7 +128,6 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>{{ __('New') }}</th>
                                 <th>{{ __('Title') }}</th>
                                 <th>{{ __('Ticket Code') }}</th>
                                 @role('company')
@@ -144,17 +143,6 @@
                         <tbody>
                             @foreach ($tickets as $ticket)
                                 <tr>
-                                    <td>
-                                        @if (\Auth::user()->type == 'employee')
-                                            @if ($ticket->ticketUnread() > 0)
-                                                <i title="New Message" class="fas fa-circle circle text-success"></i>
-                                            @endif
-                                        @else
-                                            @if ($ticket->ticketUnread() > 0)
-                                                <i title="New Message" class="fas fa-circle circle text-success"></i>
-                                            @endif
-                                        @endif
-                                    </td>
                                     <td>{{ $ticket->title }}</td>
                                     <td>{{ $ticket->ticket_code }}</td>
                                     @role('company')
