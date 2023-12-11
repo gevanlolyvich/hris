@@ -109,23 +109,8 @@ class AttendanceEmployeeController extends Controller
                 } elseif ($request->type == 'daily' && !empty($request->date)) {
                     $attendanceEmployee->where('date', $request->date);
                 } else {
-                    $month      = date('m');
-                    $year       = date('Y');
-                    $start_date = date($year . '-' . $month . '-01');
-                    $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-
-                    // olda date
-                    // $end_date   = date($year . '-' . $month . '-t');
-
-                    $attendanceEmployee->whereBetween(
-                        'date',
-                        [
-                            $start_date,
-                            $end_date,
-                        ]
-                    );
+                    $attendanceEmployee->where('date', date('Y-m-d'));
                 }
-
 
                 $attendanceEmployee = $attendanceEmployee->get();
             }
@@ -655,7 +640,7 @@ class AttendanceEmployeeController extends Controller
 
             $attendance->delete();
 
-            return redirect()->route('attendanceemployee.index')->with('success', __('Attendance successfully deleted.'));
+            return redirect()->back()->with('success', __('Attendance successfully deleted.'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
