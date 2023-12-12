@@ -9,7 +9,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{{!empty($companySettings['title_text']) ? $companySettings['title_text']->value : config('app.name', 'HRMGO')}} - {{$job->title}}</title>
+    <title>{{!empty($companySettings['title_text']) ? $companySettings['title_text']->value : config('app.name', 'COMPANY')}} - {{$job->title}}</title>
 
     <link rel="icon" href="{{$logo.'/'.(isset($companySettings['company_favicon']) && !empty($companySettings['company_favicon'])?$companySettings['company_favicon']->value:'favicon.png')}}" type="image" sizes="16x16">
 

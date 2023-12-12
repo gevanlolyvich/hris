@@ -183,7 +183,7 @@
                                     <td class="Id">
                                         <input type="hidden" value="{{ $employee->id }}" name="employee_id[]">
                                         <a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}"
-                                            class="btn btn-outline-primary">{{ \Auth::user()->employeeIdFormat($employee->employee_id) }}</a>
+                                            class="btn btn-outline-primary">{{ $employee->employee_id }}</a>
                                     </td>
                                     <td>{{ $employee->name }}</td>
                                     <td>{{ !empty($employee->branch) ? $employee->branch->name : '' }}</td>

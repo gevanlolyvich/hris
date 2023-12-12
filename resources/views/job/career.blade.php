@@ -11,7 +11,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>
-        {{ !empty($companySettings['title_text']) ? $companySettings['title_text']->value : config('app.name', 'HRMGO') }}
+        {{ !empty($companySettings['title_text']) ? $companySettings['title_text']->value : config('app.name', 'COMPANY') }}
         - {{ __('Career') }}</title>
 
     <link rel="icon"
@@ -143,7 +143,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
                 <div class="row align-items-center justify-content-md-between py-4 mt-4 delimiter-top">
                     <div class="col-md-6">
                         <div class="copyright text-sm font-weight-bold text-center text-md-left">
-                            {{ !empty($companySettings['footer_text']) ? $companySettings['footer_text']->value : 'HRMGO' }}
+                            {{ !empty($companySettings['footer_text']) ? $companySettings['footer_text']->value : 'COMPANY' }}
                         </div>
                     </div>
                     <div class="col-md-6">

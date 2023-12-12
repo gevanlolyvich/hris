@@ -26,7 +26,7 @@ class PayrollExport implements FromCollection, WithHeadings
         $data = $data->get();
 
         foreach ($data as $k => $payslip) {
-            $payslip["employee_id"] = !empty($payslip->employees) ? \Auth::user()->employeeIdFormat($payslip->employees->employee_id) : '';
+            $payslip["employee_id"] = !empty($payslip->employees) ? $payslip->employees->employee_id : '';
             $payslip["employee_name"] = (!empty($payslip->name)) ? $payslip->name : '';
             $payslip["salary"] = \Auth::user()->priceFormat($payslip->basic_salary);
             $payslip["net_salary"] = \Auth::user()->priceFormat($payslip->net_payble);

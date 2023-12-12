@@ -296,7 +296,7 @@
     "Copy": "Copy",
     "Copy Contract": "Copy Contract",
     "Copyright": "Copyright",
-    "Copyright HRMGo": "Copyright HRMGo",
+    "Copyright Company": "Copyright Company",
     "Cost": "Cost",
     "Country": "Country",
     "Coupon": "Coupon",
@@ -768,8 +768,7 @@
     "How to Get Google reCaptcha Site and Secret key": "How to Get Google reCaptcha Site and Secret key",
     "HR Admin Setup": "HR Admin Setup",
     "HRM System Setup": "HRM System Setup",
-    "HRMGo": "HRMGo",
-    "HRMGO": "HRMGO",
+    "COMPANY": "COMPANY",
     "I agree with the terms and conditions": "I agree with the terms and conditions",
     "Id": "Id",
     "If you did not receive the email": "If you did not receive the email",
@@ -1695,5 +1694,6 @@
     "Enter Branch Tolerance In Meter": "Enter Branch Tolerance In Meter",
     "Enter Branch Latitude": "Enter Branch Latitude",
     "Enter Branch Longitude": "Enter Branch Longitude",
-    "Enter Leave Type Name": "Enter Leave Type Name"
+    "Enter Leave Type Name": "Enter Leave Type Name",
+    "HRIS": "JXB HRIS"
 }
