@@ -127,7 +127,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
                                         <input class="form-control @error('address') is-invalid @enderror" name="address"
                                             type="text" id="address" placeholder="{{ __('Enter Your Address') }}"
-                                            value="{{ $userDetail->employee->address }}" required autocomplete="address">
+                                            value="{{ $userDetail?->employee?->address }}" required autocomplete="address">
                                         @error('address')
                                             <span class="invalid-feedback text-danger text-xs"
                                                 role="alert">{{ $message }}</span>

@@ -78,11 +78,6 @@
                             <input type="submit" value="{{ __('Export') }}" class="btn btn-primary">
                         {{ Form::close() }}
                     </div>
-                    <div class="col-auto float-end">
-                        @can('Create Pay Slip')
-                            <input type="button" value="{{ __('Bulk Payment') }}" class="btn btn-primary" style="margin-left: 5px" id="bulk_payment">
-                        @endcan
-                    </div>
                 </div>
             </div>
             <div class="card-body">
