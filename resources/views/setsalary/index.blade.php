@@ -33,7 +33,7 @@
                                     <td>
                                         <a href="{{ route('setsalary.show', $employee->id) }}"
                                             class="btn btn-outline-primary">
-                                            {{ \Auth::user()->employeeIdFormat($employee->employee_id) }}
+                                            {{ $employee->employee_id }}
                                         </a>
                                     </td>
                                     <td>{{ $employee->name }}</td>

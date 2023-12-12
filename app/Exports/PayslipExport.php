@@ -43,7 +43,7 @@ class PayslipExport implements FromCollection, WithHeadings
         foreach($data as $k => $payslip)
         {
             $result[] = array(
-                'employee_id'=> !empty($payslip->employees) ? \Auth::user()->employeeIdFormat($payslip->employees->employee_id) : '',
+                'employee_id'=> !empty($payslip->employees) ? $payslip->employees->employee_id : '',
                 'employee_name' => (!empty($payslip->employees)) ? $payslip->employees->name : '',
                 'basic_salary' => \Auth::user()->priceFormat($payslip->basic_salary),
                 'net_salary' =>  \Auth::user()->priceFormat($payslip->net_payble),

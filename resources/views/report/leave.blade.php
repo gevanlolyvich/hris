@@ -322,7 +322,7 @@
                             @foreach ($leaves as $leave)
                                 <tr>
                                     <td><a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($leave['employee_id'])) }}"
-                                            class="btn btn-sm btn-primary rounded">{{ \Auth::user()->employeeIdFormat($leave['employee_id']) }}</a>
+                                            class="btn btn-sm btn-primary rounded">{{ $leave['employee_id'] }}</a>
                                     </td>
                                     <td>{{ $leave['employee'] }}</td>
                                     <td>

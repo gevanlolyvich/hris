@@ -190,7 +190,7 @@
                                 <tr>
 
                                     <td><a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($timesheet->employee_id)) }}"
-                                            class="btn btn-outline-primary">{{ \Auth::user()->employeeIdFormat($timesheet->employee_id) }}</a>
+                                            class="btn btn-outline-primary">{{ $timesheet->employee_id }}</a>
                                     </td>
                                     <td>{{ !empty($timesheet->employee) ? $timesheet->employee->name : '' }}</td>
                                     <td>{{ \Auth::user()->dateFormat($timesheet->date) }}</td>

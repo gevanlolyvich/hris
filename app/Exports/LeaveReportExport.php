@@ -46,7 +46,7 @@ class LeaveReportExport implements FromCollection, WithHeadings
             
             $user_id = $leave->employees->user_id;
             $user = User::where('id', $user_id)->first();
-            $data[$k]["employee_id"] = !empty($leave->employees) ? User::employeeIdFormat($leave->employees->employee_id) : '';
+            $data[$k]["employee_id"] = !empty($leave->employees) ? $leave->employees->employee_id : '';
             $data[$k]["employee"] = (!empty($leave->employees->name)) ? $leave->employees->name : '';
 
             $data[$k]["approved_leaves"] = $leaves[$k]['approved'] == 0 ? '0' : $leaves[$k]['approved'];

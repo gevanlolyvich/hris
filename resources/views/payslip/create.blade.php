@@ -71,7 +71,7 @@
                                     @csrf
                                     <div class="form-group">
                                         {!! Form::label('employee_id', 'Employee ID') !!}
-                                        {!! Form::text('employee_id', \Illuminate\Support\Facades\Auth::user()->employeeIdFormat(1), ['class' => 'form-control','disabled'=>'disabled']) !!}
+                                        {!! Form::text('employee_id', 1, ['class' => 'form-control','disabled'=>'disabled']) !!}
                                     </div>
 
                                     <div class="form-group">
