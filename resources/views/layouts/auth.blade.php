@@ -22,7 +22,7 @@ if (!empty($mode_setting['theme_color'])) {
 
 <head>
     <title>
-        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'HRMGo') }}
+        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Company') }}
         - @yield('page-title')</title>
     <!-- HTML5 Shim and Respond.js IE11 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -77,7 +77,7 @@ if (!empty($mode_setting['theme_color'])) {
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
                             class="logo logo-lg" width="50"height="50"/>
                     </a>
-                    <h4 style="margin-bottom: 0px">JXB HRIS</h4>
+                    <h4 style="margin-bottom: 0px">{{ __('HRIS') }}</h4>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
                         aria-label="Toggle navigation">

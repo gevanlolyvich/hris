@@ -23,9 +23,8 @@ if (!empty($mode_setting['theme_color'])) {
 <html dir="{{ env('SITE_RTL') == 'on' ? 'rtl' : '' }}">
 
 <head>
-    {{-- <title>{{ __('HRMGO') }}</title> --}}
     <title>
-        {{ App\Models\Utility::getValByName('title_text') ? App\Models\Utility::getValByName('title_text') : config('app.name', 'HRMGO ') }}
+        {{ App\Models\Utility::getValByName('title_text') ? App\Models\Utility::getValByName('title_text') : config('app.name', 'COMPANY ') }}
     </title>
 
     <!-- Meta -->
@@ -69,9 +68,6 @@ if (!empty($mode_setting['theme_color'])) {
     <nav class="navbar navbar-expand-md navbar-dark default top-nav-collapse">
         <div class="container">
             <a class="navbar-brand bg-transparent" href="#">
-                {{-- <img src="{{$logo}}" alt="logo" /> --}}
-                {{-- <img src="{{ $logos . '/' . (isset($company_logo) && !empty($company_logo) ? $company_logo : 'light_logo.png') }}"
-                    alt="{{ config('app.name', 'HRMGO') }}" alt="logo"> --}}
                 <img src="{{ $logos . '/' . 'light_logo.png' }}" alt="logo" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01"
@@ -112,7 +108,7 @@ if (!empty($mode_setting['theme_color'])) {
             <div class="row align-items-center justify-content-between">
                 <div class="col-sm-5">
                     <h1 class="text-white mb-sm-4 wow animate__fadeInLeft" data-wow-delay="0.2s">
-                        {{ __('HRMGo') }}
+                        {{ __('Company') }}
                     </h1>
                     <h2 class="text-white mb-sm-4 wow animate__fadeInLeft" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -124,7 +120,7 @@ if (!empty($mode_setting['theme_color'])) {
                     <div class="my-4 wow animate__fadeInLeft" data-wow-delay="0.8s">
                         <a href="{{ route('login') }}" class="btn btn-light me-2"><i class="far fa-eye me-2"></i>Live
                             Demo</a>
-                        <a href="https://codecanyon.net/item/hrmgo-hrm-and-payroll-tool/25982864"
+                        <a href="https://codecanyon.net/item/company-hrm-and-payroll-tool/25982864"
                             class="btn btn-outline-light" target="_blank"><i class="fas fa-shopping-cart me-2"></i>Buy
                             now</a>
                     </div>
@@ -186,7 +182,7 @@ if (!empty($mode_setting['theme_color'])) {
                     </div>
                 </div>
             </div>
-            <img src="{{ asset('landing/hrmgo-pic-1.png') }}" alt=""
+            <img src="{{ asset('landing/company-pic-1.png') }}" alt=""
                 class="img-fluid img-dashboard wow animate__fadeInUp" data-wow-delay="0.2s"
                 style="border-radius: 15px;" />
         </div>
@@ -198,7 +194,7 @@ if (!empty($mode_setting['theme_color'])) {
             <div class="row align-items-center justify-content-end mb-5">
                 <div class="col-sm-4">
                     <h1 class="mb-sm-4 f-w-600 wow animate__fadeInLeft" data-wow-delay="0.2s">
-                        HRMGo
+                        Company
                     </h1>
                     <h2 class="mb-sm-4 wow animate__fadeInLeft" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -213,18 +209,18 @@ if (!empty($mode_setting['theme_color'])) {
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <img src="{{ asset('landing/hrmgo-pic-1.png') }}" alt="Datta Able Admin Template"
+                    <img src="{{ asset('landing/company-pic-1.png') }}" alt="Datta Able Admin Template"
                         class="img-fluid header-img wow animate__fadeInRight" data-wow-delay="0.2s" />
                 </div>
             </div>
             <div class="row align-items-center justify-content-start">
                 <div class="col-sm-6">
-                    <img src="{{ asset('landing/hrmgo-pic-1.png') }}" alt="Datta Able Admin Template"
+                    <img src="{{ asset('landing/company-pic-1.png') }}" alt="Datta Able Admin Template"
                         class="img-fluid header-img wow animate__fadeInLeft" data-wow-delay="0.2s" />
                 </div>
                 <div class="col-sm-4">
                     <h1 class="mb-sm-4 f-w-600 wow animate__fadeInRight" data-wow-delay="0.2s">
-                        HRMGo
+                        Company
                     </h1>
                     <h2 class="mb-sm-4 wow animate__fadeInRight" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -350,7 +346,7 @@ if (!empty($mode_setting['theme_color'])) {
             <div class="row align-items-center justify-content-end mb-5">
                 <div class="col-sm-4">
                     <h1 class="mb-sm-4 f-w-600 wow animate__fadeInLeft" data-wow-delay="0.2s">
-                        HRMGo
+                        Company
                     </h1>
                     <h2 class="mb-sm-4 wow animate__fadeInLeft" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -365,18 +361,18 @@ if (!empty($mode_setting['theme_color'])) {
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <img src="{{ asset('landing/hrmgo-pic-1.png') }}" alt="Datta Able Admin Template"
+                    <img src="{{ asset('landing/company-pic-1.png') }}" alt="Datta Able Admin Template"
                         class="img-fluid header-img wow animate__fadeInRight" data-wow-delay="0.2s" />
                 </div>
             </div>
             <div class="row align-items-center justify-content-start">
                 <div class="col-sm-6">
-                    <img src="{{ asset('landing/hrmgo-pic-1.png') }}" alt="Datta Able Admin Template"
+                    <img src="{{ asset('landing/company-pic-1.png') }}" alt="Datta Able Admin Template"
                         class="img-fluid header-img wow animate__fadeInLeft" data-wow-delay="0.2s" />
                 </div>
                 <div class="col-sm-4">
                     <h1 class="mb-sm-4 f-w-600 wow animate__fadeInRight" data-wow-delay="0.2s">
-                        HRMGo
+                        Company
                     </h1>
                     <h2 class="mb-sm-4 wow animate__fadeInRight" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -656,7 +652,7 @@ if (!empty($mode_setting['theme_color'])) {
             <div class="row align-items-center">
                 <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
                     <h1 class="mb-sm-4 f-w-600 wow animate__fadeInLeft" data-wow-delay="0.2s">
-                        HRMGo
+                        Company
                     </h1>
                     <h2 class="mb-sm-4 wow animate__fadeInLeft" data-wow-delay="0.4s">
                         HRM and Payroll Tool
@@ -673,42 +669,42 @@ if (!empty($mode_setting['theme_color'])) {
                 <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12">
                     <div class="row feature-img-row m-auto">
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-1.png') }}"
+                            <img src="{{ asset('landing/company-pic-1.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.2s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-1.png') }}"
+                            <img src="{{ asset('landing/company-pic-1.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.4s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-4.png') }}"
+                            <img src="{{ asset('landing/company-pic-4.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.6s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-3.png') }}"
+                            <img src="{{ asset('landing/company-pic-3.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.8s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-7.png') }}"
+                            <img src="{{ asset('landing/company-pic-7.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.3s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-12.png') }}"
+                            <img src="{{ asset('landing/company-pic-12.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.5s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-8.png') }}"
+                            <img src="{{ asset('landing/company-pic-8.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.7s"
                                 alt="Admin" />
                         </div>
                         <div class="col-lg-3 col-sm-6">
-                            <img src="{{ asset('landing/hrmgo-pic-13.png') }}"
+                            <img src="{{ asset('landing/company-pic-13.png') }}"
                                 class="img-fluid header-img wow animate__fadeInRight mt-5" data-wow-delay="0.9s"
                                 alt="Admin" />
                         </div>
@@ -735,8 +731,8 @@ if (!empty($mode_setting['theme_color'])) {
                         {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'LeadGo') }}
                         {{ date('Y') }} </p> --}}
                     <p class="text-body"> {{ __('Copyright') }}
-                        {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'HRMGo SaaS') }}
-                        {{ date('Y') }} | Design By HRMGo </p>
+                        {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'Company SaaS') }}
+                        {{ date('Y') }} | Design By Company </p>
                 </div>
             </div>
         </div>

@@ -20,7 +20,7 @@ if (!empty($mode_setting['theme_color'])) {
 <head>
 
     <title>
-        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'HRMGo') }}
+        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Company') }}
         - @yield('page-title')</title>
     <meta charset="utf-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -228,7 +228,7 @@ if (!empty($mode_setting['theme_color'])) {
         <div class="footer-wrapper">
             <div class="py-1">
                 <span class="text-muted">{{ __('Copyright') }} &copy;
-                    {{ App\Models\Utility::getValByName('footer_text') ? App\Models\Utility::getValByName('footer_text') : config('app.name', 'HRMGO') }}
+                    {{ App\Models\Utility::getValByName('footer_text') ? App\Models\Utility::getValByName('footer_text') : config('app.name', 'COMPANY') }}
                     {{ date('Y') }}</span>
             </div>
         </div>
