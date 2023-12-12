@@ -14,7 +14,7 @@ class BranchController extends Controller
     {
         if(\Auth::user()->can('Manage Branch'))
         {
-            $branches = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $branches = Branch::where('created_by', '=', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get();
 
             return view('branch.index', compact('branches'));
         }

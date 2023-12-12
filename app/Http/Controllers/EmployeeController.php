@@ -58,11 +58,11 @@ class EmployeeController extends Controller
         if (\Auth::user()->can('Create Employee')) {
             $company_settings = Utility::settings();
             $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $branches         = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments      = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $designations     = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees        = Employee::get()->pluck('name', 'id');
-            $shift_types      = ShiftType::get()->pluck('name', 'id');
+            $branches         = Branch::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments      = Department::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employees        = Employee::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             // $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
 
