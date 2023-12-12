@@ -18,7 +18,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>{{ __('Employee ID')}}</th>
                                 <th>{{ __('Name') }}</th>
                                 <th>{{ __('Last Login') }}</th>
                                 <th>{{ __('Role') }}</th>
@@ -31,7 +31,7 @@
                                     $emp = $user->getUSerEmployee($user->id);
                                     $emp_id = '-';
                                     if (!empty($emp)) {
-                                        $emp_id = \Auth::user()->employeeIdFormat($emp->id);
+                                        $emp_id = $emp->employee_id;
                                     }
                                 @endphp
                                 <tr>

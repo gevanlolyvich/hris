@@ -22,12 +22,7 @@ class UserController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage User')) {
-            $user = \Auth::user();
-            if (\Auth::user()->type == 'super admin') {
-                $users = User::where('created_by', '=', $user->creatorId())->where('type', '=', 'company')->get();
-            } else {
-                $users = User::where('created_by', '=', $user->creatorId())->where('type', '!=', 'employee')->get();
-            }
+            $users = User::where('created_by', '=', \Auth::user()->id)->get();
 
             return view('user.index', compact('users'));
         } else {

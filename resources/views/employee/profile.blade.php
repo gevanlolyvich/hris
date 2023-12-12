@@ -158,10 +158,10 @@ $profile = asset(Storage::url('uploads/avatar/'));
                             <div class="d-grid">
                                 @can('Show Employee Profile')
                                     <a class="btn btn-outline-primary mx-5"
-                                        href="{{ route('show.employee.profile', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ \Auth::user()->employeeIdFormat($employee->employee_id) }}</a>
+                                        href="{{ route('show.employee.profile', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ $employee->employee_id }}</a>
                                 @else
                                     <a class="btn btn-outline-primary mx-5"
-                                        href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ \Auth::user()->employeeIdFormat($employee->employee_id) }}</a>
+                                        href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ $employee->employee_id }}</a>
                                 @endcan
                             </div>
                         </div>
