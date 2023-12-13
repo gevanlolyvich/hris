@@ -218,6 +218,21 @@ class Employee extends Model
         return $this->hasMany(Overtime::class, 'employee_id');
     }
 
+    public static function get_overtime($id)
+    {
+        //Overtime
+        $over_times      = Overtime::where('employee_id', '=', $id)->get();
+        $total_over_time = 0;
+        foreach ($over_times as $over_time) {
+            $total_work      = $over_time->number_of_days * $over_time->hours;
+            $amount          = $total_work * $over_time->rate;
+            $total_over_time = $amount + $total_over_time;
+        }
+        $over_time_json = json_encode($over_times);
+
+        return $over_time_json;
+    }
+
     public static function employee_id()
     {
         $employee = Employee::latest()->first();
@@ -306,7 +321,7 @@ class Employee extends Model
     {
         $result = collect();
         $item = $this->recursiveManager;
-        if ($item instanceof Employee){
+        if ($item instanceof Employee) {
             $result->push($item);
             $result = $result->merge($item->managersFlatten());
         }
@@ -343,7 +358,7 @@ class Employee extends Model
     {
         return $this->hasMany(ShiftHistory::class);
     }
-    
+
     public function assignment(): HasMany
     {
         return $this->hasMany(EventEmployee::class, 'employee_id');

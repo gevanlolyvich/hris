@@ -121,7 +121,7 @@ class PaySlipController extends Controller
                 $payslipEmployee->loan                 = Employee::loan($employee->id);
                 $payslipEmployee->saturation_deduction = Employee::saturation_deduction($employee->id);
                 $payslipEmployee->other_payment        = Employee::other_payment($employee->id);
-                $payslipEmployee->overtime             = Employee::overtime($employee->id);
+                $payslipEmployee->overtime             = Employee::get_overtime($employee->id);
                 $payslipEmployee->created_by           = \Auth::user()->creatorId();
 
                 $payslipEmployee->save();
@@ -398,14 +398,14 @@ class PaySlipController extends Controller
         $setings = Utility::settings();
         if ($setings['new_payroll'] == 1) {
             $uArr = [
-                'payslip_email'=>$payslip->email,
+                'payslip_email' => $payslip->email,
                 'name'  => $payslip->name,
                 'url' => $payslip->url,
                 'salary_month' => $payslip->salary_month,
-              ];
-    
+            ];
+
             $resp = Utility::sendEmailTemplate('new_payroll', [$payslip->email], $uArr);
-             return redirect()->back()->with('success', __('Payslip successfully sent.')  . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
+            return redirect()->back()->with('success', __('Payslip successfully sent.')  . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
         }
 
         return redirect()->back()->with('success', __('Payslip successfully sent.'));
@@ -491,7 +491,7 @@ class PaySlipController extends Controller
 
         if (isset($request->rate) && !empty($request->rate)) {
             $rates   = $request->rate;
-            $rateIds = $request->rate_id;   
+            $rateIds = $request->rate_id;
             $hourses = $request->hours;
 
             foreach ($rates as $k => $rate) {
@@ -519,9 +519,9 @@ class PaySlipController extends Controller
     public function PayslipExport(Request $request)
     {
         $name = 'payslip_' . date('Y-m-d i:h:s');
-        $data = Excel::download(new PayslipExport($request), $name . '.xlsx'); ob_end_clean();
-    
+        $data = Excel::download(new PayslipExport($request), $name . '.xlsx');
+        ob_end_clean();
+
         return $data;
     }
-
 }
