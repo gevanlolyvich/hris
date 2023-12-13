@@ -14,9 +14,64 @@ use App\Models\Overtime;
 use App\Models\PayslipType;
 use App\Models\SaturationDeduction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SetSalaryController extends Controller
 {
+    function getTotalWorkdays($employeeWorkdays, $month, $year) {    
+        // Get the number of days in the month
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+    
+        // Initialize the total workdays count
+        $totalWorkdays = 0;
+    
+        // Loop through each day in the month
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            // Get the day of the week for the current day
+            $currentDayName = date('l', strtotime("$year-$month-$day"));
+    
+            // Check if the current day is a workday for the employee
+            if (in_array($currentDayName, $employeeWorkdays)) {
+                $totalWorkdays++;
+            }
+        }
+    
+        return $totalWorkdays;
+    }
+
+    function getTotalHours($shiftTimes, $month, $year) {
+        // Initialize the total working hours count
+        $totalWorkingHours = 0;
+    
+        // Loop through each day in the month
+        for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
+            // Get the day of the week for the current day
+            $currentDayName = date('l', strtotime("$year-$month-$day"));
+    
+            // Check if the current day is a workday for the employee
+            $shift = collect($shiftTimes)->firstWhere('days', $currentDayName);
+    
+            if ($shift && $shift['is_working']) {
+                // Calculate working hours for the day (subtract 1 hour for break time)
+                $startTimestamp = strtotime("$year-$month-$day " . $shift['start_time']);
+                $endTimestamp = strtotime("$year-$month-$day " . $shift['end_time']);
+
+                if ($endTimestamp < $startTimestamp) {
+                    // Shift spans two dates, consider hours on the next day
+                    $endTimestamp += 86400; // Add 24 hours
+                }
+
+                // Subtract 1 hour for break time
+                $workingHours = max(0, round(($endTimestamp - $startTimestamp) / 3600 - 1, 2));
+    
+                // Add working hours to the total
+                $totalWorkingHours += $workingHours;
+            }
+        }
+    
+        return $totalWorkingHours;
+    }
+
     public function index()
     {
         if(\Auth::user()->can('Manage Set Salary'))
@@ -77,129 +132,80 @@ class SetSalaryController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $payslip_type      = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        if(\Auth::user()->type == 'employee')
+        $month                = $request->month ? date('m', strtotime($request->month)): date('m');
+        $year                 = $request->month ? date('Y', strtotime($request->month)) : date('Y');
+        $start_date           = date($year . '-' . $month . '-01');
+        $end_date             = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
+
+        $payslip_type         = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $allowance_options    = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $loan_options         = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $deduction_options    = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id)->first() : Employee::find($id);
+        $allowances           = Allowance::where('employee_id', $employee->id)->get();
+        $commissions          = Commission::where('employee_id', $employee->id)->get();
+        $loans                = Loan::where('employee_id', $employee->id)->Where(function ($q) use ($month) {
+                                        $q->whereMonth('start_date',$month)
+                                        ->orWhereMonth('end_date',$month);
+                                })->Where(function ($q) use ($year) {
+                                        $q->whereYear('start_date',$year)
+                                        ->orWhereYear('end_date',$year);
+                                })->get();
+        $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->get();
+        $otherpayments        = OtherPayment::where('employee_id', $employee->id)->get();
+        $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();
+
+        $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_work_hours     = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+
+        foreach ( $allowances as  $value) {
+            if(  $value->type == 'percentage' )
         {
-            $currentEmployee      = Employee::where('user_id', '=', \Auth::user()->id)->first();
-            $allowances           = Allowance::where('employee_id', $currentEmployee->id)->get();
-            $commissions          = Commission::where('employee_id', $currentEmployee->id)->get();
-            $loans                = Loan::where('employee_id', $currentEmployee->id)->get();
-            $saturationdeductions = SaturationDeduction::where('employee_id', $currentEmployee->id)->get();
-            $otherpayments        = OtherPayment::where('employee_id', $currentEmployee->id)->get();
-            $overtimes            = Overtime::where('employee_id', $currentEmployee->id)->whereMonth('date', '=', date('m'))->get();
-            $employee             = Employee::where('user_id', '=', \Auth::user()->id)->first();
-
-            foreach ( $allowances as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
+            $employee          = Employee::find($value->employee_id);
+            $empsal  = $value->amount * $employee->salary / 100;
+            $value->tota_allow = $empsal;
             }
-
-            foreach ( $commissions as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $loans as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $saturationdeductions as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $otherpayments as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances'));
-
-        }
-        else
-        {
-            $allowances           = Allowance::where('employee_id', $id)->get();
-            $commissions          = Commission::where('employee_id', $id)->get();
-            $loans                = Loan::where('employee_id', $id)->get();
-            $saturationdeductions = SaturationDeduction::where('employee_id', $id)->get();
-            $otherpayments        = OtherPayment::where('employee_id', $id)->get();
-            $overtimes            = Overtime::where('employee_id', $id)->whereMonth('date', '=', date('m'))->get();
-            $employee             = Employee::find($id);
-
-            foreach ( $allowances as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $commissions as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $loans as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $saturationdeductions as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            foreach ( $otherpayments as  $value) {
-                if(  $value->type == 'percentage' )
-            {
-                $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
-                $value->tota_allow = $empsal;
-              }
-            }
-
-            return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances'));
         }
 
+        foreach ( $commissions as  $value) {
+            if(  $value->type == 'percentage' )
+        {
+            $employee          = Employee::find($value->employee_id);
+            $empsal  = $value->amount * $employee->salary / 100;
+            $value->tota_allow = $empsal;
+            }
+        }
+
+        foreach ( $loans as  $value) {
+            if(  $value->type == 'percentage' )
+        {
+            $employee          = Employee::find($value->employee_id);
+            $empsal  = $value->amount * $employee->salary / 100;
+            $value->tota_allow = $empsal;
+            }
+        }
+
+        foreach ( $saturationdeductions as  $value) {
+            if(  $value->type == 'percentage' )
+        {
+            $employee          = Employee::find($value->employee_id);
+            $empsal  = $value->amount * $employee->salary / 100;
+            $value->tota_allow = $empsal;
+            }
+        }
+
+        foreach ( $otherpayments as  $value) {
+            if(  $value->type == 'percentage' )
+        {
+            $employee          = Employee::find($value->employee_id);
+            $empsal  = $value->amount * $employee->salary / 100;
+            $value->tota_allow = $empsal;
+            }
+        }
+
+        return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances', 'total_work_days', 'total_work_hours'));
     }
 
 

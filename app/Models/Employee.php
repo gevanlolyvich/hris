@@ -218,10 +218,10 @@ class Employee extends Model
         return $this->hasMany(Overtime::class, 'employee_id');
     }
 
-    public static function get_overtime($id)
+    public static function get_overtime($id, $month, $year)
     {
         //Overtime
-        $over_times      = Overtime::where('employee_id', '=', $id)->get();
+        $over_times      = Overtime::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();
         $total_over_time = 0;
         foreach ($over_times as $over_time) {
             $total_work      = $over_time->number_of_days * $over_time->hours;
