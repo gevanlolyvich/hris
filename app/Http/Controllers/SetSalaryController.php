@@ -13,6 +13,8 @@ use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PayslipType;
 use App\Models\SaturationDeduction;
+use App\Models\AttendanceEmployee;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -72,6 +74,50 @@ class SetSalaryController extends Controller
         return $totalWorkingHours;
     }
 
+    function getPresentDays($attendanceData, $shiftTimes) {
+        // Initialize the present days count
+        $presentDaysCount = 0;
+    
+        // Loop through each attendance entry
+        foreach ($attendanceData as $attendance) {
+            // Get the day of the week for the attendance date
+            $attendanceDayName = date('l', strtotime($attendance['date']));
+    
+            // Check if the attendance date is a workday based on shift times
+            $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
+    
+            if ($shift && $shift['is_working']) {
+                // Calculate required work hours based on shift
+
+                $startShift = strtotime($shift['start_time']);
+                $endShift   = strtotime($shift['end_time']);
+
+                if ($endShift < $startShift) {
+                    // Shift spans two dates, consider hours on the next day
+                    $endShift += 86400; // Add 24 hours
+                }
+
+                if ($shift['end_time'] < $shift['start_time']) {
+                    // Shift spans two dates, consider hours on the next day
+                    $shift['end_time'] += 86400; // Add 24 hours
+                }
+                
+                $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
+    
+                // Check if the work hours of attendance match the required work hours
+                list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
+                $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                
+                if ($attendanceWorkHours >= $requiredWorkHours) {
+                    // Increment the present days count
+                    $presentDaysCount++;
+                }
+            }
+        }
+    
+        return $presentDaysCount;
+    }
+
     public function index()
     {
         if(\Auth::user()->can('Manage Set Salary'))
@@ -94,7 +140,6 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->can('Edit Set Salary'))
         {
-
             $payslip_type      = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
@@ -146,19 +191,14 @@ class SetSalaryController extends Controller
         $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id)->first() : Employee::find($id);
         $allowances           = Allowance::where('employee_id', $employee->id)->get();
         $commissions          = Commission::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $loans                = Loan::where('employee_id', $employee->id)->Where(function ($q) use ($month) {
-                                        $q->whereMonth('start_date',$month)
-                                        ->orWhereMonth('end_date',$month);
-                                })->Where(function ($q) use ($year) {
-                                        $q->whereYear('start_date',$year)
-                                        ->orWhereYear('end_date',$year);
-                                })->get();
+        $loans                = Loan::where('employee_id', $employee->id)->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
         $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->get();
         $otherpayments        = OtherPayment::where('employee_id', $employee->id)->get();
         $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();
 
         $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
         $total_work_hours     = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+        $total_present_days = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         foreach ( $allowances as  $value) {
             if(  $value->type == 'percentage' )

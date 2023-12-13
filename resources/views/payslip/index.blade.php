@@ -161,7 +161,7 @@
                             var clickToPaid = '';
                             var payslip = '';
                             var view = '';
-                            var edit = '';
+                            // var edit = '';
                             var deleted = '';
                             var form = '';
 
@@ -187,13 +187,13 @@
                                     '{{ __('View') }}' + '</a>';
                             }
 
-                            if (data != 0 && status == "UnPaid") {
-                                edit =
-                                    '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
-                                    payslip_id +
-                                    '"  data-ajax-popup="true" class="view-btn blue-bg" data-title="{{ __('Edit Employee salary') }}">' +
-                                    '{{ __('Edit') }}' + '</a>';
-                            }
+                            // if (data != 0 && status == "UnPaid") {
+                            //     edit =
+                            //         '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
+                            //         payslip_id + "?date=" + datePicker +
+                            //         '"  data-ajax-popup="true" class="view-btn blue-bg" data-title="{{ __('Edit Employee salary') }}">' +
+                            //         '{{ __('Edit') }}' + '</a>';
+                            // }
 
                             var url = '{{ route('payslip.delete', ':id') }}';
                             url = url.replace(':id', payslip_id);
@@ -206,7 +206,7 @@
                                 }
                             @endif
 
-                            return view + payslip + clickToPaid + edit + deleted + form;
+                            return view + payslip + clickToPaid + deleted + form;
                         }
 
                         var tr = '';
@@ -244,15 +244,15 @@
                                     var clickToPaid = '';
                                 }
 
-                                if (valueOfElement[7] != 0 && valueOfElement[6] == "UnPaid") {
-                                    var edit =
-                                        '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
-                                        payslip_id +
-                                        '"  data-ajax-popup="true" class="btn-sm btn btn-info" data-title="{{ __('Edit Employee salary') }}">' +
-                                        '{{ __('Edit') }}' + '</a>';
-                                } else {
-                                    var edit = '';
-                                }
+                                // if (valueOfElement[7] != 0 && valueOfElement[6] == "UnPaid") {
+                                //     var edit =
+                                //         '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
+                                //         payslip_id + "?date=" + datePicker +
+                                //         '"  data-ajax-popup="true" class="btn-sm btn btn-info" data-title="{{ __('Edit Employee salary') }}">' +
+                                //         '{{ __('Edit') }}' + '</a>';
+                                // } else {
+                                //     var edit = '';
+                                // }
 
 
                                 var url = '{{ route('payslip.delete', ':id') }}';
@@ -281,7 +281,7 @@
                                     '<td>' + valueOfElement[4] + '</td>' +
                                     '<td>' + valueOfElement[5] + '</td>' +
                                     '<td>' + status + '</td>' +
-                                    '<td>' + payslip + clickToPaid + edit + deleted + '</td>' +
+                                    '<td>' + payslip + clickToPaid + deleted + '</td>' +
                                     '</tr>';
                             });
                         } else {
