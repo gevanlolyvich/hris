@@ -183,6 +183,7 @@
                                     <tr>
                                         <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Date') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
@@ -194,6 +195,7 @@
                                             <td>{{ !empty($commission->employee()) ? $commission->employee()->name : '' }}
                                             </td>
                                             <td>{{ $commission->title }}</td>
+                                            <td>{{ $commission->date }}</td>
 
                                             <td>{{ ucfirst($commission->type) }}</td>
                                             @if ($commission->type == 'fixed')

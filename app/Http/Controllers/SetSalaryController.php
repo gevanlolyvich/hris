@@ -145,7 +145,7 @@ class SetSalaryController extends Controller
         $deduction_options    = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id)->first() : Employee::find($id);
         $allowances           = Allowance::where('employee_id', $employee->id)->get();
-        $commissions          = Commission::where('employee_id', $employee->id)->get();
+        $commissions          = Commission::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $loans                = Loan::where('employee_id', $employee->id)->Where(function ($q) use ($month) {
                                         $q->whereMonth('start_date',$month)
                                         ->orWhereMonth('end_date',$month);
@@ -172,8 +172,7 @@ class SetSalaryController extends Controller
         foreach ( $commissions as  $value) {
             if(  $value->type == 'percentage' )
         {
-            $employee          = Employee::find($value->employee_id);
-            $empsal  = $value->amount * $employee->salary / 100;
+            $empsal            = $value->amount * $employee->salary / 100;
             $value->tota_allow = $empsal;
             }
         }

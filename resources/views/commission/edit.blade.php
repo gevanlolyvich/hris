@@ -6,6 +6,10 @@
             {{ Form::text('title', null, ['class' => 'form-control ', 'required' => 'required','placeholder'=>'Enter Title']) }}
         </div>
         <div class="form-group">
+            {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
+            {{ Form::text('date', null, ['class' => 'form-control d_week','required' => 'required','autocomplete'=>'off']) }}
+        </div>
+        <div class="form-group">
             {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }}
             {{ Form::select('type', $commissions, null, ['class' => 'form-control amount_type','required' => 'required']) }}
         </div>
