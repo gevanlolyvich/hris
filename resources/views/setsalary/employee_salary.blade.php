@@ -76,7 +76,7 @@
                                             <th>{{ __('Employee Name') }}</th>
                                             <th>{{ __('Allownace Option') }}</th>
                                             <th>{{ __('Title') }}</th>
-                                            <th>{{ __('Type') }}</th>
+                                            <th>{{ __('Date') }}</th>
                                             <th>{{ __('Amount') }}</th>
                                             <th>{{ __('Action') }}</th>
                                         </tr>
@@ -90,14 +90,8 @@
                                                 </td>
                                                 <td>{{ $allowance->title }}</td>
 
-                                                <td>{{ ucfirst($allowance->type) }}</td>
-                                                @if ($allowance->type == 'fixed')
-                                                    <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
-                                                @else
-                                                    <td>{{ $allowance->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($allowance->tota_allow) }})
-                                                    </td>
-                                                @endif
+                                                <td>{{ ucfirst($allowance->date) }}</td>
+                                                <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
                                                 <td class="Action">
                                                     <span>
                                                         @can('Edit Allowance')
@@ -491,7 +485,7 @@
                                 <div class="col-6">
                                     <h5>{{ __('Overtime') }}</h5>
                                 </div>
-                                @can('Create Overtime')
+                                {{-- @can('Create Overtime')
                                     <div class="col text-end">
                                         <a  data-url="{{ route('overtimes.create', $employee->id) }}"
                                             data-ajax-popup="true" data-title="{{ __('Create Overtime') }}"
@@ -500,7 +494,7 @@
                                             <i class="ti ti-plus"></i>
                                         </a>
                                     </div>
-                                @endcan
+                                @endcan --}}
                             </div>
                         </div>
                         <div class=" card-body table-border-style" style=" overflow:auto">
@@ -519,7 +513,7 @@
                                     <tbody>
                                         @foreach ($overtimes as $overtime)
                                             <tr>
-                                                <td>{{ !empty($overtime->employee()) ? $overtime->employee()->name : '' }}
+                                                <td>{{ !empty($overtime->employee) ? $overtime->employee->name : '' }}
                                                 </td>
                                                 <td>{{ $overtime->title }}</td>
                                                 <td>{{ $overtime->number_of_days }}</td>

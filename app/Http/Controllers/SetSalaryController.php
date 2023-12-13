@@ -79,8 +79,6 @@ class SetSalaryController extends Controller
 
     public function show($id)
     {
-
-
         $payslip_type      = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
@@ -93,7 +91,7 @@ class SetSalaryController extends Controller
             $loans                = Loan::where('employee_id', $currentEmployee->id)->get();
             $saturationdeductions = SaturationDeduction::where('employee_id', $currentEmployee->id)->get();
             $otherpayments        = OtherPayment::where('employee_id', $currentEmployee->id)->get();
-            $overtimes            = Overtime::where('employee_id', $currentEmployee->id)->get();
+            $overtimes            = Overtime::where('employee_id', $currentEmployee->id)->whereMonth('date', '=', date('m'))->get();
             $employee             = Employee::where('user_id', '=', \Auth::user()->id)->first();
 
             foreach ( $allowances as  $value) {
@@ -151,7 +149,7 @@ class SetSalaryController extends Controller
             $loans                = Loan::where('employee_id', $id)->get();
             $saturationdeductions = SaturationDeduction::where('employee_id', $id)->get();
             $otherpayments        = OtherPayment::where('employee_id', $id)->get();
-            $overtimes            = Overtime::where('employee_id', $id)->get();
+            $overtimes            = Overtime::where('employee_id', $id)->whereMonth('date', '=', date('m'))->get();
             $employee             = Employee::find($id);
 
             foreach ( $allowances as  $value) {

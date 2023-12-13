@@ -102,7 +102,6 @@ class PaySlipController extends Controller
             $employees = Employee::where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
 
             $employeesSalary = Employee::where('created_by', \Auth::user()->creatorId())->where('salary', '<=', 0)->first();
-            Log::info(json_encode($employeesSalary, JSON_PRETTY_PRINT));
 
             if (!empty($employeesSalary)) {
                 return redirect()->route('payslip.index')->with('error', __('Please set employee salary.'));
@@ -212,6 +211,7 @@ class PaySlipController extends Controller
             foreach ($paylip_employee as $employee) {
 
                 if (Auth::user()->type == 'employee' && Auth::user()->id == $employee->user_id) {
+                    Log::info(json_encode($employee, JSON_PRETTY_PRINT));
                     $tmp   = [];
                     $tmp[] = $employee->id;
                     $tmp[] = $employee->name;
@@ -230,7 +230,7 @@ class PaySlipController extends Controller
                 } elseif (Auth::user()->type != 'employee') {
                     $tmp   = [];
                     $tmp[] = $employee->id;
-                    $tmp[] = \Auth::user()->employeeIdFormat($employee->employee_id);
+                    $tmp[] = $employee->employee_id;
                     $tmp[] = $employee->name;
                     $tmp[] = $employee->payroll_type;
                     $tmp[] = !empty($employee->basic_salary) ? \Auth::user()->priceFormat($employee->basic_salary) : '-';
@@ -308,7 +308,7 @@ class PaySlipController extends Controller
 
     //                 $tmp   = [];
     //                 $tmp[] = $employee->id;
-    //                 $tmp[] = \Auth::user()->employeeIdFormat($employee->employee_id);
+    //                 $tmp[] = $employee->employee_id;
     //                 $tmp[] = $employee->name;
     //                 $tmp[] = $employee->payroll_type;
     //                 $tmp[] = !empty($employee->basic_salary) ? \Auth::user()->priceFormat($employee->basic_salary) : '-';
