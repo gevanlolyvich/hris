@@ -223,7 +223,7 @@ $company_logo = Utility::getValByName('company_logo');
                     <div class="float-lg-left mb-lg-0 mb-3 ">
                         <p class="mt-2">{{ __('Employee Signature') }}</p>
                     </div>
-                    <p class="mt-2 "> {{ __('Paid By') }}</p>
+                    <p class="mt-2 "> {{ __('Paid By') }} {{ $payslip->status ? $company_name?->value : '-' }}</p>
                 </div>
             </div>
         </div>
