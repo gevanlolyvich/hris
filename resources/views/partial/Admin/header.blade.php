@@ -25,11 +25,11 @@
                 <li class="dropdown dash-h-item drp-company">
                     <a class="dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" aria-expanded="false">
-                        <span class="theme-avtar">
+                        <span class="theme-avtar" style="width: 40px; height: 40px; overflow: hidden; border-radius: 50%;">
                             <img alt="#"
                                 src="{{ !empty($users->avatar) ? $profile . '/' . $users->avatar : $profile . '/avatar.png' }}"
-                                class="header-avtar" style="width: 100%">
-                        </span>
+                                class="header-avtar" style="width: 100%; height: 100%; object-fit: cover;">
+                        </span>                        
                         <span class="hide-mob ms-2"> {{ Auth::user()->name }}
                             <i class="ti ti-chevron-down drp-arrow nocolor hide-mob"></i>
                     </a>
