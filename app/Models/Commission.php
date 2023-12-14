@@ -9,6 +9,7 @@ class Commission extends Model
     protected $fillable = [
         'employee_id',
         'title',
+        'date',
         'amount',
         'created_by',
     ];

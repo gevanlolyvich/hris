@@ -779,6 +779,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->coord_in               = $coord_in;
                 $employeeAttendance->note                   = $note;
                 $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->validate_by            = $is_valid ? 1 : null;
                 $employeeAttendance->attendance_type_id     = $attendance_type;
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
@@ -818,6 +819,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->coord_in               = $coord_in;
                 $employeeAttendance->note                   = $note;
                 $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->validate_by            = $is_valid ? 1 : null;
                 $employeeAttendance->attendance_type_id     = $attendance_type;
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
@@ -854,6 +856,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->coord_in               = $coord_in;
                 $employeeAttendance->note                   = $note;
                 $employeeAttendance->is_valid               = $is_valid;
+                $employeeAttendance->validate_by            = $is_valid ? 1 : null;
                 $employeeAttendance->attendance_type_id     = $attendance_type;
                 $employeeAttendance->picture_in             = $picture_path;
                 $employeeAttendance->created_by             = \Auth::user()->id;
@@ -1007,7 +1010,7 @@ class AttendanceEmployeeController extends Controller
             $attendance = AttendanceEmployee::where('id', $id)->first();
 
             $attendance->is_valid = true;
-            $attendance->validate_by = \Auth::user()->employee->id;
+            $attendance->validate_by = \Auth::user()->id;
             $attendance->save();
 
             return redirect()->route('attendanceemployee.index')->with('success', __('Attendance successfully validated.'));

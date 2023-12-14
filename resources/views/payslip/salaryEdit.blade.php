@@ -35,9 +35,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#payment" role="tab" aria-controls="pills-contact" aria-selected="false">{{__('Other Payment')}}</a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#overtime" role="tab" aria-controls="pills-contact" aria-selected="false">{{__('Overtime')}}</a>
-                    </li>
+                    </li> --}}
                 </ul>
                 <div class="tab-content pt-4">
                     <div id="allowance" class="tab-pane in active">
@@ -140,7 +140,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="overtime" class="tab-pane">
+                    {{-- <div id="overtime" class="tab-pane">
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="card bg-none mb-0">
@@ -163,7 +163,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <div class="col-12 mt-4 text-right">
