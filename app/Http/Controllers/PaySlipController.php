@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PaySlipController extends Controller
@@ -387,7 +388,9 @@ class PaySlipController extends Controller
 
         $payslipDetail = Utility::employeePayslipDetail($id);
 
-        return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail'));
+        $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+        return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
     }
 
     public function send($id, $month)
@@ -426,7 +429,9 @@ class PaySlipController extends Controller
 
         $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id);
 
-        return view('payslip.payslipPdf', compact('payslip', 'employee', 'payslipDetail'));
+        $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+        return view('payslip.payslipPdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
     }
 
     public function editEmployee($paySlip, Request $request)
