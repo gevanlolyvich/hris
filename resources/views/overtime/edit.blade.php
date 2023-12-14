@@ -35,7 +35,7 @@
                 @if (!empty($overtime->document))
                     <div class="col-md-4">
                         {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
-                        <a href="{{ $overtime->document }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                        <a href="{{ asset($overtime->document) }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
                             data-bs-toggle="tooltip"
                             data-bs-original-title="{{ __('View') }}">
                             <i class="ti ti-file text-white" style="font-size: 15px"></i>

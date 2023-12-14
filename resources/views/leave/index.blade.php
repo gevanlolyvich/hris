@@ -67,7 +67,7 @@
                                     <td>
                                         @if ($leave->document_path)
                                             <div class="action-btn bg-info ms-2">
-                                                <a href="{{ $leave->document_path }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                <a href="{{ asset($leave->document_path )}}" target="blank" class="mx-3 btn btn-sm  align-items-center"
                                                     data-bs-toggle="tooltip"
                                                     data-bs-original-title="{{ __('View') }}">
                                                     <i class="ti ti-file text-white"></i>

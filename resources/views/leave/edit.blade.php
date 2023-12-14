@@ -80,7 +80,7 @@
                 </div>
                 @if (!empty($leave->document_path))
                     <div class="col-md-4">
-                        <a href="{{ $leave->document_path }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                        <a href="{{ asset($leave->document_path) }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
                             data-bs-toggle="tooltip"
                             data-bs-original-title="{{ __('View') }}">
                             <i class="ti ti-file text-white" style="font-size: 15px"></i>
