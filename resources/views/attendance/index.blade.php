@@ -114,12 +114,14 @@
         })
     </script> --}}
 @endpush
+
 @section('action-button')
     <a href="{{ route('attendanceemployee.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Export') }}">
         <i class="ti ti-file-export"></i>
     </a>
 @endsection
+
 @section('content')
 <!-- Update the modal structure in your Blade template -->
 <div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -280,7 +282,7 @@
                                     <td class="Action">
                                         <span>
                                             @if (!$attendance->is_valid && \Auth::user()?->employee?->id != $attendance->employee_id)
-                                                <div class="action-btn bg-info ms-2">
+                                                <div class="action-btn bg-danger ms-2">
                                                     {!! Form::open(['method' => 'PATCH', 'route' => ['attendanceemployee.validateAttendance', $attendance->id], 'id' => 'employee-form-' . $attendance->id]) !!}
                                                     <button type="button" class="mx-3 btn btn-sm align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" 
@@ -302,7 +304,7 @@
                                                     </button>
                                                 </div>
                                             @else
-                                                <div class="action-btn bg-info ms-2">
+                                                <div class="action-btn bg-danger ms-2">
                                                     <button type="button" class="mx-3 btn btn-sm align-items-center disabled" disabled
                                                         data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
                                                         data-bs-original-title="{{__('Invalid / Required Validation')}}"
