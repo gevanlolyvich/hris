@@ -290,7 +290,7 @@
                                 @foreach ($payslips as $payslip)
                                     <tr>
                                         <td><a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($payslip->employee_id)) }}"
-                                                class="btn  btn-outline-primary">{{ !empty($payslip->employees) ? \Auth::user()->employeeIdFormat($payslip->employees->employee_id) : '' }}</a>
+                                                class="btn  btn-outline-primary">{{ !empty($payslip->employees) ? $payslip->employees->employee_id : '' }}</a>
                                         </td>
                                         <td>{{ !empty($payslip->employees) ? $payslip->employees->name : '' }}</td>
                                         <td>{{ \Auth::user()->priceFormat($payslip->basic_salary) }}</td>

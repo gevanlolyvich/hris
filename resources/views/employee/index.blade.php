@@ -142,9 +142,9 @@
                                         <td>
                                             @can('Show Employee')
                                                 <a
-                                                    href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ \Auth::user()->employeeIdFormat($employee->employee_id) }}</a>
+                                                    href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ $employee->employee_id }}</a>
                                             @else
-                                                <a href="#">{{ \Auth::user()->employeeIdFormat($employee->employee_id) }}</a>
+                                                <a href="#">{{ $employee->employee_id }}</a>
                                             @endcan
                                         </td>
                                         <td>{{ $employee->name }}</td>

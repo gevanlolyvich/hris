@@ -94,14 +94,14 @@ $company_logo = Utility::getValByName('company_logo');
                                                     {{ \Auth::user()->priceFormat($otherPayment->amount) }}</td>
                                             </tr>
                                         @endforeach
-                                        @foreach ($payslipDetail['earning']['overTime'] as $overTime)
+                                        {{-- @foreach ($payslipDetail['earning']['overTime'] as $overTime)
                                             <tr>
                                                 <td>{{ __('OverTime') }}</td>
                                                 <td>{{ $overTime->title }}</td>
                                                 <td class="text-right">
                                                     {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
                                             </tr>
-                                        @endforeach
+                                        @endforeach --}}
 
                                     </tbody>
                                 </table>

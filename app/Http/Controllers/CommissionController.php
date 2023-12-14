@@ -25,6 +25,7 @@ class CommissionController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'title' => 'required',
+                                   'date' => 'required',
                                    'amount' => 'required',
                                ]
             );
@@ -38,6 +39,7 @@ class CommissionController extends Controller
             $commission              = new Commission();
             $commission->employee_id = $request->employee_id;
             $commission->title       = $request->title;
+            $commission->date        = $request->date;
             $commission->type        = $request->type;
             $commission->amount      = $request->amount;
             $commission->created_by  = \Auth::user()->creatorId();
@@ -46,8 +48,7 @@ class CommissionController extends Controller
             if(  $commission->type == 'percentage' )
             {
                 $employee          = Employee::find($commission->employee_id);
-                $comsal  = $commission->amount * $employee->salary / 100; 
-                
+                $comsal            = $commission->amount * $employee->salary / 100; 
             }
 
             return redirect()->back()->with('success', __('Commission  successfully created.'));
@@ -95,6 +96,7 @@ class CommissionController extends Controller
                     $request->all(), [
 
                                        'title' => 'required',
+                                       'date' => 'required',
                                        'amount' => 'required',
                                    ]
                 );
@@ -106,7 +108,8 @@ class CommissionController extends Controller
                 }
 
                 $commission->title  = $request->title;
-                $commission->type  = $request->type;
+                $commission->date   = $request->date;
+                $commission->type   = $request->type;
                 $commission->amount = $request->amount;
                 $commission->save();
 

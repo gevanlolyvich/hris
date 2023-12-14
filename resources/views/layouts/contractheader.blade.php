@@ -16,7 +16,7 @@ $color = (!empty($setting['theme_color'])) ? $setting['theme_color'] : 'theme-3'
 
 <head>
     <title>
-        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'HRMGo') }}
+        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Company') }}
         - @yield('page-title')</title>
     <!-- Meta -->
     <meta charset="utf-8" />

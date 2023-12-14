@@ -64,8 +64,6 @@ class EmployeeController extends Controller
             $employees        = Employee::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-            // $employeesId      = \Auth::user()->employeeIdFormat($this->employeeNumber());
-
             // return $shift_types;
             return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings','shift_types'));
         } else {

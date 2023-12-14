@@ -224,8 +224,8 @@ class Utility extends Model
             $totalotherpayment += $empotherpay;
         }
 
-        $earning['overTime']          = Overtime::select('id', 'title')->selectRaw('number_of_days * hours* rate as amount')->where('employee_id', $employeeId)->get();
-        $earning['totalOverTime']     = Overtime::selectRaw('number_of_days * hours* rate as total')->where('employee_id', $employeeId)->get()->sum('total');
+        // $earning['overTime']          = Overtime::select('id', 'title')->selectRaw('number_of_days * hours* rate as amount')->where('employee_id', $employeeId)->get();
+        // $earning['totalOverTime']     = Overtime::selectRaw('number_of_days * hours* rate as total')->where('employee_id', $employeeId)->get()->sum('total');
 
         $deduction['loan']           = Loan::where('employee_id', $employeeId)->get();
         $employess = Employee::find($employeeId);
@@ -254,7 +254,8 @@ class Utility extends Model
         }
 
         $payslip['earning']        = $earning;
-        $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'];
+        $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
+        // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'];
 
         $payslip['deduction']      = $deduction;
         $payslip['totalDeduction'] = $totalloan + $totaldeduction;
@@ -682,8 +683,8 @@ class Utility extends Model
         $section_data[] = [
             'section_name' => 'section-1',
             'section_order' => 1,
-            'default_content' => '{"logo":"landing_logo.png","image":"top-banner.png","button":{"text":"Login"},"menu":[{"menu":"Features","href":"#"},{"menu":"Pricing","href":"#"}],"text":{"text-1":"HRMGo","text-2":"HRM and Payroll Tool","text-3":"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.","text-4":"get started - its free","text-5":"no creadit card reqired "},"custom_class_name":""}',
-            'content' => '{"logo":"landing_logo.png","image":"top-banner.png","button":{"text":"Login"},"menu":[{"menu":"Features","href":"#"},{"menu":"Pricing","href":"#"}],"text":{"text-1":"HRMGo","text-2":"HRM and Payroll Tool","text-3":"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.","text-4":"get started - its free","text-5":"no creadit card reqired"},"custom_class_name":""}',
+            'default_content' => '{"logo":"landing_logo.png","image":"top-banner.png","button":{"text":"Login"},"menu":[{"menu":"Features","href":"#"},{"menu":"Pricing","href":"#"}],"text":{"text-1":"Company","text-2":"HRM and Payroll Tool","text-3":"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.","text-4":"get started - its free","text-5":"no creadit card reqired "},"custom_class_name":""}',
+            'content' => '{"logo":"landing_logo.png","image":"top-banner.png","button":{"text":"Login"},"menu":[{"menu":"Features","href":"#"},{"menu":"Pricing","href":"#"}],"text":{"text-1":"Company","text-2":"HRM and Payroll Tool","text-3":"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.","text-4":"get started - its free","text-5":"no creadit card reqired"},"custom_class_name":""}',
             'section_demo_image' => 'top-header-section.png',
             'section_blade_file_name' => 'custome-top-header-section',
             'section_type' => 'section-1',

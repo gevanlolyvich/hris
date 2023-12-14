@@ -23,7 +23,7 @@
                                 <th>{{ __('Name') }}</th>
                                 <th>{{ __('Payroll Type') }}</th>
                                 <th>{{ __('Salary') }}</th>
-                                <th>{{ __('Net Salary') }}</th>
+                                {{-- <th>{{ __('Net Salary') }}</th> --}}
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
@@ -33,13 +33,13 @@
                                     <td>
                                         <a href="{{ route('setsalary.show', $employee->id) }}"
                                             class="btn btn-outline-primary">
-                                            {{ \Auth::user()->employeeIdFormat($employee->employee_id) }}
+                                            {{ $employee->employee_id }}
                                         </a>
                                     </td>
                                     <td>{{ $employee->name }}</td>
                                     <td>{{ $employee->salary_type() }}</td>
                                     <td>{{ \Auth::user()->priceFormat($employee->salary) }}</td>
-                                    <td>{{ !empty($employee->get_net_salary()) ? \Auth::user()->priceFormat($employee->get_net_salary()) : '' }}
+                                    {{-- <td>{{ !empty($employee->get_net_salary()) ? \Auth::user()->priceFormat($employee->get_net_salary()) : '' }} --}}
                                     </td>
                                     <td class="Action">
                                         <span>
