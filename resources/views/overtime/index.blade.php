@@ -790,7 +790,7 @@
                                 <td>
                                     @if ($overtime->document)
                                         <div class="action-btn bg-info ms-2">
-                                            <a href="{{ $overtime->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                            <a href="{{ asset($overtime->document) }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
                                                 data-bs-toggle="tooltip"
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-file text-white"></i>
