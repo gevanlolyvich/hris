@@ -16,7 +16,7 @@
 
 @section('content')
     <div class="row">
-        {{ Form::open(['route' => ['job.on.board.convert', $jobOnBoard->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+        {{ Form::open(['route' => ['job.on.board.convert.post', $jobOnBoard->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
     </div>
 
     <div class="col-md-6 ">
