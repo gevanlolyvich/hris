@@ -18,7 +18,7 @@
             {{ Form::model($employee, ['route' => ['employee.update', $employee->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
             <div class="row">
                 <div class="col-md-6 ">
-                    <div class="card " style="height: 506px">
+                    <div class="card" >
                         <div class="card-header">
                             <h5>{{ __('Personal Detail') }}</h5>
                         </div>
@@ -71,7 +71,7 @@
                 </div>
                 @if (\Auth::user()->type != 'employee')
                     <div class="col-md-6 ">
-                        <div class="card " style="height: 506px">
+                        <div class="card " >
                             <div class="card-header">
                                 <h5>{{ __('Company Detail') }}</h5>
                             </div>
@@ -123,7 +123,7 @@
                 @else
                     <div class="col-md-6 ">
                         <div class="employee-detail-wrap ">
-                            <div class="card " style="height: 506px">
+                            <div class="card " >
                                 <div class="card-header">
                                     <h5>{{ __('Company Detail') }}</h5>
                                 </div>
@@ -163,7 +163,7 @@
             @if (\Auth::user()->type != 'employee')
                 <div class="row">
                     <div class="col-md-6 ">
-                        <div class="card " style="height: 506px">
+                        <div class="card " >
                             <div class="card-header" >
                                 <h5>{{ __('Document') }}</h5>
                             </div>
@@ -224,7 +224,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card " style="height: 506px">
+                        <div class="card " >
                             <div class="card-header">
                                 <h5>{{ __('Bank Account Detail') }}</h5>
                             </div>
@@ -266,7 +266,7 @@
                 <div class="row">
                     <div class="col-md-6 ">
                         <div class="employee-detail-wrap">
-                            <div class="card " style="height: 506px">
+                            <div class="card " >
                                 <div class="card-header">
                                     <h5>{{ __('Document Detail') }}</h5>
                                 </div>
@@ -291,7 +291,7 @@
                     </div>
                     <div class="col-md-6 ">
                         <div class="employee-detail-wrap">
-                            <div class="card " style="height: 506px">
+                            <div class="card " >
                                 <div class="card-header">
                                     <h5>{{ __('Bank Account Detail') }}</h5>
                                 </div>
