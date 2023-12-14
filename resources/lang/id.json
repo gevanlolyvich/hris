@@ -1339,6 +1339,7 @@
   "S3 URL" : "URL S3",
   "Safe money transfer using your bank account. We support Mastercard, Visa, Discover and American express." : "Transfer uang aman menggunakan rekening bank Anda.  Kami mendukung Mastercard, Visa, Discover dan American express.",
   "Salary" : "Gaji",
+  "Main Salary" : "Gaji Utama",
   "Salary Date" : "Tanggal Gaji",
   "Salary Duration" : "Durasi Gaji",
   "Salary Month" : "Bulan Gaji",
@@ -1693,5 +1694,8 @@
   "Enter Branch Latitude": "Masukkan Latitude Cabang",
   "Enter Branch Longitude": "Masukkan Longitude Cabang",
   "Enter Leave Type Name": "Masukkan Nama Tipe Cuti",
-  "HRIS": "JXB HRIS"
+  "HRIS": "JXB HRIS",
+  "Required Days": "Hari Yang Dibutuhkan",
+  "Valid Days": "Hari Yang Valid",
+  "Total Main Salary": "Total Gaji Utama"
 }

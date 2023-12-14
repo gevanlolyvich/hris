@@ -1341,6 +1341,7 @@
     "S3 URL": "S3 URL",
     "Safe money transfer using your bank account. We support Mastercard, Visa, Discover and American express.": "Safe money transfer using your bank account. We support Mastercard, Visa, Discover and American express.",
     "Salary": "Salary",
+    "Main Salary": "Main Salary",
     "Salary Date": "Salary Date",
     "Salary Duration": "Salary Duration",
     "Salary Month": "Salary Month",
@@ -1695,5 +1696,8 @@
     "Enter Branch Latitude": "Enter Branch Latitude",
     "Enter Branch Longitude": "Enter Branch Longitude",
     "Enter Leave Type Name": "Enter Leave Type Name",
-    "HRIS": "JXB HRIS"
+    "HRIS": "JXB HRIS",
+    "Required Days": "Required Days",
+    "Valid Days": "Valid Days",
+    "Total Main Salary": "Total Salary"
 }
