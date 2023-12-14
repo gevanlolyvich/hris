@@ -152,7 +152,7 @@
                 </div>
                 {{ Form::close() }} --}}
 
-                {{ Form::open(['route' => ['attendanceemployee.bulkattendance'], 'method' => 'post']) }}
+                {{ Form::open(['route' => ['attendanceemployee.bulkattendance.post'], 'method' => 'post']) }}
                 <div class="table-responsive">
                     <table class="table" id="">
                         <thead>

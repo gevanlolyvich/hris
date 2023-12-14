@@ -119,13 +119,13 @@ Route::get('/check', [HomeController::class, 'check'])->middleware(
 );
 // Route::get('/password/resets/{lang?}', 'Auth\LoginController@showLinkRequestForm')->name('change.langPass');
 
-Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['XSS']);
+// Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['XSS']);
 
 
 // Route::group(['middleware' => ['verified']], function () {
 
 Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'XSS'])->name('dashboard');
-Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware(
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(
     [
         'auth',
         'XSS',
@@ -156,7 +156,7 @@ Route::group(
         Route::post('zoom-settings', [SettingsController::class, 'zoomSetting'])->name('zoom.settings');
 
         Route::get('test-mail', [SettingsController::class, 'testMail'])->name('test.mail');
-        Route::post('test-mail', [SettingsController::class, 'testMail'])->name('test.mail');
+        Route::post('test-mail', [SettingsController::class, 'testMail'])->name('test.mail.post');
         Route::post('test-mail/send', [SettingsController::class, 'testSendMail'])->name('test.send.mail');
 
         Route::get('create/ip', [SettingsController::class, 'createIp'])->name('create.ip');
@@ -722,12 +722,12 @@ Route::resource('permit', PermitController::class)->middleware(
     ]
 );
 
-Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.edit')->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+// Route::get('permit/{id}/edit', [PermitController::class, 'edit'])->name('permit.edit')->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::get('permit/{id}/action', [PermitController::class, 'action'])->name('permit.action')->middleware(
     [
         'auth',
@@ -774,7 +774,7 @@ Route::get('attendanceemployee/bulkattendance', [AttendanceEmployeeController::c
         'XSS',
     ]
 );
-Route::post('attendanceemployee/bulkattendance', [AttendanceEmployeeController::class, 'bulkAttendanceData'])->name('attendanceemployee.bulkattendance')->middleware(
+Route::post('attendanceemployee/bulkattendance', [AttendanceEmployeeController::class, 'bulkAttendanceData'])->name('attendanceemployee.bulkattendance.post')->middleware(
     [
         'auth',
         'XSS',
@@ -1202,7 +1202,7 @@ Route::get('job-onboard/convert/{id}', [JobApplicationController::class, 'jobBoa
         'XSS',
     ]
 );
-Route::post('job-onboard/convert/{id}', [JobApplicationController::class, 'jobBoardConvertData'])->name('job.on.board.convert')->middleware(
+Route::post('job-onboard/convert/{id}', [JobApplicationController::class, 'jobBoardConvertData'])->name('job.on.board.convert.post')->middleware(
     [
         'auth',
         'XSS',
@@ -1231,7 +1231,7 @@ Route::resource('interview-schedule', InterviewScheduleController::class)->middl
         'XSS',
     ]
 );
-Route::get('interview-schedule/create/{id?}', [InterviewScheduleController::class, 'create'])->name('interview-schedule.create')->middleware(
+Route::get('interview-schedule/create/{id?}', [InterviewScheduleController::class, 'create'])->name('interview-schedule.create.custom')->middleware(
     [
         'auth',
         'XSS',
@@ -1418,7 +1418,7 @@ Route::resource('employeeattendancehistory', EmployeeAttendanceHistoryController
     ->only(['index', 'show'])
     ->middleware(['auth', 'XSS']);
 
-Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->middleware(['auth', 'XSS']);
+// Route::get('event/{id}', [EventController::class, 'show'])->name('event.show')->middleware(['auth', 'XSS']);
 
 Route::post('eventemployee', [EventEmployeeController::class, 'report'])->name('eventemployee.report')->middleware(['auth', 'XSS']);
 Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attendance'])->name('eventemployee.attendance')->middleware(['auth', 'XSS']);
