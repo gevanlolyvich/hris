@@ -382,11 +382,10 @@ class PaySlipController extends Controller
 
     public function pdf($id, $month)
     {
-
         $payslip  = PaySlip::where('employee_id', $id)->where('salary_month', $month)->where('created_by', \Auth::user()->creatorId())->first();
         $employee = Employee::find($payslip->employee_id);
 
-        $payslipDetail = Utility::employeePayslipDetail($id);
+        $payslipDetail = Utility::employeePayslipDetail($id, $month);
 
         $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
 
@@ -402,7 +401,7 @@ class PaySlipController extends Controller
         $payslip->email = $employee->email;
 
         $payslipId    = Crypt::encrypt($payslip->id);
-        $payslip->url = route('payslip.payslipPdf', $payslipId);
+        $payslip->url = route('payslip.payslipPdf', [$payslipId, $month]);
 
         $setings = Utility::settings();
         if ($setings['new_payroll'] == 1) {
@@ -420,14 +419,14 @@ class PaySlipController extends Controller
         return redirect()->back()->with('success', __('Payslip successfully sent.'));
     }
 
-    public function payslipPdf($id)
+    public function payslipPdf($id, $month)
     {
         $payslipId = Crypt::decrypt($id);
 
         $payslip  = PaySlip::where('id', $payslipId)->where('created_by', \Auth::user()->creatorId())->first();
         $employee = Employee::find($payslip->employee_id);
 
-        $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id);
+        $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id, $month);
 
         $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
 
