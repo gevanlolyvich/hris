@@ -149,7 +149,12 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                         class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                                                 </div>
                                                 <input type="file" class="form-control file" name="profile" id="profile" onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">
-                                                <img id="blah"  width="100" src="{{ !empty($userDetail->avatar) ? $profile . $userDetail->avatar : $profile . '/avatar.png' }}" />
+                                                <span class="theme-avtar" style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%;">
+                                                    <img alt="#" id="blah"
+                                                        src="{{ !empty($userDetail->avatar) ? $profile . $userDetail->avatar : $profile . '/avatar.png' }}"
+                                                        class="header-avtar" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    {{-- <img id="blah"  width="100" src="{{ !empty($userDetail->avatar) ? $profile . $userDetail->avatar : $profile . '/avatar.png' }}" /> --}}
+                                                </span>   
                                             </label>
                                         </div>
                                         <span
