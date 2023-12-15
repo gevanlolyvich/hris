@@ -151,7 +151,7 @@
   "Attendance successfully deleted." : "Kehadiran berhasil dihapus.",
   "Attendance Summary" : "Ringkasan Kehadiran",
   "Auto Generate" : "Hasilkan Otomatis",
-  "Avatar" : "Avatar",
+  "Avatar" : "Foto Profile",
   "Award" : "Penghargaan",
   "Award  successfully created." : "Penghargaan berhasil dibuat.",
   "Award Create" : "Penghargaan Buat",
@@ -1697,5 +1697,6 @@
   "HRIS": "JXB HRIS",
   "Required Days": "Hari Yang Dibutuhkan",
   "Valid Days": "Hari Yang Valid",
-  "Total Main Salary": "Total Gaji Utama"
+  "Total Main Salary": "Total Gaji Utama",
+  "Birthdate": "Tanggal Lahir"
 }

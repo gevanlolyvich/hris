@@ -250,7 +250,7 @@ class UserController extends Controller
         $user->save();
 
         if (\Auth::user()->type == 'employee') {
-            $coordinate = "$request->latitude, $request->longitude, $request->accuracy";
+            $coordinate = "$request->latitude, $request->longitude, 50";
 
             $employee             = Employee::where('user_id', $user->id)->first();
 
@@ -265,6 +265,8 @@ class UserController extends Controller
             $employee->email      = $request->email;
             $employee->coordinate = $coordinate;
             $employee->address    = $request->address;
+            $employee->dob        = $request->birthdate;
+            $employee->phone      = $request->phone;
             $employee->save();
         }
 
@@ -304,7 +306,7 @@ class UserController extends Controller
 
     public function notificationSeen($user_id)
     {
-        Notification::where('user_id', '=', $user_id)->update(['is_read' => 1]);
+        \Notification::where('user_id', '=', $user_id)->update(['is_read' => 1]);
 
         return response()->json(['is_success' => true], 200);
     }
