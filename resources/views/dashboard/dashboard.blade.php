@@ -405,7 +405,14 @@
                     </div>
                     <div class="card">
                         <div class="card-header card-body table-border-style">
-                            <h5>{{ __("Today's Not Clock In") . ' ( ' . count($notClockIns). ' / '. $countEmployee . ' )' }}</h5>
+                            <div class="row">
+                                <div class="col-9">
+                                    <h5>{{ __("Today's Not Clock In") }}</h5>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-info btn-lg btn-block disabled">{{ count($notClockIns) }}</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body" style="height: 324px; overflow:auto">
                             <div class="table-responsive">
@@ -428,6 +435,7 @@
                             </div>
                         </div>
                     </div>
+                    
                 </div>
                 <div class="col-xl-7">
                     <div class="card">
