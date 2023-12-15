@@ -11,7 +11,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
         })
     </script>
 
-    <script>
+    {{-- <script>
         async function getLocation() {
           return new Promise((resolve, reject) => {
             if ("geolocation" in navigator) {
@@ -50,22 +50,156 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                 console.log(error);
             }
         })
+    </script> --}}
+
+    <script>
+        let map = null;
+        let layer = L.layerGroup();
+        let mapOpened = false;
+
+        function onMapClick(e, map) {
+            const latitude = document.getElementById("latitude");
+            const longitude = document.getElementById("longitude");
+            latitude.value = e.latlng.lat;
+            longitude.value = e.latlng.lng;
+                
+            if (layer !== null && layer.getLayers().length > 0) {
+                layer.clearLayers();
+            }
+        
+            let marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+            layer.addLayer(marker);
+            map.addLayer(layer);
+        }
+
+        function mapShow() {
+                mapOpened = mapOpened ? false : true;
+                if (mapOpened) {
+                    document.getElementById('map-box').style.display = '';
+
+                    if (map !== null) {
+                        map?.remove();
+                    }
+
+                    let latitude = document.getElementById("latitude").value;
+                    let longitude = document.getElementById("longitude").value;
+
+                    map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
+                        
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
+                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
+                    }).addTo(map);
+                        
+                    if(map.hasLayer(layer)){
+                        layer.clearLayers();
+                    }
+
+                    if (Number(latitude) != 0 && Number(longitude) != 0) {
+                        let marker = L.marker([latitude, longitude]).addTo(map);
+                        layer.addLayer(marker);
+                        map.addLayer(layer);
+                    }
+                        
+                    map.on('click', function (e) {
+                        onMapClick(e, map)
+                    });
+                }
+            }
+
+        function mapOpenClose() {
+            mapOpened = mapOpened ? false : true;
+            if (mapOpened) {
+                    document.getElementById('map-box').style.display = '';
+
+                    if (map !== null) {
+                        map?.remove();
+                    }
+
+                    let latitude = document.getElementById("latitude").value;
+                    let longitude = document.getElementById("longitude").value;
+
+                    map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
+                        
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
+                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
+                    }).addTo(map);
+                        
+                    if(map.hasLayer(layer)){
+                        layer.clearLayers();
+                    }
+
+                    if (Number(latitude) != 0 && Number(longitude) != 0) {
+                        let marker = L.marker([latitude, longitude]).addTo(map);
+                        layer.addLayer(marker);
+                        map.addLayer(layer);
+                    }
+                        
+                    map.on('click', function (e) {
+                        onMapClick(e, map)
+                    });
+                } else {
+                document.getElementById('map-box').style.display = 'none';
+            }
+        }
+
+        $(document).ready(function () {
+            $('body').on('click', '#get-location', function () {
+                let query = document.getElementById('location-input');
+
+                if (query.value) {
+                    $.ajax({
+                        url: `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query.value)}&format=json`,
+                        type: 'GET',
+                        success: function(data) {
+                            if (data.length) {
+                                let lat = document.getElementById("latitude");
+                                let lon = document.getElementById("longitude");
+                                lat.value = data[0].lat;
+                                lon.value = data[0].lon;
+
+                                mapShow();
+
+                                if (map) {
+                                    map.setView([lat.value, lon.value])
+                                    let marker = L.marker([lat.value, lon.value]).addTo(map);
+                                    layer.addLayer(marker);
+                                    map.addLayer(layer);
+                                }
+                            } else {
+                                alert('Location Not Found');
+                            }
+                        }
+                    });
+                }
+            })
+
+            $('body').on('click', '#show-map', mapOpenClose)
+        });
     </script>
 @endpush
+
 @section('page-title')
     {{ __('Profile') }}
 @endsection
+
 @section('title')
     <div class="d-inline-block">
         <h5 class="h4 d-inline-block font-weight-400 mb-0"> {{ __('Profile') }}</h5>
     </div>
 @endsection
+
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Dashboard') }}</a></li>
     <li class="breadcrumb-item active">{{ __('Profile') }}</li>
 @endsection
+
 @section('action-btn')
 @endsection
+
 @section('content')
     <div class="col-sm-12">
         <div class="row">
@@ -78,7 +212,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         <a href="#useradd-2"
                             class="list-group-item list-group-item-action border-0">{{ __('Change Password') }} <div
                                 class="float-end"><i class="ti ti-chevron-right"></i></div></a>
-
                     </div>
                 </div>
             </div>
@@ -94,9 +227,9 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         <div class="card-body">
                             {{ Form::model($userDetail, ['route' => ['update.account'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                             @csrf
-                            <input type="hidden" name="latitude" id="latitude" value="0">
-                            <input type="hidden" name="longitude" id="longitude" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy" value="0">
+                            <input type="hidden" name="latitude" id="latitude" value="{{ explode(', ', $userDetail?->employee?->coordinate)[0] ?? 0 }}">
+                            <input type="hidden" name="longitude" id="longitude" value="{{ explode(', ', $userDetail?->employee?->coordinate)[1] ?? 0 }}">
+                            <input type="hidden" name="accuracy" id="accuracy" value="{{ explode(', ', $userDetail?->employee?->coordinate)[2] ?? 0 }}">
                             <div class="row">
                                 <div class="col-lg-6 col-sm-6">
                                     <div class="form-group">
@@ -124,10 +257,41 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 </div>
                                 <div class="col-lg-6 col-sm-6">
                                     <div class="form-group">
+                                        <label class="col-form-label text-dark">{{ __('Birthdate') }}</label>
+                                        {{ Form::date('birthdate', $userDetail?->employee?->dob, [
+                                                'class' => 'form-control d_week', 'required' => 'required', 'autocomplete'=>'birthdate',
+                                                'id'=>'birthdate', 'required'=>'required', 'name'=>'birthdate'
+                                            ])
+                                        }}
+                                        {{-- <input class="form-control @error('birthday') is-invalid @enderror" name="name"
+                                            type="text" id="name" placeholder="{{ __('Enter Your Name') }}"
+                                            value="{{ $userDetail->name }}" required autocomplete="name">
+                                        @error('name')
+                                            <span class="invalid-feedback text-danger text-xs"
+                                                role="alert">{{ $message }}</span>
+                                        @enderror --}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="phone" class="col-form-label text-dark">{{ __('Phone') }}</label>
+                                        <input class="form-control" name="phone"
+                                            type="text" id="phone" placeholder="{{ __('Enter Phone') }}"
+                                            value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-sm-12">
+                                    <div class="form-group">
                                         <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
-                                        <input class="form-control @error('address') is-invalid @enderror" name="address"
-                                            type="text" id="address" placeholder="{{ __('Enter Your Address') }}"
+                                        {{ Form::textarea('address', $userDetail?->employee?->address, [
+                                                'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
+                                                'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
+                                            ])
+                                        }}
+                                        {{-- <textarea rows="3" class="form-control @error('address') is-invalid @enderror" name="address"
+                                            id="address" placeholder="{{ __('Enter Your Address') }}"
                                             value="{{ $userDetail?->employee?->address }}" required autocomplete="address">
+                                        </textarea> --}}
                                         @error('address')
                                             <span class="invalid-feedback text-danger text-xs"
                                                 role="alert">{{ $message }}</span>
@@ -136,8 +300,21 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 </div>
                                 <div class="col-lg-6 col-sm-6">
                                     <div class="form-group">
-                                        <label for="address" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
-                                        <button type="button" class="btn bg-primary form-control" id="coordinate">{{__("Get Current Location Coordinate")}}</button>
+                                        <label for="coordinate" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
+                                        {{-- <button type="button" class="btn bg-primary form-control text-white" id="coordinate">{{__("Get Current Location Coordinate")}}</button> --}}
+                                        <button class="btn bg-primary form-control text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6">
+                                    <div class="form-group">
+                                        {{ Form::label('location action', __('Location'), ['class' => 'col-form-label text-dark']) }}
+                                        <button class="btn bg-primary form-control text-white" type="button" id="show-map">{{__('Show Map')}}</button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12" style="display: none;" id="map-box">
+                                    <div class="form-group">
+                                        {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
+                                        <div id="openStreetMapContainer" style="height: 300px;"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6">
