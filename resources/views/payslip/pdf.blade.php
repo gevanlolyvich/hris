@@ -69,6 +69,7 @@ $company_logo = Utility::getValByName('company_logo');
                                             <td class="text-right">
                                                 {{ \Auth::user()->priceFormat($payslip->basic_salary) }}</td>
                                         </tr>
+                                        
                                         @foreach ($payslipDetail['earning']['allowance'] as $allowance)
                                             @php
                                                 $employess = \App\Models\Employee::find($allowance->employee_id);
@@ -125,7 +126,7 @@ $company_logo = Utility::getValByName('company_logo');
 
                                             </tr>
                                         @endforeach
-                                        {{-- @foreach ($payslipDetail['earning']['overTime'] as $overTime)
+                                        @foreach ($payslipDetail['earning']['overTime'] as $overTime)
                                             <tr>
                                                 <td>{{ __('OverTime') }}</td>
                                                 <td>{{ $overTime->title }}</td>
@@ -133,7 +134,7 @@ $company_logo = Utility::getValByName('company_logo');
                                                 <td class="text-right">
                                                     {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
                                             </tr>
-                                        @endforeach --}}
+                                        @endforeach
 
                                     </tbody>
                                 </table>
@@ -147,45 +148,53 @@ $company_logo = Utility::getValByName('company_logo');
                                             <th>{{ __('type') }}</th>
                                             <th class="text-right">{{ __('Amount') }}</th>
                                         </tr>
+                                        @if (count($payslipDetail['deduction']['loan']) || count($payslipDetail['deduction']['deduction']))
+                                            @foreach ($payslipDetail['deduction']['loan'] as $loan)
+                                                @php
+                                                    $employess = \App\Models\Employee::find($loan->employee_id);
+                                                    $emploan = ($loan->amount * $employess->salary) / 100;
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ __('Loan') }}</td>
+                                                    <td>{{ $loan->title }}</td>
+                                                    <td>{{ ucfirst($loan->type) }}</td>
+                                                    @if ($loan->type != 'percentage')
+                                                        <td class="text-right">
+                                                            {{ \Auth::user()->priceFormat($loan->amount) }}</td>
+                                                    @else
+                                                        <td class="text-right">{{ $loan->amount }}%
+                                                            ({{ \Auth::user()->priceFormat($emploan) }})</td>
+                                                    @endif
 
-                                        @foreach ($payslipDetail['deduction']['loan'] as $loan)
-                                            @php
-                                                $employess = \App\Models\Employee::find($loan->employee_id);
-                                                $emploan = ($loan->amount * $employess->salary) / 100;
-                                            @endphp
+                                                </tr>
+                                            @endforeach
+                                            @foreach ($payslipDetail['deduction']['deduction'] as $deduction)
+                                                @php
+                                                    $employess = \App\Models\Employee::find($deduction->employee_id);
+                                                    $empdeduction = ($deduction->amount * $employess->salary) / 100;
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ __('Saturation Deduction') }}</td>
+                                                    <td>{{ $deduction->title }}</td>
+                                                    <td>{{ ucfirst($deduction->type) }}</td>
+                                                    @if ($deduction->type != 'percentage')
+                                                        <td class="text-right">
+                                                            {{ \Auth::user()->priceFormat($deduction->amount) }}</td>
+                                                    @else
+                                                        <td class="text-right">{{ $deduction->amount }}%
+                                                            ({{ \Auth::user()->priceFormat($empdeduction) }})</td>
+                                                    @endif
+
+                                                </tr>
+                                            @endforeach    
+                                        @else
                                             <tr>
-                                                <td>{{ __('Loan') }}</td>
-                                                <td>{{ $loan->title }}</td>
-                                                <td>{{ ucfirst($loan->type) }}</td>
-                                                @if ($loan->type != 'percentage')
-                                                    <td class="text-right">
-                                                        {{ \Auth::user()->priceFormat($loan->amount) }}</td>
-                                                @else
-                                                    <td class="text-right">{{ $loan->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($emploan) }})</td>
-                                                @endif
-
+                                                <td> - </td>
+                                                <td> - </td>
+                                                <td> - </td>
+                                                <td class="text-right"> - </td>
                                             </tr>
-                                        @endforeach
-                                        @foreach ($payslipDetail['deduction']['deduction'] as $deduction)
-                                            @php
-                                                $employess = \App\Models\Employee::find($deduction->employee_id);
-                                                $empdeduction = ($deduction->amount * $employess->salary) / 100;
-                                            @endphp
-                                            <tr>
-                                                <td>{{ __('Saturation Deduction') }}</td>
-                                                <td>{{ $deduction->title }}</td>
-                                                <td>{{ ucfirst($deduction->type) }}</td>
-                                                @if ($deduction->type != 'percentage')
-                                                    <td class="text-right">
-                                                        {{ \Auth::user()->priceFormat($deduction->amount) }}</td>
-                                                @else
-                                                    <td class="text-right">{{ $deduction->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($empdeduction) }})</td>
-                                                @endif
-
-                                            </tr>
-                                        @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
