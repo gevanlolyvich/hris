@@ -105,8 +105,12 @@ class SetSalaryController extends Controller
                 $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
     
                 // Check if the work hours of attendance match the required work hours
-                list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
-                $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                if ($attendance['work_hours']) {
+                    list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
+                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                } else {
+                    $attendanceWorkHours = 0;
+                }
                 
                 if ($attendanceWorkHours >= $requiredWorkHours) {
                     // Increment the present days count
@@ -179,8 +183,8 @@ class SetSalaryController extends Controller
 
     public function show($id, Request $request)
     {
-        $month                = $request->month ? date('m', strtotime($request->month)): date('m');
         $year                 = $request->month ? date('Y', strtotime($request->month)) : date('Y');
+        $month                = $request->month ? date('m', strtotime($request->month)): date('m');
         $start_date           = date($year . '-' . $month . '-01');
         $end_date             = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
@@ -189,9 +193,9 @@ class SetSalaryController extends Controller
         $loan_options         = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $deduction_options    = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id)->first() : Employee::find($id);
-        $allowances           = Allowance::where('employee_id', $employee->id)->get();
+        $allowances           = Allowance::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $commissions          = Commission::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $loans                = Loan::where('employee_id', $employee->id)->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
+        $loans                = Loan::where('employee_id', $employee->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
         $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->get();
         $otherpayments        = OtherPayment::where('employee_id', $employee->id)->get();
         $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();

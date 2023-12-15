@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\CommonEmailTemplate;
 use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
@@ -16,6 +17,39 @@ use Spatie\GoogleCalendar\Event as GoogleEvent;
 
 class Utility extends Model
 {
+    function getTotalHours($shiftTimes, $month, $year) {
+        // Initialize the total working hours count
+        $totalWorkingHours = 0;
+    
+        // Loop through each day in the month
+        for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
+            // Get the day of the week for the current day
+            $currentDayName = date('l', strtotime("$year-$month-$day"));
+    
+            // Check if the current day is a workday for the employee
+            $shift = collect($shiftTimes)->firstWhere('days', $currentDayName);
+    
+            if ($shift && $shift['is_working']) {
+                // Calculate working hours for the day (subtract 1 hour for break time)
+                $startTimestamp = strtotime("$year-$month-$day " . $shift['start_time']);
+                $endTimestamp = strtotime("$year-$month-$day " . $shift['end_time']);
+
+                if ($endTimestamp < $startTimestamp) {
+                    // Shift spans two dates, consider hours on the next day
+                    $endTimestamp += 86400; // Add 24 hours
+                }
+
+                // Subtract 1 hour for break time
+                $workingHours = max(0, round(($endTimestamp - $startTimestamp) / 3600 - 1, 2));
+    
+                // Add working hours to the total
+                $totalWorkingHours += $workingHours;
+            }
+        }
+    
+        return $totalWorkingHours;
+    }
+
     public static function settings()
     {
         $data = DB::table('settings');
@@ -182,29 +216,34 @@ class Utility extends Model
         'contract' => 'Contract',
     ];
 
-    public static function employeePayslipDetail($employeeId)
+    public static function employeePayslipDetail($employeeId, $month)
     {
-        $earning['allowance']         = Allowance::where('employee_id', $employeeId)->get();
-        $employess = Employee::find($employeeId);
+        $employee             = Employee::find($employeeId);
+        $payslip              = Payslip::where('employee_id', $employee->id)->where('salary_month', $month)->first();
 
+        $year                 = $month ? date('Y', strtotime($month)) : date('Y');
+        $month                = $month ? date('m', strtotime($month)): date('m');
+        $total_work_hours     = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+
+
+        $earning['allowance'] = Allowance::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $totalAllowance = 0;
 
         foreach ($earning['allowance'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empall  = $earn->amount * $employess->salary / 100;
+                $empall  = $earn->amount * $employee->salary / 100;
             } else {
                 $empall = $earn->amount;
             }
             $totalAllowance += $empall;
         }
 
-        $earning['commission']        = Commission::where('employee_id', $employeeId)->get();
-        $employess = Employee::find($employeeId);
+        $earning['commission']        = Commission::where('employee_id', $employeeId)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $totalCommission = 0;
 
         foreach ($earning['commission'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empcom  = $earn->amount * $employess->salary / 100;
+                $empcom  = $earn->amount * $employee->salary / 100;
             } else {
                 $empcom = $earn->amount;
             }
@@ -212,28 +251,33 @@ class Utility extends Model
         }
 
         $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->get();
-        $employess = Employee::find($employeeId);
         $totalotherpayment = 0;
 
         foreach ($earning['otherPayment'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empotherpay  = $earn->amount * $employess->salary / 100;
+                $empotherpay  = $earn->amount * $employee->salary / 100;
             } else {
                 $empotherpay = $earn->amount;
             }
             $totalotherpayment += $empotherpay;
         }
 
-        // $earning['overTime']          = Overtime::select('id', 'title')->selectRaw('number_of_days * hours* rate as amount')->where('employee_id', $employeeId)->get();
-        // $earning['totalOverTime']     = Overtime::selectRaw('number_of_days * hours* rate as total')->where('employee_id', $employeeId)->get()->sum('total');
+        //Overtime
+        $earning['overTime']      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['totalOverTime'] = 0;
+        foreach ($earning['overTime'] as $over_time) {
+            $total_hours              = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            $amount                   = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
+            $over_time->amount        = $amount;
+            $earning['totalOverTime'] += $amount;
+        }
 
-        $deduction['loan']           = Loan::where('employee_id', $employeeId)->get();
-        $employess = Employee::find($employeeId);
+        $deduction['loan']           = Loan::where('employee_id', $employeeId)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
         $totalloan = 0;
 
         foreach ($deduction['loan'] as $earn) {
             if ($earn->type == 'percentage') {
-                $emploan  = $earn->amount * $employess->salary / 100;
+                $emploan  = $earn->amount * $employee->salary / 100;
             } else {
                 $emploan = $earn->amount;
             }
@@ -241,12 +285,11 @@ class Utility extends Model
         }
 
         $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->get();
-        $employess = Employee::find($employeeId);
         $totaldeduction = 0;
 
         foreach ($deduction['deduction'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empdeduction  = $earn->amount * $employess->salary / 100;
+                $empdeduction  = $earn->amount * $employee->salary / 100;
             } else {
                 $empdeduction = $earn->amount;
             }
@@ -254,12 +297,11 @@ class Utility extends Model
         }
 
         $payslip['earning']        = $earning;
-        $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
-        // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'];
+        $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
+        // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
 
         $payslip['deduction']      = $deduction;
         $payslip['totalDeduction'] = $totalloan + $totaldeduction;
-
 
         return $payslip;
     }
@@ -1016,7 +1058,7 @@ class Utility extends Model
                     return $res;
                 } else {
 
-                    $name = $name;
+                    // $name = $name;
 
                     if ($settings['storage_setting'] == 'local') {
                         $request->$key_name->move(storage_path($path), $name);
@@ -1167,7 +1209,7 @@ class Utility extends Model
                     return $res;
                 } else {
 
-                    $name = $name;
+                    // $name = $name;
 
                     if ($settings['storage_setting'] == 'local') {
 

@@ -125,8 +125,12 @@ class Employee extends Model
                 $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
     
                 // Check if the work hours of attendance match the required work hours
-                list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
-                $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                if ($attendance['work_hours']) {
+                    list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
+                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                } else {
+                    $attendanceWorkHours = 0;
+                }
                 
                 if ($attendanceWorkHours >= $requiredWorkHours) {
                     // Increment the present days count
@@ -176,7 +180,7 @@ class Employee extends Model
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         //allowance
-        $allowances      = Allowance::where('employee_id', '=', $this->id)->get();
+        $allowances      = Allowance::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             if ($allowance->type == 'percentage') {
@@ -199,7 +203,7 @@ class Employee extends Model
         }
 
         //Loan
-        $loans      = Loan::where('employee_id', '=', $this->id)->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
+        $loans      = Loan::where('employee_id', '=', $this->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             if ($loan->type == 'percentage') {
