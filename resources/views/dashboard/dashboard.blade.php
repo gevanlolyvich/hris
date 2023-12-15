@@ -250,7 +250,7 @@
                                     </div>
                                 </div>
                                 <div class="col-auto text-end">
-                                    <h4 class="m-0 text-primary">{{ $countUser + $countEmployee }}</h4>
+                                    <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -405,7 +405,7 @@
                     </div>
                     <div class="card">
                         <div class="card-header card-body table-border-style">
-                            <h5>{{ __("Today's Not Clock In") }}</h5>
+                            <h5>{{ __("Today's Not Clock In") . ' ( ' . count($notClockIns). ' / '. $countEmployee . ' )' }}</h5>
                         </div>
                         <div class="card-body" style="height: 324px; overflow:auto">
                             <div class="table-responsive">
