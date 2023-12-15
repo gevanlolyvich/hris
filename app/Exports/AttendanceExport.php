@@ -63,6 +63,8 @@ class AttendanceExport implements FromCollection, WithHeadings
             } elseif ($query->type == 'daily' && !empty($query->date)) {
                 $attendances->where('date', $query->date);
             }
+        }  else  {
+            $attendances->where('date', date('Y-m-d'));
         }
 
         $attendances = $attendances->get();
@@ -83,6 +85,10 @@ class AttendanceExport implements FromCollection, WithHeadings
                     $attendance->early_leaving,
                     $attendance->overtime,
                     $attendance->work_hours,
+                    $attendance->picture_in,
+                    $attendance->coord_in ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_in), 0, -1)) : '-',
+                    $attendance->picture_out,
+                    $attendance->coord_out ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_out), 0, -1)) : '-',
                 ]);
             }
 
@@ -105,6 +111,10 @@ class AttendanceExport implements FromCollection, WithHeadings
             "Early Leaving",
             "Overtime",
             "Work Hours",
+            "Clock In Picture URL",
+            "Clock In Location URL",
+            "Clock Out Picture URL",
+            "Clock Out Location URL",
         ];
     }
 }
