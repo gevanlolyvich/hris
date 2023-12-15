@@ -767,6 +767,33 @@
             var loadbutton = document.getElementById('load');
     
             loadbutton.addEventListener('click', startup, false);
+
+            function compressAndSetPicture(canvas, quality) {
+                canvas.toBlob(
+                    function (blob) {
+                        var reader = new FileReader();
+                        reader.onloadend = function () {
+                            var compressedDataUrl = reader.result;
+                            // Set the compressed image as the source of the photo element
+                            document.getElementById('photo').src = compressedDataUrl;
+
+                            // Set the compressed image data as the value of the hidden input field
+                            let pictureIn = document.getElementById('picture');
+                            let pictureOut = document.getElementById('picture_out');
+
+                            if (pictureIn) {
+                                pictureIn.value = compressedDataUrl;
+                            }
+                            if (pictureOut) {
+                                pictureOut.value = compressedDataUrl;
+                            }
+                        };
+                        reader.readAsDataURL(blob);
+                    },
+                    'image/jpeg', // Change the MIME type as needed (e.g., 'image/png')
+                    quality // Adjust the image quality (0 to 1)
+                );
+            }
     
             function startup() {
                 video = document.getElementById('video');
@@ -843,18 +870,9 @@
                     canvas.width = width;
                     canvas.height = height;
                     context.drawImage(video, 0, 0, width, height);
-    
-                    var data = canvas.toDataURL('image/png');
-                    photo.setAttribute('src', data);
-                    let pictureIn = document.getElementById('picture');
-                    let pictureOut = document.getElementById('picture_out');
 
-                    if (pictureIn) {
-                        pictureIn.value = data;
-                    }
-                    if (pictureOut) {
-                        pictureOut.value = data;
-                    }
+                    // Compress the captured image with a specified quality
+                    compressAndSetPicture(canvas, 0.8); // Adjust quality as needed
                 } else {
                     clearphoto();
                 }
