@@ -255,12 +255,9 @@ class Employee extends Model
         return $net_salary;
     }
 
-    public static function allowance($id)
+    public static function allowance($id, $month, $year)
     {
-
-        // dd('hey');
-        //allowance
-        $allowances      = Allowance::where('employee_id', '=', $id)->get();
+        $allowances      = Allowance::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             $total_allowance = $allowance->amount + $total_allowance;
@@ -286,10 +283,10 @@ class Employee extends Model
         return $commission_json;
     }
 
-    public static function loan($id)
+    public static function loan($id, $month, $year)
     {
         //Loan
-        $loans      = Loan::where('employee_id', '=', $id)->get();
+        $loans      = Loan::where('employee_id', '=', $id)->whereMonth('end_date', $month ?? date('m'))->whereYear('end_date', $year ?? date('Y'))->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             $total_loan = $loan->amount + $total_loan;
@@ -368,7 +365,7 @@ class Employee extends Model
 
     public function salaryType()
     {
-        return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type');
+        return $this->belongsTo(PayslipType::class, 'salary_type', 'id');
     }
 
     public function user()

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaySlip extends Model
 {
@@ -26,8 +27,8 @@ class PaySlip extends Model
         return Employee::find($id);
     }
 
-    public function employees()
+    public function employees(): BelongsTo
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }
