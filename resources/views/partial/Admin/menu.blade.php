@@ -170,6 +170,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                     {{ __('Employee') }}
                                 </a>
                             </li>
+                            @if (Gate::check('Manage Termination'))
+                                <li class="dash-item">
+                                    <a class="dash-link"
+                                        href="{{ route('termination.index') }}">{{ __('Termination') }}</a>
+                                </li>
+                            @endif
                         @endif
                         <li class="dash-item">
                             <a class="dash-link"
@@ -400,7 +406,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
 
                 <!-- HR-->
-                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Termination') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
+                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -437,10 +443,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             <li class="dash-item">
                                 <a class="dash-link"
                                     href="{{ route('warning.index') }}">{{ __('Warning') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('termination.index') }}">{{ __('Termination') }}</a>
                             </li>
                             <li class="dash-item">
                                 <a class="dash-link"
