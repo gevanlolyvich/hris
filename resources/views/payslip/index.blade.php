@@ -11,37 +11,65 @@
 
 
 @section('content')
-    @if (\Auth::user()->type != 'employee')
+    
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                        <div class="row align-items-center justify-content-end">
-                            <div class="col-4 month">
-                                <div class="btn-box">
-                                    {{ Form::label('month', __('Select Month'), ['class' => 'form-label']) }}
-                                    {{ Form::select('month', $month, null, ['class' => 'form-control select', 'id' => 'month']) }}
-                                </div>
-                            </div>
-                            <div class="col-4 year">
-                                <div class="btn-box">
-                                    {{ Form::label('year', __('Select Year'), ['class' => 'form-label']) }}
-                                    {{ Form::select('year', $year, null, ['class' => 'form-control select']) }}
-                                </div>
-                            </div>
-                            <div class="col-auto float-end ms-2 mt-4">
-                                <a href="#" class="btn  btn-primary"
-                                    onclick="document.getElementById('payslip_form').submit(); return false;"
-                                    data-bs-toggle="tooltip" title="{{ __('payslip') }}"
-                                    data-original-title="{{ __('payslip') }}">{{ __('Generate Payslip') }}
-                                </a>
+                    <div class="row justify-content-end">
+                        <div class="col-4 month">
+                            <div class="btn-box">
+                                {{Form::label('month',__('Month'),['class'=>'form-label'])}}
+                                {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'), ['class'=>'month-btn form-control month-btn', 'id'=>'month-filter'])}}
                             </div>
                         </div>
-                    {{ Form::close() }}
+                        <div class="col-auto p-1 pt-1 mt-4">
+                            {{ Form::open(['route' => ['payslip.index'], 'method' => 'GET', 'id' => 'payslip_filter']) }}
+                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'filter_month'])}}
+                                {{-- <input type="hidden" name="filter_month" id="filter_month"> --}}
+                                <a href="#" class="btn  btn-primary"
+                                    onclick="document.getElementById('payslip_filter').submit(); return false;"
+                                    data-bs-toggle="tooltip" title="{{ __('Search Payslip') }}"
+                                    data-original-title="{{ __('Search Payslip') }}">{{ __('Search') }}
+                                </a>
+                            {{ Form::close() }}
+                        </div>
+                        @if (\Auth::user()->type != 'employee')
+                            <div class="col-auto p-1 pt-1 mt-4">
+                                {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
+                                {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'generate_month'])}}
+                                    {{-- <input type="hidden" name="generate_month" id="generate_month"> --}}
+                                    <a href="#" class="btn  btn-info"
+                                        onclick="document.getElementById('payslip_form').submit(); return false;"
+                                        data-bs-toggle="tooltip" title="{{ __('Generate Payslip') }}"
+                                        data-original-title="{{ __('Generate Payslip') }}">{{ __('Generate') }}
+                                    </a>
+                                {{ Form::close() }}
+                            </div>
+                        @endif
+                        <div class="col-auto p-1 pt-1 mt-4">
+                            {{ Form::open(['route' => ['payslip.bulkpayment', ['date'=>$month]], 'method' => 'POST', 'id' => 'payslip_bulkpay']) }}
+                                <button type="button" class="btn btn-success bs-pass-para"
+                                    data-bs-toggle="tooltip" title="{{ __('Bulk Payment Payslip') }}"
+                                    data-original-title="{{ __('Bulk Payment Payslip') }}">{{ __('Bulk Payment') }}
+                                </button>
+                            {{ Form::close() }}
+                        </div>
+                        <div class="col-auto p-1 pt-1 mt-4">
+                            {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_export']) }}
+                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'export_month'])}}
+                                {{-- <input type="hidden" name="export_month" id="export_month"> --}}
+                                <a href="#" class="btn btn-warning"
+                                    onclick="document.getElementById('payslip_export').submit(); return false;"
+                                    data-bs-toggle="tooltip" title="{{ __('Export Payslip') }}"
+                                    data-original-title="{{ __('Export Payslip') }}">{{ __('Export') }}
+                                </a>
+                            {{ Form::close() }}
+                        </div>
+                    </div>
                  </div>
             </div>
         </div>
-    @endif
+    
 
 
     <div class="col-12">
@@ -49,8 +77,8 @@
             <div class="card-header">
                 {{--                <form> --}}
                 {{-- <div class="d-flex justify-content-between w-100"> --}}
-                <h5>{{ __('Find Employee Payslip') }}</h5>
-                <div class="row align-items-center justify-content-end mt-4">
+                <h5>{{ __('Employee Payslip') }}</h5>
+                {{-- <div class="row align-items-center justify-content-end mt-4">
                     <div class="col-4 month">
                         <div class="btn-box">
                             <select class="form-control month_date " name="year" tabindex="-1" aria-hidden="true">
@@ -78,14 +106,13 @@
                             <input type="submit" value="{{ __('Export') }}" class="btn btn-primary">
                         {{ Form::close() }}
                     </div>
-                </div>
+                </div> --}}
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table" id="pc-dt-render-column-cells">
+                    <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>{{ __('Employee Id') }}</th>
                                 <th>{{ __('Name') }}</th>
                                 <th>{{ __('Payroll Type') }}</th>
                                 <th>{{ __('Salary') }}</th>
@@ -95,6 +122,36 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach ($payslips as $payslip)
+                                <tr>
+                                    <td>{{ $payslip?->employees?->name ?? '-' }}</td>
+                                    <td>{{ $payslip?->employees?->salaryType?->name ?? '-' }}</td>
+                                    <td>{{ \Auth::user()->priceFormat($payslip?->basic_salary ?? '0') }}</td>
+                                    <td>{{ \Auth::user()->priceFormat($payslip?->net_payble ?? '0') }}</td>
+                                    <td>
+                                        @if ($payslip?->status)
+                                            <div class="badge bg-success p-2 px-3 rounded text-white">{{__('Paid')}}</div>
+                                        @else
+                                            <div class="badge bg-danger p-2 px-3 rounded text-white">{{__('UnPaid')}}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" data-url="{{ route('payslip.pdf', ['id' => $payslip->employee_id, 'm' => $month]) }}" data-size="md-pdf"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Employee Payslip') }}">{{ __('Payslip') }}</a>
+                                    
+                                            @if (\Auth::user()->type != 'employee')
+                                                @if ($payslip->status == 0)
+                                                    <a href="{{ route('payslip.paysalary', ['id' => $payslip->employee_id, 'date' => $month]) }}" class="btn-sm btn m-1 btn-primary">{{ __('Click To Paid') }}</a>
+                                                @endif
+                                    
+                                                {!! Form::open(['method' => 'GET', 'route' => ['payslip.delete', $payslip->id], 'id' => 'delete-form-' . $payslip->id]) !!}
+                                                <button type="button" class="btn btn-danger m-1 btn-sm bs-pass-para">{{ __('Delete') }}</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -109,218 +166,45 @@
             callback();
 
             function callback() {
-                var month = $(".month_date").val();
-                var year = $(".year_date").val();
+                var month = $("#month-filter").val();
 
-                $('.filter_month').val(month);
-                $('.filter_year').val(year);
+                let filterMonth = document.getElementById('filter_month');
+                let exportMonth = document.getElementById('export_month');
+                let generateMonth = document.getElementById('generate_month');
+                let bulkpayMonth = document.getElementById('bulkpay_month');
 
-                if (month == '') {
-                    month = '{{ date('m', strtotime('last month')) }}';
-                    year = '{{ date('Y') }}';
-
-                    $('.filter_month').val(month);
-                    $('.filter_year').val(year);
+                if (filterMonth) {
+                    filterMonth.value = month;
+                    filterMonth.val = month;
                 }
-
-                var datePicker = year + '-' + month;
-
-                $.ajax({
-                    url: '{{ route('payslip.search_json') }}',
-                    type: 'POST',
-                    data: {
-                        "datePicker": datePicker,
-                        "_token": "{{ csrf_token() }}",
-                    },
-                    success: function(data) {
-                        var datatable_data = {
-                            data: data
-                        };
-
-                        function renderstatus(data, cell, row) {
-                            if (data == 'Paid')
-                                return '<div class="badge bg-success p-2 px-3 rounded"><a href="#" class="text-white">' +
-                                    data + '</a></div>';
-                            else
-                                return '<div class="badge bg-danger p-2 px-3 rounded"><a href="#" class="text-white">' +
-                                    data + '</a></div>';
-                        }
-
-                        function renderButton(data, cell, row) {
-
-                            var $div = $(row);
-                            employee_id = $div.find('td:eq(0)').text();
-                            status = $div.find('td:eq(6)').text();
-
-                            var month = $(".month_date").val();
-                            var year = $(".year_date").val();
-                            var id = employee_id;
-                            var payslip_id = data;
-
-
-                            var clickToPaid = '';
-                            var payslip = '';
-                            var view = '';
-                            // var edit = '';
-                            var deleted = '';
-                            var form = '';
-
-                            if (data != 0) {
-                                var payslip =
-                                    '<a href="#" data-url="{{ url('payslip/pdf/') }}/' + id +
-                                    '/' + datePicker +
-                                    '" data-size="md-pdf"  data-ajax-popup="true" class="btn btn-primary" data-title="{{ __('Employee Payslip') }}">' +
-                                    '{{ __('Payslip') }}' + '</a> ';
-                            }
-
-                            if (status == "UnPaid" && data != 0) {
-                                clickToPaid = '<a href="{{ url('payslip/paysalary/') }}/' + id +
-                                    '/' + datePicker + '"  class="view-btn primary-bg btn-sm">' +
-                                    '{{ __('Click To Paid') }}' + '</a>  ';
-                            }
-
-                            if (data != 0) {
-                                view =
-                                    '<a href="#" data-url="{{ url('payslip/showemployee/') }}/' +
-                                    payslip_id +
-                                    '"  data-ajax-popup="true" class="view-btn gray-bg" data-title="{{ __('View Employee Detail') }}">' +
-                                    '{{ __('View') }}' + '</a>';
-                            }
-
-                            // if (data != 0 && status == "UnPaid") {
-                            //     edit =
-                            //         '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
-                            //         payslip_id + "?date=" + datePicker +
-                            //         '"  data-ajax-popup="true" class="view-btn blue-bg" data-title="{{ __('Edit Employee salary') }}">' +
-                            //         '{{ __('Edit') }}' + '</a>';
-                            // }
-
-                            var url = '{{ route('payslip.delete', ':id') }}';
-                            url = url.replace(':id', payslip_id);
-
-                            @if (\Auth::user()->type != 'employee')
-                                if (data != 0) {
-                                    deleted = '<a href="#"  data-url="' + url +
-                                        '" class="payslip_delete view-btn red-bg" >' +
-                                        '{{ __('Delete') }}' + '</a>';
-                                }
-                            @endif
-
-                            return view + payslip + clickToPaid + deleted + form;
-                        }
-
-                        var tr = '';
-                        // <tr><td class="dataTables-empty" colspan="1">No entries found</td></tr>
-                        if (data.length > 0) {
-                            $.each(data, function(indexInArray, valueOfElement) {
-                                var status =
-                                    '<div class="badge bg-danger p-2 px-3 rounded"><a href="#" class="text-white">' +
-                                    valueOfElement[6] + '</a></div>';
-                                if (valueOfElement[6] == 'Paid') {
-                                    var status =
-                                        '<div class="badge bg-success p-2 px-3 rounded"><a href="#" class="text-white">' +
-                                        valueOfElement[6] + '</a></div>';
-                                }
-
-                                var id = valueOfElement[0];
-                                var employee_id = valueOfElement[1];
-                                var payslip_id = valueOfElement[7];
-
-                                if (valueOfElement[7] != 0) {
-                                    var payslip =
-                                        '<a href="#" data-url="{{ url('payslip/pdf/') }}/' +
-                                        id +
-                                        '/' + datePicker +
-                                        '" data-size="lg"  data-ajax-popup="true" class=" btn-sm btn btn-warning" data-title="{{ __('Employee Payslip') }}">' +
-                                        '{{ __('Payslip') }}' + '</a> ';
-                                }
-                                if (valueOfElement[6] == "UnPaid" && valueOfElement[7] != 0) {
-                                    var clickToPaid =
-                                        '<a href="{{ url('payslip/paysalary/') }}/' + id +
-                                        '/' + datePicker +
-                                        '"  class="btn-sm btn btn-primary">' +
-                                        '{{ __('Click To Paid') }}' + '</a>  ';
-                                } else {
-                                    var clickToPaid = '';
-                                }
-
-                                // if (valueOfElement[7] != 0 && valueOfElement[6] == "UnPaid") {
-                                //     var edit =
-                                //         '<a href="#" data-url="{{ url('payslip/editemployee/') }}/' +
-                                //         payslip_id + "?date=" + datePicker +
-                                //         '"  data-ajax-popup="true" class="btn-sm btn btn-info" data-title="{{ __('Edit Employee salary') }}">' +
-                                //         '{{ __('Edit') }}' + '</a>';
-                                // } else {
-                                //     var edit = '';
-                                // }
-
-
-                                var url = '{{ route('payslip.delete', ':id') }}';
-                                url = url.replace(':id', payslip_id);
-
-                                @if (\Auth::user()->type != 'employee')
-                                    if (valueOfElement[7] != 0) {
-                                        var deleted = '<a href="#"  data-url="' + url +
-                                            '" class="payslip_delete view-btn btn btn-danger ms-1 btn-sm"  >' +
-                                            '{{ __('Delete') }}' + '</a>';
-                                    } else {
-                                        var deleted = '';
-                                    }
-                                @else
-                                    var deleted = '';
-                                @endif
-                                var url_employee = valueOfElement['url'];
-
-                                tr +=
-                                    '<tr> ' +
-                                    '<td> <a class="btn btn-outline-primary" href="' +
-                                    url_employee + '">' +
-                                    valueOfElement[1] + '</a></td> ' +
-                                    '<td>' + valueOfElement[2] + '</td> ' +
-                                    '<td>' + valueOfElement[3] + '</td>' +
-                                    '<td>' + valueOfElement[4] + '</td>' +
-                                    '<td>' + valueOfElement[5] + '</td>' +
-                                    '<td>' + status + '</td>' +
-                                    '<td>' + payslip + clickToPaid + deleted + '</td>' +
-                                    '</tr>';
-                            });
-                        } else {
-                            var colspan = $('#pc-dt-render-column-cells thead tr th').length;
-                            var tr = '<tr><td class="dataTables-empty" colspan="' + colspan +
-                                '">{{ __('No entries found') }}</td></tr>';
-                        }
-
-                        $('#pc-dt-render-column-cells tbody').html(tr);
-                        var table = document.querySelector("#pc-dt-render-column-cells");
-                        var datatable = new simpleDatatables.DataTable(table);
-
-                    },
-                    error: function(data) {
-
-                    }
-
-                });
-
+                if (exportMonth) {
+                    exportMonth.value = month;
+                    exportMonth.val = month;
+                }
+                if (generateMonth) {
+                    generateMonth.value = month;
+                    generateMonth.val = month;
+                }
+                if (bulkpayMonth) {
+                    bulkpayMonth.value = month;
+                    bulkpayMonth.val = month;
+                }
             }
 
-            $(document).on("change", ".month_date,.year_date", function() {
-                callback();
-            });
+            $(document).on("change", "#month-filter", callback);
 
             //bulkpayment Click
             $(document).on("click", "#bulk_payment", function() {
-                var month = $(".month_date").val();
-                var year = $(".year_date").val();
-                var datePicker = year + '_' + month;
+                var month = $("#month-filter").val();
+                var datePicker = month?.replace('-', '_');
 
 
             });
             $(document).on('click', '#bulk_payment',
                 'a[data-ajax-popup="true"], button[data-ajax-popup="true"], div[data-ajax-popup="true"]',
                 function() {
-                    var month = $(".month_date").val();
-                    var year = $(".year_date").val();
-                    var datePicker = year + '-' + month;
+                    var month = $("#month-filter").val();
+                    var datePicker = month?.replace('-', '_');
 
                     var title = 'Bulk Payment';
                     var size = 'md';
