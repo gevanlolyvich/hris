@@ -1700,5 +1700,7 @@
     "Required Days": "Required Days",
     "Valid Days": "Valid Days",
     "Total Main Salary": "Total Salary",
-    "Birthdate": "Birthdate"
+    "Birthdate": "Birthdate",
+    "Payslip successfully deleted": "Payslip successfully deleted",
+    "Bulk Payment Payslip": "Bulk Payment Payslip"
 }
