@@ -59,14 +59,11 @@
             <div class="card">
                 <div class="card-body">
                     {{ Form::open(['route' => ['attendanceemployee.bulkattendance'], 'method' => 'get', 'id' => 'bulkattendance_filter']) }}
-                    <div class="d-flex align-items-center justify-content-end">
+                    <div class="d-flex align-items-center justify-content-end row">
                         <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
                             <div class="btn-box">
                                 {{ Form::label('date', __('Date'), ['class' => 'form-label']) }}
                                 {{ Form::text('date', isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'), ['class' => 'month-btn form-control d_week ', 'autocomplete' => 'off']) }}
-
-
-
                             </div>
                         </div>
 
@@ -158,11 +155,10 @@
                         <thead>
                             <tr>
                                 <th width="10%">{{ __('Employee Id') }}</th>
-                                <th>{{ __('Employee') }}</th>
-                                <th>{{ __('Branch') }}</th>
-                                <th>{{ __('Department') }}</th>
+                                <th width="10%">{{ __('Employee') }}</th>
+                                <th width="10%">{{ __('Branch') }}</th>
+                                <th width="10%">{{ __('Department') }}</th>
                                 <th>
-
                                     <div class="form-group my-auto">
                                         <div class="custom-control custom-checkbox">
                                             <input class="form-check-input" type="checkbox" name="present_all"
@@ -178,6 +174,8 @@
                             @foreach ($employees as $employee)
                                 @php
                                     $attendance = $employee->present_status($employee->id, isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'));
+                                    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+                                    $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($date)));
                                 @endphp
                                 <tr>
                                     <td class="Id">
@@ -202,14 +200,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div
-                                                class="col-md-8 present_check_in {{ empty($attendance) ? 'd-none' : '' }} ">
+                                            <div class="col-md-11 present_check_in {{ empty($attendance) ? 'd-none' : '' }} ">
                                                 <div class="row">
                                                     <label class="col-md-2 control-label">{{ __('In') }}</label>
                                                     <div class="col-md-4">
                                                         <input type="time" class="form-control timepicker"
                                                             name="in-{{ $employee->id }}"
-                                                            value="{{ !empty($attendance) && $attendance->clock_in != '00:00:00' ? $attendance->clock_in : \Utility::getValByName('company_start_time') }}">
+                                                            value="{{ !empty($attendance) && $attendance->clock_in != '00:00:00' ? $attendance->clock_in : optional($shift->first())->start_time ?? '00:00:00' }}">
                                                     </div>
 
                                                     <label for="inputValue"
@@ -217,7 +214,7 @@
                                                     <div class="col-md-4">
                                                         <input type="time" class="form-control timepicker"
                                                             name="out-{{ $employee->id }}"
-                                                            value="{{ !empty($attendance) && $attendance->clock_out != '00:00:00' ? $attendance->clock_out : \Utility::getValByName('company_end_time') }}">
+                                                            value="{{ !empty($attendance) && $attendance->clock_out != '00:00:00' ? $attendance->clock_out : optional($shift->first())->end_time ?? '00:00:00' }}">
                                                     </div>
                                                 </div>
                                             </div>
