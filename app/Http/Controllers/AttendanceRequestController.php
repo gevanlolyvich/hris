@@ -229,6 +229,13 @@ class AttendanceRequestController extends Controller
         $attendance_request = AttendanceRequest::find($request->attendance_request_id);
         $date = $attendance_request->date;
 
+        $start_time_cal = strtotime($attendance_request->start_time);
+        $end_time_cal   = strtotime($attendance_request->end_time);
+
+        if ($start_time_cal > $end_time_cal) {
+            $end_time_cal += 86400;
+        }
+
         $form = null;
         if ($request->status == 'Approved') {
             $form = [
@@ -249,15 +256,25 @@ class AttendanceRequestController extends Controller
             $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
                 ->where('days', date('l', strtotime($attendance_request->date)))
                 ->first();
+
+            //work hours
+            $totalWorkHoursSeconds    = $end_time_cal - $start_time_cal;
+            $hours                    = floor($totalWorkHoursSeconds / 3600);
+            $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
+            $secs                     = floor($totalWorkHoursSeconds % 60);
+            $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
             
             if ($shift_times->is_working) {
-                $startTime = $shift_times->start_time;
-                $endTime = $shift_times->end_time;
+                $shift_startTime = strtotime($shift_times->start_time);
+                $shift_endTime   = strtotime($shift_times->end_time);
 
-                $totalLateSeconds = strtotime($date . $attendance_request->start_time) - strtotime($date . $startTime);
-
-
-                if ($totalLateSeconds > 0) {
+                if ($shift_startTime > $shift_endTime) {
+                    $shift_endTime += 86400;
+                }                
+                
+                // late
+                if ($start_time_cal > $shift_startTime) {
+                    $totalLateSeconds = $start_time_cal - $shift_startTime;
                     $hours = floor($totalLateSeconds / 3600);
                     $mins  = floor($totalLateSeconds / 60 % 60);
                     $secs  = floor($totalLateSeconds % 60);
@@ -266,16 +283,9 @@ class AttendanceRequestController extends Controller
                     $late  = '00:00:00';
                 }
 
-                //work hours
-                $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
-                $hours                    = floor($totalWorkHoursSeconds / 3600);
-                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
-                $secs                     = floor($totalWorkHoursSeconds % 60);
-                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
                 //early Leaving
-                $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($date . $attendance_request->end_time);
-                if ($totalEarlyLeavingSeconds > 0) {
+                if ($shift_endTime > $end_time_cal) {
+                    $totalEarlyLeavingSeconds = $shift_endTime - $end_time_cal;
                     $hours                    = floor($totalEarlyLeavingSeconds / 3600);
                     $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
                     $secs                     = floor($totalEarlyLeavingSeconds % 60);
@@ -284,9 +294,9 @@ class AttendanceRequestController extends Controller
                     $earlyLeaving             = '00:00:00';
                 }
 
-                if (strtotime($date . $attendance_request->end_time) > strtotime($date . $endTime)) {
+                if ($end_time_cal - $start_time_cal > 32400) {
                     //Overtime
-                    $totalOvertimeSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $endTime);
+                    $totalOvertimeSeconds = $end_time_cal - $start_time_cal - 32400;
                     $hours                = floor($totalOvertimeSeconds / 3600);
                     $mins                 = floor($totalOvertimeSeconds / 60 % 60);
                     $secs                 = floor($totalOvertimeSeconds % 60);
@@ -314,15 +324,9 @@ class AttendanceRequestController extends Controller
                     'coord_out'             => null,
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
+                    'shift_type_id'         => $attendance_request->employee->shift_type_id,
                 ];
             } else {
-                //work hours
-                $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
-                $hours                    = floor($totalWorkHoursSeconds / 3600);
-                $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
-                $secs                     = floor($totalWorkHoursSeconds % 60);
-                $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
                 $form_attendance = [
                     'employee_id'           => $attendance_request->employee->id,
                     'date'                  => $date,
@@ -341,6 +345,7 @@ class AttendanceRequestController extends Controller
                     'coord_out'             => null,
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
+                    'shift_type_id'         => $attendance_request->employee->shift_type_id,
                 ];
             }
         }
@@ -355,7 +360,7 @@ class AttendanceRequestController extends Controller
             }
         });
 
-        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Updated'));
+        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Approved / Rejeted'));
     }
 
     public function export(Request $request)
