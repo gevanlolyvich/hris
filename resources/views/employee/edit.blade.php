@@ -80,7 +80,7 @@
                                     @csrf
                                     <div class="form-group col-md-6">
                                         {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('employee_id', $employeesId, ['class' => 'form-control', 'disabled' => 'disabled']) !!}
+                                        {!! Form::text('employee_id', $employeesId, ['class' => 'form-control', 'disabled' => (\Auth::user()->type == 'employee') ? 'disabled' : null ]) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
