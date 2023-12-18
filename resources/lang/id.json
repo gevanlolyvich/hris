@@ -566,9 +566,9 @@
   "Employee " : "Karyawan  ",
   "Employee  successfully created." : "Karyawan berhasil dibuat.",
   "Employee are not allow multiple time clock in & clock for every day." : "Karyawan tidak diizinkan untuk bekerja sama dalam setiap hari.",
-  "Employee Attendance Already Created." : "Kehadiran Karyawan Yang Telah Dibuat.",
-  "Employee attendance successfully created." : "Kehadiran Karyawan yang Berhasil Dibuat.",
-  "Employee attendance successfully updated." : "Kehadiran Karyawan yang Berhasil Dirubah.",
+  "Employee Attendance Already Created." : "Kehadiran Karyawan Telah Dibuat.",
+  "Employee attendance successfully created." : "Kehadiran Karyawan Berhasil Dibuat.",
+  "Employee attendance successfully updated." : "Kehadiran Karyawan Berhasil Dirubah.",
   "Employee Branch" : "Cabang Karyawan",
   "Employee Complaints" : "Keluhan karyawan",
   "Employee Create" : "Buat karyawan",
@@ -1700,5 +1700,6 @@
   "Total Main Salary": "Total Gaji Utama",
   "Birthdate": "Tanggal Lahir",
   "Payslip successfully deleted": "Slip Gaji Berhasil Dihapus",
-  "Bulk Payment Payslip": "Pembayaran Masal Slip Gaji"
+  "Bulk Payment Payslip": "Pembayaran Masal Slip Gaji",
+  "Request Attendance Successfully Approved / Rejeted": "Permintaan Kehadiran Berhasil Disetujui / Ditolak"
 }
