@@ -62,7 +62,7 @@ $profile = asset(Storage::url('uploads/avatar/'));
                 </div>
                 <div class="card-body">
                     <div class="avatar d-flex justify-content-center align-items-center">
-                        <span class="theme-avtar" style="width: 70px; height: 70px; border-radius: 50%;">
+                        <span class="theme-avtar" style="width: 85px; height: 85px; overflow: hidden; border-radius: 50%;">
                             @if ($user->type == 'employee')
                                 <a href="{{ route('employee.show', \Illuminate\Support\Facades\Crypt::encrypt($user?->employee?->id)) }}">
                             @else
