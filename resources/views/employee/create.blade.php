@@ -20,7 +20,7 @@
             {{ Form::open(['route' => ['employee.store'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card em-card" style="height: 506px">
+                    <div class="card em-card">
                         <div class="card-header">
                             <h5>{{ __('Personal Detail') }}</h5>
                         </div>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card em-card" style="height: 506px">
+                    <div class="card em-card">
                         <div class="card-header">
                             <h5>{{ __('Company Detail') }}</h5>
                         </div>
@@ -196,7 +196,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 ">
-                    <div class="card em-card " style="height: 506px">
+                    <div class="card em-card ">
                         <div class="card-header">
                             <h5>{{ __('Bank Account Detail') }}</h5>
                         </div>
