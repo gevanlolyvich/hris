@@ -10,6 +10,7 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class TerminationController extends Controller
 {
@@ -20,11 +21,11 @@ class TerminationController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $emp          = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->get();
+                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->orderBy('termination_date', 'DESC')->get();
             }
             else
             {
-                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->orderBy('termination_date', 'DESC')->get();
             }
 
             return view('termination.index', compact('terminations'));
@@ -39,7 +40,7 @@ class TerminationController extends Controller
     {
         if(\Auth::user()->can('Create Termination'))
         {
-            $employees        = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees        = Employee::where('created_by', \Auth::user()->creatorId())->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $terminationtypes = TerminationType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
             return view('termination.create', compact('employees', 'terminationtypes'));
@@ -113,8 +114,17 @@ class TerminationController extends Controller
     {
         if(\Auth::user()->can('Edit Termination'))
         {
-            $employees        = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = Employee::where(function ($query) {
+                // Get all active employees
+                $query->where('created_by', \Auth::user()->creatorId())
+                    ->where('is_active', 1);
+            })->orWhere(function ($query) use ($termination) {
+                // Get the current employee from termination data
+                $query->where('id', $termination->employee_id);
+            })->orderby('name', 'asc')->get()->pluck('name', 'id');
+
             $terminationtypes = TerminationType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+
             if($termination->created_by == \Auth::user()->creatorId())
             {
 
@@ -153,6 +163,9 @@ class TerminationController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                if ($termination->employee_id != $request->employee_id) {
+                    Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
+                }
 
                 $termination->employee_id      = $request->employee_id;
                 $termination->termination_type = $request->termination_type;
@@ -180,6 +193,7 @@ class TerminationController extends Controller
         {
             if($termination->created_by == \Auth::user()->creatorId())
             {
+                Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
                 $termination->delete();
 
                 return redirect()->route('termination.index')->with('success', __('Termination successfully deleted.'));

@@ -22,6 +22,11 @@ class Kernel extends ConsoleKernel
         ->everyFifteenMinutes()
         ->timezone('Asia/Jakarta')
         ->between('1:00', '23:59');
+
+        $schedule->command('terminate:employees')
+        ->everyTenMinutes()
+        ->timezone('Asia/Jakarta')
+        ->between('1:00', '23:59');
     }
 
     /**
