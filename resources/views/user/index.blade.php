@@ -51,7 +51,7 @@ $profile = asset(Storage::url('uploads/avatar/'));
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a href="#" class="dropdown-item" data-url="{{ route('user.edit', $user->id) }}" data-ajax-popup="true" data-title="{{ __('Update User') }}"><i class="ti ti-edit "></i><span class="ms-2">{{ __('Edit') }}</span></a>
-                                <a href="#" class="dropdown-item" data-ajax-popup="true" data-title="{{ __('Change Password') }}" data-url="{{ route('user.reset', \Crypt::encrypt($user->id)) }}"><i class="ti ti-key"></i>
+                                <a href="#" class="dropdown-item" data-ajax-popup="true" data-title="{{ __('Change Password') }}" data-url="{{ route('user.reset', ['id'=>\Crypt::encrypt($user->id)]) }}"><i class="ti ti-key"></i>
                                     <span class="ms-1">{{ __('Reset Password') }}</span></a>
                                 {!! Form::open(['method' => 'DELETE', 'route' => ['user.destroy', $user->id], 'id' => 'delete-form-' . $user->id]) !!}
                                 <a href="#" class="bs-pass-para dropdown-item" data-confirm="{{ __('Are You Sure?') }}" data-text="{{ __('This action can not be undone. Do you want to continue?') }}" data-confirm-yes="delete-form-{{ $user->id }}" title="{{ __('Delete') }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="ti ti-trash"></i><span class="ms-2">{{ __('Delete') }}</span></a>

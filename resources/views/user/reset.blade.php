@@ -1,8 +1,7 @@
-{{ Form::model($user, ['route' => ['user.password.update', $user->id], 'method' => 'post']) }}
+{{ Form::open(['route' => ['password.reset', \Crypt::encrypt($user->id)], 'method' => 'POST']) }}
 <div class="modal-body">
     <div class="row">
         <div class="form-group">
-
             {{ Form::label('password', __('Password'), ['class' => 'form-label']) }}
             <div class="form-icon-user">
                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror"
