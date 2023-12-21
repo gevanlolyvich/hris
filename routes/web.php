@@ -1333,7 +1333,7 @@ Route::post('/recaptcha-settings', [SettingsController::class, 'recaptchaSetting
 
 // user reset password
 Route::get('user-reset-password/{id}', [UserController::class, 'userPassword'])->name('user.reset');
-Route::post('/reset-password/{id}', [UserController::class, 'userPasswordReset'])->name('password.reset');
+Route::post('/reset-password/{id}', [UserController::class, 'userPasswordReset'])->name('user.password.reset');
 
 //contract
 Route::resource('contract_type', ContractTypeController::class)->middleware(['auth', 'XSS']);
