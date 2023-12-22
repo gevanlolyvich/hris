@@ -38,7 +38,7 @@ class TrainingController extends Controller
             $branches      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $trainingTypes = TrainingType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $trainers      = Trainer::where('created_by', \Auth::user()->creatorId())->get()->pluck('firstname', 'id');
-            $employees     = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees     = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.create', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options'));
@@ -112,7 +112,7 @@ class TrainingController extends Controller
             $branches      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $trainingTypes = TrainingType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $trainers      = Trainer::where('created_by', \Auth::user()->creatorId())->get()->pluck('firstname', 'id');
-            $employees     = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees     = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.edit', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options', 'training'));

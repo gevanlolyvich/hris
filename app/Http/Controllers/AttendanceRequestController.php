@@ -54,9 +54,9 @@ class AttendanceRequestController extends Controller
     {
         if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('attendancerequest.create', compact('employees'));
@@ -86,7 +86,10 @@ class AttendanceRequestController extends Controller
 
         $date = date_create($request->date);
         //* Role Validation
-        $employee = Employee::where('user_id', Auth::user()->id)->first();
+        $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
+        if (empty($employee) || !$employee) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
 
         if (Auth::user()->type == 'employee') {
             $employee_id = $employee->id;
@@ -100,7 +103,7 @@ class AttendanceRequestController extends Controller
         }
 
         //* Custom Form data
-        $employee = Employee::find($employee_id);
+        $employee = Employee::where('is_active', 1)->find($employee_id);
         $document_path = null;
         if ($request->file('myDocument')) {
             $docs = $request->file('myDocument');
@@ -136,7 +139,7 @@ class AttendanceRequestController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
-                $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
                 return view('attendancerequest.edit', compact('employees', 'attendance_request'));
             } else {

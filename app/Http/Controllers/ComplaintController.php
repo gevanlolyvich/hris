@@ -41,15 +41,15 @@ class ComplaintController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
 
@@ -91,7 +91,11 @@ class ComplaintController extends Controller
             $complaint = new Complaint();
             if(\Auth::user()->type == 'employee')
             {
-                $emp                       = Employee::where('user_id', '=', \Auth::user()->id)->first();
+                $emp                       = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->first();
+                if (empty($emp) || !$emp) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+
                 $complaint->complaint_from = $emp->id;
             }
             else
@@ -108,14 +112,14 @@ class ComplaintController extends Controller
             $setings = Utility::settings();
             if($setings['employee_complaints'] == 1)
             {
-                $employee         = Employee::find($complaint->complaint_against);
+                $employee         = Employee::where('is_active', 1)->find($complaint->complaint_against);
+                if (empty($emp) || !$emp) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
 
-            $uArr = [
-                'employee_complaints_name'=>$employee->name, 
-
-             ];
-          $resp = Utility::sendEmailTemplate('employee_complaints', [$employee->email], $uArr);
-          return redirect()->route('complaint.index')->with('success', __('Complaint  successfully created.'). ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
+                $uArr = ['employee_complaints_name'=>$employee->name];
+                $resp = Utility::sendEmailTemplate('employee_complaints', [$employee->email], $uArr);
+                return redirect()->route('complaint.index')->with('success', __('Complaint  successfully created.'). ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
             }
 
             return redirect()->route('complaint.index')->with('success', __('Complaint  successfully created.'));
@@ -139,14 +143,14 @@ class ComplaintController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             if($complaint->created_by == \Auth::user()->creatorId())
             {
@@ -196,7 +200,10 @@ class ComplaintController extends Controller
 
                 if(\Auth::user()->type == 'employee')
                 {
-                    $emp                       = Employee::where('user_id', '=', \Auth::user()->id)->first();
+                    $emp                       = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->first();
+                    if (empty($emp) || !$emp) {
+                        return redirect()->back()->with('error', __('Inactive'));
+                    }
                     $complaint->complaint_from = $emp->id;
                 }
                 else

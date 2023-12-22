@@ -43,7 +43,7 @@ class AppraisalController extends Controller
     {
         if(\Auth::user()->can('Create Appraisal'))
         {
-            $employee   = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
+            $employee   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
             $employee->prepend('Select Employee', '');
             
             $brances = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
@@ -61,7 +61,6 @@ class AppraisalController extends Controller
 
     public function store(Request $request)
     {
-
         if(\Auth::user()->can('Create Appraisal'))
         {
             $validator = \Validator::make(
@@ -109,7 +108,7 @@ class AppraisalController extends Controller
         {
             $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
 
-            $employee   = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
+            $employee   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
             $employee->prepend('Select Employee', '');
             
             $brances = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
@@ -177,7 +176,7 @@ class AppraisalController extends Controller
     }
     public function empByStar(Request $request)
     {
-        $employee = Employee::find($request->employee);
+        $employee = Employee::where('is_active', 1)->find($request->employee);
         
         $indicator = Indicator::where('branch',$employee->branch_id)->where('department',$employee->department_id)->where('designation',$employee->designation_id)->first();
      
@@ -192,7 +191,7 @@ class AppraisalController extends Controller
     }
     public function empByStar1(Request $request)
     {
-        $employee = Employee::find($request->employee);
+        $employee = Employee::where('is_active', 1)->find($request->employee);
         
         $appraisal = Appraisal::find($request->appraisal);
 
@@ -208,7 +207,7 @@ class AppraisalController extends Controller
     }
     public function getemployee(Request $request)
     {
-        $data['employee'] = Employee::where('branch_id',$request->branch_id)->get();
+        $data['employee'] = Employee::where('is_active', 1)->where('branch_id',$request->branch_id)->get();
 
     
 

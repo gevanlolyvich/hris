@@ -17,7 +17,7 @@ class PermitController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->can('Manage Leave')) {
+        if (\Auth::user()->can('Manage Leave')) {
             $permits = Permit::where('created_by', '=', Auth::user()->creatorId())->get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
@@ -35,11 +35,11 @@ class PermitController extends Controller
 
     public function create()
     {
-        if (Auth::user()->can('Create Leave')) {
+        if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $permittypes   = PermitType::get();
 
@@ -81,7 +81,12 @@ class PermitController extends Controller
                 $permit->employee_id = $request->employee_id;
             }
 
-            $employee = Employee::find($permit->employee_id);
+            $employee = Employee::where('is_active', 1)->find($permit->employee_id);
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
+
             $document_path = null;
             if ($request->file('document')) {
                 $docs = $request->file('document');
@@ -97,7 +102,7 @@ class PermitController extends Controller
             $permit->reason             = $request->reason;
             $permit->docs               = $document_path;
             $permit->status             = 'Pending';
-            $permit->created_by         = Auth::user()->creatorId();
+            $permit->created_by         = Auth::user()->id;
 
             $permit->save();
             return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Created'));
@@ -115,9 +120,9 @@ class PermitController extends Controller
     {
         $permit = Permit::find($id);
 
-        if (Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
-                $employees  = Employee::orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+                $employees  = Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
 
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
@@ -132,8 +137,8 @@ class PermitController extends Controller
     public function update(Request $request, $permit_id)
     {
         $permit = Permit::find($permit_id);
-        if (Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Edit Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
                     [
@@ -187,8 +192,8 @@ class PermitController extends Controller
 
     public function destroy(Permit $permit)
     {
-        if (Auth::user()->can('Delete Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Delete Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
                 $permit->delete();
                 return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Deleted'));
             } else {

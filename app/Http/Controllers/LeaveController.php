@@ -54,9 +54,9 @@ class LeaveController extends Controller
     {
         if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $leavetypes      = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get();
             $leavetypes_days = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get();
@@ -89,7 +89,8 @@ class LeaveController extends Controller
             }
 
 
-            $employee = Employee::where('user_id', '=', Auth::user()->id)->first();
+            $employee = Employee::where('is_active', 1)->where('user_id', '=', Auth::user()->id)->first();
+
             $leave_type = LeaveType::find($request->leave_type_id);
             $startDate = new \DateTime($request->start_date);
             $endDate = new \DateTime($request->end_date);
@@ -103,7 +104,12 @@ class LeaveController extends Controller
                     $leave->employee_id = $request->employee_id;
                 }
 
-                $employee = Employee::find($leave->employee_id);
+                $employee = Employee::where('is_active', 1)->find($leave->employee_id);
+
+                if (empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+        
                 $document_path = null;
                 if ($request->file('myDocument')) {
                     $docs = $request->file('myDocument');
@@ -160,9 +166,9 @@ class LeaveController extends Controller
             if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $employees = null;
                 if (Auth::user()->type == 'employee') {
-                    $employees = Employee::where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 } else {
-                    $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
                 $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get();
 
@@ -181,7 +187,7 @@ class LeaveController extends Controller
         return $leave;
         if (\Auth::user()->can('Edit Leave')) {
             if ($leave->created_by == \Auth::user()->creatorId()) {
-                $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('title', 'id');
 
                 return view('leave.edit', compact('leave', 'employees', 'leavetypes'));
@@ -215,7 +221,12 @@ class LeaveController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
                 $leave_type = LeaveType::find($request->leave_type_id);
-                $employee = Employee::find($leave->employee_id);
+                $employee = Employee::where('is_active', 1)->find($leave->employee_id);
+
+                if (empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+                
                 $document_path = null;
                 if ($request->file('myDocument')) {
                     $docs = $request->file('myDocument');
@@ -339,7 +350,12 @@ class LeaveController extends Controller
 
         // twilio  
         $setting = Utility::settings();
-        $emp = Employee::find($leave->employee_id);
+        $emp = Employee::where('is_active', 1)->find($leave->employee_id);
+
+        if (empty($emp) || !$emp) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
+
         if (isset($setting['twilio_leave_approve_notification']) && $setting['twilio_leave_approve_notification'] == 1) {
             $msg = __("Your leave has been") . ' ' . $leave->status . '.';
 
@@ -349,7 +365,12 @@ class LeaveController extends Controller
 
         $setings = Utility::settings();
         if ($setings['leave_status'] == 1) {
-            $employee     = Employee::where('id', $leave->employee_id)->where('created_by', '=', \Auth::user()->creatorId())->first();
+            $employee     = Employee::where('is_active', 1)->where('id', $leave->employee_id)->where('created_by', '=', \Auth::user()->creatorId())->first();
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
+
             $uArr = [
                 'leave_status_name' => $employee->name,
                 'leave_status' => $request->status,

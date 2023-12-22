@@ -41,14 +41,14 @@ class WarningController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('warning.create', compact('employees', 'current_employee'));
@@ -141,14 +141,14 @@ class WarningController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             if($warning->created_by == \Auth::user()->creatorId())
             {
