@@ -36,7 +36,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             class="dash-mtext">{{ __('Dashboard') }}</span></a>
                 </li> 
                 @endif
-                @if (\Auth::user()->type == 'company')
+                @if (\Auth::user()->type != 'employee')
                 <li
                         class="dash-item dash-hasmenu  {{ Request::segment(1) == 'null' ? 'active dash-trigger' : '' }}">
                         <a href="#" class="dash-link"><span class="dash-micon"><i
