@@ -29,7 +29,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
             <ul class="dash-navbar">
 
                 <!-- dashboard-->
-                @if (\Auth::user()->type != 'company')
+                @if (\Auth::user()->type == 'employee')
                  <li class="dash-item">
                     <a href="{{ route('home') }}" class="dash-link"><span class="dash-micon"><i
                                 class="ti ti-home"></i></span><span
