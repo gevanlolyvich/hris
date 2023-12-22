@@ -1702,5 +1702,9 @@
   "Birthdate": "Tanggal Lahir",
   "Payslip successfully deleted": "Slip Gaji Berhasil Dihapus",
   "Bulk Payment Payslip": "Pembayaran Masal Slip Gaji",
-  "Request Attendance Successfully Approved / Rejeted": "Lupa Absen Berhasil Disetujui / Ditolak"
+  "Request Attendance Successfully Approved / Rejeted": "Lupa Absen Berhasil Disetujui / Ditolak",
+  "Permit Action": "Aksi Perizinan",
+  "Manage Permit": "Kelola Perizinan",
+  "Permit Already Exist In That Date Range": "Telah Ada Perizinan Pada Tanggal Yang Tersebut",
+  "Leave Already Exist In That Date Range": "Telah Ada Cuti Pada Tanggal Yang Tersebut"
 }

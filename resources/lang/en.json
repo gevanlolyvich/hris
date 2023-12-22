@@ -1704,5 +1704,9 @@
     "Birthdate": "Birthdate",
     "Payslip successfully deleted": "Payslip successfully deleted",
     "Bulk Payment Payslip": "Bulk Payment Payslip",
-    "Request Attendance Successfully Approved / Rejeted": "Request Attendance Successfully Approved / Rejeted"
+    "Request Attendance Successfully Approved / Rejeted": "Request Attendance Successfully Approved / Rejeted",
+    "Permit Action": "Permit Action",
+    "Manage Permit": "Manage Permit",
+    "Permit Already Exist In That Date Range": "Permit Already Exist In That Date Range",
+    "Leave Already Exist In That Date Range": "Leave Already Exist In That Date Range"
 }
