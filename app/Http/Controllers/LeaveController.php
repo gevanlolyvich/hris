@@ -94,6 +94,8 @@ class LeaveController extends Controller
             $leave_type = LeaveType::find($request->leave_type_id);
             $startDate = new \DateTime($request->start_date);
             $endDate = new \DateTime($request->end_date);
+            $start_date = date($request->start_date);
+            $end_date   = date($request->end_date);
             $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
             // return $total_leave_days;
             if ($leave_type->days >= $total_leave_days) {
@@ -108,6 +110,21 @@ class LeaveController extends Controller
 
                 if (empty($employee) || !$employee) {
                     return redirect()->back()->with('error', __('Inactive'));
+                }
+
+                $duplicate_leave = LocalLeave::where('employee_id', $leave->employee_id)
+                ->where(function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('start_date', [$start_date, $end_date])
+                        ->orWhereBetween('end_date', [$start_date, $end_date])
+                        ->orWhere(function ($query) use ($start_date, $end_date) {
+                            $query->where('start_date', '<=', $start_date)
+                                    ->where('end_date', '>=', $end_date);
+                        });
+                })
+                ->first();
+
+                if (!empty($duplicate_leave)) {
+                    return redirect()->back()->with('error', __('Leave Already Exist In That Date Range'));
                 }
         
                 $document_path = null;
@@ -220,11 +237,28 @@ class LeaveController extends Controller
 
                     return redirect()->back()->with('error', $messages->first());
                 }
+                $start_date = date($request->start_date);
+                $end_date   = date($request->end_date);
                 $leave_type = LeaveType::find($request->leave_type_id);
                 $employee = Employee::where('is_active', 1)->find($leave->employee_id);
 
                 if (empty($employee) || !$employee) {
                     return redirect()->back()->with('error', __('Inactive'));
+                }
+
+                $duplicate_leave = LocalLeave::whereNot('id', $leave->id)->where('employee_id', $leave->employee_id)
+                    ->where(function ($query) use ($start_date, $end_date) {
+                        $query->whereBetween('start_date', [$start_date, $end_date])
+                            ->orWhereBetween('end_date', [$start_date, $end_date])
+                            ->orWhere(function ($query) use ($start_date, $end_date) {
+                                $query->where('start_date', '<=', $start_date)
+                                        ->where('end_date', '>=', $end_date);
+                            });
+                    })
+                    ->first();
+
+                if (!empty($duplicate_leave)) {
+                    return redirect()->back()->with('error', __('Leave Already Exist In That Date Range'));
                 }
                 
                 $document_path = null;
@@ -344,6 +378,7 @@ class LeaveController extends Controller
                     'coord_out'             => null,
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
+                    'shift_type_id'         => $leave->employee->shift_type_id,
                 ]);
             }
         }
