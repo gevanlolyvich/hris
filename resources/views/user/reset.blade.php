@@ -1,4 +1,4 @@
-{{ Form::open(['route' => ['password.reset', \Crypt::encrypt($user->id)], 'method' => 'POST']) }}
+{{ Form::open(['route' => ['user.password.reset', \Crypt::encrypt($user->id)], 'method' => 'POST']) }}
 <div class="modal-body">
     <div class="row">
         <div class="form-group">
