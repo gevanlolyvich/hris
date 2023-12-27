@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use SebastianBergmann\CodeCoverage\Percentage;
 use Illuminate\Support\Facades\Log;
 
 class Employee extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'employees';
     protected $fillable = [
         'user_id',
@@ -40,39 +43,41 @@ class Employee extends Model
         'created_by',
     ];
 
-    function getTotalWorkdays($employeeWorkdays, $month, $year) {    
+    function getTotalWorkdays($employeeWorkdays, $month, $year)
+    {
         // Get the number of days in the month
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    
+
         // Initialize the total workdays count
         $totalWorkdays = 0;
-    
+
         // Loop through each day in the month
         for ($day = 1; $day <= $daysInMonth; $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
-    
+
             // Check if the current day is a workday for the employee
             if (in_array($currentDayName, $employeeWorkdays)) {
                 $totalWorkdays++;
             }
         }
-    
+
         return $totalWorkdays;
     }
 
-    function getTotalHours($shiftTimes, $month, $year) {
+    function getTotalHours($shiftTimes, $month, $year)
+    {
         // Initialize the total working hours count
         $totalWorkingHours = 0;
-    
+
         // Loop through each day in the month
         for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
-    
+
             // Check if the current day is a workday for the employee
             $shift = collect($shiftTimes)->firstWhere('days', $currentDayName);
-    
+
             if ($shift && $shift['is_working']) {
                 // Calculate working hours for the day (subtract 1 hour for break time)
                 $startTimestamp = strtotime("$year-$month-$day " . $shift['start_time']);
@@ -85,27 +90,28 @@ class Employee extends Model
 
                 // Subtract 1 hour for break time
                 $workingHours = max(0, round(($endTimestamp - $startTimestamp) / 3600 - 1, 2));
-    
+
                 // Add working hours to the total
                 $totalWorkingHours += $workingHours;
             }
         }
-    
+
         return $totalWorkingHours;
     }
 
-    function getPresentDays($attendanceData, $shiftTimes) {
+    function getPresentDays($attendanceData, $shiftTimes)
+    {
         // Initialize the present days count
         $presentDaysCount = 0;
-    
+
         // Loop through each attendance entry
         foreach ($attendanceData as $attendance) {
             // Get the day of the week for the attendance date
             $attendanceDayName = date('l', strtotime($attendance['date']));
-    
+
             // Check if the attendance date is a workday based on shift times
             $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
-    
+
             if ($shift && $shift['is_working']) {
                 // Calculate required work hours based on shift
 
@@ -121,9 +127,9 @@ class Employee extends Model
                     // Shift spans two dates, consider hours on the next day
                     $shift['end_time'] += 86400; // Add 24 hours
                 }
-                
+
                 $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
-    
+
                 // Check if the work hours of attendance match the required work hours
                 if ($attendance['work_hours']) {
                     list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
@@ -131,14 +137,14 @@ class Employee extends Model
                 } else {
                     $attendanceWorkHours = 0;
                 }
-                
+
                 if ($attendanceWorkHours >= $requiredWorkHours) {
                     // Increment the present days count
                     $presentDaysCount++;
                 }
             }
         }
-    
+
         return $presentDaysCount;
     }
 
