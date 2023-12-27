@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             AttendanceStatusSeeder::class,
             NewFeature::class,
+            NewSystemSetting::class,
         ]);
     }
 }

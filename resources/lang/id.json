@@ -1706,5 +1706,9 @@
   "Permit Action": "Aksi Perizinan",
   "Manage Permit": "Kelola Perizinan",
   "Permit Already Exist In That Date Range": "Telah Ada Perizinan Pada Tanggal Yang Tersebut",
-  "Leave Already Exist In That Date Range": "Telah Ada Cuti Pada Tanggal Yang Tersebut"
+  "Leave Already Exist In That Date Range": "Telah Ada Cuti Pada Tanggal Yang Tersebut",
+  "Late Tolerance (Minute)": "Toleransi Keterlambatan (Menit)",
+  "Enter Minutes": "Masukkan Menit",
+  "Photo On Clock In / Out": "Foto Pada Jam Masuk / Keluar",
+  "Map Tileset Provider URL": "URL Penyedia Tileset Peta"
 }

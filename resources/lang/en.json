@@ -1708,5 +1708,9 @@
     "Permit Action": "Permit Action",
     "Manage Permit": "Manage Permit",
     "Permit Already Exist In That Date Range": "Permit Already Exist In That Date Range",
-    "Leave Already Exist In That Date Range": "Leave Already Exist In That Date Range"
+    "Leave Already Exist In That Date Range": "Leave Already Exist In That Date Range",
+    "Late Tolerance (Minute)": "Late Tolerance (Minute)",
+    "Enter Minutes": "Enter Minutes",
+    "Photo On Clock In / Out": "Photo On Clock In / Out",
+    "Map Tileset Provider URL": "Map Tileset Provider URL"
 }
