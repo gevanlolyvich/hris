@@ -10,7 +10,7 @@ class CommissionController extends Controller
 {
     public function commissionCreate($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::where('is_active', 1)->find($id);
         $commissions =Commission::$commissiontype;
 
         return view('commission.create', compact('employee','commissions'));
@@ -18,7 +18,6 @@ class CommissionController extends Controller
 
     public function store(Request $request)
     {
-
         if(\Auth::user()->can('Create Commission'))
         {
             $validator = \Validator::make(
@@ -36,6 +35,12 @@ class CommissionController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $employee          = Employee::where('is_active', 1)->find($request->employee_id);
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
+
             $commission              = new Commission();
             $commission->employee_id = $request->employee_id;
             $commission->title       = $request->title;
@@ -47,7 +52,6 @@ class CommissionController extends Controller
 
             if(  $commission->type == 'percentage' )
             {
-                $employee          = Employee::find($commission->employee_id);
                 $comsal            = $commission->amount * $employee->salary / 100; 
             }
 

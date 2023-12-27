@@ -101,19 +101,19 @@ class OvertimeController extends Controller
                         $employeesId->push($subordinate->id);
                     }
 
-                    $employees = Employee::whereIn('id', $employeesId)->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
                 } else {
-                    $employees = Employee::where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
                 }
         } else {
-            $employees = Employee::get()->pluck('name', 'id');
+            $employees = Employee::where('is_active', 1)->get()->pluck('name', 'id');
         }
         return view('overtime.create', compact('employees'));
     }
 
     public function overtimeCreate($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::where('is_active', 1)->find($id);
 
         return view('overtime.create', compact('employee'));
     }
@@ -187,12 +187,12 @@ class OvertimeController extends Controller
                             $employeesId->push($subordinate->id);
                         }
 
-                        $employees = Employee::whereIn('id', $employeesId)->get()->pluck('name', 'id');
+                        $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
                     } else {
-                        $employees = Employee::where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
+                        $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
                     }
                 } else {
-                    $employees  = Employee::where('created_by', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
                 return view('overtime.edit', compact('overtime', 'employees'));
             }
@@ -305,7 +305,11 @@ class OvertimeController extends Controller
         $overtime = Overtime::find($request->overtimeId ?? $request->overtimeIdOut);
 
         $picture_path = null;
-        $employee = Employee::where('user_id', Auth::user()->id)->first();
+        $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
+
+        if (empty($employee) || !$employee) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
 
         if ($request->out == '1' && $overtime) {
             // clock out
@@ -377,7 +381,11 @@ class OvertimeController extends Controller
         $overtime = Overtime::find($request->overtimeId);
         if ($overtime) {
             $document_path = null;
-            $employee = Employee::where('user_id', Auth::user()->id)->first();
+            $employee = Employee::where('is_active')->where('user_id', Auth::user()->id)->first();
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
 
             if ($overtime->report_document && $request->file('myDocument')) {
                 $filepath_array = explode('/', $overtime->report_document);

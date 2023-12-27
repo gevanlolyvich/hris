@@ -17,7 +17,9 @@ use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\PaySlip;
 use App\Models\TimeSheet;
+use App\Models\ShiftTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -505,7 +507,7 @@ class ReportController extends Controller
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
-            $employees = Employee::select('id', 'name')->where('created_by', \Auth::user()->creatorId());
+            $employees = Employee::where('created_by', \Auth::user()->creatorId());
             if (!empty($request->branch)) {
                 $employees->where('branch_id', $request->branch);
                 $data['branch'] = !empty(Branch::find($request->branch)) ? Branch::find($request->branch)->name : '';
@@ -516,7 +518,7 @@ class ReportController extends Controller
                 $data['department'] = !empty(Department::find($request->department)) ? Department::find($request->department)->name : '';
             }
 
-            $employees = $employees->orderBy('name', 'asc')->get()->pluck('name', 'id');
+            $employees = $employees->orderBy('name', 'asc')->get();
 
 
             if (!empty($request->month)) {
@@ -540,14 +542,15 @@ class ReportController extends Controller
             $employeesAttendance = [];
             $totalPresent        = $totalLeave = $totalEarlyLeave = 0;
             $ovetimeHours        = $overtimeMins = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
-            foreach ($employees as $id => $employee) {
-                $attendances['name'] = $employee;
-
+            foreach ($employees as $employee) {
+                $attendances['name'] = $employee->name;
+                
                 foreach ($dates as $date) {
                     $dateFormat = $year . '-' . $month . '-' . $date;
 
                     if ($dateFormat <= date('Y-m-d')) {
-                        $employeeAttendance = AttendanceEmployee::where('employee_id', $id)->where('date', $dateFormat)->first();
+                        $shift = ShiftTime::where('shift_type_id', $employee->shift_type->id)->where('days', date('l', strtotime($dateFormat)))->select('is_working', 'days')->first();
+                        $employeeAttendance = AttendanceEmployee::where('employee_id', $employee->id)->where('date', $dateFormat)->first();
 
                         if (($employeeAttendance)) {
                             if ($employeeAttendance->status == 'Present') {
@@ -576,7 +579,10 @@ class ReportController extends Controller
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
-                        } else {
+                        } elseif (!$shift->is_working) {
+                            $attendanceStatus[$date] = 'L';
+                        }
+                         else {
                             $attendanceStatus[$date] = 'A';
                         }
 

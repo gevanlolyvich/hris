@@ -174,10 +174,10 @@ class EventController extends Controller
             $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             $departments = Department::where('branch_id', $request->branch_id)->first();
-            $employees = Employee::where('employee_id', $request->employee_id)->first();
+            $employees = Employee::where('is_active', 1)->where('employee_id', $request->employee_id)->first();
 
             if (isset($setting['twilio_event_notification']) && $setting['twilio_event_notification'] == 1) {
-                $employeess = Employee::where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->orderby('name', 'asc')->get();
+                $employeess = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->orderby('name', 'asc')->get();
                 foreach ($employeess as $key => $employee) {
                     $msg = $request->title . ' ' . __("for branch") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
 
@@ -186,7 +186,7 @@ class EventController extends Controller
             }
 
             if (in_array('0', $request->employee_id)) {
-                $departmentEmployee = Employee::whereIn('department_id', $request->department_id)->get()->pluck('id');
+                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->get()->pluck('id');
                 // $departmentEmployee = $departmentEmployee;
             } else {
                 $departmentEmployee = $request->employee_id;
@@ -228,7 +228,7 @@ class EventController extends Controller
         if (\Auth::user()->can('Edit Assignment')) {
             $event                        = LocalEvent::find($event);
             $created_by                   = \Auth::user()->creatorId();
-            $employees                    = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees                    = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch                       = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
             $departments                  = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
             $event_employees              = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');

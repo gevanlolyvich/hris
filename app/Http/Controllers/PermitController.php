@@ -12,12 +12,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class PermitController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->can('Manage Leave')) {
+        if (\Auth::user()->can('Manage Leave')) {
             $permits = Permit::where('created_by', '=', Auth::user()->creatorId())->get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
@@ -35,11 +36,11 @@ class PermitController extends Controller
 
     public function create()
     {
-        if (Auth::user()->can('Create Leave')) {
+        if (\Auth::user()->can('Create Leave')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_active', 1)->where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $permittypes   = PermitType::get();
 
@@ -51,7 +52,7 @@ class PermitController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->can('Create Leave')) {
+        if (\Auth::user()->can('Create Leave')) {
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -70,6 +71,8 @@ class PermitController extends Controller
             $employee = Employee::where('user_id', '=', Auth::user()->id)->first();
             $startDate = new \DateTime($request->start_date);
             $endDate = new \DateTime($request->end_date);
+            $start_date = date($request->start_date);
+            $end_date   = date($request->end_date);
             $total_permit_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
             $permit_type = PermitType::find($request->permit_type_id);
 
@@ -81,7 +84,27 @@ class PermitController extends Controller
                 $permit->employee_id = $request->employee_id;
             }
 
-            $employee = Employee::find($permit->employee_id);
+            $employee = Employee::where('is_active', 1)->find($permit->employee_id);
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
+
+            $duplicate_permit = Permit::where('employee_id', $permit->employee_id)
+                ->where(function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('start_date', [$start_date, $end_date])
+                        ->orWhereBetween('end_date', [$start_date, $end_date])
+                        ->orWhere(function ($query) use ($start_date, $end_date) {
+                            $query->where('start_date', '<=', $start_date)
+                                    ->where('end_date', '>=', $end_date);
+                        });
+                })
+                ->first();
+
+            if (!empty($duplicate_permit)) {
+                return redirect()->back()->with('error', __('Permit Already Exist In That Date Range'));
+            }
+
             $document_path = null;
             if ($request->file('document')) {
                 $docs = $request->file('document');
@@ -97,7 +120,7 @@ class PermitController extends Controller
             $permit->reason             = $request->reason;
             $permit->docs               = $document_path;
             $permit->status             = 'Pending';
-            $permit->created_by         = Auth::user()->creatorId();
+            $permit->created_by         = Auth::user()->id;
 
             $permit->save();
             return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Created'));
@@ -115,9 +138,9 @@ class PermitController extends Controller
     {
         $permit = Permit::find($id);
 
-        if (Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
-                $employees  = Employee::orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+                $employees  = Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
 
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
@@ -132,8 +155,8 @@ class PermitController extends Controller
     public function update(Request $request, $permit_id)
     {
         $permit = Permit::find($permit_id);
-        if (Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Edit Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
                     [
@@ -153,7 +176,24 @@ class PermitController extends Controller
                 //* Custom Form
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
+                $start_date = date($request->start_date);
+                $end_date   = date($request->end_date);
                 $total_permit_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
+
+                $duplicate_permit = Permit::whereNot('id', $permit->id)->where('employee_id', $permit->employee_id)
+                    ->where(function ($query) use ($start_date, $end_date) {
+                        $query->whereBetween('start_date', [$start_date, $end_date])
+                            ->orWhereBetween('end_date', [$start_date, $end_date])
+                            ->orWhere(function ($query) use ($start_date, $end_date) {
+                                $query->where('start_date', '<=', $start_date)
+                                        ->where('end_date', '>=', $end_date);
+                            });
+                    })
+                    ->first();
+
+                if (!empty($duplicate_permit)) {
+                    return redirect()->back()->with('error', __('Permit Already Exist In That Date Range'));
+                }
 
                 $date = date_create($request->date);
                 $document_path = null;
@@ -187,8 +227,8 @@ class PermitController extends Controller
 
     public function destroy(Permit $permit)
     {
-        if (Auth::user()->can('Delete Leave')) {
-            if ($permit->created_by == Auth::user()->creatorId()) {
+        if (\Auth::user()->can('Delete Leave')) {
+            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
                 $permit->delete();
                 return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
@@ -210,124 +250,65 @@ class PermitController extends Controller
     public function changeaction(Request $request)
     {
         $permit = Permit::find($request->permit_id);
-        // return $permit;
-
-        // if ($request->status == 'Approved') {
-        //     $form = [
-        //         'is_approved'   => true,
-        //         'approved_by'   => Auth::user()->id
-        //     ];
-        // } elseif ($request->status == 'Reject') {
-        //     $form = [
-        //         'is_approved'   => false,
-        //         'approved_by'   => Auth::user()->id
-        //     ];
-        // }
+        
         $form = [
             'status'        => $request->status,
-            'approved_by'   => Auth::user()->id
+            'is_approved'   => $request->status == 'Approved',
+            'approved_by'   => Auth::user()->id,
         ];
 
-        $form_attendance = [];
-        // if ($form['is_approved']) {
-        //     $permitAttendance = AttendanceStatus::where('id', 3)->first();
-        //     //* Check availability attendance
-        //     $attendance = AttendanceEmployee::where('employee_id', $attendance_request->employee->id)->where('date', $date)->first();
-        //     if ($attendance) {
-        //         return redirect()->back()->with('error', __('You were present on that date already'));
-        //     }
+        if ($request->status == 'Approved') {
+            $dates = [];
 
-        //     //* Method Create Attendance
-        //     $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
-        //         ->where('days', date('l'))
-        //         ->first();
+            if ($permit->start_date == $permit->end_date) {
+                array_push($dates, $permit->start_date);
+            } else {
+                $period = new \DatePeriod(
+                    new \DateTime($permit->start_date),
+                    new \DateInterval('P1D'),
+                    new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($permit->end_date))))
+                );
 
+                Log::info(json_encode($period, JSON_PRETTY_PRINT));
+    
+                foreach ($period as $key => $value) {
+                    array_push($dates, $value->format('Y-m-d'));
+                }
+            }
+    
+            $permitAttendance = AttendanceStatus::find(3);
+            for ($i = 0; $i < count($dates); $i++) {
+                $date = $dates[$i];
+    
+                AttendanceEmployee::where('employee_id', $permit->employee_id)->where('date', $date)->delete();
+                AttendanceEmployee::create([
+                    'employee_id'           => $permit->employee_id,
+                    'date'                  => $date,
+                    'attendance_status_id'  => $permitAttendance->id,
+                    'status'                => $permitAttendance->name,
+                    'clock_in'              => '00:00:00',
+                    'clock_out'             => '00:00:00',
+                    'late'                  => '00:00:00',
+                    'early_leaving'         => '00:00:00',
+                    'work_hours'            => '00:00:00',
+                    'overtime'              => '00:00:00',
+                    'total_rest'            => '00:00:00',
+                    'created_by'            => $permit->employee_id,
+                    'attendance_type_id'    => null, //* ON SITE
+                    'coord_in'              => null,
+                    'coord_out'             => null,
+                    'is_valid'              => true,
+                    'validate_by'           => Auth::user()->id,
+                    'shift_type_id'         => $permit->employee->shift_type_id,
+                ]);
+            }
+        }
 
-        //     if ($shift_times->is_working) {
-        //         $startTime = $shift_times->start_time;
-        //         $endTime = $shift_times->end_time;
-
-        //         $totalLateSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $startTime);
-
-        //         $hours = floor($totalLateSeconds / 3600);
-        //         $mins  = floor($totalLateSeconds / 60 % 60);
-        //         $secs  = floor($totalLateSeconds % 60);
-        //         $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-        //         //work hours
-        //         $totalWorkHoursSeconds    = strtotime($date . $attendance_request->end_time) - strtotime($date . $attendance_request->start_time);
-        //         $hours                    = floor($totalWorkHoursSeconds / 3600);
-        //         $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
-        //         $secs                     = floor($totalWorkHoursSeconds % 60);
-        //         $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-        //         //early Leaving
-        //         $totalEarlyLeavingSeconds = strtotime($date . $endTime) - strtotime($date . $attendance_request->end_time);
-        //         $hours                    = floor($totalEarlyLeavingSeconds / 3600);
-        //         $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
-        //         $secs                     = floor($totalEarlyLeavingSeconds % 60);
-        //         $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-
-
-        //         if (strtotime($date . $attendance_request->end_time) > strtotime($date . $endTime)) {
-        //             //Overtime
-        //             $totalOvertimeSeconds = strtotime($date . $attendance_request->end_time) - strtotime($date . $endTime);
-        //             $hours                = floor($totalOvertimeSeconds / 3600);
-        //             $mins                 = floor($totalOvertimeSeconds / 60 % 60);
-        //             $secs                 = floor($totalOvertimeSeconds % 60);
-        //             $overtime             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-        //         } else {
-        //             $overtime = '00:00:00';
-        //         }
-
-        //         $employee = $attendance_request->employee;
-        //         $form_attendance = [
-        //             'employee_id'           => $employee->id,
-        //             'date'                  => $date,
-        //             'attendance_status_id'  => $permitAttendance->id,
-        //             'status'                => $permitAttendance->name,
-        //             'clock_in'              => $attendance_request->start_time . ':00',
-        //             'clock_out'             => $attendance_request->end_time . ':00',
-        //             'late'                  => $late,
-        //             'early_leaving'         => $earlyLeaving,
-        //             'work_hours'            => $workHours,
-        //             'overtime'              => $overtime,
-        //             'total_rest'            => '00:00:00',
-        //             'created_by'            => $employee->user_id,
-        //             'attendance_type_id'    => 1, //* ON SITE
-        //             'coord_in'              => null,
-        //             'coord_out'             => null,
-        //             'is_valid'              => true,
-        //             'validate_by'           => Auth::user()->id,
-        //         ];
-        //     } else {
-        //         $form_attendance = [
-        //             'employee_id'           => $attendance_request->employee->id,
-        //             'date'                  => $date,
-        //             'attendance_status_id'  => $permitAttendance->id,
-        //             'status'                => $permitAttendance->name,
-        //             'clock_in'              => $attendance_request->start_time . ':00',
-        //             'clock_out'             => $attendance_request->end_time . ':00',
-        //             'late'                  => '00:00:00',
-        //             'early_leaving'         => '00:00:00',
-        //             'work_hours'            => '00:00:00',
-        //             'overtime'              => '00:00:00',
-        //             'total_rest'            => '00:00:00',
-        //             'created_by'            => $attendance_request->employee->user_id,
-        //             'attendance_type_id'    => 1, //* ON SITE
-        //             'coord_in'              => null,
-        //             'coord_out'             => null,
-        //             'is_valid'              => true,
-        //             'validate_by'           => Auth::user()->id,
-        //         ];
-        //     }
-        // }
-
-        DB::transaction(function () use ($permit, $form, $form_attendance) {
+        DB::transaction(function () use ($permit, $form) {
             Permit::where('id', $permit->id)->update($form);
             // AttendanceEmployee::create($form_attendance);
         });
 
-        return redirect()->route('permit.index')->with('success', __('Request Attendance Successfully Updated'));
+        return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Updated'));
     }
 }

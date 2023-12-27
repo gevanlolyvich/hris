@@ -13,7 +13,7 @@ class AllowanceController extends Controller
     {
 
         $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employee          = Employee::find($id);
+        $employee          = Employee::where('is_active', 1)->find($id);
 
         return view('allowance.create', compact('employee', 'allowance_options'));
     }
@@ -112,7 +112,7 @@ class AllowanceController extends Controller
 
                 if(  $allowance->type == 'percentage' )
                 {
-                    $employee          = Employee::find($allowance->employee_id);
+                    $employee          = Employee::where('is_active', 1)->find($allowance->employee_id);
                     $empsal  = $allowance->amount * $employee->salary / 100;
                     
                 }

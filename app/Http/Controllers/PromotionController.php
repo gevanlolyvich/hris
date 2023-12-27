@@ -40,7 +40,7 @@ class PromotionController extends Controller
         if(\Auth::user()->can('Create Promotion'))
         {
             $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees    = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees    = Employee::where('is_active', 1)->where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('promotion.create', compact('employees', 'designations'));
         }
@@ -82,21 +82,20 @@ class PromotionController extends Controller
             $setings = Utility::settings();
             if($setings['employee_promotion'] == 1)
             {
-                $employee               = Employee::find($promotion->employee_id);
-            $designation            = Designation::find($promotion->designation_id);
+                $employee           = Employee::find($promotion->employee_id);
+                $designation            = Designation::find($promotion->designation_id);
 
-            $uArr = [
-                'employee_promotion_name'=>$employee->name,
-                'promotion_designation'  =>$designation->name,
-                'promotion_title'  =>$request->promotion_title,
-                'promotion_date'  =>$request->promotion_date,
-                
+                $uArr = [
+                    'employee_promotion_name'=>$employee->name,
+                    'promotion_designation'  =>$designation->name,
+                    'promotion_title'  =>$request->promotion_title,
+                    'promotion_date'  =>$request->promotion_date,
+                    
 
-             ];
+                ];
 
-          $resp = Utility::sendEmailTemplate('employee_promotion', [$employee->email], $uArr);
-           return redirect()->route('promotion.index')->with('success', __('Promotion  successfully created.'). ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
-
+                $resp = Utility::sendEmailTemplate('employee_promotion', [$employee->email], $uArr);
+                return redirect()->route('promotion.index')->with('success', __('Promotion  successfully created.'). ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
             }
 
             return redirect()->route('promotion.index')->with('success', __('Promotion  successfully created.'));
@@ -115,7 +114,7 @@ class PromotionController extends Controller
     public function edit(Promotion $promotion)
     {
         $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employees    = Employee::where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+        $employees    = Employee::where('is_active', 1)->where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
         if(\Auth::user()->can('Edit Promotion'))
         {
             if($promotion->created_by == \Auth::user()->creatorId())

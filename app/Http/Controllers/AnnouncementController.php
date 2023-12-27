@@ -19,7 +19,7 @@ class AnnouncementController extends Controller
 
             if (Auth::user()->type == 'employee') {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $announcements    = Announcement::orderBy('announcements.id', 'desc')->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', '=', $current_employee->id)->orWhere(
+                $announcements    = Announcement::orderBy('announcements.id', 'desc')->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', $current_employee?->id)->orWhere(
                     function ($q) {
                         $q->where('announcements.department_id', '["0"]')->where('announcements.employee_id', '["0"]');
                     }
@@ -38,11 +38,11 @@ class AnnouncementController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Announcement')) {
-            $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             // $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             // $employees->prepend('All', 0);
-            $branch      = Branch::where('created_by', '=', Auth::user()->creatorId())->get();
-            $departments = Department::where('created_by', '=', Auth::user()->creatorId())->get();
+            $branch      = Branch::where('created_by', '=', Auth::user()->created_by)->get();
+            $departments = Department::where('created_by', '=', Auth::user()->created_by)->get();
 
             return view('announcement.create', compact('employees', 'branch', 'departments'));
         } else {
@@ -80,12 +80,12 @@ class AnnouncementController extends Controller
             // $announcement->department_id = json_encode($request->department_id);
             // $announcement->employee_id   = json_encode($request->employee_id);
             $announcement->description   = $request->description;
-            $announcement->created_by    = \Auth::user()->creatorId();
+            $announcement->created_by    = \Auth::user()->id;
             $announcement->save();
 
 
             // slack 
-            $setting = Utility::settings(Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['Announcement_notification']) && $setting['Announcement_notification'] == 1) {
                 $msg = $request->title . ' ' . __("announcement created for branch") . ' ' . $branch->name . ' ' . __("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -93,7 +93,7 @@ class AnnouncementController extends Controller
             }
 
             // telegram
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['telegram_Announcement_notification']) && $setting['telegram_Announcement_notification'] == 1) {
                 $msg = $request->title . ' ' . __("announcement created for branch") . ' ' . $branch->name . ' ' . __("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -101,14 +101,14 @@ class AnnouncementController extends Controller
             }
 
             // twilio
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             $departments = Department::where('branch_id', $request->branch_id)->first();
-            $employees = Employee::where('employee_id', $request->employee_id)->first();
+            $employees = Employee::where('is_active', 1)->where('employee_id', $request->employee_id)->first();
             
     
             if (isset($setting['twilio_announcement_notification']) && $setting['twilio_announcement_notification'] == 1) {    
-                $employeess = Employee::where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->get();
+                $employeess = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->get();
                 
                 foreach ($employeess as $key => $employee) {
                     $msg = $request->title . ' ' . __("announcement created for branch") . ' ' . $branch->name . ' ' . __("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -117,8 +117,7 @@ class AnnouncementController extends Controller
             }
 
             if (in_array('0', $request->employee_id)) {
-                $departmentEmployee = Employee::whereIn('department_id', $request->department_id)->get()->pluck('id');
-                $departmentEmployee = $departmentEmployee;
+                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->get()->pluck('id');
             } else {
                 $departmentEmployee = $request->employee_id;
             }
@@ -145,7 +144,7 @@ class AnnouncementController extends Controller
     {
         if (\Auth::user()->can('Edit Announcement')) {
             $announcement = Announcement::find($announcement);
-            if ($announcement->created_by == Auth::user()->creatorId()) {
+            if ($announcement->created_by == Auth::user()->id) {
                 $branch      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
                 $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
@@ -228,11 +227,11 @@ class AnnouncementController extends Controller
         if($request->department_id)
         {
             
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             
         }
         return response()->json($employees);

@@ -8,7 +8,7 @@ class Leave extends Model
 {
     protected $fillable = [
         'employee_id',
-        'Leave_type_id',
+        'leave_type_id',
         'applied_on',
         'start_date',
         'end_date',
@@ -23,11 +23,11 @@ class Leave extends Model
 
     public function leaveType()
     {
-        return $this->hasOne('App\Models\LeaveType', 'id', 'leave_type_id');
+        return $this->belongsTo(LeaveType::class, 'leave_type_id', 'id');
     }
 
     public function employees()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }

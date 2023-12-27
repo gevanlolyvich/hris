@@ -42,11 +42,11 @@ class MeetingController extends Controller
     {
         if (\Auth::user()->can('Create Meeting')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_created', 1)->where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $branch      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $departments = Department::where('created_by', '=', Auth::user()->creatorId())->get();
-                $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch      = Branch::get();
+                $departments = Department::get();
+                $employees   = Employee::where('is_created', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('meeting.create', compact('employees', 'departments', 'branch'));
@@ -64,7 +64,6 @@ class MeetingController extends Controller
                 'branch_id' => 'required',
                 'department_id' => 'required',
                 'employee_id' => 'required',
-                'department_id' => 'required',
                 'title' => 'required',
                 'date' => 'required',
                 'time' => 'required',
@@ -85,12 +84,12 @@ class MeetingController extends Controller
             $meeting->date          = $request->date;
             $meeting->time          = $request->time;
             $meeting->note          = $request->note;
-            $meeting->created_by    = \Auth::user()->creatorId();
+            $meeting->created_by    = \Auth::user()->id;
             $meeting->save();
 
 
             // slack 
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['meeting_notification']) && $setting['meeting_notification'] == 1) {
                 $msg = $request->title . ' ' . __("meeting created for") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->date . ' ' . ("at") . ' ' . $request->time . '.';
@@ -98,7 +97,7 @@ class MeetingController extends Controller
             }
 
             // telegram
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $branch = Branch::find($request->branch_id);
             if (isset($setting['telegram_meeting_notification']) && $setting['telegram_meeting_notification'] == 1) {
                 $msg = $request->title . ' ' . __("meeting created for") . ' ' . $branch->name . ' ' . ("from") . ' ' . $request->date . ' ' . ("at") . ' ' . $request->time . '.';
@@ -107,7 +106,7 @@ class MeetingController extends Controller
 
             if (in_array('0', $request->employee_id)) {
                 $departmentEmployee = Employee::whereIn('department_id', $request->department_id)->get()->pluck('id');
-                $departmentEmployee = $departmentEmployee;
+                // $departmentEmployee = $departmentEmployee;
             } else {
 
                 $departmentEmployee = $request->employee_id;
@@ -116,7 +115,7 @@ class MeetingController extends Controller
                 $meetingEmployee              = new MeetingEmployee();
                 $meetingEmployee->meeting_id  = $meeting->id;
                 $meetingEmployee->employee_id = $employee;
-                $meetingEmployee->created_by  = \Auth::user()->creatorId();
+                $meetingEmployee->created_by  = \Auth::user()->id;
                 $meetingEmployee->save();
             }
 
@@ -149,11 +148,11 @@ class MeetingController extends Controller
     {
         if (\Auth::user()->can('Edit Meeting')) {
             $meeting = LocalMeeting::find($meeting);
-            if ($meeting->created_by == Auth::user()->creatorId()) {
+            if ($meeting->created_by == Auth::user()->id) {
                 if (Auth::user()->type == 'employee') {
-                    $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_created', 1)->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 } else {
-                    $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_created', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
 
                 return view('meeting.edit', compact('meeting', 'employees'));

@@ -183,7 +183,7 @@ class UserController extends Controller
         }
 
 
-        $eId      = \Crypt::decrypt($id);
+        $eId                  = \Crypt::decrypt($id);
         $user                 = User::where('id', $eId)->first();
         $user->forceFill([
             'password' => Hash::make($request->password),

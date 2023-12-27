@@ -38,7 +38,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Create Resignation'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('resignation.create', compact('employees'));
         }
@@ -72,7 +72,7 @@ class ResignationController extends Controller
             $user        = \Auth::user();
             if($user->type == 'employee')
             {
-                $employee                 = Employee::where('user_id', $user->id)->first();
+                $employee                 = Employee::where('is_active', 1)->where('user_id', $user->id)->first();
                 $resignation->employee_id = $employee->id;
             }
             else
@@ -88,7 +88,7 @@ class ResignationController extends Controller
             $setings = Utility::settings();
             if($setings['employee_resignation'] == 1)
             {
-                $employee           = Employee::find($resignation->employee_id);
+                $employee           = Employee::where('is_active', 1)->find($resignation->employee_id);
                 $uArr = [
                'assign_user'=>$employee->name,
                'resignation_date'  =>$request->notice_date,
@@ -129,7 +129,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Edit Resignation'))
         {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             if($resignation->created_by == \Auth::user()->creatorId())
             {
 
