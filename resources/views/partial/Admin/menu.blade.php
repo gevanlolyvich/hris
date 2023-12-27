@@ -20,7 +20,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
             <a href="{{ route('home') }}" class="b-brand">
                 <!-- ========   change your logo hear   ============ -->
                 <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
-                    class="logo logo-lg" style="height: 40px;" />
+                    class="logo logo-lg" style="height: 75px;" />
                
             </a>
         
