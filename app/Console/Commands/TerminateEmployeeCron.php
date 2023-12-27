@@ -53,9 +53,12 @@ class TerminateEmployeeCron extends Command
         $old_users = Employee::whereIn('id', $old_terminations)
             ->where('is_active', 1)
             ->select('user_id')->get()->pluck('user_id');
-        Employee::whereIn('id', $old_terminations)
-            ->where('is_active', 1)
-            ->update(['is_active' => 0, 'termination_date'=> date('Y-m-d')]);
+        foreach($old_terminations as $old_id) {
+            $termination = Termination::where('employee_id', $old_id)->select('employee_id', 'termination_date')->first();
+            Employee::where('id', $old_id)
+                ->where('is_active', 1)
+                ->update(['is_active' => 0, 'termination_date'=> date($termination->termination_date)]);
+        }
         User::whereIn('id', $old_users)
             ->where('is_active', 1)
             ->update(['is_active' => 0]);

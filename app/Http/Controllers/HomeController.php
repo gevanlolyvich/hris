@@ -42,6 +42,7 @@ class HomeController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             if ($user->type == 'employee') {
+                $settings = Utility::settings();
 
                 $emp = Employee::where('user_id', $user->id)->first();
 
@@ -133,7 +134,7 @@ class HomeController extends Controller
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings'));
             } else {
                 // $events    = Event::where('created_by', '=', \Auth::user()->creatorId())->get();
                 // $arrEvents = [];
