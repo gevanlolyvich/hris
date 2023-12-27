@@ -23,7 +23,11 @@ class EventEmployeeController extends Controller
         $event_employee = EventEmployee::find($request->eventemployeeid);
         if ($event_employee) {
             $document_path = null;
-            $employee = Employee::where('user_id', Auth::user()->id)->first();
+            $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
+
+            if(empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
 
             if ($event_employee->report_document && $request->file('myDocument')) {
                 $filepath_array = explode('/', $event_employee->report_document);
@@ -56,7 +60,11 @@ class EventEmployeeController extends Controller
         $event_employee = EventEmployee::find($request->eventemployeeidAttendance ?? $request->eventemployeeidAttendanceOut);
 
         $picture_path = null;
-        $employee = Employee::where('user_id', Auth::user()->id)->first();
+        $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
+
+        if(empty($employee) || !$employee) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
 
         if ($request->out == '1' && $event_employee) {
             // clock out

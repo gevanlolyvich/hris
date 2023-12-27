@@ -11,7 +11,12 @@ class LoanController extends Controller
 {
     public function loanCreate($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::where('is_active', 1)->find($id);
+        
+        if (empty($employee) || !$employee) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
+
         $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $loan =loan::$Loantypes;
         return view('loan.create', compact('employee','loan_options','loan'));
@@ -39,6 +44,12 @@ class LoanController extends Controller
 
                 return redirect()->back()->with('error', $messages->first());
             }
+            
+            $employee          = Employee::find($request->employee_id);
+
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }    
 
             $loan              = new Loan();
             $loan->employee_id = $request->employee_id;
@@ -54,9 +65,7 @@ class LoanController extends Controller
 
             if(  $loan->type == 'percentage' )
             {
-                $employee          = Employee::find($loan->employee_id);
                 $loansal  = $loan->amount * $employee->salary / 100; 
-                
             }
 
             return redirect()->back()->with('success', __('Loan  successfully created.'));
@@ -117,6 +126,12 @@ class LoanController extends Controller
 
                     return redirect()->back()->with('error', $messages->first());
                 }
+
+                $employee          = Employee::find($loan->employee_id);
+                if (empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+                
                 $loan->loan_option = $request->loan_option;
                 $loan->title       = $request->title;
                 $loan->type        = $request->type; 
@@ -128,7 +143,6 @@ class LoanController extends Controller
 
                 if(  $loan->type == 'percentage' )
                 {
-                    $employee          = Employee::find($loan->employee_id);
                     $loansal  = $loan->amount * $employee->salary / 100; 
                     
                 }

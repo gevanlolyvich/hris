@@ -305,6 +305,8 @@
                                                     <i class="badge bg-info p-2  rounded">{{ $status }}</i>
                                                 @elseif($status == 'C')
                                                     <i class="badge bg-warning p-2  rounded">{{ $status }}</i>
+                                                @elseif($status == 'L')
+                                                    <i class="badge bg-primary p-2  rounded">{{ $status }}</i>
                                                 @endif
                                             </td>
                                         @endforeach

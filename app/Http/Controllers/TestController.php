@@ -29,10 +29,16 @@ class TestController extends Controller
         $employees = Employee::where('is_active', 1)->select('personel_id')->get();
         $presentAttendance = AttendanceStatus::where('id',1)->first();
 
-        for ($a=0; $a < count($apis); $a++) { 
-            $responses = Http::withHeaders([
-                'X-APP-KEY' => 'PTJAKTOURJXBPTJAKTOURJXBPTJAKTOURJXBACCESSDOOOR'
-            ])->get($apis[$a] . '/transaction-attendances?date=' . $date);
+        for ($a=0; $a < count($apis); $a++) {
+            $responses = null;
+            try {
+                $responses = Http::withHeaders([
+                    'X-APP-KEY' => 'PTJAKTOURJXBPTJAKTOURJXBPTJAKTOURJXBACCESSDOOOR'
+                ])->get($apis[$a] . '/transaction-attendances?date=' . $date);
+            } catch (\Throwable $th) {
+                $responses = null;
+                Log::info($th);
+            }
 
             if (!empty($responses)) {
                 $parsed_responses = $responses->json();
@@ -62,15 +68,17 @@ class TestController extends Controller
                 }));
                 
                 LogAttendance::insert($parsed_data);
-    
-                $final_data = DB::table('log_attendances')
-                    ->select('personel_id', DB::raw('MIN(min) as min'), DB::raw('MAX(max) as max'), 'coordinate', 'date')
-                    ->where('date', date('Y-m-d'))
-                    ->groupBy('personel_id')
-                    ->get();
+            }
+            $final_data = DB::table('log_attendances')
+                ->select('personel_id', DB::raw('MIN(min) as min'), DB::raw('MAX(max) as max'), 'coordinate', 'date')
+                ->where('date', date('Y-m-d'))
+                ->groupBy('personel_id')
+                ->get();
 
-                foreach ($final_data as $f_data) {
-                    $employee = Employee::where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
+            foreach ($final_data as $f_data) {
+                $employee = Employee::where('is_active', 1)->where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
+
+                if (!empty($employee)) {
                     $shift_times = ShiftTime::where('shift_type_id',$employee->shift_type->id)
                         ->where('days',date('l'))
                         ->select(['is_working', 'start_time', 'end_time'])
@@ -163,7 +171,7 @@ class TestController extends Controller
                         $early_secs          = floor($total_early_seconds % 60);
                         $early_leaving       = sprintf('%02d:%02d:%02d', $early_hours, $early_mins, $early_secs);
                     }
-
+    
                     // ? Create / Update Attendance
                     if ($yesterday_clock_out && $yesterday_attendance) {
                         Log::info('Updating Yesterday Attendance Data');

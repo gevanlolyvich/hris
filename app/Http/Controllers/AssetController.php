@@ -26,7 +26,7 @@ class AssetController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Assets')) {
-            $employee   = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employee   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             return view('assets.create',compact('employee'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -82,7 +82,7 @@ class AssetController extends Controller
 
         if (\Auth::user()->can('Edit Assets')) {
             $asset = Asset::find($id);
-            $employee   = Employee::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employee   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             return view('assets.edit', compact('asset','employee'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

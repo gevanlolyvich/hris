@@ -80,13 +80,13 @@ class PaySlipController extends Controller
         $year = date('Y', strtotime($request->month));
 
         $validatePaysilp    = PaySlip::where('salary_month', '=', $formate_month_year)->where('created_by', \Auth::user()->creatorId())->pluck('employee_id');
-        $payslip_employee   = Employee::where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        $payslip_employee   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
 
         if ($payslip_employee > count($validatePaysilp)) {
-            $employees = Employee::where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
+            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
 
             // check if there is employe that salary has to be set
-            $employeesSalary = Employee::where('created_by', \Auth::user()->creatorId())->where('salary', '<=', 0)->first();
+            $employeesSalary = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->where('salary', '<=', 0)->first();
 
             if (!empty($employeesSalary)) {
                 return redirect()->back()->with('error', __('Please set employee salary.'));
@@ -128,12 +128,12 @@ class PaySlipController extends Controller
 
                 // twilio
                 $setting  = Utility::settings();
-                $emp = Employee::where('id', $payslipEmployee->employee_id = \Auth::user()->id)->first();
+                $emp = Employee::where('is_active', 1)->where('id', $payslipEmployee->employee_id = \Auth::user()->id)->first();
                 if (isset($setting['twilio_payslip_notification']) && $setting['twilio_payslip_notification'] == 1) {
-                    $employeess = Employee::where($request->employee_id)->orderby('name', 'asc')->get();
+                    $employeess = Employee::where('is_active', 1)->where($request->employee_id)->orderby('name', 'asc')->get();
                     foreach ($employeess as $key => $employee) {
                         $msg = ("payslip generated of") . ' ' . $monthYear . '.';
-                        Utility::send_twilio_msg($emp->phone, $msg);
+                        Utility::send_twilio_msg($emp?->phone, $msg);
                     }
                 }
             }

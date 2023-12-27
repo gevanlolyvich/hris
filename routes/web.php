@@ -1332,8 +1332,8 @@ Route::post('setting/twilio', [SettingsController::class, 'twilio'])->name('twil
 Route::post('/recaptcha-settings', [SettingsController::class, 'recaptchaSettingStore'])->name('recaptcha.settings.store')->middleware(['auth', 'XSS']);
 
 // user reset password
-Route::any('user-reset-password/{id}', [UserController::class, 'userPassword'])->name('user.reset');
-Route::post('user-reset-password/{id}', [UserController::class, 'userPasswordReset'])->name('user.password.update');
+Route::get('user-reset-password/{id}', [UserController::class, 'userPassword'])->name('user.reset');
+Route::post('/reset-password/{id}', [UserController::class, 'userPasswordReset'])->name('user.password.reset');
 
 //contract
 Route::resource('contract_type', ContractTypeController::class)->middleware(['auth', 'XSS']);

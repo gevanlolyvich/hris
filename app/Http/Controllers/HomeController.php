@@ -19,6 +19,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -42,11 +43,11 @@ class HomeController extends Controller
             $user = Auth::user();
             if ($user->type == 'employee') {
 
-                $emp = Employee::where('user_id', '=', $user->id)->first();
+                $emp = Employee::where('user_id', $user->id)->first();
 
                 $announcements = Announcement::orderBy('announcements.id', 'desc')->take(5)->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', '=', $emp->id)->orWhere(
                     function ($q) {
-                        $q->where('announcements.department_id', '["0"]')->where('announcements.employee_id', '["0"]');
+                        $q->where('announcements.department_id', '["0"]')->whereOr('announcements.employee_id', '["0"]');
                     }
                 )->get();
 
@@ -168,11 +169,11 @@ class HomeController extends Controller
 
                 $currentDate = date('Y-m-d');
 
-                $employees     = User::where('type', '=', 'employee')->where('created_by', '=', \Auth::user()->creatorId())->get();
+                $employees     = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get();
                 $countEmployee = count($employees);
                 $notClockIn    = AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
 
-                $notClockIns    = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
+                $notClockIns    = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::where('created_by', '=', \Auth::user()->creatorId())->sum('initial_balance');
 
                 $activeJob   = Job::where('status', 'active')->where('created_by', '=', \Auth::user()->creatorId())->count();
@@ -219,7 +220,7 @@ class HomeController extends Controller
         $arrTask['data']  = [];
         foreach ($arrDuration as $date => $label) {
 
-            $data               = Order::select(\DB::raw('count(*) as total'))->whereDate('created_at', '=', $date)->first();
+            $data               = \Order::select(\DB::raw('count(*) as total'))->whereDate('created_at', '=', $date)->first();
             $arrTask['label'][] = $label;
             $arrTask['data'][]  = $data->total;
         }

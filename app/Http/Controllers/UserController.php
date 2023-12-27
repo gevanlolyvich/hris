@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -157,9 +158,9 @@ class UserController extends Controller
 
     public function userPassword($id)
     {
-        $eId        = \Crypt::decrypt($id);
+        $eId      = \Crypt::decrypt($id);
 
-        $user = User::find($eId);
+        $user     = User::find($eId);
 
         $employee = User::where('id', $eId)->first();
 
@@ -182,7 +183,8 @@ class UserController extends Controller
         }
 
 
-        $user                 = User::where('id', $id)->first();
+        $eId                  = \Crypt::decrypt($id);
+        $user                 = User::where('id', $eId)->first();
         $user->forceFill([
             'password' => Hash::make($request->password),
         ])->save();
