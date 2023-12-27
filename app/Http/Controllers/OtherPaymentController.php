@@ -10,7 +10,7 @@ class OtherPaymentController extends Controller
 {
     public function otherpaymentCreate($id)
     {
-        $employee = Employee::find($id);
+        $employee = Employee::where('is_active', 1)->find($id);
         $otherpaytype=OtherPayment::$otherPaymenttype;
         return view('otherpayment.create', compact('employee','otherpaytype'));
     }
@@ -33,17 +33,22 @@ class OtherPaymentController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $employee          = Employee::where('is_active', 1)->find($request->employee_id);
+
+            if(empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Permission denied.'));
+            }
+
             $otherpayment              = new OtherPayment();
             $otherpayment->employee_id = $request->employee_id;
             $otherpayment->title       = $request->title;
-            $otherpayment->type       = $request->type;
+            $otherpayment->type        = $request->type;
             $otherpayment->amount      = $request->amount;
             $otherpayment->created_by  = \Auth::user()->creatorId();
             $otherpayment->save();
 
             if(  $otherpayment->type == 'percentage' )
             {
-                $employee          = Employee::find($otherpayment->employee_id);
                 $loansal  = $otherpayment->amount * $employee->salary / 100; 
                 
             }  
@@ -102,14 +107,19 @@ class OtherPaymentController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                $employee          = Employee::where('is_active', 1)->find($otherpayment->employee_id);
+
+                if(empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+
                 $otherpayment->title  = $request->title;
-                $otherpayment->type  = $request->type;
+                $otherpayment->type   = $request->type;
                 $otherpayment->amount = $request->amount;
                 $otherpayment->save();
 
                 if(  $otherpayment->type == 'percentage' )
                 {
-                    $employee          = Employee::find($otherpayment->employee_id);
                     $loansal  = $otherpayment->amount * $employee->salary / 100; 
                     
                 }

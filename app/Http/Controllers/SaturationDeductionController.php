@@ -11,7 +11,12 @@ class SaturationDeductionController extends Controller
 {
     public function saturationdeductionCreate($id)
     {
-        $employee          = Employee::find($id);
+        $employee          = Employee::where('is_active', 1)->find($id);
+
+        if (empty($employee) || !$employee) {
+            return redirect()->back()->with('error', __('Inactive'));
+        }
+
         $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $saturationdeduc = SaturationDeduction::$saturationDeductiontype;
 
@@ -37,6 +42,11 @@ class SaturationDeductionController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $employee          = Employee::where('is_active', 1)->find($request->employee_id);
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
+
             $saturationdeduction                   = new SaturationDeduction;
             $saturationdeduction->employee_id      = $request->employee_id;
             $saturationdeduction->deduction_option = $request->deduction_option;
@@ -48,7 +58,6 @@ class SaturationDeductionController extends Controller
 
             if($saturationdeduction->type == 'percentage')
             {
-                $employee          = Employee::find($saturationdeduction->employee_id);
                 $saturationdeductionsal  = $saturationdeduction->amount * $employee->salary / 100;
             }
 
@@ -110,6 +119,11 @@ class SaturationDeductionController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                $employee          = Employee::find($saturationdeduction->employee_id);
+                if (empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+
                 $saturationdeduction->deduction_option = $request->deduction_option;
                 $saturationdeduction->title            = $request->title;
                 $saturationdeduction->type            = $request->type;
@@ -118,7 +132,6 @@ class SaturationDeductionController extends Controller
 
                 if($saturationdeduction->type == 'percentage')
                     {
-                        $employee          = Employee::find($saturationdeduction->employee_id);
                         $saturationdeductionsal  = $saturationdeduction->amount * $employee->salary / 100;
                     }
 

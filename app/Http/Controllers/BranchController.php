@@ -187,11 +187,11 @@ class BranchController extends Controller
     {
         if(in_array('0', $request->department_id))
         {
-            $employees = Employee::orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::whereIn('department_id', $request->department_id)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($employees);

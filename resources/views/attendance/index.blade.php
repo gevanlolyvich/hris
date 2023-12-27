@@ -269,17 +269,21 @@
                                             </a>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                             {{ $attendance->late }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <span @if($attendance->early_leaving != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                             {{ $attendance->early_leaving }}
                                         </span>
                                     </td>
-                                    <td>{{ $attendance->overtime }}</td>
+                                    <td class="text-center">
+                                        <span @if(strtotime('09:00:00') > strtotime($attendance->work_hours) && $attendance->status == 'Present')) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            {{ $attendance?->work_hours ?? '00:00:00' }}
+                                        </span>
+                                    </td>
                                     <td class="Action">
                                         <span>
                                             @if (!$attendance->is_valid && \Auth::user()?->employee?->id != $attendance->employee_id)

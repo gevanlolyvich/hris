@@ -10,16 +10,16 @@
 @endsection
 
 @section('action-button')
-    <div class="float-end">
     @can('edit employee')
-        <a href="{{route('employee.edit',\Illuminate\Support\Facades\Crypt::encrypt($employee->id))}}" data-bs-toggle="tooltip" title="{{__('Edit')}}"class="btn btn-sm btn-primary">
-            <i class="ti ti-pencil"></i>
-        </a>
+        <div class="float-start">
+            <a href="{{route('employee.edit',\Illuminate\Support\Facades\Crypt::encrypt($employee->id))}}" data-bs-toggle="tooltip" title="{{__('Edit')}}"class="btn btn-sm btn-primary">
+                <i class="ti ti-pencil"></i>
+            </a>
+        </div>
     @endcan
-    </div>
-    <div class="text-end mb-3">
-        <div class="d-flex justify-content-end drp-languages">
-            <ul class="list-unstyled mb-0 m-2">
+    <div class="text-start mb-3">
+        <div class="row d-flex drp-languages">
+            <ul class="list-unstyled col-5 col-sm-4 col-md-4 col-lg-4 mb-2 mt-3">
                 <li class="dropdown dash-h-item drp-language">
                     <a class="dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" aria-expanded="false">
@@ -33,7 +33,7 @@
                     </div>
                 </li>
             </ul>
-            <ul class="list-unstyled mb-0 m-2">
+            <ul class="list-unstyled col-5 col-sm-5 col-md-5 col-lg-5 mb-2 mt-3">
                 <li class="dropdown dash-h-item drp-language">
                     <a class="dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" aria-expanded="false">
@@ -47,7 +47,7 @@
                     </div>
                 </li>
             </ul>
-            <ul class="list-unstyled mb-0 m-2">
+            <ul class="list-unstyled col-auto col-sm-2 col-md-2 col-lg-2 mb-2 mt-3">
                 <li class="dropdown dash-h-item drp-language">
                     <a class="dash-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#"
                         role="button" aria-haspopup="false" aria-expanded="false">

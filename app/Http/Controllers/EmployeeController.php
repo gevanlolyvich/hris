@@ -61,7 +61,7 @@ class EmployeeController extends Controller
             $branches         = Branch::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $departments      = Department::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $employees        = Employee::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employees        = Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             // return $shift_types;
@@ -226,7 +226,7 @@ class EmployeeController extends Controller
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
             $employeesId  = ($employee->employee_id);
-            $employees    = Employee::get()->pluck('name', 'id');
+            $employees    = Employee::where('is_active', 1)->get()->pluck('name', 'id');
             $shift_types  = ShiftType::get()->pluck('name', 'id');
 
             // return $employee;
@@ -256,7 +256,10 @@ class EmployeeController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $employee = Employee::findOrFail($id);
+            $employee = Employee::where('is_active', 1)->find($id);
+            if (empty($employee) || !$employee) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
 
             // create shift history when employee changing it's shift
             if ($employee->shift_type_id !== (int)$request['shift_type_id']) {
@@ -314,7 +317,6 @@ class EmployeeController extends Controller
                 }
             }
 
-            $employee = Employee::findOrFail($id);
             $input    = $request->all();
             $employee->fill($input)->save();
             if ($request->salary) {
@@ -453,7 +455,7 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($employees);
     }

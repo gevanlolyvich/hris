@@ -72,11 +72,11 @@ class AttendanceExport implements FromCollection, WithHeadings
         foreach($attendances as $attendance)
             {    
                 $data->push([
-                    $attendance->employee->name,
-                    !empty(\Auth::user()->getBranch($attendance->employee->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
-                    !empty(\Auth::user()->getDepartment($attendance->employee->department_id)) ? \Auth::user()->getDepartment($attendance->employee->department_id)->name : '-',
-                    !empty(\Auth::user()->getDesignation($attendance->employee->designation_id)) ? \Auth::user()->getDesignation($attendance->employee->designation_id)->name : '-',
-                    $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name,
+                    $attendance?->employee?->name ?? 'Deleted Employee',
+                    !empty(\Auth::user()->getBranch($attendance?->employee?->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
+                    !empty(\Auth::user()->getDepartment($attendance?->employee?->department_id)) ? \Auth::user()->getDepartment($attendance->employee->department_id)->name : '-',
+                    !empty(\Auth::user()->getDesignation($attendance?->employee?->designation_id)) ? \Auth::user()->getDesignation($attendance->employee->designation_id)->name : '-',
+                    $attendance->shift_type?->name ?? $attendance?->employee?->shift_type?->name,
                     $attendance->date,
                     $attendance->status,
                     $attendance->clock_in,

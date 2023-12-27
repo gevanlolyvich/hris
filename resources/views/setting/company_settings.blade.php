@@ -900,7 +900,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="site_time_format" class="col-form-label">{{ __('Time Format') }}</label>
+                                    {{ Form::label('site_time_format', __('Time Format'), ['class' => 'col-form-label']) }}
                                     <select type="text" name="site_time_format" class="form-control select2"
                                         id="site_time_format">
                                         <option value="g:i A"
@@ -914,7 +914,6 @@
                                             22:30</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group col-md-4">
                                     {{-- {{Form::label('bug_prefix',__('Bug Prefix'),['class'=>'col-form-label']) }}
                                     {{Form::text('bug_prefix',null,array('class'=>'form-control'))}}
@@ -932,13 +931,18 @@
                                     @enderror
 
                                 </div>
-
-
-
-
-
-
-
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('map_tile_url', __('Map Tileset Provider URL'), ['class' => 'col-form-label']) }}
+                                    {{ Form::text('map_tile_url', null, ['class' => 'form-control']) }}
+                                </div>
+                                <div class="form-group col-md-4">
+                                    {{ Form::label('late_tolerance', __('Late Tolerance (Minute)'), ['class' => 'col-form-label']) }}
+                                    {{ Form::number('late_tolerance', null, ['class' => 'form-control', 'placeholder'=>__('Enter Minutes')]) }}
+                                </div>
+                                <div class="form-group col-md-4">
+                                    {{ Form::label('photo_on_clock', __('Photo On Clock In / Out'), ['class' => 'col-form-label']) }}
+                                    {{ Form::select('photo_on_clock', ['Required'=>'Required', 'Optional'=>'Optional'], null, ['class' => 'form-control select2']) }}
+                                </div>
                             </div>
                         </div>
 

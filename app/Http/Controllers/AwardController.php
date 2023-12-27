@@ -43,7 +43,7 @@ class AwardController extends Controller
     {
         if(\Auth::user()->can('Create Award'))
         {
-            $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
             $awardtypes = AwardType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
             return view('award.create', compact('employees', 'awardtypes'));
@@ -85,38 +85,47 @@ class AwardController extends Controller
             $award->created_by  = \Auth::user()->creatorId();
             $award->save();
  
-           //slack
-           $setting = Utility::settings(Auth::user()->creatorId());
-           $awardtype = AwardType::find($request->award_type);
-           $emp = Employee::find($request->employee_id);
-           if(isset($setting['award_notificaation']) && $setting['award_notificaation'] ==1){
-               $msg = $awardtype->name.' '. __("created for").' '.$emp->name.' '. __("from").' '.$request->date.'.';
-               Utility::send_slack_msg($msg);
-           }
+            //slack
+            $setting = Utility::settings();
+            $awardtype = AwardType::find($request->award_type);
+            $emp = Employee::where('is_active', 1)->find($request->employee_id);
 
-             //telegram
-             $setting = Utility::settings(Auth::user()->creatorId());
-             $awardtype = AwardType::find($request->award_type);
-             $emp = Employee::find($request->employee_id);
-             if(isset($setting['telegram_award_notification']) && $setting['telegram_award_notification'] ==1){
-               $msg = $awardtype->name.' '. __("created for").' '.$emp->name.' '. __("from").' '.$request->date.'.';
-               Utility::send_telegram_msg($msg);
-             }
+            if (empty($emp) || !$emp) {
+                return redirect()->back()->with('error', __('Inactive'));
+            }
 
-             // twilio  
-             $setting = Utility::settings(\Auth::user()->creatorId());
-             $awardtype = AwardType::find($request->award_type);
-             $emp = Employee::find($request->employee_id);
-             if (isset($setting['twilio_award_notification']) && $setting['twilio_award_notification'] == 1) {
-                 $msg = $awardtype->name . ' ' . __("created for") . ' ' . $emp->name . ' ' . __("from") . ' ' . $request->date . '.';
-                 Utility::send_twilio_msg($emp->phone,$msg);
-             }
+            if(isset($setting['award_notificaation']) && $setting['award_notificaation'] ==1){
+                $msg = $awardtype->name.' '. __("created for").' '.$emp->name.' '. __("from").' '.$request->date.'.';
+                Utility::send_slack_msg($msg);
+            }
+
+            //telegram
+            $setting = Utility::settings();
+            $awardtype = AwardType::find($request->award_type);
+            if(isset($setting['telegram_award_notification']) && $setting['telegram_award_notification'] ==1){
+            $msg = $awardtype->name.' '. __("created for").' '.$emp->name.' '. __("from").' '.$request->date.'.';
+            Utility::send_telegram_msg($msg);
+            }
+
+            // twilio  
+            $setting = Utility::settings();
+            $awardtype = AwardType::find($request->award_type);
+            if (isset($setting['twilio_award_notification']) && $setting['twilio_award_notification'] == 1) {
+                $msg = $awardtype->name . ' ' . __("created for") . ' ' . $emp->name . ' ' . __("from") . ' ' . $request->date . '.';
+                Utility::send_twilio_msg($emp->phone,$msg);
+            }
 
             $setings = Utility::settings();
             if($setings['new_award'] == 1)
-            {$employee     = Employee::find($award->employee_id);
+            {
+                $employee     = Employee::where('is_active', 1)->find($award->employee_id);
+
+                if (empty($employee) || !$employee) {
+                    return redirect()->back()->with('error', __('Inactive'));
+                }
+
                 $uArr = [
-                    'award_name'=>$employee->name,
+                    'award_name'=>$employee?->name,
                     
                 ];
 
@@ -144,7 +153,7 @@ class AwardController extends Controller
         {
             if($award->created_by == \Auth::user()->creatorId())
             {
-                $employees  = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $awardtypes = AwardType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
 
                 return view('award.edit', compact('award', 'awardtypes', 'employees'));
