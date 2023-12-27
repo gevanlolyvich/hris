@@ -650,6 +650,8 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
+        $settings = Utility::settings();
+
         $validator = \Validator::make(
             $request->all(),
             [
@@ -657,7 +659,7 @@ class AttendanceEmployeeController extends Controller
                 'latitude' => 'required',
                 'longitude' => 'required',
                 'accuracy' => 'required',
-                'picture' => 'required',
+                'picture' => $settings['late_tolerance'] == 'Required' ? 'required' : 'nullable',
             ]
         );
         if ($validator->fails()) {
@@ -665,8 +667,6 @@ class AttendanceEmployeeController extends Controller
 
             return redirect()->back()->with('error', $messages->first());
         }
-
-        $settings = Utility::settings();
 
         $picture_path = null;
         $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
