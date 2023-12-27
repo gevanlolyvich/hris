@@ -254,6 +254,8 @@ class AttendanceRequestController extends Controller
 
         $form_attendance = null;
 
+        $settings = Utility::settings();
+
         if ($form['is_approved']) {
             //* Method Create Attendance
             $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
@@ -276,8 +278,8 @@ class AttendanceRequestController extends Controller
                 }                
                 
                 // late
-                if ($start_time_cal > $shift_startTime) {
-                    $totalLateSeconds = $start_time_cal - $shift_startTime;
+                if ($start_time_cal > ($shift_startTime + ((int)$settings['late_tolerance'] * 60))) {
+                    $totalLateSeconds = $start_time_cal - ($shift_startTime + ((int)$settings['late_tolerance'] * 60));
                     $hours = floor($totalLateSeconds / 3600);
                     $mins  = floor($totalLateSeconds / 60 % 60);
                     $secs  = floor($totalLateSeconds % 60);

@@ -29,6 +29,8 @@ class TestController extends Controller
         $employees = Employee::where('is_active', 1)->select('personel_id')->get();
         $presentAttendance = AttendanceStatus::where('id',1)->first();
 
+        $settings = Utility::settings();
+
         for ($a=0; $a < count($apis); $a++) {
             $responses = null;
             try {
@@ -75,6 +77,8 @@ class TestController extends Controller
                 ->groupBy('personel_id')
                 ->get();
 
+            
+
             foreach ($final_data as $f_data) {
                 $employee = Employee::where('is_active', 1)->where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
 
@@ -119,8 +123,8 @@ class TestController extends Controller
     
                     // * Calculating late
                     $late = '00:00:00';
-                    if (strtotime($clock_in) > strtotime($shift_times->start_time)) {
-                        $totalLateSeconds = strtotime($clock_in) - strtotime($shift_times->start_time);
+                    if (strtotime($clock_in) > (strtotime($shift_times->start_time) + ((int)$settings['late_tolerance'] * 60))) {
+                        $totalLateSeconds = strtotime($clock_in) - (strtotime($shift_times->start_time) + ((int)$settings['late_tolerance'] * 60));
                         $late_hours = floor($totalLateSeconds / 3600);
                         $late_mins  = floor($totalLateSeconds / 60 % 60);
                         $late_secs  = floor($totalLateSeconds % 60);

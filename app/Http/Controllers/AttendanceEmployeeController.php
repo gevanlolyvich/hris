@@ -271,6 +271,8 @@ class AttendanceEmployeeController extends Controller
         $time           = date("H:i:s");
         $timestamp      = time();
 
+        $settings = Utility::settings();
+
         // yesterday shift and attendance for cross day attendance operation
         $yesterday_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
             ->where('days', date('l', strtotime('yesterday')))
@@ -373,7 +375,7 @@ class AttendanceEmployeeController extends Controller
                     ]);
                 } else {
                     //late
-                    $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
+                    $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime) + ((int)$settings['late_tolerance'] * 60);
 
                     $hours = floor($totalLateSeconds / 3600);
                     $mins  = floor($totalLateSeconds / 60 % 60);
@@ -754,8 +756,8 @@ class AttendanceEmployeeController extends Controller
                     }
     
                     //late
-                    if (time() > strtotime($date . $startTime)) {
-                        $totalLateSeconds = time() - strtotime($date . $startTime);
+                    if (time() > (strtotime($date . $startTime) + ((int)$settings['late_tolerance'] * 60))) {
+                        $totalLateSeconds = time() - (strtotime($date . $startTime) + ((int)$settings['late_tolerance'] * 60));
                         $hours            = floor($totalLateSeconds / 3600);
                         $mins             = floor($totalLateSeconds / 60 % 60);
                         $secs             = floor($totalLateSeconds % 60);
