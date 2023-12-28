@@ -142,11 +142,12 @@
                                             @if (\Auth::user()->type != 'employee')
                                                 @if ($payslip->status == 0)
                                                     <a href="{{ route('payslip.paysalary', ['id' => $payslip->employee_id, 'date' => $month]) }}" class="btn-sm btn m-1 btn-primary">{{ __('Click To Paid') }}</a>
+                                                    
+                                                    {!! Form::open(['method' => 'GET', 'route' => ['payslip.delete', $payslip->id], 'id' => 'delete-form-' . $payslip->id]) !!}
+                                                    <button type="button" class="btn btn-danger m-1 btn-sm bs-pass-para">{{ __('Delete') }}</button>
+                                                    </form>
                                                 @endif
                                     
-                                                {!! Form::open(['method' => 'GET', 'route' => ['payslip.delete', $payslip->id], 'id' => 'delete-form-' . $payslip->id]) !!}
-                                                <button type="button" class="btn btn-danger m-1 btn-sm bs-pass-para">{{ __('Delete') }}</button>
-                                                </form>
                                             @endif
                                         </div>
                                     </td>
