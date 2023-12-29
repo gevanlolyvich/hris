@@ -194,21 +194,28 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Payroll') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu ">
-                            <li class="dash-item {{ Request::segment(1) == 'setsalary' ? 'active' : '-' }}">
-                                <a class="dash-link"
-                                    href="{{ route('setsalary.index') }}">{{ __('Set Salary') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('payslip.index') }}">{{ __('Payslip') }}</a>
-                            </li>
+                            @if (\Auth::user()->type != 'employee')
+                                <li class="dash-item {{ Request::segment(1) == 'setsalary' ? 'active' : '-' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('setsalary.index') }}">{{ __('Set Salary') }}</a>
+                                </li>
+                                <li class="dash-item">
+                                    <a class="dash-link"
+                                        href="{{ route('payslip.index') }}">{{ __('Payslip') }}</a>
+                                </li>
+                            @else
+                                <li class="dash-item">
+                                    <a class="dash-link"
+                                        href="{{ route('payslip.employee', \Illuminate\Support\Facades\Crypt::encrypt(\Auth::user()?->employee?->id)) }}">{{ __('Payslip') }}</a>
+                                </li>
+                            @endif
 
                         </ul>
                     </li>
                 @endif
                 <!-- payroll-->
 
-                @if (\Auth::user()->type == 'employee' && (Gate::check('Manage Set Salary') || Gate::check('Manage Pay Slip')))
+                {{-- @if (\Auth::user()->type == 'employee' && (Gate::check('Manage Set Salary') || Gate::check('Manage Pay Slip')))
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'setsalary' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -226,7 +233,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             </li>
                         </ul>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- timesheet-->
                 @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet'))
@@ -719,6 +726,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('HRM System Setup') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            @can('Manage Bank')
+                                <li class="dash-item {{ request()->is('bank*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('bank.index') }}">{{ __('Bank') }}</a>
+                                </li>
+                            @endcan 
                             @can('Manage Branch')
                                 <li class="dash-item {{ request()->is('branch*') ? 'active' : '' }}">
                                     <a class="dash-link"

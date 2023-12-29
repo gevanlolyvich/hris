@@ -17,7 +17,7 @@ $company_logo = Utility::getValByName('company_logo');
         <div class="col-form-label">
             <div class="invoice-number">
                 <img src="{{ $logo . '/' . (isset($company_logo) && !empty($company_logo) ? $company_logo : 'dark_logo.png') }}"
-                        width="170px;">
+                        width="75px;">
                 </div>
            
            
@@ -247,10 +247,10 @@ $company_logo = Utility::getValByName('company_logo');
         var opt = {
             margin: 0.3,
             filename: '{{ $employee->name }}',
-            image: {
-                type: 'jpeg',
-                quality: 1
-            },
+            // image: {
+            //     type: 'jpeg',
+            //     quality: 1
+            // },
             html2canvas: {
                 scale: 4,
                 dpi: 72,
