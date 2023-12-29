@@ -10,7 +10,7 @@ class BankController extends Controller
     public function index()
     {
 
-        if (\Auth::user()->can('Manage Designation')) {
+        if (\Auth::user()->can('Manage Bank')) {
             $banks = Bank::orderBy('name', 'ASC')->get();
 
             return view('bank.index', compact('banks'));
@@ -21,7 +21,7 @@ class BankController extends Controller
 
     public function create()
     {
-        if (\Auth::user()->can('Create Designation')) {
+        if (\Auth::user()->can('Create Bank')) {
 
             return view('bank.create');
         } else {
@@ -32,7 +32,7 @@ class BankController extends Controller
     public function store(Request $request)
     {
         // return $request;
-        if (\Auth::user()->can('Create Designation')) {
+        if (\Auth::user()->can('Create Bank')) {
             $validator = \Validator::make(
                 $request->all(),
                 [
@@ -64,7 +64,7 @@ class BankController extends Controller
 
     public function edit(Bank $bank)
     {
-        if (\Auth::user()->can('Edit Designation')) {
+        if (\Auth::user()->can('Edit Bank')) {
             return view('bank.edit', compact('bank'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
@@ -73,7 +73,7 @@ class BankController extends Controller
 
     public function update(Request $request, Bank $bank)
     {
-        if (\Auth::user()->can('Edit Designation')) {
+        if (\Auth::user()->can('Edit Bank')) {
             $validator = \Validator::make(
                 $request->all(),
                 [
@@ -98,7 +98,7 @@ class BankController extends Controller
 
     public function destroy(Bank $bank)
     {
-        if (\Auth::user()->can('Delete Designation')) {
+        if (\Auth::user()->can('Delete Bank')) {
             $bank->delete();
 
             return redirect()->route('bank.index')->with('success', __('Bank successfully deleted.'));
