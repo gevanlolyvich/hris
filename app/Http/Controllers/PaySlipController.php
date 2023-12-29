@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PaySlipController extends Controller
@@ -43,13 +44,30 @@ class PaySlipController extends Controller
                 $employees->push(\Auth::user()->employee->id);
             }
 
-            $payslips = PaySlip::where('salary_month', $month)->whereIn('employeeId', $employees)->get();
+            $payslips = PaySlip::where('salary_month', $month)->whereIn('employee_id', $employees)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
 
             return view('payslip.index', compact('payslips', 'month'));
         } elseif (\Auth::user()->type != 'employee') {
-            $payslips = PaySlip::where('salary_month', $month)->get();
+            $payslips = PaySlip::where('salary_month', $month)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
 
             return view('payslip.index', compact('payslips', 'month'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+    }
+    public function indexEmployee($id, Request $request)
+    {
+        $month  = $request->month;
+        $id     = Crypt::decrypt($id);
+        if (\Auth::user()->can('Manage Pay Slip') && (\Auth::user()?->employee?->id == $id || \Auth::user()->type != 'employee')) {
+            $payslips = null;
+            if (!empty($month)) {
+                $payslips = PaySlip::where('salary_month', $month)->where('employee_id', $id)->orderBy('salary_month', 'DESC')->get();
+            } else{
+                $payslips = PaySlip::where('employee_id', $id)->orderBy('salary_month', 'DESC')->get();
+            }
+
+            return view('payslip.employee', compact('payslips', 'month'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -149,7 +167,7 @@ class PaySlipController extends Controller
         $payslip = PaySlip::find($id);
         $payslip->delete();
 
-        return redirect()->back()->with('success', __('Payslip successfully deleted.'));
+        return redirect()->back()->with('success', __('Payslip successfully deleted'));
     }
 
     public function showemployee($paySlip)
@@ -504,5 +522,35 @@ class PaySlipController extends Controller
         ob_end_clean();
 
         return $data;
+    }
+
+    public function payslipAuth(Request $request)
+    {
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'password' => 'required',
+                'payslip_id' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return redirect()->back()->with('error', $messages->first());
+        }
+
+        if (Hash::check($request->password, Auth::user()->password) && !empty($request->payslip_id)) {
+            $payslip  = PaySlip::find($request->payslip_id);
+            $employee = Employee::find($payslip->employee_id);
+
+            $payslipDetail = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
+
+            $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+            return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
+        } else {
+            return response()->json(['error' => __('Wrong Password')]);
+        }
     }
 }

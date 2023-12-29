@@ -535,6 +535,20 @@ Route::resource('setsalary', SetSalaryController::class)->middleware(
     ]
 );
 
+Route::get('payslip/employee/{id}', [PaySlipController::class, 'indexEmployee'])->name('payslip.employee')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('payslip/auth', [PaySlipController::class, 'payslipAuth'])->name('payslip.auth')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::get('payslip/paysalary/{id}/{date}', [PaySlipController::class, 'paysalary'])->name('payslip.paysalary')->middleware(
     [
         'auth',

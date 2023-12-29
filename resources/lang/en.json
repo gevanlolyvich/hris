@@ -1712,5 +1712,8 @@
     "Late Tolerance (Minute)": "Late Tolerance (Minute)",
     "Enter Minutes": "Enter Minutes",
     "Photo On Clock In / Out": "Photo On Clock In / Out",
-    "Map Tileset Provider URL": "Map Tileset Provider URL"
+    "Map Tileset Provider URL": "Map Tileset Provider URL",
+    "Enter Password To Access Payslip": "Enter Password To Access Payslip",
+    "Submit": "Submit",
+    "Wrong Password": "Wrong Password"
 }
