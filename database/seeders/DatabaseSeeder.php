@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AttendanceStatusSeeder::class,
             NewFeature::class,
             NewSystemSetting::class,
+            BankSeeder::class
         ]);
     }
 }
