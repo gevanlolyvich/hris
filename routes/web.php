@@ -78,6 +78,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\DeductionOptionController;
 use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\PayslipTypeController;
 use App\Http\Controllers\PermitController;
@@ -275,12 +276,19 @@ Route::resource('department', DepartmentController::class)->middleware(
         'XSS',
     ]
 );
+Route::resource('bank', BankController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('designation', DesignationController::class)->middleware(
     [
         'auth',
         'XSS',
     ]
 );
+
 Route::resource('document', DocumentController::class)->middleware(
     [
         'auth',

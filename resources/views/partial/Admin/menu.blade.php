@@ -726,6 +726,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('HRM System Setup') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            @can('Manage Bank')
+                                <li class="dash-item {{ request()->is('bank*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('bank.index') }}">{{ __('Bank') }}</a>
+                                </li>
+                            @endcan 
                             @can('Manage Branch')
                                 <li class="dash-item {{ request()->is('branch*') ? 'active' : '' }}">
                                     <a class="dash-link"
