@@ -10,7 +10,7 @@
 @endsection
 
 @section('action-button')
-    @can('Create Designation')
+    @can('Create Bank')
         <a href="#" data-url="{{ route('bank.create') }}" data-ajax-popup="true"
             data-title="{{ __('Create New Bank') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
@@ -42,7 +42,7 @@
                                     <td>{{ $bank->code }}</td>
                                     <td class="Action">
                                         <span>
-                                            @can('Edit Designation')
+                                            @can('Edit Bank')
                                                 <div class="action-btn bg-info ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                         data-url="{{  route('bank.edit', $bank->id) }}"
@@ -54,7 +54,7 @@
                                                 </div>
                                             @endcan
 
-                                            @can('Delete Designation')
+                                            @can('Delete Bank')
                                                 <div class="action-btn bg-danger ms-2">
                                                     {!! Form::open(['method' => 'DELETE', 'route' => ['bank.destroy', $bank->id], 'id' => 'delete-form-' . $bank->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
