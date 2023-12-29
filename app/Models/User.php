@@ -7,12 +7,14 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable;
     use HasRoles;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -73,18 +75,16 @@ class User extends Authenticatable implements MustVerifyEmail
             'contract',
         ];
 
-        foreach($emailTemplate as $eTemp)
-        {
+        foreach ($emailTemplate as $eTemp) {
 
             EmailTemplate::create(
                 [
                     'name' => $eTemp,
-                    
+
                     'slug' => strtolower(str_replace(' ', '_', $eTemp)),
                     'created_by' => 1,
                 ]
             );
-
         }
 
         $defaultTemplate = [
@@ -183,7 +183,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     <p style="font-size: 14.4px;"><span style="font-size: 14.4px;">{app_url}</span></p>
                     <p style="font-size: 14.4px;"><span style="font-size: 14.4px;">Obrigado,</span></p>
                     <p style="font-size: 14.4px;"><span style="font-size: 14.4px;">{app_name}</span></p>',
-                
+
                 ],
             ],
             'new_employee' => [
@@ -661,7 +661,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     <p style="font-size: 14.4px;"><span style="font-size: 14.4px;">{app_name}</span></p>',
                 ],
             ],
-            
+
             'employee_transfer' => [
                 'subject' => 'Employee Transfer',
                 'lang' => [
@@ -787,7 +787,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     <p style="font-size: 14.4px;"><span style="font-size: 14.4px;">{app_name}</span></p>',
                 ],
             ],
-            
+
             'employee_resignation' => [
                 'subject' => 'Employee Resignation',
                 'lang' => [
@@ -915,7 +915,7 @@ class User extends Authenticatable implements MustVerifyEmail
             ],
 
 
-            
+
             'employee_trip' => [
                 'subject' => 'Employee Trip',
                 'lang' => [
@@ -1797,11 +1797,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $email = EmailTemplate::all();
 
-        foreach($email as $e)
-        {
+        foreach ($email as $e) {
 
-            foreach($defaultTemplate[$e->slug]['lang'] as $lang => $content)
-            {
+            foreach ($defaultTemplate[$e->slug]['lang'] as $lang => $content) {
                 EmailTemplateLang::create(
                     [
                         'parent_id' => $e->id,
@@ -1821,12 +1819,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function creatorId()
     {
 
-        if($this->type == 'company' || $this->type == 'super admin')
-        {
+        if ($this->type == 'company' || $this->type == 'super admin') {
             return $this->id;
-        }
-        else
-        {
+        } else {
             return $this->created_by;
         }
     }
@@ -1932,19 +1927,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function assignPlan($planID)
     {
         $plan = Plan::find($planID);
-        if($plan)
-        {
+        if ($plan) {
             $this->plan = $plan->id;
-            if($plan->duration == 'month')
-            {
+            if ($plan->duration == 'month') {
                 $this->plan_expire_date = Carbon::now()->addMonths(1)->isoFormat('YYYY-MM-DD');
-            }
-            elseif($plan->duration == 'year')
-            {
+            } elseif ($plan->duration == 'year') {
                 $this->plan_expire_date = Carbon::now()->addYears(1)->isoFormat('YYYY-MM-DD');
-            }
-            else
-            {
+            } else {
                 $this->plan_expire_date = null;
             }
             $this->save();
@@ -1952,55 +1941,39 @@ class User extends Authenticatable implements MustVerifyEmail
             $users     = User::where('created_by', '=', \Auth::user()->creatorId())->where('type', '!=', 'super admin')->where('type', '!=', 'company')->where('type', '!=', 'employee')->get();
             $employees = User::where('created_by', '=', \Auth::user()->creatorId())->where('type', 'employee')->get();
 
-            if($plan->max_users == -1)
-            {
-                foreach($users as $user)
-                {
+            if ($plan->max_users == -1) {
+                foreach ($users as $user) {
                     $user->is_active = 1;
                     $user->save();
                 }
-            }
-            else
-            {
+            } else {
                 $userCount = 0;
-                foreach($users as $user)
-                {
+                foreach ($users as $user) {
                     $userCount++;
-                    if($userCount <= $plan->max_users)
-                    {
+                    if ($userCount <= $plan->max_users) {
                         $user->is_active = 1;
                         $user->save();
-                    }
-                    else
-                    {
+                    } else {
                         $user->is_active = 0;
                         $user->save();
                     }
                 }
             }
 
-            if($plan->max_employees == -1)
-            {
-                foreach($employees as $employee)
-                {
+            if ($plan->max_employees == -1) {
+                foreach ($employees as $employee) {
                     $employee->is_active = 1;
                     $employee->save();
                 }
-            }
-            else
-            {
+            } else {
 
                 $employeeCount = 0;
-                foreach($employees as $employee)
-                {
+                foreach ($employees as $employee) {
                     $employeeCount++;
-                    if($employeeCount <= $plan->max_employees)
-                    {
+                    if ($employeeCount <= $plan->max_employees) {
                         $employee->is_active = 1;
                         $employee->save();
-                    }
-                    else
-                    {
+                    } else {
                         $employee->is_active = 0;
                         $employee->save();
                     }
@@ -2008,9 +1981,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
 
             return ['is_success' => true];
-        }
-        else
-        {
+        } else {
             return [
                 'is_success' => false,
                 'error' => 'Plan is deleted.',
@@ -2042,38 +2013,35 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Plan::count();
     }
-    
+
     public function contractNumberFormat($number)
     {
         $settings = Utility::settings();
 
         return $settings["contract_prefix"] . sprintf("%05d", $number);
     }
-    
+
     public function countPaidCompany()
     {
         return User::where('type', '=', 'company')->whereNotIn(
-            'plan', [
-                      0,
-                      1,
-                  ]
+            'plan',
+            [
+                0,
+                1,
+            ]
         )->where('created_by', '=', \Auth::user()->id)->count();
     }
 
     public function planPrice()
     {
         $user = \Auth::user();
-        if($user->type == 'super admin')
-        {
+        if ($user->type == 'super admin') {
             $userId = $user->id;
-        }
-        else
-        {
+        } else {
             $userId = $user->created_by;
         }
 
         return \DB::table('settings')->where('created_by', '=', $userId)->get()->pluck('value', 'name');
-
     }
 
     public function currentPlan()
@@ -2093,11 +2061,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public static function userDefaultData()
     {
-        
+
         // Make Entry In User_Email_Template
         $allEmail = EmailTemplate::all();
-        foreach($allEmail as $email)
-        {
+        foreach ($allEmail as $email) {
             UserEmailTemplate::create(
                 [
                     'template_id' => $email->id,
@@ -2113,8 +2080,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Make Entry In User_Email_Template
         $allEmail = EmailTemplate::all();
-        foreach($allEmail as $email)
-        {
+        foreach ($allEmail as $email) {
             UserEmailTemplate::create(
                 [
                     'template_id' => $email->id,
@@ -2124,5 +2090,4 @@ class User extends Authenticatable implements MustVerifyEmail
             );
         }
     }
-    
 }
