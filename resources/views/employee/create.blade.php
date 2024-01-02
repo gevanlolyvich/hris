@@ -234,33 +234,6 @@
                                     {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}
                                     {!! Form::text('tax_payer_id', old('tax_payer_id'), ['class' => 'form-control']) !!}
                                 </div>
-                                {{-- <div class="form-group col-md-6">
-                                    {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('account_holder_name', old('account_holder_name'), ['class' => 'form-control' ,'placeholder'=>'Enter Account Holder Name']) !!}
-
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('account_number', __('Account Number'), ['class' => 'form-label']) !!}
-                                    {!! Form::number('account_number', old('account_number'), ['class' => 'form-control' ,'placeholder'=>'Enter Account Number']) !!}
-
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('bank_name', __('Bank Name'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('bank_name', old('bank_name'), ['class' => 'form-control' ,'placeholder'=>'Enter Bank Name']) !!}
-
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('bank_identifier_code', __('Bank Identifier Code'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('bank_identifier_code', old('bank_identifier_code'), ['class' => 'form-control' ,'placeholder'=>'Enter Bank Identifier Code']) !!}
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('branch_location', __('Branch Location'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('branch_location', old('branch_location'), ['class' => 'form-control' ,'placeholder'=>'Enter Branch Location']) !!}
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('tax_payer_id', old('tax_payer_id'), ['class' => 'form-control' ,'placeholder'=>'Enter Tax Payer Id']) !!}
-                                </div> --}}
                             </div>
                         </div>
                     </div>
