@@ -17,7 +17,7 @@
 
     @can('Create Branch')
         <a href="#" data-url="{{ route('meeting.create') }}" data-ajax-popup="true"
-            data-title="{{ __('Create New Meeting') }}" data-size="lg" data-bs-toggle="tooltip" title=""
+            data-title="{{ __('Create New Meeting') }}" data-size="xl" data-bs-toggle="tooltip" title=""
             class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
         </a>
@@ -36,8 +36,9 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Meeting title') }}</th>
-                                <th>{{ __('Meeting Date') }}</th>
-                                <th>{{ __('Meeting Time') }}</th>
+                                <th>{{ __('Type') }}</th>
+                                <th>{{ __("Start Date") }}</th>
+                                <th>{{ __('End Date') }}</th>
                                 @if (Gate::check('Edit Meeting') || Gate::check('Delete Meeting'))
                                     <th width="200px">{{ __('Action') }}</th>
                                 @endif
@@ -47,15 +48,25 @@
                             @foreach ($meetings as $meeting)
                                 <tr>
                                     <td>{{ $meeting->title }}</td>
-                                    <td>{{ \Auth::user()->dateFormat($meeting->date) }}</td>
-                                    <td>{{ \Auth::user()->timeFormat($meeting->time) }}</td>
+                                    <td>{{ $meeting->meeting_type }}</td>
+                                    <td>{{ $meeting->start_time }}</td>
+                                    <td>{{ $meeting->end_time }}</td>
                                     <td class="Action">
                                         <span>
+                                            <div class="action-btn bg-success ms-2">
+                                                <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                    data-url="{{ URL::to('meeting/' . $meeting->id) }}"
+                                                    data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Meeting') }}"
+                                                    data-bs-original-title="{{ __('Meeting') }}">
+                                                    <i class="ti ti-caret-right text-white"></i>
+                                                </a>
+                                            </div>
                                             @can('Edit Meeting')
                                                 <div class="action-btn bg-info ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                         data-url="{{ URL::to('meeting/' . $meeting->id . '/edit') }}"
-                                                        data-ajax-popup="true" data-size="lg" data-bs-toggle="tooltip"
+                                                        data-ajax-popup="true" data-size="xl" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Edit Meeting') }}"
                                                         data-bs-original-title="{{ __('Edit') }}">
                                                         <i class="ti ti-pencil text-white"></i>
@@ -184,8 +195,6 @@
                     new Choices('#choices-multiple', {
                         removeItemButton: true,
                     });
-
-
                 }
             });
         }
@@ -207,11 +216,18 @@
                 success: function(data) {
                     console.log(data);
                     $('.employee_id').empty();
-                    $('.employee_id').append('<option value="">{{ __('Select Employee') }}</option>');
-                    $('.employee_id').append('<option value="0"> {{ __('All Employee') }} </option>');
+                    var emp_selct = ` <select class="form-control  employee_id" name="employee_id[]" id="choices-multiple1"
+                                            placeholder="Select Employee" multiple >
+                                            </select>`;
+                    $('.employee_div').html(emp_selct);
 
+                    $('.employee_id').append('<option value="0"> {{ __('All') }} </option>');
                     $.each(data, function(key, value) {
-                        $('.employee_id').append('<option value="' + key + '">' + value + '</option>');
+                        $('.employee_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple1', {
+                        removeItemButton: true,
                     });
                 }
             });

@@ -10,6 +10,7 @@ use App\Models\MeetingEmployee;
 use Illuminate\Http\Request;
 use App\Models\Utility;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
 
 class MeetingController extends Controller
@@ -26,10 +27,9 @@ class MeetingController extends Controller
                     ->orWhere(function ($q) {
                         $q->where('meetings.department_id', '["0"]')
                             ->where('meetings.employee_id', '["0"]');
-                    })
-                    ->get();
+                    })->get();
             } else {
-                $meetings = LocalMeeting::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $meetings = !empty(\Auth::user()->branch_id) ? LocalMeeting::where('branch_id', \Auth::user()->branch_id)->get() : LocalMeeting::get();
             }
 
             return view('meeting.index', compact('meetings', 'employees'));
@@ -42,14 +42,19 @@ class MeetingController extends Controller
     {
         if (\Auth::user()->can('Create Meeting')) {
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('is_created', 1)->where('created_by', '=', \Auth::user()->creatorId())->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = Employee::where('is_created', 1)->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $branch      = Branch::get();
-                $departments = Department::get();
-                $employees   = Employee::where('is_created', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get() : Branch::get();
+                $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get() : Department::get();
+                $employees   = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::orderby('name', 'asc')->get()->pluck('name', 'id');
+
+
+                $meeting_types = ['Offline'=>'Offline', 'Online'=>'Online', 'Hybrid'=>'Hybrid'];
+                // Log::info(json_encode($branch, JSON_PRETTY_PRINT));
+                // Log::info(json_encode($employees, JSON_PRETTY_PRINT));
             }
 
-            return view('meeting.create', compact('employees', 'departments', 'branch'));
+            return view('meeting.create', compact('employees', 'departments', 'branch', 'meeting_types'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -65,8 +70,9 @@ class MeetingController extends Controller
                 'department_id' => 'required',
                 'employee_id' => 'required',
                 'title' => 'required',
-                'date' => 'required',
-                'time' => 'required',
+                'meeting_type' => 'required',
+                'start_time' => 'required',
+                'end_time' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -81,8 +87,12 @@ class MeetingController extends Controller
             $meeting->department_id = json_encode($request->department_id);
             $meeting->employee_id   = json_encode($request->employee_id);
             $meeting->title         = $request->title;
-            $meeting->date          = $request->date;
-            $meeting->time          = $request->time;
+            $meeting->meeting_type  = $request->meeting_type;
+            $meeting->url           = $request->url;
+            $meeting->password      = $request->password;
+            $meeting->start_time    = $request->start_time;
+            $meeting->end_time      = $request->end_time;
+            $meeting->location      = $request->location;
             $meeting->note          = $request->note;
             $meeting->created_by    = \Auth::user()->id;
             $meeting->save();
@@ -139,8 +149,11 @@ class MeetingController extends Controller
 
     public function show($id)
     {
-        $meetings = LocalMeeting::where('id',$id)->first();
-        return view('meeting.show', compact('meetings'));
+        $meetings = LocalMeeting::find($id);
+        $branch = Branch::find($meetings->branch_id);
+        $employees = Employee::whereIn('id', json_decode($meetings->employee_id))->get()->pluck('name')->toArray();
+        $departments = Department::whereIn('id', json_decode($meetings->department_id))->get()->pluck('name')->toArray();
+        return view('meeting.show', compact('meetings', 'employees', 'departments', 'branch'));
         // return redirect()->route('meeting.index');
     }
 
@@ -148,14 +161,15 @@ class MeetingController extends Controller
     {
         if (\Auth::user()->can('Edit Meeting')) {
             $meeting = LocalMeeting::find($meeting);
+            $meeting_types = ['Offline'=>'Offline', 'Online'=>'Online', 'Hybrid'=>'Hybrid'];
             if ($meeting->created_by == Auth::user()->id) {
                 if (Auth::user()->type == 'employee') {
-                    $employees = Employee::where('is_created', 1)->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_active', 1)->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 } else {
-                    $employees = Employee::where('is_created', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
 
-                return view('meeting.edit', compact('meeting', 'employees'));
+                return view('meeting.edit', compact('meeting', 'employees', 'meeting_types'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -172,8 +186,9 @@ class MeetingController extends Controller
                 [
 
                     'title' => 'required',
-                    'date' => 'required',
-                    'time' => 'required',
+                    'meeting_type' => 'required',
+                    'start_time' => 'required',
+                    'end_time' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -182,11 +197,15 @@ class MeetingController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            if ($meeting->created_by == \Auth::user()->creatorId()) {
-                $meeting->title = $request->title;
-                $meeting->date  = $request->date;
-                $meeting->time  = $request->time;
-                $meeting->note  = $request->note;
+            if ($meeting->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
+                $meeting->title         = $request->title;
+                $meeting->meeting_type  = $request->meeting_type;
+                $meeting->url           = $request->url;
+                $meeting->password      = $request->password;
+                $meeting->location      = $request->location;
+                $meeting->start_time    = $request->start_time;
+                $meeting->end_time      = $request->end_time;
+                $meeting->note          = $request->note;
                 $meeting->save();
 
                 return redirect()->route('meeting.index')->with('success', __('Meeting successfully updated.'));
@@ -217,9 +236,9 @@ class MeetingController extends Controller
     {
 
         if ($request->branch_id == 0) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id')->toArray() : Department::get()->pluck('name', 'id')->toArray();
         } else {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($departments);
@@ -230,11 +249,11 @@ class MeetingController extends Controller
         if($request->department_id)
         {
             
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = Employee::whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray() : Employee::orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             
         }
         return response()->json($employees);
@@ -254,7 +273,7 @@ class MeetingController extends Controller
                     })
                     ->get();
             } else {
-                $meetings = LocalMeeting::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $meetings = LocalMeeting::get();
             }
 
         return view('meeting.calender' , compact('meetings', 'employees'));

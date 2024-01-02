@@ -1735,5 +1735,12 @@
   "Map Tileset Provider URL": "URL Penyedia Tileset Peta",
   "Enter Password To Access Payslip": "Masukkan Password Untuk Mengakses Slip Gaji",
   "Submit": "Kirim",
-  "Wrong Password": "Password Tidak Sesuai"
+  "Wrong Password": "Password Tidak Sesuai",
+  "Meeting Type": "Tipe Rapat",
+  "Select Meeting Type": "Pilih Tipe Meeting",
+  "Meeting URL": "URL / Link Rapat",
+  "Meeting Password": "Kata Sandi Rapat",
+  "Enter Meeting URL": "Masukkan URL / Link Rapat",
+  "Enter Meeting Password": "Masukkan Kata Sandi Rapat",
+  "Select Role": "Pilih Peran"
 }

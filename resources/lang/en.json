@@ -1736,5 +1736,12 @@
     "Map Tileset Provider URL": "Map Tileset Provider URL",
     "Enter Password To Access Payslip": "Enter Password To Access Payslip",
     "Submit": "Submit",
-    "Wrong Password": "Wrong Password"
+    "Wrong Password": "Wrong Password",
+    "Meeting Type": "Meeting Type",
+    "Select Meeting Type": "Select Meeting Type",
+    "Meeting URL": "Meeting URL",
+    "Meeting Password": "Meeting Password",
+    "Enter Meeting URL": "Enter Meeting URL",
+    "Enter Meeting Password": "Enter Meeting Password",
+    "Select Role": "Select Role"
 }
