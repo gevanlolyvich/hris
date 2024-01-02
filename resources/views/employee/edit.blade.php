@@ -58,6 +58,20 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control ', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control ', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    <input class="form-control" name="identity_number"
+                                        type="text" id="identity_number" placeholder="{{ __('Enter Identity Number') }}"
+                                        value="{{ $employee->identity_number }}" required autocomplete="identity_number">
+                                </div>
                             </div>
                             <div class="form-group">
                                 {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
@@ -231,27 +245,17 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('account_holder_name', null, ['class' => 'form-control']) !!}
-
+                                        {!! Form::label('bank_name', __('Bank Name'), ['class' => 'form-label']) !!}
+                                        {!! Form::select('bank_id', $banks, null, ['class' => 'form-control']) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('account_number', __('Account Number'), ['class' => 'form-label']) !!}
                                         {!! Form::number('account_number', null, ['class' => 'form-control']) !!}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
+                                        {!! Form::text('account_holder_name', null, ['class' => 'form-control']) !!}
 
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        {!! Form::label('bank_name', __('Bank Name'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('bank_name', null, ['class' => 'form-control']) !!}
-
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        {!! Form::label('bank_identifier_code', __('Bank Identifier Code'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('bank_identifier_code', null, ['class' => 'form-control']) !!}
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        {!! Form::label('branch_location', __('Branch Location'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('branch_location', null, ['class' => 'form-control']) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}

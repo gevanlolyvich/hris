@@ -959,12 +959,16 @@ Route::resource('permissions', PermissionController::class)->middleware(
 
 Route::post('change-password', [UserController::class, 'updatePassword'])->name('update.password');
 
-Route::resource('coupons', CouponController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+Route::post('update-bank', [UserController::class, 'updateBank'])->name('update.bank');
+
+Route::post('update-nationality', [UserController::class, 'updateNationality'])->name('update.nationality');
+
+// Route::resource('coupons', CouponController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::resource('account-assets', AssetController::class)->middleware(
     [
         'auth',

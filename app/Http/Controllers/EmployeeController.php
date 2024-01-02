@@ -11,6 +11,7 @@ use App\Models\EmployeeDocument;
 use App\Mail\UserCreate;
 use App\Models\ShiftHistory;
 use App\Models\User;
+use App\Models\Bank;
 use App\Models\Utility;
 use File;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class EmployeeController extends Controller
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             // return $shift_types;
-            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings','shift_types'));
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -228,9 +229,12 @@ class EmployeeController extends Controller
             $employeesId  = ($employee->employee_id);
             $employees    = Employee::where('is_active', 1)->get()->pluck('name', 'id');
             $shift_types  = ShiftType::get()->pluck('name', 'id');
+            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
 
             // return $employee;
-            return view('employee.edit', compact('shift_types','employee','employees', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -318,6 +322,7 @@ class EmployeeController extends Controller
             }
 
             $input    = $request->all();
+            // return $input;
             $employee->fill($input)->save();
             if ($request->salary) {
                 return redirect()->route('setsalary.index')->with('success', 'Employee successfully updated.');
