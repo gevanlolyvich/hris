@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\Invoice;
 use App\Mail\UserCreate;
 use App\Models\Notification;
+use App\Models\Bank;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\EmployeeHomeHistory;
@@ -198,14 +199,21 @@ class UserController extends Controller
     public function profile()
     {
         $userDetail = \Auth::user();
+        // $employee   = Employee::where('user_id', $userDetail->id)->first();
+        $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+        $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+        $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
 
-        return view('user.profile')->with('userDetail', $userDetail);
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks'));
     }
 
     public function editprofile(Request $request)
     {
+        return $request;
         $userDetail = \Auth::user();
         $user       = User::findOrFail($userDetail['id']);
+
+        $request['email'] = !$request['email'] ? $user['email'] : $request['email'];
 
         $validator = \Validator::make(
             $request->all(),
@@ -301,6 +309,60 @@ class UserController extends Controller
             } else {
                 return redirect()->route('profile', $objUser->id)->with('error', __('Please enter correct current password.'));
             }
+        } else {
+            return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
+        }
+    }
+
+    public function updateBank(Request $request)
+    {
+        if (\Auth::Check()) {
+            $request->validate(
+                [
+                    'bank_id'               => 'required',
+                    'account_number'        => 'required',
+                    'account_holder_name'   => 'required',
+                    'tax_payer_id'          => 'required'
+                ]
+            );
+            // return $request;
+            $objUser          = Auth::user();
+
+            $objEmployee = Employee::where('user_id', Auth::user()->id)->first();
+            $objEmployee->bank_id = $request->bank_id;
+            $objEmployee->account_number = $request->account_number;
+            $objEmployee->account_holder_name = $request->account_holder_name;
+            $objEmployee->tax_payer_id = $request->tax_payer_id;
+            $objEmployee->save();
+
+            // return $objEmployee;
+            return redirect()->route('profile', $objUser->id)->with('success', __('Bank successfully updated.'));
+        } else {
+            return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
+        }
+    }
+
+    public function updateNationality(Request $request)
+    {
+        if (\Auth::Check()) {
+            $request->validate(
+                [
+                    'nationality'       => 'required',
+                    'identity_type'     => 'required',
+                    'identity_number'   => 'required',
+                ]
+            );
+            // return $request;
+            $objUser          = Auth::user();
+
+            $objEmployee = Employee::where('user_id', Auth::user()->id)->first();
+            $objEmployee->nationality = $request->nationality;
+            $objEmployee->identity_type = $request->identity_type;
+            $objEmployee->identity_number = $request->identity_number;
+            $objEmployee->save();
+
+            // return $objEmployee;
+            return redirect()->route('profile', $objUser->id)->with('success', __('Nationality successfully updated.'));
         } else {
             return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
         }

@@ -31,16 +31,18 @@ class Employee extends Model
         'department_id',
         'designation_id',
         'company_doj',
+        'nationality',
+        'identity_type',
+        'identity_number',
         'documents',
         'account_holder_name',
         'account_number',
-        'bank_name',
-        'bank_identifier_code',
-        'branch_location',
+        'bank_id',
         'tax_payer_id',
         'salary_type',
         'salary',
         'created_by',
+
     ];
 
     function getTotalWorkdays($employeeWorkdays, $month, $year)

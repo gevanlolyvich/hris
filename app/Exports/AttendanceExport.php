@@ -85,9 +85,9 @@ class AttendanceExport implements FromCollection, WithHeadings
                     $attendance->early_leaving,
                     $attendance->overtime,
                     $attendance->work_hours,
-                    $attendance->picture_in,
+                    strpos($attendance->picture_in, 'http') ? $attendance->picture_in : env('APP_URL') . $attendance->picture_in,
                     $attendance->coord_in ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_in), 0, -1)) : '-',
-                    $attendance->picture_out,
+                    strpos($attendance->picture_out, 'http') ? $attendance->picture_out : env('APP_URL') . $attendance->picture_out,
                     $attendance->coord_out ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_out), 0, -1)) : '-',
                 ]);
             }
