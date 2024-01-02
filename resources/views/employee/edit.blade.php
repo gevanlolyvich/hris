@@ -60,11 +60,11 @@
                                 </div>
                                 <div class="form-group col-md-12">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control ', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                    {!! Form::select('nationality', $nationalities, $employee->nationality, ['class' => 'form-control ', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control ', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                    {!! Form::select('identity_type', $identity_types, $employee->identity_type, ['class' => 'form-control ', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
@@ -245,8 +245,8 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="form-group col-md-6">
-                                        {!! Form::label('bank_name', __('Bank Name'), ['class' => 'form-label']) !!}
-                                        {!! Form::select('bank_id', $banks, null, ['class' => 'form-control']) !!}
+                                        {!! Form::label('bank_id', __('Bank Name'), ['class' => 'form-label']) !!}
+                                        {!! Form::select('bank_id', $banks, null, ['class' => 'form-control select2','placeholder' =>  __('Select Bank Name')]) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('account_number', __('Account Number'), ['class' => 'form-label']) !!}

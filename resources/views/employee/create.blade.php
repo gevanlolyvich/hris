@@ -37,7 +37,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         {!! Form::label('dob', __('Date of Birth'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {{ Form::date('dob', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off' ,'placeholder'=>'Select Date of Birth']) }}
+                                        {{ Form::date('dob', old('dob'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off' ,'placeholder'=>'Select Date of Birth']) }}
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -57,6 +57,21 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control ', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control ', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'placeholder'=>'Enter Identity Number']) !!}
+                                    {{-- <input class="form-control" name="identity_number"
+                                        type="text" id="identity_number" placeholder="{{ __('Enter Identity Number') }}"
+                                        value="" required autocomplete="identity_number"> --}}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('email', __('Email'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
@@ -84,11 +99,11 @@
                                 @csrf
                                 <div class="form-group col-md-6">
                                     {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('employee_id', null, ['class' => 'form-control','placeholder'=>"Enter Employee ID"]) !!}
+                                    {!! Form::text('employee_id', old('employee_id'), ['class' => 'form-control','placeholder'=>"Enter Employee ID"]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
-                                    {!! Form::text('personel_id', null, ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
+                                    {!! Form::text('personel_id', old('personel_id'), ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
                                 </div>
 
                                 <div class="form-group col-md-6">
@@ -119,7 +134,7 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}
-                                    {{ Form::date('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
+                                    {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}
@@ -203,6 +218,23 @@
                         <div class="card-body employee-detail-create-body">
                             <div class="row">
                                 <div class="form-group col-md-6">
+                                    {!! Form::label('bank_id', __('Bank Name'), ['class' => 'form-label']) !!}
+                                    {!! Form::select('bank_id', $banks, old('bank_id'), ['class' => 'form-control select2','placeholder' =>  __('Select Bank Name')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('account_number', __('Account Number'), ['class' => 'form-label']) !!}
+                                    {!! Form::number('account_number', old('account_number'), ['class' => 'form-control']) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
+                                    {!! Form::text('account_holder_name', old('account_holder_name'), ['class' => 'form-control']) !!}
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}
+                                    {!! Form::text('tax_payer_id', old('tax_payer_id'), ['class' => 'form-control']) !!}
+                                </div>
+                                {{-- <div class="form-group col-md-6">
                                     {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
                                     {!! Form::text('account_holder_name', old('account_holder_name'), ['class' => 'form-control' ,'placeholder'=>'Enter Account Holder Name']) !!}
 
@@ -228,7 +260,7 @@
                                 <div class="form-group col-md-6">
                                     {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}
                                     {!! Form::text('tax_payer_id', old('tax_payer_id'), ['class' => 'form-control' ,'placeholder'=>'Enter Tax Payer Id']) !!}
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

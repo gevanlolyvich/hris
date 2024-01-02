@@ -42,7 +42,6 @@ class Employee extends Model
         'salary_type',
         'salary',
         'created_by',
-
     ];
 
     function getTotalWorkdays($employeeWorkdays, $month, $year)

@@ -64,9 +64,11 @@ class EmployeeController extends Controller
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
-
+            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
             // return $shift_types;
-            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types'));
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -92,6 +94,9 @@ class EmployeeController extends Controller
                     'department_id' => 'required',
                     'designation_id' => 'required',
                     'document.*' => 'required',
+                    'nationality' => 'required',
+                    'identity_type' => 'required',
+                    'identity_number' => 'required'
                 ]
             );
             if ($validator->fails()) {
@@ -143,10 +148,11 @@ class EmployeeController extends Controller
                     'documents' => $document_implode,
                     'account_holder_name' => $request['account_holder_name'],
                     'account_number' => $request['account_number'],
-                    'bank_name' => $request['bank_name'],
-                    'bank_identifier_code' => $request['bank_identifier_code'],
-                    'branch_location' => $request['branch_location'],
+                    'bank_id' => $request['bank_id'],
                     'tax_payer_id' => $request['tax_payer_id'],
+                    'nationality' => $request['nationality'],
+                    'identity_type' => $request['identity_type'],
+                    'identity_number' => $request['identity_number'],
                     'created_by' => \Auth::user()->creatorId(),
                 ]
             );
@@ -232,6 +238,7 @@ class EmployeeController extends Controller
             $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
+            // return $employee;
 
             // return $employee;
             return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types'));
