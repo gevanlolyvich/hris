@@ -265,52 +265,55 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label class="col-form-label text-dark">{{ __('Birthdate') }}</label>
-                                        {{ Form::date('birthdate', $userDetail?->employee?->dob, [
-                                                'class' => 'form-control d_week', 'required' => 'required', 'autocomplete'=>'birthdate',
-                                                'id'=>'birthdate', 'required'=>'required', 'name'=>'birthdate'
-                                            ])
-                                        }}
+                                @if (\Auth::user()->type == 'employee')
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-form-label text-dark">{{ __('Birthdate') }}</label>
+                                            {{ Form::date('birthdate', $userDetail?->employee?->dob, [
+                                                    'class' => 'form-control d_week', 'required' => 'required', 'autocomplete'=>'birthdate',
+                                                    'id'=>'birthdate', 'required'=>'required', 'name'=>'birthdate'
+                                                ])
+                                            }}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label for="phone" class="col-form-label text-dark">{{ __('Phone Number') }}</label>
-                                        <input class="form-control" name="phone"
-                                            type="text" id="phone" placeholder="{{ __('Enter Phone') }}"
-                                            value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="phone" class="col-form-label text-dark">{{ __('Phone Number') }}</label>
+                                            <input class="form-control" name="phone"
+                                                type="text" id="phone" placeholder="{{ __('Enter Phone') }}"
+                                                value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
+                                        </div>
                                     </div>
-                                </div>
+                                    
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
+                                            {{ Form::textarea('address', $userDetail?->employee?->address, [
+                                                    'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
+                                                    'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
+                                                ])
+                                            }}
+                                            @error('address')
+                                                <span class="invalid-feedback text-danger text-xs"
+                                                    role="alert">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="coordinate" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
+                                            {{-- <button type="button" class="btn bg-primary form-control text-white" id="coordinate">{{__("Get Current Location Coordinate")}}</button> --}}
+                                            <button class="btn bg-primary form-control text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            {{ Form::label('location action', __('Location'), ['class' => 'col-form-label text-dark']) }}
+                                            <button class="btn bg-primary form-control text-white" type="button" id="show-map">{{__('Show Map')}}</button>
+                                        </div>
+                                    </div>
+                                @endif
                                 
-                                <div class="col-lg-12 col-sm-12">
-                                    <div class="form-group">
-                                        <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
-                                        {{ Form::textarea('address', $userDetail?->employee?->address, [
-                                                'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
-                                                'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
-                                            ])
-                                        }}
-                                        @error('address')
-                                            <span class="invalid-feedback text-danger text-xs"
-                                                role="alert">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label for="coordinate" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
-                                        {{-- <button type="button" class="btn bg-primary form-control text-white" id="coordinate">{{__("Get Current Location Coordinate")}}</button> --}}
-                                        <button class="btn bg-primary form-control text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        {{ Form::label('location action', __('Location'), ['class' => 'col-form-label text-dark']) }}
-                                        <button class="btn bg-primary form-control text-white" type="button" id="show-map">{{__('Show Map')}}</button>
-                                    </div>
-                                </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12" style="display: none;" id="map-box">
                                     <div class="form-group">
                                         {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
