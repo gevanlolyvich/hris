@@ -78,7 +78,7 @@ if (!empty($mode_setting['theme_color'])) {
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
                             class="logo logo-lg" width="50"height="50"/>
                     </a>
-                    <h4 style="margin-bottom: 0px">{{ $company_name . " ".__('HRIS') }}</h4>
+                    <h4 style="margin-bottom: 0px">{{ env('APP_NAME',"HRIS") }}</h4>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
                         aria-label="Toggle navigation">
