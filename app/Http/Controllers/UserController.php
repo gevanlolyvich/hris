@@ -209,7 +209,6 @@ class UserController extends Controller
 
     public function editprofile(Request $request)
     {
-        return $request;
         $userDetail = \Auth::user();
         $user       = User::findOrFail($userDetail['id']);
 
