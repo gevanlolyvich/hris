@@ -209,6 +209,15 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         <a href="#useradd-1"
                             class="list-group-item list-group-item-action border-0">{{ __('Personal Info') }} <div
                                 class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                        @if (\Auth::user()->type == 'employee')
+                        <a href="#useradd-3"
+                                class="list-group-item list-group-item-action border-0">{{ __('Bank') }} <div
+                                    class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                            <a href="#useradd-4"
+                                class="list-group-item list-group-item-action border-0">{{ __('Nationality') }} <div
+                                    class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                            
+                        @endif
                         <a href="#useradd-2"
                             class="list-group-item list-group-item-action border-0">{{ __('Change Password') }} <div
                                 class="float-end"><i class="ti ti-chevron-right"></i></div></a>
@@ -227,6 +236,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         <div class="card-body">
                             {{ Form::model($userDetail, ['route' => ['update.account'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                             @csrf
+                            
                             <input type="hidden" name="latitude" id="latitude" value="{{ explode(', ', $userDetail?->employee?->coordinate)[0] ?? 0 }}">
                             <input type="hidden" name="longitude" id="longitude" value="{{ explode(', ', $userDetail?->employee?->coordinate)[1] ?? 0 }}">
                             <input type="hidden" name="accuracy" id="accuracy" value="{{ explode(', ', $userDetail?->employee?->coordinate)[2] ?? 0 }}">
@@ -248,69 +258,62 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         <label for="email" class="col-form-label text-dark">{{ __('Email') }}</label>
                                         <input class="form-control @error('email') is-invalid @enderror" name="email"
                                             type="text" id="email" placeholder="{{ __('Enter Your Email Address') }}"
-                                            value="{{ $userDetail->email }}" required autocomplete="email">
+                                            value="{{ $userDetail->email }}" required autocomplete="email" disabled>
                                         @error('email')
                                             <span class="invalid-feedback text-danger text-xs"
                                                 role="alert">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label class="col-form-label text-dark">{{ __('Birthdate') }}</label>
-                                        {{ Form::date('birthdate', $userDetail?->employee?->dob, [
-                                                'class' => 'form-control d_week', 'required' => 'required', 'autocomplete'=>'birthdate',
-                                                'id'=>'birthdate', 'required'=>'required', 'name'=>'birthdate'
-                                            ])
-                                        }}
-                                        {{-- <input class="form-control @error('birthday') is-invalid @enderror" name="name"
-                                            type="text" id="name" placeholder="{{ __('Enter Your Name') }}"
-                                            value="{{ $userDetail->name }}" required autocomplete="name">
-                                        @error('name')
-                                            <span class="invalid-feedback text-danger text-xs"
-                                                role="alert">{{ $message }}</span>
-                                        @enderror --}}
+                                @if (\Auth::user()->type == 'employee')
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-form-label text-dark">{{ __('Birthdate') }}</label>
+                                            {{ Form::date('birthdate', $userDetail?->employee?->dob, [
+                                                    'class' => 'form-control d_week', 'required' => 'required', 'autocomplete'=>'birthdate',
+                                                    'id'=>'birthdate', 'required'=>'required', 'name'=>'birthdate'
+                                                ])
+                                            }}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label for="phone" class="col-form-label text-dark">{{ __('Phone') }}</label>
-                                        <input class="form-control" name="phone"
-                                            type="text" id="phone" placeholder="{{ __('Enter Phone') }}"
-                                            value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="phone" class="col-form-label text-dark">{{ __('Phone Number') }}</label>
+                                            <input class="form-control" name="phone"
+                                                type="text" id="phone" placeholder="{{ __('Enter Phone') }}"
+                                                value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-12 col-sm-12">
-                                    <div class="form-group">
-                                        <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
-                                        {{ Form::textarea('address', $userDetail?->employee?->address, [
-                                                'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
-                                                'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
-                                            ])
-                                        }}
-                                        {{-- <textarea rows="3" class="form-control @error('address') is-invalid @enderror" name="address"
-                                            id="address" placeholder="{{ __('Enter Your Address') }}"
-                                            value="{{ $userDetail?->employee?->address }}" required autocomplete="address">
-                                        </textarea> --}}
-                                        @error('address')
-                                            <span class="invalid-feedback text-danger text-xs"
-                                                role="alert">{{ $message }}</span>
-                                        @enderror
+                                    
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
+                                            {{ Form::textarea('address', $userDetail?->employee?->address, [
+                                                    'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
+                                                    'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
+                                                ])
+                                            }}
+                                            @error('address')
+                                                <span class="invalid-feedback text-danger text-xs"
+                                                    role="alert">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        <label for="coordinate" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
-                                        {{-- <button type="button" class="btn bg-primary form-control text-white" id="coordinate">{{__("Get Current Location Coordinate")}}</button> --}}
-                                        <button class="btn bg-primary form-control text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="coordinate" class="col-form-label text-dark">{{ __('Coordinate') }}</label>
+                                            {{-- <button type="button" class="btn bg-primary form-control text-white" id="coordinate">{{__("Get Current Location Coordinate")}}</button> --}}
+                                            <button class="btn bg-primary form-control text-white" style="margin-right: 15px" type="button" id="get-location">{{__('Search Location')}}</button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6">
-                                    <div class="form-group">
-                                        {{ Form::label('location action', __('Location'), ['class' => 'col-form-label text-dark']) }}
-                                        <button class="btn bg-primary form-control text-white" type="button" id="show-map">{{__('Show Map')}}</button>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            {{ Form::label('location action', __('Location'), ['class' => 'col-form-label text-dark']) }}
+                                            <button class="btn bg-primary form-control text-white" type="button" id="show-map">{{__('Show Map')}}</button>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
+                                
                                 <div class="col-lg-12 col-md-12 col-sm-12" style="display: none;" id="map-box">
                                     <div class="form-group">
                                         {{ Form::label('map', __('Map'), ['class' => 'form-label']) }}
@@ -408,6 +411,101 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                     </div>
                 </div>
 
+                @if (\Auth::user()->type == 'employee')
+                    <div id="useradd-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ __('Bank') }}</h5>
+                                <small> {{ __('Details about your bank information') }}</small>
+                            </div>
+                            <div class="card-body">
+                                {{ Form::model($userDetail, ['route' => ['update.bank', $userDetail->id], 'method' => 'post']) }}
+
+                                <div class="row">
+                                    {{-- Banks --}}
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="bank_id" class="col-form-label text-dark">{{ __('Bank Name') }}</label>
+                                            {{ Form::select('bank_id', $banks, $userDetail->employee?->bank_id, ['class' => 'form-control select2', 'id' => 'bank','placeholder' =>  __('Select Bank Name')]) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="account_number" class="col-form-label text-dark">{{ __('Account Number') }}</label>
+                                            <input class="form-control" name="account_number"
+                                                type="text" id="account_number" placeholder="{{ __('Enter Account Number') }}"
+                                                value="{{ $userDetail?->employee?->account_number }}" required autocomplete="account_number">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="account_holder_name" class="col-form-label text-dark">{{ __('Account Holder Name') }}</label>
+                                            <input class="form-control" name="account_holder_name"
+                                                type="text" id="account_holder_name" placeholder="{{ __('Enter Account Holder Name') }}"
+                                                value="{{ $userDetail?->employee?->account_holder_name }}" required autocomplete="account_holder_name">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6">
+                                        <div class="form-group">
+                                            <label for="tax_payer_id" class="col-form-label text-dark">{{ __('Tax Payer Id') }}</label>
+                                            <input class="form-control" name="tax_payer_id"
+                                                type="text" id="tax_payer_id" placeholder="{{ __('Enter Tax Payer Id') }}"
+                                                value="{{ $userDetail?->employee?->tax_payer_id }}" required autocomplete="tax_payer_id">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer pr-0">
+                                    {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                                </div>
+                                {{ Form::close() }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="useradd-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ __('Nationality') }}</h5>
+                                <small> {{ __('Details about your nationality information') }}</small>
+                            </div>
+                            <div class="card-body">
+                                {{ Form::model($userDetail, ['route' => ['update.nationality', $userDetail->id], 'method' => 'post']) }}
+
+                                <div class="row">
+                                    {{-- Nationality --}}
+                                    <div class="col-lg-4 col-sm-4">
+                                        <div class="form-group">
+                                            <label for="phone" class="col-form-label text-dark">{{ __('Nationality') }}</label>
+                                            {{ Form::select('nationality', $nationalities, $userDetail->employee?->nationality, ['class' => 'form-control ', 'id' => 'nationality','placeholder' =>  __('Select Nationality')]) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-sm-4">
+                                        <div class="form-group">
+                                            <label for="phone" class="col-form-label text-dark">{{ __('Identity Type') }}</label>
+                                            {{ Form::select('identity_type', $identity_types, $userDetail->employee?->identity_type, ['class' => 'form-control ', 'id' => 'identity_type','placeholder' =>  __('Select Identity Type')]) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-sm-4">
+                                        <div class="form-group">
+                                            <label for="identity_number" class="col-form-label text-dark">{{ __('Identity Number') }}</label>
+                                            <input class="form-control" name="identity_number"
+                                                type="text" id="identity_number" placeholder="{{ __('Enter Identity Number') }}"
+                                                value="{{ $userDetail?->employee?->identity_number }}" required autocomplete="identity_number">
+    
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer pr-0">
+                                    {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                                </div>
+                                {{ Form::close() }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
 
             </div>
 

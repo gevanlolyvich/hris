@@ -4,6 +4,7 @@ $logos=\App\Models\Utility::get_file('uploads/logo/');
 
 $logo = Utility::get_superadmin_logo();
 $company_favicon = Utility::getValByName('company_favicon');
+$company_name = Utility::getValByName('title_text');
 
 $dark_mode = Utility::getValByName('dark_mode');
 $theme_color = Utility::getValByName('theme_color');
@@ -39,7 +40,7 @@ if (!empty($mode_setting['theme_color'])) {
 
     <meta name="description" content="Dashboard Template Description" />
     <meta name="keywords" content="Dashboard Template" />
-    <meta name="author" content="Rajodiya Infotech" />
+    <meta name="author" content="SyafiqRM" />
 
     <!-- Favicon icon -->
     <link rel="icon" href="{{ asset(Storage::url('uploads/logo')) . '/favicon.png' }}" type="image/x-icon" />
@@ -77,7 +78,7 @@ if (!empty($mode_setting['theme_color'])) {
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
                             class="logo logo-lg" width="50"height="50"/>
                     </a>
-                    <h4 style="margin-bottom: 0px">{{ __('HRIS') }}</h4>
+                    <h4 style="margin-bottom: 0px">{{ env('APP_NAME',"HRIS") }}</h4>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
                         aria-label="Toggle navigation">
