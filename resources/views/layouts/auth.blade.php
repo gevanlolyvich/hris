@@ -40,7 +40,7 @@ if (!empty($mode_setting['theme_color'])) {
 
     <meta name="description" content="Dashboard Template Description" />
     <meta name="keywords" content="Dashboard Template" />
-    <meta name="author" content="Rajodiya Infotech" />
+    <meta name="author" content="SyafiqRM" />
 
     <!-- Favicon icon -->
     <link rel="icon" href="{{ asset(Storage::url('uploads/logo')) . '/favicon.png' }}" type="image/x-icon" />
