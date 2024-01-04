@@ -706,6 +706,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @if (Gate::check('Manage Department') ||
                     Gate::check('Manage Designation') ||
                     Gate::check('Manage Document Type') ||
+                    Gate::check('Manage Bank') ||
                     Gate::check('Manage Branch') ||
                     Gate::check('Manage Award Type') ||
                     Gate::check('Manage Termination Types') ||

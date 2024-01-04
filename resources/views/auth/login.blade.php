@@ -90,9 +90,8 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
         <div class="col-xl-6 img-card-side">
             <div class="auth-img-content">
                 <img src="{{ asset('assets/images/auth/img-auth-3.svg') }}" alt="" class="img-fluid">
-                <h3 class="text-white mb-4 mt-5"> {{ __('“Attention is the new currency”') }}</h3>
-                <p class="text-white"> {{__('The more effortless the writing looks, the more effort the writer
-                    actually put into the process.')}}</p>
+                <h4 class="text-white mb-4 mt-5"> {{ "“".__('Success is not achieved alone')."”" }}</h4>
+                <p class="text-white"> {{__('But through strong team collaboration. Every small step brings us closer to our common goal.')}}</p>
             </div>
         </div>
     </div>
