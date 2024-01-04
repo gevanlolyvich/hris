@@ -82,14 +82,14 @@ class EmployeeController extends Controller
                 $request->all(),
                 [
                     'employee_id' => 'required|unique:employees',
-                    'personel_id' => 'required|unique:employees',
+                    'personel_id' => 'nullable|unique:employees',
                     'shift_type_id' => 'required',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
-                    'email' => 'required|unique:users',
+                    'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
                     'department_id' => 'required',
                     'designation_id' => 'required',
@@ -253,6 +253,8 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
+                    'employee_id' => 'required|unique:employees',
+                    'personel_id' => 'required|unique:employees',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
