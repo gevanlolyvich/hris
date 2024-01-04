@@ -58,28 +58,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group col-md-12">
-                                    {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control ', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control ', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'placeholder'=>'Enter Identity Number']) !!}
-                                    {{-- <input class="form-control" name="identity_number"
-                                        type="text" id="identity_number" placeholder="{{ __('Enter Identity Number') }}"
-                                        value="" required autocomplete="identity_number"> --}}
-                                </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('email', __('Email'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::email('email', old('email'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee Email']) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('password', __('Password'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::password('password', ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee new Password']) !!}
+                                    {!! Form::password('password', ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter Password']) !!}
+                                </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control select2', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control select2', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>'Enter Identity Number']) !!}
                                 </div>
                             </div>
                             <div class="form-group">
@@ -98,31 +95,31 @@
                             <div class="row">
                                 @csrf
                                 <div class="form-group col-md-6">
-                                    {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}
-                                    {!! Form::text('employee_id', old('employee_id'), ['class' => 'form-control','placeholder'=>"Enter Employee ID"]) !!}
+                                    {!! Form::label('employee_id', __('Employee ID'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::text('employee_id', old('employee_id'), ['class' => 'form-control', 'required' => 'required', 'placeholder'=>"Enter Employee ID"]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
                                     {!! Form::text('personel_id', old('personel_id'), ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
                                 </div>
 
-                                <div class="form-group col-md-6">
-                                    {{ Form::label('branch_id', __('Select Branch*'), ['class' => 'form-label']) }}
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
                                     <div class="form-icon-user">
-                                        {{ Form::select('branch_id', $branches, null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => 'Select Branch']) }}
+                                        {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => 'Select Branch']) }}
                                     </div>
                                 </div>
 
-                                <div class="form-group col-md-6">
-                                    {{ Form::label('department_id', __('Select Department*'), ['class' => 'form-label']) }}
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
                                     <div class="form-icon-user">
                                         {{-- {{ $departements }} --}}
-                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control ', 'id' => 'department_id', 'required' => 'required' ,'placeholder' => 'Select Department']) }}
+                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control select2', 'id' => 'department_id', 'required' => 'required' ,'placeholder' => 'Select Department']) }}
                                     </div>
                                 </div>
 
-                                <div class="form-group col-md-6">
-                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                     <div class="form-icon-user">
                                         <div class="designation_div">
@@ -132,20 +129,21 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('shift_type_id', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {{ Form::select('managed_by', $employees, null, ['class' => 'form-control select2', 'id' => 'shift_type_id','placeholder' =>  __('Select Direct Supervisor')]) }}
+                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
+                                </div>
                                 <div class="form-group col-md-6">
-                                    {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}
+                                    {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
                                 </div>
                                 <div class="form-group col-md-6">
-                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}
+                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
                                     {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
                                 </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('shift_type_id', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}
-                                    {{ Form::select('managed_by', $employees, null, ['class' => 'form-control ', 'id' => 'shift_type_id','placeholder' =>  __('Select Direct Supervisor')]) }}
-                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
-                                </div>
+                                
                             </div>
                         </div>
                     </div>

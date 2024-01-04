@@ -64,10 +64,10 @@ class EmployeeController extends Controller
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
-            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
-            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
-            // return $shift_types;
+            $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+
             return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -82,14 +82,14 @@ class EmployeeController extends Controller
                 $request->all(),
                 [
                     'employee_id' => 'required|unique:employees',
-                    'personel_id' => 'required|unique:employees',
+                    'personel_id' => 'nullable|unique:employees',
                     'shift_type_id' => 'required',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
-                    'email' => 'required|unique:users',
+                    'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
                     'department_id' => 'required',
                     'designation_id' => 'required',
@@ -253,6 +253,8 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
+                    'employee_id' => 'required|unique:employees',
+                    'personel_id' => 'required|unique:employees',
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
