@@ -228,13 +228,15 @@ class EmployeeController extends Controller
     {
         $id = Crypt::decrypt($id);
         if (\Auth::user()->can('Edit Employee')) {
+            $branches         = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments      = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $department_id    = $departments->pluck('id')->toArray();
+            $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
             $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $branches     = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employee     = Employee::find($id);
             $employeesId  = ($employee->employee_id);
-            $employees    = Employee::where('is_active', 1)->get()->pluck('name', 'id');
             $shift_types  = ShiftType::get()->pluck('name', 'id');
             $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
