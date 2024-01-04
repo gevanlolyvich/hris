@@ -64,10 +64,10 @@ class EmployeeController extends Controller
             $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
-            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
-            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
-            // return $shift_types;
+            $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+
             return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
