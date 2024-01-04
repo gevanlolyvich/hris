@@ -13,12 +13,15 @@ use Illuminate\Support\Facades\Auth;
 
 class OvertimeController extends Controller
 {
-    public function index(Request $request) {
-        $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $branch->prepend('All', '');
+    public function index(Request $request) {   
+        $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
-        $department = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $department->prepend('All', '');
+        $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+
+        if (empty(\Auth::user()->branch_id)) {
+            $branch->prepend('All', '');
+            $department->prepend('All', '');
+        }
 
         $overtimes = null;
 
@@ -41,7 +44,7 @@ class OvertimeController extends Controller
 
             $overtimes = Overtime::whereIn('employee_id', $employees);
         } else {
-            $employees = Employee::select('id')->get()->pluck('id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->select('id')->get()->pluck('id') : Employee::select('id')->get()->pluck('id');
             $overtimes = Overtime::whereIn('employee_id', $employees);
         }
 
@@ -106,7 +109,7 @@ class OvertimeController extends Controller
                     $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
                 }
         } else {
-            $employees = Employee::where('is_active', 1)->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
         }
         return view('overtime.create', compact('employees'));
     }
@@ -192,7 +195,7 @@ class OvertimeController extends Controller
                         $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
                     }
                 } else {
-                    $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
                 return view('overtime.edit', compact('overtime', 'employees'));
             }

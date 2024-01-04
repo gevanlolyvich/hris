@@ -10,7 +10,7 @@ class CommissionController extends Controller
 {
     public function commissionCreate($id)
     {
-        $employee = Employee::where('is_active', 1)->find($id);
+        $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->find($id) : Employee::where('is_active', 1)->find($id);
         $commissions =Commission::$commissiontype;
 
         return view('commission.create', compact('employee','commissions'));

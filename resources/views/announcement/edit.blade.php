@@ -12,7 +12,7 @@
             <div class="form-group">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
                 
-                {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2']) }}
+                {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch'), 'id' => 'branch_id']) }}
             </div>
         </div>
 

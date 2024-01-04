@@ -166,7 +166,7 @@ class MeetingController extends Controller
                 if (Auth::user()->type == 'employee') {
                     $employees = Employee::where('is_active', 1)->where('user_id', '!=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 } else {
-                    $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
 
                 return view('meeting.edit', compact('meeting', 'employees', 'meeting_types'));

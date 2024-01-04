@@ -23,7 +23,8 @@ class ComplaintController extends Controller
             }
             else
             {
-                $complaints = Complaint::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
+                $complaints = !empty(\Auth::user()->branch_id) ? Complaint::whereIn('complaint_from', $employee_id)->get() : Complaint::get();
             }
 
             return view('complaint.index', compact('complaints'));
@@ -48,10 +49,9 @@ class ComplaintController extends Controller
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
-
 
             return view('complaint.create', compact('employees', 'current_employee'));
         }
@@ -149,8 +149,8 @@ class ComplaintController extends Controller
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             if($complaint->created_by == \Auth::user()->creatorId())
             {

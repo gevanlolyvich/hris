@@ -41,7 +41,8 @@ class AttendanceRequestController extends Controller
 
                 $attendance_requests   = AttendanceRequest::wherein('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
             } else {
-                $attendance_requests = AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
+                $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
+                $attendance_requests = !empty(\Auth::user()?->branch_id) ? AttendanceRequest::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get() : AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
             }
             // return $attendance_requests;
             return view('attendancerequest.index', compact('attendance_requests'));
@@ -56,7 +57,7 @@ class AttendanceRequestController extends Controller
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('is_active', 1)->where('created_by', Auth::user()->created_by)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('attendancerequest.create', compact('employees'));
@@ -139,7 +140,7 @@ class AttendanceRequestController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
-                $employees  = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
                 return view('attendancerequest.edit', compact('employees', 'attendance_request'));
             } else {

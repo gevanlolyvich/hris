@@ -18,4 +18,9 @@ class Event extends Model
         'location_coord',
         'created_by',
     ];
+
+    public function eventEmployees()
+    {
+        return $this->hasMany(EventEmployee::class);
+    }
 }

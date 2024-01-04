@@ -12,7 +12,9 @@
                 <div class="form-icon-user">
                     <select class="form-control " name="branch_id" placeholder="Select Branch" id="branch_id">
                         <option value="">{{ __('Select Branch') }}</option>
-                        <option value="0">{{ __('All Branch') }}</option>
+                        @if (empty(\Auth::user()->branch_id))
+                            <option value="0">{{ __('All Branch') }}</option>
+                        @endif
                         @foreach ($branch as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                         @endforeach

@@ -8,6 +8,7 @@ use App\Mail\UserCreate;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Utility;
+use App\Models\Branch;
 use App\Models\EmployeeHomeHistory;
 use File;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class UserController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage User')) {
-            $users = User::where('created_by', '=', \Auth::user()->id)->get();
+            $users = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get() : User::withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
 
             return view('user.index', compact('users'));
         } else {
@@ -37,7 +38,9 @@ class UserController extends Controller
             $user  = \Auth::user();
             $roles = Role::where('created_by', '=', $user->creatorId())->where('name', '!=', 'employee')->get()->pluck('name', 'id');
 
-            return view('user.create', compact('roles'));
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
+            return view('user.create', compact('roles', 'branches'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -73,6 +76,7 @@ class UserController extends Controller
                     'lang' => !empty($default_language) ? $default_language->value : '',
                     'created_by' => \Auth::user()->id,
                     'email_verified_at' => $date,
+                    'branch_id' => $request->branch_id,
                 ]
             );
             $user->assignRole($role_r);
@@ -104,9 +108,11 @@ class UserController extends Controller
     {
         if (\Auth::user()->can('Edit User')) {
             $user  = User::find($id);
-            $roles = Role::where('created_by', '=', $user->creatorId())->where('name', '!=', 'employee')->get()->pluck('name', 'id');
+            $roles = Role::where('created_by', '=', $user->creatorId())->get()->pluck('name', 'id');
 
-            return view('user.edit', compact('user', 'roles'));
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
+            return view('user.edit', compact('user', 'roles', 'branches'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }

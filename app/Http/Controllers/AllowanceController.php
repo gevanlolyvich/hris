@@ -13,7 +13,11 @@ class AllowanceController extends Controller
     {
 
         $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employee          = Employee::where('is_active', 1)->find($id);
+        if (!empty(\Auth::user()->branch_id)) {
+            $employee          = Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->find($id);
+        } else {
+            $employee          = Employee::where('is_active', 1)->find($id);
+        }
 
         return view('allowance.create', compact('employee', 'allowance_options'));
     }

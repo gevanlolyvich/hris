@@ -32,6 +32,11 @@ class Ticket extends Model
         }
     }
 
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
+    }
+
     public function createdBy()
     {
         return $this->hasOne('App\Models\user', 'id', 'ticket_created');

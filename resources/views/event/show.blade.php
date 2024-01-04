@@ -741,17 +741,17 @@
                             <tbody>
                                 @foreach ($event_employees as $eventP)
                                     <tr>
-                                        <td>{{ $eventP->employee->name }}</td>
+                                        <td>{{ $eventP?->employee?->name }}</td>
                                         <td>
-                                            {{ !empty(\Auth::user()->getBranch($eventP->employee->branch_id)) ? \Auth::user()->getBranch($eventP->employee->branch_id)->name : '' }}
+                                            {{ !empty(\Auth::user()->getBranch($eventP->employee?->branch_id)) ? \Auth::user()->getBranch($eventP->employee->branch_id)->name : '' }}
                                         </td>
                                         <td>
-                                            {{ !empty(\Auth::user()->getDepartment($eventP->employee->department_id)) ? \Auth::user()->getDepartment($eventP->employee->department_id)->name : '' }}
+                                            {{ !empty(\Auth::user()->getDepartment($eventP->employee?->department_id)) ? \Auth::user()->getDepartment($eventP->employee->department_id)->name : '' }}
                                         </td>
                                         <td>
-                                            {{ !empty(\Auth::user()->getDesignation($eventP->employee->designation_id)) ? \Auth::user()->getDesignation($eventP->employee->designation_id)->name : '' }}
+                                            {{ !empty(\Auth::user()->getDesignation($eventP->employee?->designation_id)) ? \Auth::user()->getDesignation($eventP->employee->designation_id)->name : '' }}
                                         </td>
-                                        @if (\Auth::user()?->employee?->id == $eventP->employee->id || \Auth::user()->type != 'employee')
+                                        @if (\Auth::user()?->employee?->id == $eventP->employee?->id || \Auth::user()->type != 'employee')
                                             <td>
                                                 <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
                                                     data-event-employee-id="{{ $eventP->id }}"
@@ -767,7 +767,7 @@
                                                     <i class="fa fa-solid fa-file-import"></i>
                                                 </button>
                                             </td>
-                                        @elseif (\Auth::user()?->employee ? in_array($eventP->employee->id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) : false || \Auth::user()->type != 'employee')
+                                        @elseif (\Auth::user()?->employee ? in_array($eventP->employee?->id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) : false || \Auth::user()->type != 'employee')
                                             <td>
                                                 <button class="btn btn-success btn-sm clock-data" data-bs-toggle="tooltip"
                                                     data-event-employee-id="{{ $eventP->id }}"

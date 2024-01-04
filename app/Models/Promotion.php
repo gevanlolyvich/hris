@@ -17,11 +17,11 @@ class Promotion extends Model
 
     public function designation()
     {
-        return $this->hasMany('App\Models\Designation', 'id', 'designation_id')->first();
+        return $this->belongsTo(Designation::class, 'designation_id', 'id');
     }
 
     public function employee()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id')->first();
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }

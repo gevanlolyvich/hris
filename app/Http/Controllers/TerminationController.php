@@ -19,9 +19,9 @@ class TerminationController extends Controller
         if (\Auth::user()->can('Manage Termination')) {
             if (Auth::user()->type == 'employee') {
                 $emp          = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->orderBy('termination_date', 'DESC')->get();
+                $terminations = Termination::where('employee_id', '=', $emp->id)->orderBy('termination_date', 'DESC')->get();
             } else {
-                $terminations = Termination::where('created_by', '=', \Auth::user()->creatorId())->orderBy('termination_date', 'DESC')->get();
+                $terminations = !empty(\Auth::user()->branch_id) ? Termination::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('termination_date', 'DESC')->get() : Termination::orderBy('termination_date', 'DESC')->get();
             }
 
             return view('termination.index', compact('terminations'));
@@ -33,8 +33,8 @@ class TerminationController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Termination')) {
-            $employees        = Employee::where('created_by', \Auth::user()->creatorId())->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
-            $terminationtypes = TerminationType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $terminationtypes = TerminationType::get()->pluck('name', 'id');
 
             return view('termination.create', compact('employees', 'terminationtypes'));
         } else {
@@ -109,9 +109,11 @@ class TerminationController extends Controller
             })->orWhere(function ($query) use ($termination) {
                 // Get the current employee from termination data
                 $query->where('id', $termination->employee_id);
-            })->orderby('name', 'asc')->get()->pluck('name', 'id');
+            })->orderby('name', 'asc');
 
-            $terminationtypes = TerminationType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees        = !empty(\Auth::user()->branch_id) ? $employees->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : $employees->get()->pluck('name', 'id');
+
+            $terminationtypes = TerminationType::get()->pluck('name', 'id');
 
             if ($termination->created_by == \Auth::user()->creatorId()) {
 

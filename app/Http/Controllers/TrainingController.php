@@ -19,7 +19,7 @@ class TrainingController extends Controller
     {
         if(\Auth::user()->can('Manage Training'))
         {
-            $trainings = Training::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $trainings = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->get() : Training::get();
             $status    = Training::$Status;
 
             return view('training.index', compact('trainings', 'status'));
@@ -35,10 +35,10 @@ class TrainingController extends Controller
     {
         if(\Auth::user()->can('Create Training'))
         {
-            $branches      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $trainingTypes = TrainingType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $trainers      = Trainer::where('created_by', \Auth::user()->creatorId())->get()->pluck('firstname', 'id');
-            $employees     = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $trainingTypes = TrainingType::get()->pluck('name', 'id');
+            $trainers      = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
+            $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.create', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options'));
@@ -97,7 +97,12 @@ class TrainingController extends Controller
     public function show($id)
     {
         $traId       = Crypt::decrypt($id);
-        $training    = Training::find($traId);
+        $training    = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->find($traId) : Training::find($traId);
+
+        if (empty($training)) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $performance = Training::$performance;
         $status      = Training::$Status;
 
@@ -109,10 +114,10 @@ class TrainingController extends Controller
     {
         if(\Auth::user()->can('Create Training'))
         {
-            $branches      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $trainingTypes = TrainingType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $trainers      = Trainer::where('created_by', \Auth::user()->creatorId())->get()->pluck('firstname', 'id');
-            $employees     = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $trainingTypes = TrainingType::get()->pluck('name', 'id');
+            $trainers      = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
+            $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.edit', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options', 'training'));

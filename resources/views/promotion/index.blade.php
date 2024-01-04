@@ -47,9 +47,9 @@
                             @foreach ($promotions as $promotion)
                                 <tr>
                                     @role('company')
-                                        <td>{{ !empty($promotion->employee()) ? $promotion->employee()->name : '' }}</td>
+                                        <td>{{ !empty($promotion->employee) ? $promotion->employee->name : '' }}</td>
                                     @endrole
-                                    <td>{{ !empty($promotion->designation()) ? $promotion->designation()->name : '' }}
+                                    <td>{{ !empty($promotion->designation()) ? $promotion->designation->name : '' }}
                                     </td>
                                     <td>{{ $promotion->promotion_title }}</td>
                                     <td>{{ \Auth::user()->dateFormat($promotion->promotion_date) }}</td>

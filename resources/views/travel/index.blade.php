@@ -48,7 +48,7 @@
                             @foreach ($travels as $travel)
                                 <tr>
                                     @role('company')
-                                        <td>{{ !empty($travel->employee()) ? $travel->employee()->name : '' }}</td>
+                                        <td>{{ !empty($travel->employee) ? $travel->employee->name : '' }}</td>
                                     @endrole
                                     <td>{{ \Auth::user()->dateFormat($travel->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($travel->end_date) }}</td>

@@ -44,7 +44,7 @@ class EmployeeController extends Controller
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get();
             } else {
-                $employees = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get();
+                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
             }
 
             return view('employee.index', compact('employees'));
@@ -57,11 +57,12 @@ class EmployeeController extends Controller
     {
         if (\Auth::user()->can('Create Employee')) {
             $company_settings = Utility::settings();
-            $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $branches         = Branch::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $departments      = Department::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $designations     = Designation::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $employees        = Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $documents        = Document::get();
+            $branches         = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments      = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $department_id    = $departments->pluck('id')->toArray();
+            $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             // return $shift_types;
@@ -220,14 +221,15 @@ class EmployeeController extends Controller
     {
         $id = Crypt::decrypt($id);
         if (\Auth::user()->can('Edit Employee')) {
-            $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $branches     = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employee     = Employee::find($id);
-            $employeesId  = ($employee->employee_id);
-            $employees    = Employee::where('is_active', 1)->get()->pluck('name', 'id');
-            $shift_types  = ShiftType::get()->pluck('name', 'id');
+            $documents     = Document::get();
+            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments   = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $department_id = $departments->pluck('id')->toArray();
+            $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employee      = Employee::find($id);
+            $employeesId   = ($employee->employee_id);
+            $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $shift_types   = ShiftType::get()->pluck('name', 'id');
 
             // return $employee;
             return view('employee.edit', compact('shift_types','employee','employees', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
@@ -360,13 +362,14 @@ class EmployeeController extends Controller
     public function show($id)
     {
         if (\Auth::user()->can('Show Employee')) {
-            $empId        = Crypt::decrypt($id);
-            $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $branches     = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments  = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employee     = Employee::find($empId);
-            $employeesId  = $employee->employee_id;
+            $empId         = Crypt::decrypt($id);
+            $documents     = Document::get();
+            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments   = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $department_id = $departments->pluck('id')->toArray();
+            $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employee      = Employee::find($empId);
+            $employeesId   = $employee->employee_id;
 
             return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
         } else {
@@ -376,14 +379,16 @@ class EmployeeController extends Controller
 
     public function json(Request $request)
     {
-        $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+        $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
+        $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
 
         return response()->json($designations);
     }
 
     function employeeNumber()
     {
-        $latest = Employee::where('created_by', '=', \Auth::user()->creatorId())->latest('id')->first();
+        $latest = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->latest('id')->first() : Employee::latest('id')->first();
         if (!$latest) {
             return 1;
         }
@@ -448,7 +453,7 @@ class EmployeeController extends Controller
 
     public function lastLogin()
     {
-        $users = User::where('created_by', \Auth::user()->creatorId())->get();
+        $users = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->get() : User::get();
 
         return view('employee.lastLogin', compact('users'));
     }

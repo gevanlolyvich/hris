@@ -155,16 +155,18 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Meeting title') }}</th>
-                                <th>{{ __('Meeting Date') }}</th>
-                                <th>{{ __('Meeting Time') }}</th>
+                                <th>{{ __('Type') }}</th>
+                                <th>{{ __("Start Date") }}</th>
+                                <th>{{ __('End Date') }}</th>
                             </tr>
                         </thead>
                         <tbody class="list">
                             @foreach ($meetings as $meeting)
                                 <tr>
                                     <td>{{ $meeting->title }}</td>
-                                    <td>{{ \Auth::user()->dateFormat($meeting->date) }}</td>
-                                    <td>{{ \Auth::user()->timeFormat($meeting->time) }}</td>
+                                    <td>{{ $meeting->meeting_type }}</td>
+                                    <td>{{ $meeting->start_time }}</td>
+                                    <td>{{ $meeting->end_time }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -387,17 +389,19 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Title') }}</th>
-                                            <th>{{ __('Date') }}</th>
-                                            <th>{{ __('Time') }}</th>
+                                            <th>{{ __('Meeting title') }}</th>
+                                            <th>{{ __('Type') }}</th>
+                                            <th>{{ __("Start Date") }}</th>
+                                            <th>{{ __('End Date') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="list">
                                         @foreach ($meetings as $meeting)
                                             <tr>
                                                 <td>{{ $meeting->title }}</td>
-                                                <td>{{ \Auth::user()->dateFormat($meeting->date) }}</td>
-                                                <td>{{ \Auth::user()->timeFormat($meeting->time) }}</td>
+                                                <td>{{ $meeting->meeting_type }}</td>
+                                                <td>{{ $meeting->start_time }}</td>
+                                                <td>{{ $meeting->end_time }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

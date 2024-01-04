@@ -21,9 +21,9 @@ class IndicatorController extends Controller
             if ($user->type == 'employee') {
                 $employee = Employee::where('user_id', $user->id)->first();
 
-                $indicators = Indicator::where('created_by', '=', $user->creatorId())->where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->get();
+                $indicators = Indicator::where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->get();
             } else {
-                $indicators = Indicator::where('created_by', '=', $user->creatorId())->get();
+                $indicators = !empty(\Auth::user()->branch_id) ? Indicator::where('branch', \Auth::user()->branch_id)->get() : Indicator::get();
             }
 
             return view('indicator.index', compact('indicators'));
@@ -36,11 +36,13 @@ class IndicatorController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Indicator')) {
-            $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $brances     = Branch::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $performance_types = Performance_Type::get();
+            $brances     = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $departments->prepend('Select Department', '');
-            $degisnation = Designation::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+
+            $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Department::get()->pluck('id')->toArray();
+            $degisnation = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             return view('indicator.create', compact('performance_types', 'brances', 'departments', 'degisnation'));
         } else {
@@ -89,7 +91,7 @@ class IndicatorController extends Controller
     public function show(Indicator $indicator)
     {
         $ratings = json_decode($indicator->rating, true);
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
+        $performance_types = Performance_Type::get();
         // $technicals      = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'technical')->get();
         // $organizationals = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'organizational')->get();
         // $behaviourals = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'behavioural')->get();
@@ -101,11 +103,13 @@ class IndicatorController extends Controller
     public function edit(Indicator $indicator)
     {
         if (\Auth::user()->can('Edit Indicator')) {
-            $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $brances     = Branch::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $performance_types = Performance_Type::get();
+            $brances     = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $departments->prepend('Select Department', '');
-            $degisnation = Designation::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+
+            $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Department::get()->pluck('id')->toArray();
+            $degisnation = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             $ratings = json_decode($indicator->rating, true);
 

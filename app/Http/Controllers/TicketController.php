@@ -16,10 +16,10 @@ class TicketController extends Controller
 {
     public function index()
     {   
-        $countTicket      = Ticket::where('created_by', '=', \Auth::user()->creatorId())->count();
-        $countOpenTicket  = Ticket::where('status', '=', 'open')->where('created_by', '=', \Auth::user()->creatorId())->count();
-        $countonholdTicket  = Ticket::where('status', '=', 'onhold')->where('created_by', '=', \Auth::user()->creatorId())->count();
-        $countCloseTicket = Ticket::where('status', '=', 'close')->where('created_by', '=', \Auth::user()->creatorId())->count();
+        $countTicket        = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->count() : Ticket::count();
+        $countOpenTicket    = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'open')->count() : Ticket::where('status', '=', 'open')->count();
+        $countonholdTicket  = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'onhold')->count() : Ticket::where('status', '=', 'onhold')->count();
+        $countCloseTicket   = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'close')->count() : Ticket::where('status', '=', 'close')->count();
 
 
         $arr=[];
@@ -31,7 +31,7 @@ class TicketController extends Controller
             if ($user->type == 'employee') {
                 $tickets = Ticket::where('employee_id', '=', \Auth::user()->id)->orWhere('ticket_created', \Auth::user()->id)->get();
             } else {
-                $tickets = Ticket::select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->where('users.created_by', '=', \Auth::user()->creatorId())->orWhere('tickets.created_by', \Auth::user()->creatorId())->get();
+                $tickets = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get() : Ticket::select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get();
             }
 
             return view('ticket.index', compact('tickets','countTicket','countOpenTicket','countonholdTicket','countCloseTicket','ticket_arr'));
@@ -43,7 +43,7 @@ class TicketController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Ticket')) {
-            $employees = User::where('created_by', '=', \Auth::user()->creatorId())->where('type', '=', 'employee')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->where('type', '=', 'employee')->get()->pluck('name', 'id') : User::where('type', '=', 'employee')->get()->pluck('name', 'id');
 
             return view('ticket.create', compact('employees'));
         } else {
@@ -91,12 +91,12 @@ class TicketController extends Controller
             $ticket->description = $request->description;
 
             $ticket->ticket_created = \Auth::user()->id;
-            $ticket->created_by     = \Auth::user()->creatorId();
+            $ticket->created_by     = \Auth::user()->id;
             $ticket->status         = 'open';
             $ticket->save();
 
             // slack 
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $emp = User::where('id', $request->employee_id)->first();
             if (isset($setting['ticket_notification']) && $setting['ticket_notification'] == 1) {
                 $msg = ("New Support ticket created of") . ' ' . $request->priority . ' ' . __("priority for") . ' ' . $emp->name . '.';
@@ -104,7 +104,7 @@ class TicketController extends Controller
             }
 
             //telegram
-            $setting = Utility::settings(\Auth::user()->creatorId());
+            $setting = Utility::settings();
             $emp = User::where('id', $request->employee_id)->first();
             if (isset($setting['telegram_ticket_notification']) && $setting['telegram_ticket_notification'] == 1) {
                 $msg = ("New Support ticket created of") . ' ' . $request->priority . ' ' . __("priority for") . ' ' . $emp->name . '.';
@@ -112,8 +112,8 @@ class TicketController extends Controller
             }
 
              // twilio 
-             $setting = Utility::settings(\Auth::user()->creatorId());
-             $emp = Employee::where('id', $request->employee_id = \Auth::user()->id)->first();
+             $setting = Utility::settings();
+             $emp = Employee::where('id', \Auth::user()->id)->first();
              if (isset($setting['twilio_ticket_notification']) && $setting['twilio_ticket_notification'] == 1) {
                  $msg = ("New Support ticket created of") . ' ' . $request->priority . ' ' . __("priority for") . ' ' . $emp->name . ' ';
                  Utility::send_twilio_msg($emp->phone,$msg);
@@ -149,7 +149,7 @@ class TicketController extends Controller
     {
         $ticket = Ticket::find($ticket);
         if (\Auth::user()->can('Edit Ticket')) {
-            $employees = User::where('created_by', '=', \Auth::user()->creatorId())->where('type', '=', 'employee')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->where('type', '=', 'employee')->get()->pluck('name', 'id') : User::where('type', '=', 'employee')->get()->pluck('name', 'id');
 
             return view('ticket.edit', compact('ticket', 'employees'));
         } else {
@@ -213,7 +213,7 @@ class TicketController extends Controller
 
     public function reply($ticket)
     {
-        $ticketreply = TicketReply::where('ticket_id', '=', $ticket)->orderBy('id', 'DESC')->get();
+        $ticketreply = !empty(\Auth::user()->branch_id) ? TicketReply::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('ticket_id', '=', $ticket)->orderBy('id', 'DESC')->get() : TicketReply::where('ticket_id', '=', $ticket)->orderBy('id', 'DESC')->get();
         $ticket      = Ticket::find($ticket);
         if (\Auth::user()->type == 'employee') {
             $ticketreplyRead = TicketReply::where('ticket_id', $ticket->id)->where('created_by', '!=', \Auth::user()->id)->update(['is_read' => '1']);
@@ -246,12 +246,7 @@ class TicketController extends Controller
         $ticket_reply->ticket_id   = $request->ticket_id;
         $ticket_reply->employee_id = $ticket->employee_id;
         $ticket_reply->description = $request->description;
-        if (\Auth::user()->type == 'employee') {
-            $ticket_reply->created_by = Auth::user()->id;
-        } else {
-            $ticket_reply->created_by = Auth::user()->creatorId();
-        }
-
+        $ticket_reply->created_by  = Auth::user()->id;
         $ticket_reply->save();
 
         return redirect()->route('ticket.reply', $ticket_reply->ticket_id)->with('success', __('Ticket Reply successfully Send.'));

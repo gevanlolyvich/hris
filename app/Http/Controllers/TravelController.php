@@ -20,11 +20,11 @@ class TravelController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $emp     = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $travels = Travel::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->get();
+                $travels = Travel::where('employee_id', '=', $emp->id)->get();
             }
             else
             {
-                $travels = Travel::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $travels = !empty(\Auth::user()->branch_id) ? Travel::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Travel::get();
             }
 
             return view('travel.index', compact('travels'));
@@ -39,7 +39,7 @@ class TravelController extends Controller
     {
         if(\Auth::user()->can('Create Travel'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('travel.create', compact('employees'));
         }
@@ -76,11 +76,11 @@ class TravelController extends Controller
             $travel->purpose_of_visit = $request->purpose_of_visit;
             $travel->place_of_visit          = $request->place_of_visit;
             $travel->description      = $request->description;
-            $travel->created_by       = \Auth::user()->creatorId();
+            $travel->created_by       = \Auth::user()->id;
             $travel->save();
 
              // twilio
-             $setting = Utility::settings(\Auth::user()->creatorId());
+             $setting = Utility::settings();
              $emp = Employee::find($request->employee_id);
              if (isset($setting['twilio_trip_notification']) && $setting['twilio_trip_notification'] == 1) {
                  $msg = $request->purpose_of_visit . ' ' . __("is created to visit") . ' ' . $request->place_of_visit . ' ' . __("for") . ' ' . $emp->name . ' ' . __("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
@@ -124,8 +124,8 @@ class TravelController extends Controller
 
         if(\Auth::user()->can('Edit Travel'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            if($travel->created_by == \Auth::user()->creatorId())
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            if($travel->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 return view('travel.edit', compact('travel', 'employees'));
             }
@@ -144,7 +144,7 @@ class TravelController extends Controller
     {
         if(\Auth::user()->can('Edit Travel'))
         {
-            if($travel->created_by == \Auth::user()->creatorId())
+            if($travel->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
 
                 $validator = \Validator::make(
@@ -189,7 +189,7 @@ class TravelController extends Controller
     {
         if(\Auth::user()->can('Delete Travel'))
         {
-            if($travel->created_by == \Auth::user()->creatorId())
+            if($travel->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $travel->delete();
 

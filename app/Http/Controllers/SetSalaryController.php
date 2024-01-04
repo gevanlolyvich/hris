@@ -126,11 +126,7 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->can('Manage Set Salary'))
         {
-            $employees = Employee::where('is_active', 1)->where(
-                [
-                    'created_by' => \Auth::user()->creatorId(),
-                ]
-            )->orderby('name', 'asc')->get();
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }
@@ -144,10 +140,10 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->can('Edit Set Salary'))
         {
-            $payslip_type      = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $payslip_type      = PayslipType::get()->pluck('name', 'id');
+            $allowance_options = AllowanceOption::get()->pluck('name', 'id');
+            $loan_options      = LoanOption::get()->pluck('name', 'id');
+            $deduction_options = DeductionOption::get()->pluck('name', 'id');
             if(\Auth::user()->type == 'employee')
             {
                 $currentEmployee      = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->first();
@@ -193,11 +189,18 @@ class SetSalaryController extends Controller
         $start_date           = date($year . '-' . $month . '-01');
         $end_date             = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
-        $payslip_type         = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $allowance_options    = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $loan_options         = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $deduction_options    = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id)->first() : Employee::find($id);
+        $payslip_type         = PayslipType::get()->pluck('name', 'id');
+        $allowance_options    = AllowanceOption::get()->pluck('name', 'id');
+        $loan_options         = LoanOption::get()->pluck('name', 'id');
+        $deduction_options    = DeductionOption::get()->pluck('name', 'id');
+        $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id) : Employee::where('id', $id);
+        
+        $employee             = !empty(\Auth::user()->branch_id) ? $employee->where('branch_id', \Auth::user()->branch_id)->first() : $employee->first();
+
+        if (empty($employee)) {
+            return redirect()->back()->with('error', __('Permission denied'));
+        }
+        
         $allowances           = Allowance::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $commissions          = Commission::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
         $loans                = Loan::where('employee_id', $employee->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
@@ -210,11 +213,11 @@ class SetSalaryController extends Controller
         $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         foreach ( $allowances as  $value) {
-            if(  $value->type == 'percentage' )
+            if($value->type == 'percentage' )
         {
-            $employee          = Employee::find($value->employee_id);
-            $empsal  = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            $employee           = Employee::find($value->employee_id);
+            $empsal             = $value->amount * $employee->salary / 100;
+            $value->tota_allow  = $empsal;
             }
         }
 
@@ -282,7 +285,7 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->type == "employee")
         {
-            $employees = Employee::where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get();
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get() : Employee::where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }
@@ -291,7 +294,7 @@ class SetSalaryController extends Controller
     public function employeeBasicSalary($id)
     {
 
-        $payslip_type = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $payslip_type = PayslipType::get()->pluck('name', 'id');
         $employee     = Employee::find($id);
 
         return view('setsalary.basic_salary', compact('employee', 'payslip_type'));
