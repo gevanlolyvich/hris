@@ -1,3 +1,3 @@
-name;dob;gender;phone;address;email;password;employee_id;branch_id;company_doj;nationality(WNI/WNA);identity_type(KTP/SIM/Passport);identity_number;tax_payer_id;shift_type_id
+name;date_of_birth;gender;phone;address;email;password;employee_id;branch_id;company_date_of_join;nationality(WNI/WNA);identity_type(KTP/SIM/Passport);identity_number;tax_payer_id;shift_type_id
 naruto;2000-12-09;Male;(021) 22908800;Jl. Tebet Barat IV No.20, RT.7/RW.2, Tebet Bar., Kec. Tebet, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12810;naruto@example.com;1234;406680253;1;2000-12-09;WNI;KTP;780049298;78004999298;1
 sasuke;2000-12-09;Female;(021) 22908800;Jl. Tebet Barat IV No.20, RT.7/RW.2, Tebet Bar., Kec. Tebet, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12811;sasuke@example.com;1234;412740521;1;2000-12-09;WNI;KTP;722830836;;1
