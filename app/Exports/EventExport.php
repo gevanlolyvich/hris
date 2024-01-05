@@ -14,13 +14,13 @@ class EventExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = Event::get();
+        $data = !empty(\Auth::user()?->branch_id) ? Event::where('branch_id', \Auth::user()->branch_id)->orderby('start_date', 'DESC')->get() : Event::orderby('start_date', 'DESC')->get();
 
         foreach ($data as $k => $events) {
             $data[$k]["branch_id"]     = Branch::where('id',$events->branch_id)->pluck('name')->first();
             // dd(json_decode($events->department_id));
         }
-        // dd($data);
+
         return $data;
     }
 

@@ -11,14 +11,11 @@ class TrainingTypeController extends Controller
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Training Type'))
-        {
-            $trainingtypes = TrainingType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Training Type')) {
+            $trainingtypes = TrainingType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
 
             return view('trainingtype.index', compact('trainingtypes'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -26,12 +23,9 @@ class TrainingTypeController extends Controller
 
     public function create()
     {
-        if(\Auth::user()->can('Create Training Type'))
-        {
+        if (\Auth::user()->can('Create Training Type')) {
             return view('trainingtype.create');
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -39,16 +33,15 @@ class TrainingTypeController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Training Type'))
-        {
+        if (\Auth::user()->can('Create Training Type')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -60,9 +53,7 @@ class TrainingTypeController extends Controller
             $trainingtype->save();
 
             return redirect()->route('trainingtype.index')->with('success', __('TrainingType  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -77,21 +68,15 @@ class TrainingTypeController extends Controller
     public function edit($id)
     {
 
-        if(\Auth::user()->can('Edit Training Type'))
-        {
+        if (\Auth::user()->can('Edit Training Type')) {
             $trainingType = TrainingType::find($id);
-            if($trainingType->created_by == \Auth::user()->creatorId())
-            {
+            if ($trainingType->created_by == \Auth::user()->creatorId()) {
 
                 return view('trainingtype.edit', compact('trainingType'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -99,30 +84,25 @@ class TrainingTypeController extends Controller
 
     public function update(Request $request, $id)
     {
-        if(\Auth::user()->can('Edit Training Type'))
-        {
+        if (\Auth::user()->can('Edit Training Type')) {
             $trainingType = TrainingType::find($id);
-            if($trainingType->created_by == \Auth::user()->creatorId())
-            {
+            if ($trainingType->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required',
+                    $request->all(),
+                    [
+                        'name' => 'required',
 
-                                   ]
+                    ]
                 );
 
                 $trainingType->name = $request->name;
                 $trainingType->save();
 
                 return redirect()->route('trainingtype.index')->with('success', __('TrainingType successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -130,30 +110,22 @@ class TrainingTypeController extends Controller
 
     public function destroy($id)
     {
-        if(\Auth::user()->can('Delete Training Type'))
-        {
+        if (\Auth::user()->can('Delete Training Type')) {
 
             $trainingType = TrainingType::find($id);
-            if($trainingType->created_by == \Auth::user()->creatorId())
-            {
-                $trainings = Training::where('training_type',$trainingType->id)->get();
-                if(count($trainings) == 0){
+            if ($trainingType->created_by == \Auth::user()->creatorId()) {
+                $trainings = Training::where('training_type', $trainingType->id)->get();
+                if (count($trainings) == 0) {
 
                     $trainingType->delete();
-                }else
-                {
+                } else {
                     return redirect()->route('trainingtype.index')->with('error', __('This TrainingType has Training List. Please remove the Training List from this TrainingType.'));
-
                 }
                 return redirect()->route('trainingtype.index')->with('success', __('TrainingType successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }

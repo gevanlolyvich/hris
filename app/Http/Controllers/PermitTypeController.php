@@ -14,7 +14,7 @@ class PermitTypeController extends Controller
     public function index()
     {
         if (Auth::user()->type !== 'employee') {
-            $permittypes = PermitType::all();
+            $permittypes = PermitType::orderBy('id', 'ASC')->get();
 
             return view('permittype.index', compact('permittypes'));
         } else {

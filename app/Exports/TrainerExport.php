@@ -14,7 +14,7 @@ class TrainerExport implements FromCollection,WithHeadings
     */
     public function collection()
     {
-        $data=Trainer::get();
+        $data = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get() : Trainer::get();
         foreach($data as $k=>$trainer)
         {
             $data[$k]["branch"]=!empty($trainer->branches)?$trainer->branches->name:'';

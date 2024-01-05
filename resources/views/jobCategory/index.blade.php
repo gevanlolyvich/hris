@@ -29,6 +29,7 @@
                 <table class="table" id="pc-dt-simple">
                     <thead>
                         <tr>
+                            <th width="10px">ID</th>
                             <th>{{ __('Category') }}</th>
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
@@ -36,6 +37,7 @@
                     <tbody>
                         @foreach ($categories as $category)
                             <tr>
+                                <td>{{ $category->id }}</td>
                                 <td>{{ $category->title }}</td>
                                 <td class="Action">
                                     <span>

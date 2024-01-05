@@ -5,6 +5,7 @@ namespace App\Exports;
 
 use App\Models\Employee;
 use App\Models\PaySlip;
+use App\Models\Bank;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Facades\Log;
@@ -35,18 +36,18 @@ class PayslipExport implements FromCollection, WithHeadings
 
         foreach($data as $k => $payslip)
         {
-            $result[] = array(
-                'employee_id'=> !empty($payslip->employees) ? $payslip->employees->employee_id : '',
-                'employee_name' => (!empty($payslip->employees)) ? $payslip->employees->name : '',
+            $bank       = Bank::find($payslip?->employees?->bank_id);
+            $result[]   = array(
+                'employee_id'=> !empty($payslip->employees) ? $payslip->employees->employee_id : '-',
+                'employee_name' => (!empty($payslip->employees)) ? $payslip->employees->name : '-',
                 'basic_salary' => \Auth::user()->priceFormat($payslip->basic_salary),
                 'net_salary' =>  \Auth::user()->priceFormat($payslip->net_payble),
                 'status' =>  $payslip->status == 0 ? 'UnPaid' :  'Paid',
-                'account_holder_name' =>  (!empty($payslip->employees)) ? $payslip->employees->account_holder_name : '',
-                'account_number' =>  (!empty($payslip->employees)) ? $payslip->employees->account_number : '',
-                'bank_name' =>  (!empty($payslip->employees)) ? $payslip->employees->bank_name : '',
-                'bank_identifier_code' => (!empty($payslip->employees)) ? $payslip->employees->bank_identifier_code : '',
-                'branch_location' =>   (!empty($payslip->employees)) ? $payslip->employees->branch_location : '',
-                'tax_payer_id' =>  (!empty($payslip->employees)) ? $payslip->employees->tax_payer_id : '',
+                'account_holder_name' =>  (empty($payslip->employees)) ? '-' : $payslip?->employees?->account_holder_name ?? '-',
+                'account_number' =>  (empty($payslip->employees)) ? '-' : $payslip?->employees?->account_number ?? '-',
+                'bank_name' =>  $bank->name ?? '-',
+                'bank_identifier_code' => $bank->code ?? '-',
+                'tax_payer_id' =>  (empty($payslip->employees)) ? '-' : $payslip->employees->tax_payer_id ?? '-',
 
             );
         }
@@ -59,7 +60,6 @@ class PayslipExport implements FromCollection, WithHeadings
         return [
             "EMP ID",
             "Name",
-//            "Payroll Type",
             "Salary",
             "Net Salary",
             "Status",
@@ -67,9 +67,7 @@ class PayslipExport implements FromCollection, WithHeadings
             "Account Number",
             "Bank Name",
             "Bank Identifier Code",
-            "Branch Location",
             "Tax Payer Id",
-
         ];
     }
 }
