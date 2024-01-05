@@ -11,7 +11,7 @@ class AwardTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Award Type')) {
-            $awardtypes = AwardType::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $awardtypes = AwardType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
 
             return view('awardtype.index', compact('awardtypes'));
         } else {

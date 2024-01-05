@@ -10,7 +10,7 @@ class PaymentTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Payment Type')) {
-            $paymenttypes = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $paymenttypes = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
 
             return view('paymenttype.index', compact('paymenttypes'));
         } else {

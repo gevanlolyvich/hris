@@ -30,6 +30,7 @@
                     <table class="table" id="pc-dt-simple">
                     <thead>
                         <tr>
+                            <th width="10px">ID</th>
                             <th>{{ __('Loan Option') }}</th>
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
@@ -37,6 +38,7 @@
                     <tbody>
                         @foreach ($loanoptions as $loanoption)
                             <tr>
+                                <td>{{ $loanoption->id }}</td>
                                 <td>{{ $loanoption->name }}</td>
                                 <td class="Action">
                                     <span>

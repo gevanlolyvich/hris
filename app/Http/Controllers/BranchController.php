@@ -12,45 +12,38 @@ class BranchController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Branch'))
-        {
-            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get() : Branch::orderBy('name', 'ASC')->get();
+        if (\Auth::user()->can('Manage Branch')) {
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('id', 'ASC')->get() : Branch::orderBy('id', 'ASC')->get();
 
             return view('branch.index', compact('branches'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Branch'))
-        {
+        if (\Auth::user()->can('Create Branch')) {
             return view('branch.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Branch'))
-        {
+        if (\Auth::user()->can('Create Branch')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                                   'tolerance' => 'required',
-                                   'latitude' => 'required',
-                                   'longitude' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'tolerance' => 'required',
+                    'latitude' => 'required',
+                    'longitude' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -65,9 +58,7 @@ class BranchController extends Controller
             $branch->save();
 
             return redirect()->route('branch.index')->with('success', __('Branch  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -79,40 +70,32 @@ class BranchController extends Controller
 
     public function edit(Branch $branch)
     {
-        if(\Auth::user()->can('Edit Branch'))
-        {
-            if($branch->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Branch')) {
+            if ($branch->created_by == \Auth::user()->creatorId()) {
 
                 return view('branch.edit', compact('branch'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Branch $branch)
     {
-        if(\Auth::user()->can('Edit Branch'))
-        {
-            if($branch->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Branch')) {
+            if ($branch->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required',
-                                       'tolerance' => 'required',
-                                       'latitude' => 'required',
-                                       'longitude' => 'required',
-                                   ]
+                    $request->all(),
+                    [
+                        'name' => 'required',
+                        'tolerance' => 'required',
+                        'latitude' => 'required',
+                        'longitude' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -125,45 +108,32 @@ class BranchController extends Controller
                 $branch->save();
 
                 return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Branch $branch)
     {
-        if(\Auth::user()->can('Delete Branch'))
-        {
-            if($branch->created_by == \Auth::user()->creatorId())
-            {
-                $employee     = Employee::where('branch_id',$branch->id)->get();
-                if(count($employee) == 0)
-                {
-                    $department = Department::where('branch_id',$branch->id)->first();
-                    Designation::where('department_id',$department->branch_id)->delete();
+        if (\Auth::user()->can('Delete Branch')) {
+            if ($branch->created_by == \Auth::user()->creatorId()) {
+                $employee     = Employee::where('branch_id', $branch->id)->get();
+                if (count($employee) == 0) {
+                    $department = Department::where('branch_id', $branch->id)->first();
+                    Designation::where('department_id', $department->branch_id)->delete();
                     $department->delete();
                     $branch->delete();
-                }
-                else
-                {
+                } else {
                     return redirect()->route('branch.index')->with('error', __('This branch has employees. Please remove the employee from this branch.'));
                 }
                 return redirect()->route('branch.index')->with('success', __('Branch successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -171,12 +141,9 @@ class BranchController extends Controller
     public function getdepartment(Request $request)
     {
 
-        if($request->branch_id == 0)
-        {
+        if ($request->branch_id == 0) {
             $departments = Department::get()->pluck('name', 'id')->toArray();
-        }
-        else
-        {
+        } else {
             $departments = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
         }
 
@@ -185,12 +152,9 @@ class BranchController extends Controller
 
     public function getemployee(Request $request)
     {
-        if(in_array('0', $request->department_id))
-        {
+        if (in_array('0', $request->department_id)) {
             $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
-        }
-        else
-        {
+        } else {
             $employees = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
 

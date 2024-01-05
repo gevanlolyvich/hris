@@ -12,7 +12,7 @@ class CompetenciesController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Competencies')) {
-            $competencies = Competencies::where('created_by', \Auth::user()->creatorId())->get();
+            $competencies = Competencies::where('created_by', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
             return view('competencies.index', compact('competencies'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

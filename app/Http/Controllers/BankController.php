@@ -11,7 +11,7 @@ class BankController extends Controller
     {
 
         if (\Auth::user()->can('Manage Bank')) {
-            $banks = Bank::orderBy('name', 'ASC')->get();
+            $banks = Bank::orderBy('id', 'ASC')->get();
 
             return view('bank.index', compact('banks'));
         } else {

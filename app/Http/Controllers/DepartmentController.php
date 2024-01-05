@@ -13,7 +13,7 @@ class DepartmentController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Department')) {
-            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get() : Department::orderBy('name', 'ASC')->get();
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('id', 'ASC')->get() : Department::orderBy('id', 'ASC')->get();
 
             return view('department.index', compact('departments'));
         } else {

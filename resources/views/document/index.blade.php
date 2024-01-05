@@ -28,6 +28,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Document') }}</th>
                                 <th>{{ __('Required Field') }}</th>
                                 @if (Gate::check('Edit Document Type') || Gate::check('Delete Document Type'))
@@ -38,6 +39,7 @@
                         <tbody>
                             @foreach ($documents as $document)
                                 <tr>
+                                    <td>{{ $document->id }}</td>
                                     <td>{{ $document->name }}</td>
                                     <td>
                                         <h6 class="float-left mr-1">

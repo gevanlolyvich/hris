@@ -29,6 +29,7 @@
                 <table class="table" id="pc-dt-simple">
                     <thead>
                         <tr>
+                            <th width="10px">ID</th>
                             <th>{{ __('Termination Type') }}</th>
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
@@ -36,6 +37,7 @@
                     <tbody>
                         @foreach ($terminationtypes as $terminationtype)
                             <tr>
+                                <td>{{ $terminationtype->id }}</td>
                                 <td>{{ $terminationtype->name }}</td>
                                 <td class="Action">
                                     <span>

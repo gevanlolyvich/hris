@@ -28,6 +28,7 @@
                         <table class="table datatable">
                             <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{__('Branch')}}</th>
                                 <th width="200px">{{__('Action')}}</th>
                             </tr>
@@ -35,6 +36,7 @@
                             <tbody >
                             @foreach ($branches as $branch)
                                 <tr>
+                                    <td>{{ $branch->id }}</td>
                                     <td>{{ $branch->name }}</td>
                                     <td class="Action">
                                         <span>

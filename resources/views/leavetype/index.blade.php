@@ -29,6 +29,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Leave Type') }}</th>
                                 <th>{{ __('Days / Year') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -37,6 +38,7 @@
                         <tbody>
                             @foreach ($leavetypes as $leavetype)
                                 <tr>
+                                    <td>{{ $leavetype->id }}</td>
                                     <td>{{ $leavetype->title }}</td>
                                     <td>{{ $leavetype->days }}</td>
                                     <td class="Action">
