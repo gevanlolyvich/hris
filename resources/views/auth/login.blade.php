@@ -75,6 +75,10 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
 
                         <div class="d-grid">
                             <button type="submit" class="login-do-btn btn btn-primary btn-block mt-2" tabindex="4">{{ __('Login') }}</button>
+                            <span class="mt-3 text-muted">{{ __('Get our Android app by clicking on the icon below.') }}</span>
+                            <a href="{{ asset('storage/uploads/apk/HRIS.apk') }}" class="mt-2" target="_blank" rel="noopener noreferrer">
+                                <img src="{{ asset('assets/images/android-download.png') }}" height="40" width="120">
+                            </a>
                         </div>
 
                         @if(Utility::getValByName('disable_signup_button')=='on')
