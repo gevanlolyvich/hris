@@ -106,7 +106,7 @@
                                     </div>
                                     <div class="form-group col-md-12">
                                         {{ Form::label('department_id', __('Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control ', 'id' => 'department_id', 'required' => 'required']) }}
+                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control select2', 'id' => 'department_id', 'required' => 'required','placeholder' => __('Select Department')]) }}
                                     </div>
                                     <div class="form-group col-md-12">
                                         {{ Form::label('designation_id', __('Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
@@ -120,7 +120,7 @@
                                     </div>
                                     <div class="form-group col-md-12">
                                         {!! Form::label('managed_by', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {{ Form::select('managed_by', $employees, null, ['class' => 'form-control ', 'id' => 'managed_by', 'required' => 'required' ,'placeholder' =>  __('Select Direct Supervisor')]) }}
+                                        {{ Form::select('managed_by', $employees, null, ['class' => 'form-control select2', 'id' => 'managed_by', 'required' => 'required' ,'placeholder' =>  __('Select Direct Supervisor')]) }}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
