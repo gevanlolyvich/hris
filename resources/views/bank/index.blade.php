@@ -30,6 +30,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Bank Name') }}</th>
                                 <th>{{ __('Bank Code') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -38,6 +39,7 @@
                         <tbody>
                             @foreach ($banks as $bank)
                                 <tr>
+                                    <td>{{ $bank->id }}</td>
                                     <td>{{ $bank->name }}</td>
                                     <td>{{ $bank->code }}</td>
                                     <td class="Action">

@@ -14,7 +14,7 @@ class DesignationController extends Controller
         if (\Auth::user()->can('Manage Designation')) {
 
             $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Department::get()->pluck('id')->toArray();
-            $designations = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get();
+            $designations = Designation::whereIn('department_id', $department_id)->orderBy('id', 'ASC')->get();
 
             return view('designation.index', compact('designations'));
         } else {

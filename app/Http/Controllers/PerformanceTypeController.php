@@ -15,7 +15,7 @@ class PerformanceTypeController extends Controller
      */
     public function index()
     {
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->id)->get();
+        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->id)->orderBy('id', 'ASC')->get();
         return view('performance_type.index', compact('performance_types'));
     }
 
@@ -26,11 +26,9 @@ class PerformanceTypeController extends Controller
      */
     public function create()
     {
-        if(\Auth::user()->can('Create Performance Type'))
-        {
-        return view('performance_type.create');
-        }
-        else{
+        if (\Auth::user()->can('Create Performance Type')) {
+            return view('performance_type.create');
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -82,11 +80,10 @@ class PerformanceTypeController extends Controller
      */
     public function edit($id)
     {
-        if(\Auth::user()->can('Edit Performance Type'))
-        {
-                    $performance_type  = Performance_Type::find($id);
-                    return view('performance_type.edit', compact('performance_type'));
-        }else{
+        if (\Auth::user()->can('Edit Performance Type')) {
+            $performance_type  = Performance_Type::find($id);
+            return view('performance_type.edit', compact('performance_type'));
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -126,34 +123,24 @@ class PerformanceTypeController extends Controller
      * @param  \App\Models\Performance_Type  $performance_Type
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Performance_Type $performance_Type,$id)
+    public function destroy(Performance_Type $performance_Type, $id)
     {
 
-        if(\Auth::user()->can('Delete Performance Type'))
-        {
-            if(\Auth::user()->type == 'company')
-            {
+        if (\Auth::user()->can('Delete Performance Type')) {
+            if (\Auth::user()->type == 'company') {
                 $performance_Type = Performance_Type::findOrFail($id);
                 $competencies = Competencies::where('type', $performance_Type->id)->get();
-                if(count($competencies) == 0){
+                if (count($competencies) == 0) {
 
                     $performance_Type->delete();
-                }else{
+                } else {
                     return redirect()->route('performanceType.index')->with('error', __('This Performance Type has Competencies. Please remove the Competencies from this Performance Type.'));
-
                 }
 
                 return redirect()->route('performanceType.index')->with('success', __('Performance Type successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
         }
     }
 }
-
-
-
-
-

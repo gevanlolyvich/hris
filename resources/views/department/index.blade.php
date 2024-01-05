@@ -31,6 +31,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -39,6 +40,7 @@
                         <tbody>
                             @foreach ($departments as $department)
                                 <tr>
+                                    <td>{{ $department->id }}</td>
                                     <td>{{ !empty($department->branch) ? $department->branch->name : '' }}</td>
                                     <td>{{ $department->name }}</td>
 

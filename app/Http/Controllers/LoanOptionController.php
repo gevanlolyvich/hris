@@ -11,7 +11,7 @@ class LoanOptionController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Loan Option')) {
-            $loanoptions = LoanOption::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $loanoptions = LoanOption::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
 
             return view('loanoption.index', compact('loanoptions'));
         } else {

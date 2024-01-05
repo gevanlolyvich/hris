@@ -34,6 +34,7 @@
                         <table class="table datatable">
                             <thead>
                                 <tr>
+                                    <th width="10px">ID</th>
                                     <th>{{__('Contract Type')}}</th>
                                     <th width="250px">{{__('Action')}}</th>
                                 </tr>
@@ -41,6 +42,7 @@
                             <tbody >
                                 @foreach ($contractTypes as $contractType)
                                 <tr>
+                                    <td>{{ $contractType->id }}</td>
                                     <td>{{ $contractType->name }}</td>
                                     <td class="Action">
                                         <span>

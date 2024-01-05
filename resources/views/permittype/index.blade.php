@@ -29,6 +29,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <td width="10px">ID</td>
                                 <th>{{ __('Permit Type') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -36,6 +37,7 @@
                         <tbody>
                             @foreach ($permittypes as $permittype)
                                 <tr>
+                                    <td>{{ $permittype->id }}</td>
                                     <td>{{ $permittype->name }}</td>
                                     <td class="Action">
                                         <span>

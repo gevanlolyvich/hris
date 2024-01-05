@@ -11,14 +11,11 @@ class JobCategoryController extends Controller
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Job Category'))
-        {
-            $categories = JobCategory::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Job Category')) {
+            $categories = JobCategory::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
 
             return view('jobCategory.index', compact('categories'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -32,17 +29,16 @@ class JobCategoryController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Job Category'))
-        {
+        if (\Auth::user()->can('Create Job Category')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'title' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'title' => 'required',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -54,9 +50,7 @@ class JobCategoryController extends Controller
             $jobCategory->save();
 
             return redirect()->back()->with('success', __('Job category  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -75,17 +69,16 @@ class JobCategoryController extends Controller
 
     public function update(Request $request, JobCategory $jobCategory)
     {
-        if(\Auth::user()->can('Edit Job Category'))
-        {
+        if (\Auth::user()->can('Edit Job Category')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'title' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'title' => 'required',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -95,9 +88,7 @@ class JobCategoryController extends Controller
             $jobCategory->save();
 
             return redirect()->back()->with('success', __('Job category  successfully updated.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -105,29 +96,20 @@ class JobCategoryController extends Controller
 
     public function destroy(JobCategory $jobCategory)
     {
-        if(\Auth::user()->can('Delete Job Category'))
-        {
-            if($jobCategory->created_by == \Auth::user()->creatorId())
-            {
-                $jobs = Job::where('category',$jobCategory->id)->get();
-                if(count($jobs) == 0)
-                {
+        if (\Auth::user()->can('Delete Job Category')) {
+            if ($jobCategory->created_by == \Auth::user()->creatorId()) {
+                $jobs = Job::where('category', $jobCategory->id)->get();
+                if (count($jobs) == 0) {
                     $jobCategory->delete();
-                }
-                else
-                {
+                } else {
                     return redirect()->back()->with('error', __('This Job category has Job. Please remove the Job from this Job category.'));
                 }
 
                 return redirect()->back()->with('success', __('Job category successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
