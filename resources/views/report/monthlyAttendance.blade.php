@@ -60,23 +60,23 @@
                             <div class="btn-box">
 
                                 {{ Form::label('month', __(' Month'), ['class' => 'form-label']) }}
-                                {{ Form::date('month', isset($_GET['month']) ? $_GET['month'] : '', ['class' => 'month-btn form-control  ', 'autocomplete' => 'off', 'placeholder' => 'Select month']) }}
+                                {{ Form::month('month', isset($_GET['month']) ? $_GET['month'] : date('Y-m'), ['class' => 'month-btn form-control', 'autocomplete' => 'off', 'placeholder' => 'Select month']) }}
 
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                        <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
                             <div class="btn-box">
 
                                 {{ Form::label('branch', __('Branch'), ['class' => 'form-label']) }}
-                                {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select']) }}
+                                {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select2']) }}
 
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
+                        <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12 col-12 mx-2">
                             <div class="btn-box">
 
                                 {{ Form::label('department', __('Department'), ['class' => 'form-label']) }}
-                                {{ Form::select('department', $department, isset($_GET['department']) ? $_GET['department'] : '', ['class' => 'form-control select']) }}
+                                {{ Form::select('department', $department, isset($_GET['department']) ? $_GET['department'] : '', ['class' => 'form-control select2']) }}
 
                             </div>
                         </div>

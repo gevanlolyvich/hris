@@ -16,7 +16,7 @@ class TrainerController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Trainer')) {
-            $trainers = Trainer::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $trainers = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get() : Trainer::get();
 
             return view('trainer.index', compact('trainers'));
         } else {
@@ -28,7 +28,7 @@ class TrainerController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Trainer')) {
-            $branches = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
             return view('trainer.create', compact('branches'));
         } else {
@@ -84,7 +84,7 @@ class TrainerController extends Controller
     public function edit(Trainer $trainer)
     {
         if (\Auth::user()->can('Edit Trainer')) {
-            $branches = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
             return view('trainer.edit', compact('branches', 'trainer'));
         } else {

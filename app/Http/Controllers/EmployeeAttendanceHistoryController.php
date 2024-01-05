@@ -26,10 +26,10 @@ class EmployeeAttendanceHistoryController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('All', '');
 
-            $department = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
             $employees = null;
@@ -57,7 +57,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
                 $employees = $employees->orderby('name', 'asc')->get();
             } else {
-                $employee = Employee::where('created_by', \Auth::user()->creatorId());
+                $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
                 if (!empty($request->branch)) {
                     $employee->where('branch_id', $request->branch);
                 }
@@ -66,7 +66,7 @@ class EmployeeAttendanceHistoryController extends Controller
                     $employee->where('department_id', $request->department);
                 }
 
-                $employees = $employee->orderby('name', 'asc')->get();
+                $employees = $employee->get();
             }
             return view('employeeattendancehistory.index', compact('employees', 'branch', 'department'));
         } else {

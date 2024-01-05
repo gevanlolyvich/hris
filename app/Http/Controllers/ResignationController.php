@@ -19,11 +19,11 @@ class ResignationController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $emp          = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $resignations = Resignation::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->get();
+                $resignations = Resignation::where('employee_id', '=', $emp->id)->get();
             }
             else
             {
-                $resignations = Resignation::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $resignations = !empty(\Auth::user()->branch_id) ? Resignation::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderby('notice_date', 'DESC')->get() : Resignation::orderby('notice_date', 'DESC')->get();
             }
 
             return view('resignation.index', compact('resignations'));
@@ -38,7 +38,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Create Resignation'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('resignation.create', compact('employees'));
         }
@@ -129,7 +129,7 @@ class ResignationController extends Controller
     {
         if(\Auth::user()->can('Edit Resignation'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             if($resignation->created_by == \Auth::user()->creatorId())
             {
 

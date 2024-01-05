@@ -24,10 +24,10 @@ class TimeSheetController extends Controller
             }
             else
             {
-                $employeesList = Employee::where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
+                $employeesList = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'user_id') : Employee::orderby('name', 'asc')->get()->pluck('name', 'user_id');
                 $employeesList->prepend('All', '');
 
-                $timesheets = TimeSheet::where('created_by', \Auth::user()->creatorId());
+                $timesheets = !empty(\Auth::user()->branch_id) ? TimeSheet::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC'); }) : TimeSheet::whereHas('employee', function ($query) { $query->orderby('name', 'ASC'); });
 
                 if(!empty($request->start_date) && !empty($request->end_date))
                 {
@@ -55,7 +55,7 @@ class TimeSheetController extends Controller
 
         if(\Auth::user()->can('Create TimeSheet'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'user_id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'user_id');
 
             return view('timeSheet.create', compact('employees'));
         }
@@ -111,7 +111,7 @@ class TimeSheetController extends Controller
 
         if(\Auth::user()->can('Edit TimeSheet'))
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'user_id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'user_id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'user_id');
             $timeSheet = Timesheet::find($id);
 
             return view('timeSheet.edit', compact('timeSheet', 'employees'));

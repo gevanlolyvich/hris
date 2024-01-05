@@ -26,7 +26,7 @@ class AppraisalController extends Controller
             }
             else
             {
-                $appraisals = Appraisal::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $appraisals = !empty(\Auth::user()->branch_id) ? Appraisal::where('branch', \Auth::user()->branch_id)->get() : Appraisal::get();
                 $competencyCount = Competencies::where('created_by', '=', $user->creatorId())->count();
             }
 
@@ -43,10 +43,10 @@ class AppraisalController extends Controller
     {
         if(\Auth::user()->can('Create Appraisal'))
         {
-            $employee   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name','id') : Employee::where('is_active', 1)->get()->pluck('name','id');
             $employee->prepend('Select Employee', '');
             
-            $brances = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name','id') : Branch::get()->pluck('name','id');
 
             $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
 
@@ -65,7 +65,7 @@ class AppraisalController extends Controller
         {
             $validator = \Validator::make(
                 $request->all(), [
-                                   'brances' => 'required',
+                                   'branch' => 'required',
                                    'employee' => 'required',
                                    'rating'=> 'required',
                                ]
@@ -78,7 +78,7 @@ class AppraisalController extends Controller
             }
 
             $appraisal                 = new Appraisal();
-            $appraisal->branch         = $request->brances;
+            $appraisal->branch         = $request->branch;
             $appraisal->employee       = $request->employee;
             $appraisal->appraisal_date = $request->appraisal_date;
             $appraisal->rating         = json_encode($request->rating, true);
@@ -108,10 +108,10 @@ class AppraisalController extends Controller
         {
             $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
 
-            $employee   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->get()->pluck('name','id');
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name','id') : Employee::where('is_active', 1)->get()->pluck('name','id');
             $employee->prepend('Select Employee', '');
             
-            $brances = Branch::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name','id') : Branch::get()->pluck('name','id');
 
             $rating = json_decode($appraisal->rating,true);
 
@@ -207,7 +207,7 @@ class AppraisalController extends Controller
     }
     public function getemployee(Request $request)
     {
-        $data['employee'] = Employee::where('is_active', 1)->where('branch_id',$request->branch_id)->get();
+        $data['employee'] = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->get();
 
     
 

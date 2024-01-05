@@ -5,15 +5,16 @@
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('branch', __('Branch*'), ['class' => 'col-form-label']) }}
+                {{ Form::select('branch', $brances, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch'), 'id' => 'branch_id']) }}
                
-                <select name="brances" id="brances" required class="form-control ">
+                {{-- <select name="brances" id="brances" required class="form-control ">
                     <option selected disabled value="0">Select Category</option>
         
                     @foreach ($brances as $value)
         
                         <option value="{{ $value->id }}">{{ $value->name }}</option>
                     @endforeach
-                </select>
+                </select> --}}
             </div>
         </div>
 
@@ -22,16 +23,13 @@
             <div class="form-group">
                 {{ Form::label('employee', __('Employee*'), ['class' => 'form-label']) }}
               
-                <div class="employee_div">
-                   
+                <div class="employee_div">            
                     <select name="employee" id="employee" class="form-control " required>
                     </select>
                 </div>
             </div>
         </div>
         
-        
-
         <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('appraisal_date', __('Select Month*'), ['class' => 'col-form-label']) }}
@@ -59,8 +57,9 @@
 
     <script>
         
-        $('#employee').change(function(){
+        $('#employee').on('change', function(){
 
+            console.log('changing employee');
             var emp_id = $('#employee').val();
             $.ajax({
                 url: "{{ route('empByStar') }}",
@@ -72,6 +71,7 @@
                 
                 cache: false,
                 success: function(data) {
+                    console.log(data);
                     $('#stares').html(data.html);
                 }
             })

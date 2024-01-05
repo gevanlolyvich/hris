@@ -20,6 +20,6 @@ class Travel extends Model
 
     public function employee()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id')->first();
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }

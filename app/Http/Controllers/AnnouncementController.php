@@ -10,6 +10,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Models\Utility;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AnnouncementController extends Controller
 {
@@ -17,7 +18,7 @@ class AnnouncementController extends Controller
     {
         if (\Auth::user()->can('Manage Announcement')) {
 
-            if (Auth::user()->type == 'employee') {
+            if (\Auth::user()->type == 'employee') {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
                 $announcements    = Announcement::orderBy('announcements.id', 'desc')->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', $current_employee?->id)->orWhere(
                     function ($q) {
@@ -26,7 +27,13 @@ class AnnouncementController extends Controller
                 )->get();
             } else {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $announcements    = Announcement::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $announcements    = null;
+                if (!empty(\Auth::user()->branch_id)) {
+                    $announcements    = Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('start_date', 'DESC');
+                } else {
+                    $announcements    = Announcement::orderBy('start_date', 'DESC');
+                }
+                $announcements    = $announcements->get();
             }
 
             return view('announcement.index', compact('announcements', 'current_employee'));
@@ -38,11 +45,20 @@ class AnnouncementController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Announcement')) {
-            $employees   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employees   = null;
+            $branch      = null;
+            $departments = null;
+            if (!empty(\Auth::user()->branch_id)) {
+                $employees   = Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $branch      = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $departments = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get();
+            } else {
+                $employees   = Employee::where('is_active', 1)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $branch      = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $departments = Department::orderby('name', 'ASC')->get();
+            }
             // $employees = Employee::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             // $employees->prepend('All', 0);
-            $branch      = Branch::where('created_by', '=', Auth::user()->created_by)->get();
-            $departments = Department::where('created_by', '=', Auth::user()->created_by)->get();
 
             return view('announcement.create', compact('employees', 'branch', 'departments'));
         } else {
@@ -125,7 +141,7 @@ class AnnouncementController extends Controller
                 $announcementEmployee                  = new AnnouncementEmployee();
                 $announcementEmployee->announcement_id = $announcement->id;
                 $announcementEmployee->employee_id     = $employee;
-                $announcementEmployee->created_by      = \Auth::user()->creatorId();
+                $announcementEmployee->created_by      = \Auth::user()->id;
                 $announcementEmployee->save();
             }
 
@@ -144,9 +160,14 @@ class AnnouncementController extends Controller
     {
         if (\Auth::user()->can('Edit Announcement')) {
             $announcement = Announcement::find($announcement);
-            if ($announcement->created_by == Auth::user()->id) {
-                $branch      = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            if ($announcement->created_by == Auth::user()->id || \Auth::user()->type == 'company') {
+                if (!empty(\Auth::user()->branch_id)) {
+                    $branch      = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $departments = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                } else {
+                    $branch      = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $departments = Department::orderby('name', 'ASC')->get()->pluck('name', 'id');
+                }
 
                 return view('announcement.edit', compact('announcement', 'branch', 'departments'));
             } else {
@@ -214,9 +235,15 @@ class AnnouncementController extends Controller
     {
 
         if ($request->branch_id == 0) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'ASC');
         } else {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->orderby('name', 'ASC');
+        }
+
+        if (!empty(\Auth::user()->branch_id)) {
+            $departments = $departments->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id')->toArray();
+        } else {
+            $departments = $departments->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($departments);
@@ -225,14 +252,12 @@ class AnnouncementController extends Controller
     public function getemployee(Request $request)
     {
         if($request->department_id)
-        {
-            
-            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        {   
+            $employees = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         else
         {
-            $employees = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
-            
+            $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();   
         }
         return response()->json($employees);
     }

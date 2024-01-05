@@ -14,7 +14,7 @@ class ShiftController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->can('Manage Shift')) {
+        if (\Auth::user()->can('Manage Shift')) {
             $shifts = ShiftType::all();
 
             return view('shift.index', compact('shifts'));
@@ -25,18 +25,18 @@ class ShiftController extends Controller
 
     public function create()
     {
-        if (Auth::user()->can('Create Shift')) {
-            if (Auth::user()->type == 'employee') {
-                $user             = Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
-            } else {
-                $user             = Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            }
+        if (\Auth::user()->can('Create Shift')) {
+            // if (Auth::user()->type == 'employee') {
+            //     $user             = Auth::user();
+            //     $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+            //     $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            // } else {
+            //     $user             = Auth::user();
+            //     $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+            //     $employees        = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            // }
 
-            return view('shift.create', compact('employees', 'current_employee'));
+            return view('shift.create');
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -44,7 +44,7 @@ class ShiftController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->can('Create Shift')) {
+        if (\Auth::user()->can('Create Shift')) {
 
             $validator = Validator::make(
                 $request->all(),
@@ -93,7 +93,7 @@ class ShiftController extends Controller
     public function edit(ShiftType $shift)
     {
         // return $shift;
-        if (Auth::user()->can('Edit Shift')) {
+        if (\Auth::user()->can('Edit Shift')) {
             $shift_type = ShiftType::where('id', $shift->id)->first();
             return view('shift.edit', compact('shift', 'shift_type'));
         } else {
@@ -103,7 +103,7 @@ class ShiftController extends Controller
 
     public function update(Request $request, ShiftType $shift)
     {
-        if (Auth::user()->can('Edit Shift')) {
+        if (\Auth::user()->can('Edit Shift')) {
             if (Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
@@ -157,7 +157,7 @@ class ShiftController extends Controller
     // * Soft Delete
     public function destroy(ShiftType $shift)
     {
-        if (Auth::user()->can('Delete Shift')) {
+        if (\Auth::user()->can('Delete Shift')) {
             //* Destroy shift times 
             $shift_times = ShiftTime::where('shift_type_id', $shift->id)->get()->pluck('id');
             ShiftTime::destroy($shift_times);

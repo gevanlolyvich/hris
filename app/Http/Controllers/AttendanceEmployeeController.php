@@ -25,10 +25,10 @@ class AttendanceEmployeeController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('All', '');
 
-            $department = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
             if (\Auth::user()->type == 'employee') {
@@ -76,7 +76,7 @@ class AttendanceEmployeeController extends Controller
                 }
                 $attendanceEmployee = $attendanceEmployee->orderby('date', 'desc')->get();
             } else {
-                $employee = Employee::select('id')->where('created_by', \Auth::user()->creatorId());
+                $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->select('id') : Employee::select('id');
                 if (!empty($request->branch)) {
                     $employee->where('branch_id', $request->branch);
                 }
@@ -126,7 +126,7 @@ class AttendanceEmployeeController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Attendance')) {
-            $employees = User::where('created_by', '=', Auth::user()->created_by)->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? User::where('is_active', 1)->where('type', '=', "employee")->where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id') : User::where('is_active', 1)->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.create', compact('employees'));
         } else {
@@ -208,7 +208,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->overtime               = $overtime;
                 $employeeAttendance->total_rest             = '00:00:00';
                 $employeeAttendance->work_hours             = $workhours;
-                $employeeAttendance->created_by             = \Auth::user()->created_by;
+                $employeeAttendance->created_by             = \Auth::user()->id;
 
                 $employeeAttendance->save();
 
@@ -227,7 +227,7 @@ class AttendanceEmployeeController extends Controller
     {
         if (\Auth::user()->can('Edit Attendance')) {
             $attendanceEmployee = AttendanceEmployee::where('id', $id)->first();
-            $employees          = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.edit', compact('attendanceEmployee', 'employees'));
         } else {
@@ -893,15 +893,15 @@ class AttendanceEmployeeController extends Controller
     {
         if (\Auth::user()->can('Create Attendance')) {
 
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('Select Branch', '');
 
-            $department = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('Select Department', '');
 
             $employees = [];
             if (!empty($request->branch) && !empty($request->department)) {
-                $employees = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->where('branch_id', $request->branch)->where('department_id', $request->department)->orderby('name', 'asc')->get();
+                $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch)->where('department_id', $request->department)->orderby('name', 'asc')->get();
             }
 
 

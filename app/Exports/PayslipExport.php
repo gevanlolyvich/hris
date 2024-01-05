@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\PaySlip;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Facades\Log;
 
 class PayslipExport implements FromCollection, WithHeadings
 {
@@ -21,25 +22,17 @@ class PayslipExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $request=$this->data;
+        $request = $this->data;
 
-        $data = PaySlip::where('created_by', \Auth::user()->creatorId());
-
-        if(isset($request->filter_month) && !empty($request->filter_month)){
-            $month=$request->filter_month;
-        }else{
-            $month=date('m', strtotime('last month'));
+        $formated_month_year = $request->month;
+        if(empty($formated_month_year)){
+            $formated_month_year = date('Y') . '-' . date('m', strtotime('last month'));
         }
 
-        if(isset($request->filter_year) && !empty($request->filter_year)){
-            $year=$request->filter_year;
-        }else{
-            $year=date('Y');
-        }
-        $formate_month_year = $year . '-' . $month;
-        $data->where('salary_month', '=', $formate_month_year);
+        $data = !empty(\Auth::user()->branch_id) ? PaySlip::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', '=', $formated_month_year) : PaySlip::where('salary_month', '=', $formated_month_year);
         $data=$data->get();
         $result = array();
+
         foreach($data as $k => $payslip)
         {
             $result[] = array(

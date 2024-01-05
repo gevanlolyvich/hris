@@ -181,9 +181,9 @@ class Employee extends Model
 
     public function get_net_salary($month, $year)
     {
-        $employee             = Employee::find($this->id);
+        $employee                = Employee::find($this->id);
         // $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_work_hours     = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+        $total_work_hours        = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         //allowance

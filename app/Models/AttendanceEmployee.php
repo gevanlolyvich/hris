@@ -35,7 +35,7 @@ class AttendanceEmployee extends Model
 
     public function employee()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 
     public function attendanceStatus()

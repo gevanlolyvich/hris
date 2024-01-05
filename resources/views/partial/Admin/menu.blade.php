@@ -57,10 +57,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-arrow"><i data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
                             @can('Manage Report')
-                                <li class="dash-item">
+                                {{-- <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('report.income-expense') }}">{{ __('Income Vs Expense') }}</a>
-                                </li>
+                                </li> --}}
 
                                 <li class="dash-item">
                                     <a class="dash-link"
@@ -73,10 +73,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
 
 
-                                <li class="dash-item">
+                                {{-- <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('report.account.statement') }}">{{ __('Account Statement') }}</a>
-                                </li>
+                                </li> --}}
 
 
                                 <li class="dash-item">
@@ -325,7 +325,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!--performance-->
 
                 <!--fianance-->
-                @if (Gate::check('Manage Account List') || Gate::check('Manage Payee') || Gate::check('Manage Payer') || Gate::check('Manage Deposit') || Gate::check('Manage Expense') || Gate::check('Manage Transfer Balance'))
+                {{-- @if (Gate::check('Manage Account List') || Gate::check('Manage Payee') || Gate::check('Manage Payer') || Gate::check('Manage Deposit') || Gate::check('Manage Expense') || Gate::check('Manage Transfer Balance'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-wallet"></i></span><span
@@ -380,7 +380,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             @endcan
                         </ul>
                     </li>
-                @endif
+                @endif --}}
                 <!-- fianance-->
 
                 <!--trainning-->
