@@ -18,11 +18,11 @@ class JobController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Job Category')) {
-            $jobs = Job::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $jobs = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->get() : Job::get();
 
-            $data['total']     = Job::where('created_by', '=', \Auth::user()->creatorId())->count();
-            $data['active']    = Job::where('status', 'active')->where('created_by', '=', \Auth::user()->creatorId())->count();
-            $data['in_active'] = Job::where('status', 'in_active')->where('created_by', '=', \Auth::user()->creatorId())->count();
+            $data['total']     = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->count() : Job::count();
+            $data['active']    = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->where('status', 'active')->count() : Job::where('status', 'active')->count();
+            $data['in_active'] = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->where('status', 'in_active')->count() : Job::where('status', 'in_active')->count();
 
             return view('job.index', compact('jobs', 'data'));
         } else {
@@ -32,15 +32,15 @@ class JobController extends Controller
 
     public function create()
     {
-        $categories = JobCategory::where('created_by', \Auth::user()->creatorId())->get()->pluck('title', 'id');
+        $categories = JobCategory::get()->pluck('title', 'id');
         $categories->prepend('--', '');
 
-        $branches = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $branches = JobCategory::get()->pluck('title', 'id')? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
         $branches->prepend('All', 0);
 
         $status = Job::$status;
 
-        $customQuestion = CustomQuestion::where('created_by', \Auth::user()->creatorId())->get();
+        $customQuestion = CustomQuestion::get();
 
         return view('job.create', compact('categories', 'status', 'branches', 'customQuestion'));
     }
@@ -108,10 +108,10 @@ class JobController extends Controller
     public function edit(Job $job)
     {
 
-        $categories = JobCategory::where('created_by', \Auth::user()->creatorId())->get()->pluck('title', 'id');
+        $categories = JobCategory::get()->pluck('title', 'id');
         $categories->prepend('--', '');
 
-        $branches = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
         $branches->prepend('All', 0);
 
         $status = Job::$status;
@@ -120,7 +120,7 @@ class JobController extends Controller
         $job->visibility      = explode(',', $job->visibility);
         $job->custom_question = explode(',', $job->custom_question);
 
-        $customQuestion = CustomQuestion::where('created_by', \Auth::user()->creatorId())->get();
+        $customQuestion = CustomQuestion::get();
 
         return view('job.edit', compact('categories', 'status', 'branches', 'job', 'customQuestion'));
     }
@@ -183,7 +183,7 @@ class JobController extends Controller
 
     public function career($id, $lang)
     {
-        $jobs = Job::where('created_by', $id)->get();
+        $jobs = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->where('created_by', $id)->get() : Job::where('created_by', $id)->get();
 
         \Session::put('lang', $lang);
 
@@ -212,7 +212,7 @@ class JobController extends Controller
 
     public function jobRequirement($code, $lang)
     {
-        $job = Job::where('code', $code)->first();
+        $job = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->where('code', $code)->first() : Job::where('code', $code)->first();
         if ($job->status == 'in_active') {
             return redirect()->back()->with('error', __('Permission Denied.'));
         }
@@ -332,7 +332,7 @@ class JobController extends Controller
             }
         }
 
-        $stage = JobStage::where('created_by', \Auth::user()->creatorId())->first();
+        $stage = JobStage::first();
 
         $jobApplication                  = new JobApplication();
         $jobApplication->job             = $job->id;

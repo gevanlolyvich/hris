@@ -35,7 +35,8 @@ class LeaveExport implements FromCollection, WithHeadings
                 
             }
             else{  
-                $data= Leave::get();
+                $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
+                $data= !empty(\Auth::user()?->branch_id) ? Leave::whereIn('employee_id', $employee_id)->get() : Leave::get();
                 foreach($data as $k=>$leave)
                 {    
                     

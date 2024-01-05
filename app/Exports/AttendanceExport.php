@@ -42,7 +42,8 @@ class AttendanceExport implements FromCollection, WithHeadings
             $attendances= AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
 
         } else {
-            $attendances = AttendanceEmployee::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
+            $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
+            $attendances = !empty(\Auth::user()?->branch_id) ? AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC') : AttendanceEmployee::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
         }
 
         if (!empty($query)) {

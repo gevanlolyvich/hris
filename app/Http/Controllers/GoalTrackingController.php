@@ -19,11 +19,11 @@ class GoalTrackingController extends Controller
             if($user->type == 'employee')
             {
                 $employee      = Employee::where('user_id', $user->id)->first();
-                $goalTrackings = GoalTracking::where('created_by', '=', \Auth::user()->creatorId())->where('branch', $employee->branch_id)->get();
+                $goalTrackings = GoalTracking::where('branch', $employee->branch_id)->orderby('start_date', 'DESC')->get();
             }
             else
             {
-                $goalTrackings = GoalTracking::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $goalTrackings = !empty(\Auth::user()->branch_id) ? GoalTracking::where('branch', \Auth::user()->branch_id)->orderby('start_date', 'DESC')->get() : GoalTracking::orderby('start_date', 'DESC')->get();
             }
 
             return view('goaltracking.index', compact('goalTrackings'));
@@ -40,9 +40,10 @@ class GoalTrackingController extends Controller
         if(\Auth::user()->can('Create Goal Tracking'))
         {
 
-            $brances = Branch::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
             $brances->prepend('Select Branch', '');
-            $goalTypes = GoalType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+
+            $goalTypes = GoalType::get()->pluck('name', 'id');
             $goalTypes->prepend('Select Goal Type', '');
 
             return view('goaltracking.create', compact('brances', 'goalTypes'));
@@ -106,9 +107,9 @@ class GoalTrackingController extends Controller
         if(\Auth::user()->can('Edit Goal Tracking'))
         {
             $goalTracking = GoalTracking::find($id);
-            $brances      = Branch::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $brances      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
             $brances->prepend('Select Branch', '');
-            $goalTypes = GoalType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $goalTypes = GoalType::get()->pluck('name', 'id');
             $goalTypes->prepend('Select Goal Type', '');
 
             $status = GoalTracking::$status;
@@ -124,8 +125,6 @@ class GoalTrackingController extends Controller
 
     public function update(Request $request, $id)
     {
-
-
         if(\Auth::user()->can('Edit Goal Tracking'))
         {
             $goalTracking = GoalTracking::find($id);
@@ -164,7 +163,6 @@ class GoalTrackingController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
-
 
     public function destroy($id)
     {

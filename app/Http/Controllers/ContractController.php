@@ -26,7 +26,7 @@ class ContractController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -81,7 +81,7 @@ class ContractController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -103,9 +103,9 @@ class ContractController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+    //  * @param \Illuminate\Http\Request $request
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {

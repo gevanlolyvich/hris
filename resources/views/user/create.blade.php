@@ -4,32 +4,38 @@
         <div class="form-group">
             {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
             <div class="form-icon-user">
-                {!! Form::text('name', null, ['class' => 'form-control', 'required' => 'required','placeholder'=>'Enter Name']) !!}
+                {!! Form::text('name', null, ['class' => 'form-control', 'required' => 'required','placeholder'=> __('Enter Name')]) !!}
             </div>
         </div>
         <div class="form-group">
             {{ Form::label('email', __('Email'), ['class' => 'form-label']) }}
             <div class="form-icon-user">
-                {!! Form::text('email', null, ['class' => 'form-control', 'required' => 'required', 'placeholder'=>'Enter Email']) !!}
+                {!! Form::text('email', null, ['class' => 'form-control', 'required' => 'required', 'placeholder'=> __('Enter Email')]) !!}
             </div>
         </div>
         <div class="form-group">
             {{ Form::label('password', __('Password'), ['class' => 'form-label']) }}
             <div class="form-icon-user">
-                {!! Form::password('password', ['class' => 'form-control', 'required' => 'required','placeholder'=>'Enter password']) !!}
+                {!! Form::password('password', ['class' => 'form-control', 'required' => 'required','placeholder'=> __('Enter Password')]) !!}
             </div>
         </div>
         @if (\Auth::user()->type != 'super admin')
             <div class="form-group">
                 {{ Form::label('role', __('User Role'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {!! Form::select('role', $roles, null, ['class' => 'form-control select2 ', 'required' => 'required']) !!}
+                    {!! Form::select('role', $roles, null, ['class' => 'form-control select2 ', 'required' => 'required', 'placeholder' => __('Select Role')]) !!}
                 </div>
                 @error('role')
                     <span class="invalid-role" role="alert">
                         <strong class="text-danger">{{ $message }}</strong>
                     </span>
                 @enderror
+            </div>
+            <div class="form-group">
+                {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}
+                <div class="form-icon-user">
+                    {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
+                </div>
             </div>
         @endif
     </div>

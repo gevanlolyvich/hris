@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\Department;
 use App\Mail\PromotionSend;
 use App\Models\Promotion;
 use App\Models\Utility;
@@ -20,11 +21,11 @@ class PromotionController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $emp        = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $promotions = Promotion::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->get();
+                $promotions = Promotion::where('employee_id', '=', $emp->id)->get();
             }
             else
             {
-                $promotions = Promotion::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $promotions = !empty(\Auth::user()->branch_id) ? Promotion::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Promotion::get();
             }
 
             return view('promotion.index', compact('promotions'));
@@ -39,8 +40,9 @@ class PromotionController extends Controller
     {
         if(\Auth::user()->can('Create Promotion'))
         {
-            $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees    = Employee::where('is_active', 1)->where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->select('id')->get()->pluck('id')->toArray() : Department::select('id')->get()->pluck('id')->toArray();
+            $designations = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employees    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('promotion.create', compact('employees', 'designations'));
         }
@@ -113,8 +115,8 @@ class PromotionController extends Controller
 
     public function edit(Promotion $promotion)
     {
-        $designations = Designation::where('created_by', Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employees    = Employee::where('is_active', 1)->where('created_by', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+        $designations = !empty(\Auth::user()->branch_id) ? Designation::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Designation::get()->pluck('name', 'id');
+        $employees    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
         if(\Auth::user()->can('Edit Promotion'))
         {
             if($promotion->created_by == \Auth::user()->creatorId())

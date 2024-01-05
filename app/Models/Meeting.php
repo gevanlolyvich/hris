@@ -11,8 +11,11 @@ class Meeting extends Model
         'department_id',
         'employee_id',
         'title',
-        'date',
-        'time',
+        'meeting_type',
+        'url',
+        'password',
+        'start_time',
+        'end_time',
         'note',
         'created_by',
     ];

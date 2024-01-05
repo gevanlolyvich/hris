@@ -32,10 +32,12 @@ class JobApplicationController extends Controller
     {
 
         if (\Auth::user()->can('Manage Job Application')) {
-            $stages = JobStage::where('created_by', '=', \Auth::user()->creatorId())->orderBy('order', 'asc')->get();
+            $stages = JobStage::orderBy('order', 'asc')->get();
 
-            $jobs = Job::where('created_by', \Auth::user()->creatorId())->get()->pluck('title', 'id');
-            $jobs->prepend('All', '');
+            $jobs = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->get()->pluck('title', 'id') : Job::get()->pluck('title', 'id');
+            if (empty(\Auth::user()->branch_id)) {
+                $jobs->prepend('All', '');
+            }
 
             if (isset($request->start_date) && !empty($request->start_date)) {
                 $filter['start_date'] = $request->start_date;
@@ -65,10 +67,10 @@ class JobApplicationController extends Controller
     public function create()
     {
 
-        $jobs = Job::where('created_by', \Auth::user()->creatorId())->get()->pluck('title', 'id');
+        $jobs = !empty(\Auth::user()->branch_id) ? Job::where('branch', \Auth::user()->branch_id)->get()->pluck('title', 'id') : Job::get()->pluck('title', 'id');
         $jobs->prepend('--', '');
 
-        $questions = CustomQuestion::where('created_by', \Auth::user()->creatorId())->get();
+        $questions = CustomQuestion::get();
 
         return view('jobApplication.create', compact('jobs', 'questions'));
     }
@@ -137,7 +139,7 @@ class JobApplicationController extends Controller
                     return redirect()->back()->with('error', __($path['msg']));
                 }
             }
-            $stage = JobStage::where('created_by', \Auth::user()->creatorId())->first();
+            $stage = JobStage::first();
 
             $job                  = new JobApplication();
             $job->job             = $request->job;
@@ -174,7 +176,7 @@ class JobApplicationController extends Controller
 
             $notes = JobApplicationNote::where('application_id', $id)->get();
 
-            $stages = JobStage::where('created_by', \Auth::user()->creatorId())->get();
+            $stages = JobStage::get();
 
             return view('jobApplication.show', compact('jobApplication', 'notes', 'stages'));
         } else {
@@ -301,7 +303,7 @@ class JobApplicationController extends Controller
     public function candidate()
     {
         if (\Auth::user()->can('Manage Job OnBoard')) {
-            $archive_application = JobApplication::where('created_by', \Auth::user()->creatorId())->where('is_archive', 1)->get();
+            $archive_application = JobApplication::where('is_archive', 1)->get();
 
             return view('jobApplication.candidate', compact('archive_application'));
         } else {
@@ -316,7 +318,7 @@ class JobApplicationController extends Controller
         $status       = JobOnBoard::$status;
         $job_type        = JobOnBoard::$job_type;
         $salary_duration = JobOnBoard::$salary_duration;
-        $salary_type     = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $salary_type     = PayslipType::get()->pluck('name', 'id');
         $applications = InterviewSchedule::select('interview_schedules.*', 'job_applications.name')->join('job_applications', 'interview_schedules.candidate', '=', 'job_applications.id')->where('interview_schedules.created_by', \Auth::user()->creatorId())->get()->pluck('name', 'candidate');
         $applications->prepend('-', '');
 
@@ -326,7 +328,7 @@ class JobApplicationController extends Controller
     public function jobOnBoard()
     {
         if (\Auth::user()->can('Manage Job OnBoard')) {
-            $jobOnBoards = JobOnBoard::where('created_by', \Auth::user()->creatorId())->get();
+            $jobOnBoards = JobOnBoard::get();
 
             return view('jobApplication.onboard', compact('jobOnBoards'));
         } else {
@@ -417,7 +419,7 @@ class JobApplicationController extends Controller
         $status     = JobOnBoard::$status;
         $job_type        = JobOnBoard::$job_type;
         $salary_duration = JobOnBoard::$salary_duration;
-        $salary_type     = PayslipType::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $salary_type     = PayslipType::get()->pluck('name', 'id');
 
 
         return view('jobApplication.onboardEdit', compact('jobOnBoard', 'status', 'job_type', 'salary_type', 'salary_duration'));
@@ -436,11 +438,11 @@ class JobApplicationController extends Controller
     {
         $jobOnBoard       = JobOnBoard::find($id);
         $company_settings = Utility::settings();
-        $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
-        $branches         = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $departments      = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $designations     = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $employees        = User::where('created_by', \Auth::user()->creatorId())->get();
+        $documents        = Document::get();
+        $branches         = Branch::get()->pluck('name', 'id');
+        $departments      = Department::get()->pluck('name', 'id');
+        $designations     = Designation::get()->pluck('name', 'id');
+        $employees        = User::get();
         $employeesId      = $this->employeeNumber();
 
         return view('jobApplication.convert', compact('jobOnBoard', 'employees', 'employeesId', 'departments', 'designations', 'documents', 'branches', 'company_settings'));
@@ -571,7 +573,7 @@ class JobApplicationController extends Controller
 
     function employeeNumber()
     {
-        $latest = Employee::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+        $latest = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->latest()->first() : Employee::latest()->first();
         if (!$latest) {
             return 1;
         }

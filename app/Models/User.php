@@ -34,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'lang',
         'created_by',
         'email_verified_at',
+        'branch_id',
     ];
 
     /**
@@ -2089,5 +2090,10 @@ class User extends Authenticatable implements MustVerifyEmail
                 ]
             );
         }
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
     }
 }

@@ -25,7 +25,7 @@ class CompanyPolicyController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Company Policy')) {
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::get('id', \Auth::user()->branch_id)->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('Select Branch', '');
 
             return view('companyPolicy.create', compact('branch'));
@@ -113,7 +113,7 @@ class CompanyPolicyController extends Controller
     {
 
         if (\Auth::user()->can('Edit Company Policy')) {
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::get('id', \Auth::user()->branch_id)->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('Select Branch', '');
 
             return view('companyPolicy.edit', compact('branch', 'companyPolicy'));

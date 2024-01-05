@@ -10,12 +10,13 @@
         <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
-                <select class="form-control select2" name="branch_id" id="branch_id" placeholder="Select Branch">
-                    <option value="">{{ __('Select Branch') }}</option>
-                    <option value="0">{{ __('All Branch') }}</option>
-                    @foreach ($branch as $branch)
+                {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch'), 'id' => 'branch_id']) }}
+                {{-- <select class="form-control select2" name="branch_id" id="branch_id" placeholder="Select Branch"> --}}
+                    {{-- <option value="">{{ __('Select Branch') }}</option> --}}
+                    {{-- <option value="0">{{ __('All Branch') }}</option> --}}
+                    {{-- @foreach ($branch as $branch)
                         <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                    @endforeach
+                    @endforeach --}}
                 </select>
             </div>
         </div>

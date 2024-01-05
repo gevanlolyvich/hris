@@ -13,7 +13,7 @@ class DepartmentController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Department')) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get();
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get() : Department::orderBy('name', 'ASC')->get();
 
             return view('department.index', compact('departments'));
         } else {
@@ -24,7 +24,7 @@ class DepartmentController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Department')) {
-            $branch = Branch::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             return view('department.create', compact('branch'));
         } else {
@@ -70,7 +70,7 @@ class DepartmentController extends Controller
     {
         if (\Auth::user()->can('Edit Department')) {
             if ($department->created_by == \Auth::user()->creatorId()) {
-                $branch = Branch::where('created_by', \Auth::user()->creatorId())->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+                $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
                 return view('department.edit', compact('department', 'branch'));
             } else {

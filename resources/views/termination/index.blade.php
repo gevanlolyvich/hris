@@ -47,7 +47,7 @@
                             @foreach ($terminations as $termination)
                             <tr>
                                 @role('company')
-                                <td>{{ !empty($termination->employee()) ? $termination->employee()->name : '' }}</td>
+                                <td>{{ !empty($termination->employee) ? $termination->employee->name : '' }}</td>
                             @endrole
 
                             <td>{{ !empty($termination->terminationType()) ? $termination->terminationType()->name : '' }}

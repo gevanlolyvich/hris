@@ -8,7 +8,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
-                <select class="form-control select" name="branch_id" id="branch_id"
+                <select class="form-control select2" name="branch_id" id="branch_id"
                     placeholder="{{ __('Select Branch') }}">
                     <option value="">{{ __('Select Branch') }}</option>
                     <option value="0">{{ __('All Branch') }}</option>

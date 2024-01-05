@@ -19,13 +19,13 @@ class PermitController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Leave')) {
-            $permits = Permit::where('created_by', '=', Auth::user()->creatorId())->get();
+            $permits = Permit::get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
                 $employee = Employee::where('user_id', '=', $user->id)->first();
                 $permits   = Permit::where('employee_id', '=', $employee->id)->get();
             } else {
-                $permits = Permit::where('created_by', '=', Auth::user()->creatorId())->get();
+                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Permit::get();
             }
 
             return view('permit.index', compact('permits'));
@@ -40,7 +40,7 @@ class PermitController extends Controller
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('is_active', 1)->where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = Employee::where('is_active', 1)->where('created_by', '=', Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $permittypes   = PermitType::get();
 
@@ -140,7 +140,7 @@ class PermitController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
-                $employees  = Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
 
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));

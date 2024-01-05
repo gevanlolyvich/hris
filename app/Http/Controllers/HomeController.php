@@ -52,8 +52,12 @@ class HomeController extends Controller
                     }
                 )->get();
 
-                $employees = Employee::orderby('name', 'asc')->get();
-                $meetings  = Meeting::orderBy('meetings.id', 'desc')->take(5)->leftjoin('meeting_employees', 'meetings.id', '=', 'meeting_employees.meeting_id')->where('meeting_employees.employee_id', '=', $emp->id)->orWhere(
+                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
+                $meetings  = !empty(\Auth::user()->branch_id) ? Meeting::where('branch_id', \Auth::user()->branch_id)->orderby('start_time', 'DESC')->take(5)->leftjoin('meeting_employees', 'meetings.id', '=', 'meeting_employees.meeting_id')->where('meeting_employees.employee_id', '=', $emp->id)->orWhere(
+                    function ($q) {
+                        $q->where('meetings.department_id', '["0"]')->where('meetings.employee_id', '["0"]');
+                    }
+                )->get() : Meeting::orderBy('meetings.id', 'desc')->take(5)->leftjoin('meeting_employees', 'meetings.id', '=', 'meeting_employees.meeting_id')->where('meeting_employees.employee_id', '=', $emp->id)->orWhere(
                     function ($q) {
                         $q->where('meetings.department_id', '["0"]')->where('meetings.employee_id', '["0"]');
                     }
@@ -136,7 +140,7 @@ class HomeController extends Controller
 
                 return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings'));
             } else {
-                // $events    = Event::where('created_by', '=', \Auth::user()->creatorId())->get();
+                // $events    = Event::get();
                 // $arrEvents = [];
 
                 // foreach ($events as $event) {
@@ -153,37 +157,40 @@ class HomeController extends Controller
                 //     $arrEvents[] = $arr;
                 // }
 
+                $announcements = !empty(\Auth::user()->branch_id) ? Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('announcements.id', 'desc')->take(5)->get() : Announcement::orderBy('announcements.id', 'desc')->take(5)->get();
 
-
-                $announcements = Announcement::orderBy('announcements.id', 'desc')->take(5)->where('created_by', '=', \Auth::user()->creatorId())->get();
-
-
-                $emp           = User::where('type', '=', 'employee')->where('created_by', '=', \Auth::user()->creatorId())->get();
+                $emp           = !empty(\Auth::user()->branch_id) ? User::whereHas('employee', function ($query) {
+                        $query->where('branch_id', \Auth::user()->branch_id);
+                    })
+                    ->where('type', '=', 'employee')
+                    ->get()
+                : User::where('type', '=', 'employee')
+                    ->get();
                 $countEmployee = count($emp);
 
-                $user      = User::where('type', '!=', 'employee')->where('created_by', '=', \Auth::user()->creatorId())->get();
+                $user      = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->where('type', '!=', 'employee')->get() : User::where('type', '!=', 'employee')->get();
                 $countUser = count($user);
 
-                $countTicket      = Ticket::where('created_by', '=', \Auth::user()->creatorId())->count();
-                $countOpenTicket  = Ticket::where('status', '=', 'open')->where('created_by', '=', \Auth::user()->creatorId())->count();
-                $countCloseTicket = Ticket::where('status', '=', 'close')->where('created_by', '=', \Auth::user()->creatorId())->count();
+                $countTicket      = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->count() : Ticket::count();
+                $countOpenTicket  = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'open')->count() : Ticket::where('status', '=', 'open')->count();
+                $countCloseTicket = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'close')->count() : Ticket::where('status', '=', 'close')->count();
 
                 $currentDate = date('Y-m-d');
 
-                $employees     = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get();
+                $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
                 $countEmployee = count($employees);
-                $notClockIn    = AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $notClockIn    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
 
-                $notClockIns    = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
-                $accountBalance = AccountList::where('created_by', '=', \Auth::user()->creatorId())->sum('initial_balance');
+                $notClockIns    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
+                $accountBalance = AccountList::sum('initial_balance');
 
-                $activeJob   = Job::where('status', 'active')->where('created_by', '=', \Auth::user()->creatorId())->count();
-                $inActiveJOb = Job::where('status', 'in_active')->where('created_by', '=', \Auth::user()->creatorId())->count();
+                $activeJob   = Job::where('status', 'active')->count();
+                $inActiveJOb = Job::where('status', 'in_active')->count();
 
-                $totalPayee = Payees::where('created_by', '=', \Auth::user()->creatorId())->count();
-                $totalPayer = Payer::where('created_by', '=', \Auth::user()->creatorId())->count();
+                $totalPayee = Payees::count();
+                $totalPayer = Payer::count();
 
-                $meetings = Meeting::where('created_by', '=', \Auth::user()->creatorId())->limit(5)->get();
+                $meetings = !empty(\Auth::user()->branch_id) ? Meeting::where('branch_id', \Auth::user()->branch_id)->orderby('start_time', 'DESC')->limit(5)->get() : Meeting::orderby('start_time', 'DESC')->limit(5)->get();
 
                 return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer'));
             }

@@ -23,7 +23,8 @@ class WarningController extends Controller
             }
             else
             {
-                $warnings = Warning::where('created_by', '=', \Auth::user()->creatorId())->get();
+                $employee_id    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
+                $warnings       = Warning::orWhere(function ($query) use ($employee_id) { $query->whereIn('warning_to', $employee_id)->whereIn('warning_by', $employee_id); })->get();
             }
 
             return view('warning.index', compact('warnings'));
@@ -41,14 +42,14 @@ class WarningController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('warning.create', compact('employees', 'current_employee'));
@@ -141,14 +142,14 @@ class WarningController extends Controller
             if(Auth::user()->type == 'employee')
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             else
             {
                 $user             = \Auth::user();
-                $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-                $employees        = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $current_employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
+                $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             if($warning->created_by == \Auth::user()->creatorId())
             {

@@ -1685,6 +1685,7 @@
   "Report Data": "Data Laporan",
   "Coordinate": "Koordinat",
   "Get Current Location Coordinate": "Dapatkan Koordinat Lokasi",
+  "Get our Android app by clicking on the icon below.":"Dapatkan aplikasi Android kami dengan mengklik ikon di bawah ini.",
   "Enter Your Address": "Masukan Alamat Anda",
   "Home Address Changes": "Perubahan Alamat Rumah",
   "Search Location": "Cari Lokasi",
@@ -1742,6 +1743,13 @@
   "Enter Password To Access Payslip": "Masukkan Password Untuk Mengakses Slip Gaji",
   "Submit": "Kirim",
   "Wrong Password": "Password Tidak Sesuai",
+  "Meeting Type": "Tipe Rapat",
+  "Select Meeting Type": "Pilih Tipe Meeting",
+  "Meeting URL": "URL / Link Rapat",
+  "Meeting Password": "Kata Sandi Rapat",
+  "Enter Meeting URL": "Masukkan URL / Link Rapat",
+  "Enter Meeting Password": "Masukkan Kata Sandi Rapat",
+  "Select Role": "Pilih Peran",
   "Success is not achieved alone":"Kesuksesan tidak dicapai sendirian",
   "But through strong team collaboration. Every small step brings us closer to our common goal.":"Tetapi melalui kolaborasi tim yang kuat. Setiap langkah kecil membawa kita lebih dekat pada tujuan bersama."
 }
