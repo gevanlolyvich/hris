@@ -431,10 +431,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <a class="dash-link"
                                     href="{{ route('transfer.index') }}">{{ __('Transfer') }}</a>
                             </li>
-                            <li class="dash-item">
+                            {{-- <li class="dash-item">
                                 <a class="dash-link"
                                     href="{{ route('resignation.index') }}">{{ __('Resignation') }}</a>
-                            </li>
+                            </li> --}}
                             <li class="dash-item">
                                 <a class="dash-link"
                                     href="{{ route('travel.index') }}">{{ __('Trip') }}</a>
