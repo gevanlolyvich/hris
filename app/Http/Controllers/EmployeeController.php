@@ -256,8 +256,8 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'employee_id' => 'required|unique:employees',
-                    'personel_id' => 'required|unique:employees',
+                    'employee_id' => 'required|unique:employees,employee_id,' . $id,
+                    'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
