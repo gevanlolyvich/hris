@@ -16,16 +16,15 @@ class LeaveReportExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $data    = Leave::all();
-        $employees = Employee::where('created_by', \Auth::user()->creatorId());
-        $employees = $employees->orderby('name', 'asc')->get();
+        $data       = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Leave::get();
+        $employees  = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
 
         foreach ($employees as $employee) {
 
-            $approved = Leave::where('employee_id', $employee->id)->where('status', 'Approved');
-            $reject   = Leave::where('employee_id', $employee->id)->where('status', 'Reject');
-            $pending  = Leave::where('employee_id', $employee->id)->where('status', 'Pending');
-            $totalApproved = $totalReject = $totalPending = 0;
+            $approved       = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('employee_id', $employee->id)->where('status', 'Approved') : Leave::where('employee_id', $employee->id)->where('status', 'Approved');
+            $reject         = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('employee_id', $employee->id)->where('status', 'Reject') : Leave::where('employee_id', $employee->id)->where('status', 'Reject');
+            $pending        = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('employee_id', $employee->id)->where('status', 'Pending') : Leave::where('employee_id', $employee->id)->where('status', 'Pending');
+            $totalApproved  = $totalReject = $totalPending = 0;
 
             $approved = $approved->count();
             $reject   = $reject->count();
@@ -60,7 +59,6 @@ class LeaveReportExport implements FromCollection, WithHeadings
 
         return $data;
     }
-
 
     public function headings(): array
     {
