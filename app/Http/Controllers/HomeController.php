@@ -35,7 +35,7 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+    //  * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
     {
@@ -210,29 +210,29 @@ class HomeController extends Controller
         }
     }
 
-    public function getOrderChart($arrParam)
-    {
-        $arrDuration = [];
-        if ($arrParam['duration']) {
-            if ($arrParam['duration'] == 'week') {
-                $previous_week = strtotime("-2 week +1 day");
-                for ($i = 0; $i < 14; $i++) {
-                    $arrDuration[date('Y-m-d', $previous_week)] = date('d-M', $previous_week);
-                    $previous_week                              = strtotime(date('Y-m-d', $previous_week) . " +1 day");
-                }
-            }
-        }
+    // public function getOrderChart($arrParam)
+    // {
+    //     $arrDuration = [];
+    //     if ($arrParam['duration']) {
+    //         if ($arrParam['duration'] == 'week') {
+    //             $previous_week = strtotime("-2 week +1 day");
+    //             for ($i = 0; $i < 14; $i++) {
+    //                 $arrDuration[date('Y-m-d', $previous_week)] = date('d-M', $previous_week);
+    //                 $previous_week                              = strtotime(date('Y-m-d', $previous_week) . " +1 day");
+    //             }
+    //         }
+    //     }
 
-        $arrTask          = [];
-        $arrTask['label'] = [];
-        $arrTask['data']  = [];
-        foreach ($arrDuration as $date => $label) {
+    //     $arrTask          = [];
+    //     $arrTask['label'] = [];
+    //     $arrTask['data']  = [];
+    //     foreach ($arrDuration as $date => $label) {
 
-            $data               = \Order::select(\DB::raw('count(*) as total'))->whereDate('created_at', '=', $date)->first();
-            $arrTask['label'][] = $label;
-            $arrTask['data'][]  = $data->total;
-        }
+    //         $data               = \Order::select(\DB::raw('count(*) as total'))->whereDate('created_at', '=', $date)->first();
+    //         $arrTask['label'][] = $label;
+    //         $arrTask['data'][]  = $data->total;
+    //     }
 
-        return $arrTask;
-    }
+    //     return $arrTask;
+    // }
 }

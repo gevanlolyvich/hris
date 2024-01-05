@@ -14,7 +14,7 @@ class PayrollExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id')->where('pay_slips.created_by', \Auth::user()->creatorId());
+        $data = !empty(\Auth::user()?->branch_id) ? PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id')->where('employees.branch_id', \Auth::user()?->branch_id) : PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id');
 
         $month = date('Y-m');
 

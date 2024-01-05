@@ -42,7 +42,7 @@ class AttendanceExport implements FromCollection, WithHeadings
             $attendances= AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
 
         } else {
-            $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
+            $employee_id = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
             $attendances = !empty(\Auth::user()?->branch_id) ? AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC') : AttendanceEmployee::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
         }
 
@@ -61,7 +61,7 @@ class AttendanceExport implements FromCollection, WithHeadings
                         $end_date,
                     ]
                 );
-            } elseif ($query->type == 'daily' && !empty($query->date)) {
+            } else if ($query->type == 'daily' && !empty($query->date)) {
                 $attendances->where('date', $query->date);
             }
         }  else  {
@@ -85,10 +85,10 @@ class AttendanceExport implements FromCollection, WithHeadings
                     $attendance->late,
                     $attendance->early_leaving,
                     $attendance->overtime,
-                    $attendance->work_hours,
-                    strpos($attendance->picture_in, 'http') ? $attendance->picture_in : env('APP_URL') . $attendance->picture_in,
+                    $attendance->work_hours ?? '00:00:00' ,
+                    (strpos($attendance->picture_in, 'http') != 0) && !empty($attendance->picture_in) ? env('APP_URL') . $attendance->picture_in : $attendance->picture_in ?? '-    ',
                     $attendance->coord_in ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_in), 0, -1)) : '-',
-                    strpos($attendance->picture_out, 'http') ? $attendance->picture_out : env('APP_URL') . $attendance->picture_out,
+                    (strpos($attendance->picture_out, 'http') != 0) && !empty($attendance->picture_out) ? env('APP_URL') . $attendance->picture_out : $attendance->picture_out ?? '-    ',
                     $attendance->coord_out ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $attendance->coord_out), 0, -1)) : '-',
                 ]);
             }
