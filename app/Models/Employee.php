@@ -168,6 +168,10 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type')->pluck('name')->first();
     }
+    public function direct_spv()
+    {
+        return $this->belongsTo('App\Models\Employee', 'managed_by');
+    }
 
     public function get_salary($month, $year)
     {
