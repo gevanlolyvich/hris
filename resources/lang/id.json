@@ -1757,5 +1757,7 @@
   "Approved By": "Disetujui Oleh",
   "Overtime Limit": "Batasan Lembur",
   "Overtime Limit (Hour/Month)": "Batasan Lembur (Jam/Bulan)",
-  "Enter Overtime Limit": "Masukkan Batasan Lembur"
+  "Enter Overtime Limit": "Masukkan Batasan Lembur",
+  "Overtime Exceeding The Overtime Limit Of": "Lembur Melebihi Batasan Lembur",
+  "Hours Per Month": "Jam Per-Bulan"
 }

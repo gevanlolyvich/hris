@@ -140,6 +140,24 @@ class OvertimeController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $month = date('m', strtotime($request->date));
+            $year  = date('Y', strtotime($request->date));
+
+            $start_date = date($year . '-' . $month . '-01');
+            $end_date   = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
+
+            $employee    = Employee::find($request->employee_id);
+            $overtimes   = Overtime::where('employee_id', $request->employee_id)->whereBetween('date', [$start_date, $end_date])->get();
+
+            $total_overtime = $overtimes->reduce(function (int $carry, $overtime) {
+                $total = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
+                return $carry + (floor($total / 3600));
+            }, 0);
+
+            if (!empty($employee->departments->overtime_limit) && $total_overtime >= $employee->departments->overtime_limit) {
+                return redirect()->back()->with('error', __('Overtime Exceeding The Overtime Limit Of') . ' ' . $employee->departments->overtime_limit . ' ' . __('Hours Per Month') );
+            }
+
             $overtime                 = new Overtime();
             $overtime->employee_id    = $request->employee_id;
             $overtime->title          = $request->title;

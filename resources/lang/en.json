@@ -1758,5 +1758,7 @@
     "Approved By": "Approved By",
     "Overtime Limit": "Overtime Limit",
     "Overtime Limit (Hour/Month)": "Overtime Limit (Hour/Month)",
-    "Enter Overtime Limit": "Enter Overtime Limit"
+    "Enter Overtime Limit": "Enter Overtime Limit",
+    "Overtime Exceeding The Overtime Limit Of": "Overtime Exceeding The Overtime Limit Of",
+    "Hours Per Month": "Hours Per Month"
 }

@@ -365,6 +365,11 @@ class Employee extends Model
         return $this->hasOne('App\Models\Department', 'id', 'department_id');
     }
 
+    public function departments()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
+
     public function designation()
     {
         return $this->hasOne('App\Models\Designation', 'id', 'designation_id');

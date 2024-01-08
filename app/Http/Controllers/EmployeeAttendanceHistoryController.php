@@ -137,7 +137,7 @@ class EmployeeAttendanceHistoryController extends Controller
         }
 
         $attendanceEmployee  = $attendanceEmployee->orderby('date', 'desc')->get();
-        $overtimes            = $overtimes->orderby('date', 'desc')->get();
+        $overtimes           = $overtimes->orderby('date', 'desc')->get();
 
         // calculating total late
         $total_late = 0;
