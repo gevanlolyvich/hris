@@ -241,7 +241,7 @@ class EmployeeController extends Controller
             $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
-            // return $employee;
+            // return $employee->managed_by;
 
             // return $employee;
             return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types'));
@@ -394,11 +394,24 @@ class EmployeeController extends Controller
 
     public function json(Request $request)
     {
-        $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
-        $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
+        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
         // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+        $designations = Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+
 
         return response()->json($designations);
+    }
+
+
+    public function departmentJson(Request $request)
+    {
+        $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Department::where('branch_id', $request->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+
+        return response()->json($departments);
     }
 
     function employeeNumber()
@@ -475,7 +488,7 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($employees);
     }
