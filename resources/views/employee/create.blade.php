@@ -190,7 +190,7 @@
                                                             class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                                                     </div>
                                                     <input type="file"
-                                                        class="form-control file  d-none @error('document') is-invalid @enderror "
+                                                        class="form-control file   @error('document') is-invalid @enderror "
                                                         @if ($document->is_required == 1) required @endif
                                                         name="document[{{ $document->id }}]" id="document[{{ $document->id }}]"
                                                         data-filename="{{ $document->id . '_filename' }}" onchange="document.getElementById('{{'blah'.$key}}').src = window.URL.createObjectURL(this.files[0])">
