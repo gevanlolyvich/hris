@@ -103,6 +103,16 @@
                                     {!! Form::text('personel_id', old('personel_id'), ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
                                 </div>
 
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
+                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
+                                </div>
+
                                 <div class="form-group col-md-12">
                                     {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
                                     <div class="form-icon-user">
@@ -155,15 +165,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
-                                </div>
-                                <div class="form-group col-md-6">
-                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
-                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
-                                </div>
+                                
                                 
                             </div>
                         </div>
