@@ -46,7 +46,7 @@
                                             @if ($document->is_required == 1)
                                                 <div class="badge bg-success p-2 px-3 rounded status-badge7">{{ __('Required') }}</div>
                                             @else
-                                                <div class="badge bg-danger p-2 px-3 rounded status-badge7">{{ __('Not Required') }}
+                                                <div class="badge bg-danger p-2 px-3 rounded status-badge7">{{ __('Optional') }}
                                                 </div>
                                             @endif
                                         </h6>
