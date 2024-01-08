@@ -183,14 +183,16 @@ class EmployeeAttendanceHistoryController extends Controller
             $secs               = floor($overtime_hours % 60);
             $overtime['total']  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
         }
-        $hours            = floor($total_overtime / 3600);
-        $mins             = floor($total_overtime / 60 % 60);
-        $total_overtime   = [ 'hours' => $hours, 'minutes' => $mins];
+        $hours                  = floor($total_overtime / 3600);
+        $mins                   = floor($total_overtime / 60 % 60);
+        $total_overtime         = [ 'hours' => $hours, 'minutes' => $mins];
+        $max_overtime           = $employee->departments->overtime_limit;
+        $overtime_exceed_limit  = $hours >= $max_overtime && !empty($max_overtime);
 
         // Getting shift changes
         $shift_changes = ShiftHistory::where('employee_id', $empId)->get();
         $home_changes = EmployeeHomeHistory::where('employee_id', $empId)->get();
 
-        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes'));
+        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit'));
     }
 }

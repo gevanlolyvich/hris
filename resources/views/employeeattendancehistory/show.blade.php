@@ -301,11 +301,13 @@
                               </thead>
                               <tbody>
                                   @foreach ($attendanceEmployee as $attendance)
-                                      <tr>
-                                          <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
-                                          <!-- Modify Clock In and Clock Out columns in your table -->
-                                          <td>{{ $attendance->work_hours }}</td>
-                                      </tr>
+                                    @if ($attendance->work_hours !== '00:00:00')
+                                        <tr>
+                                            <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                            <!-- Modify Clock In and Clock Out columns in your table -->
+                                            <td>{{ $attendance->work_hours }}</td>
+                                        </tr>
+                                    @endif
                                   @endforeach
                               </tbody>
                           </table>
@@ -341,7 +343,11 @@
                           </table>
                         </div>
                         <div class="text-center mt-4">
-                          <h6>Total: {{ $total_overtime['hours'] }} {{__('Hours')}}  {{ $total_overtime['minutes'] }} {{__(' Minute')}}</h6>
+                            @if ($overtime_exceed_limit)
+                            <h6>Total: {{ $max_overtime }} {{__('Hours')}} 0 {{__(' Minute')}} | {{ __('Maximum Overtime')}}</h6>
+                            @else
+                                <h6>Total: {{ $total_overtime['hours'] }} {{__('Hours')}}  {{ $total_overtime['minutes'] }} {{__(' Minute')}}</h6>
+                            @endif
                         </div>
                     </div>
                 </div>

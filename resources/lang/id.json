@@ -1759,5 +1759,6 @@
   "Overtime Limit (Hour/Month)": "Batasan Lembur (Jam/Bulan)",
   "Enter Overtime Limit": "Masukkan Batasan Lembur",
   "Overtime Exceeding The Overtime Limit Of": "Lembur Melebihi Batasan Lembur",
-  "Hours Per Month": "Jam Per-Bulan"
+  "Hours Per Month": "Jam Per-Bulan",
+  "Maximum Overtime": "Maksimal Lembur"
 }
