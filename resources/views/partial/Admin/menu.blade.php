@@ -411,59 +411,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
                 <!-- tranning-->
 
-
-                <!-- HR-->
-                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
-                    <li
-                        class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
-                        <a href="#!" class="dash-link"><span class="dash-micon"><i
-                                    class="ti ti-user-plus"></i></span><span
-                                class="dash-mtext">{{ __('HR Admin Setup') }}</span><span class="dash-arrow"><i
-                                    data-feather="chevron-right"></i></span></a>
-                        <ul class="dash-submenu">
-                            <li class="dash-item {{ Request::segment(1) == 'shift' ? 'active' : '' }}">
-                                <a class="dash-link" href="{{ route('shift.index') }}">{{ __('Shift') }}</a>
-                            </li>
-                            <li class="dash-item {{ Request::segment(1) == 'award' ? 'active' : '' }}">
-                                <a class="dash-link" href="{{ route('award.index') }}">{{ __('Award') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('transfer.index') }}">{{ __('Transfer') }}</a>
-                            </li>
-                            {{-- <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('resignation.index') }}">{{ __('Resignation') }}</a>
-                            </li> --}}
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('travel.index') }}">{{ __('Trip') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('promotion.index') }}">{{ __('Promotion') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('complaint.index') }}">{{ __('Complaints') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('warning.index') }}">{{ __('Warning') }}</a>
-                            </li>
-                            <li class="dash-item">
-                                <a class="dash-link"
-                                    href="{{ route('announcement.index') }}">{{ __('Announcement') }}</a>
-                            </li>
-                            <li class="dash-item {{ Request::segment(1) == 'holiday' ? ' active' : '' }}">
-                                <a class="dash-link"
-                                    href="{{ route('holiday.index') }}">{{ __('Holidays') }}</a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
-                <!-- HR-->
-
                <!-- recruitment-->
                 @if ((Gate::check('Manage Job') || Gate::check('Manage Job Application') || Gate::check('Manage Job OnBoard') || Gate::check('Manage Custom Question') || Gate::check('Manage Interview Schedule') || Gate::check('Manage Career')) && \Auth::user()->type != 'employee')
                     <li
@@ -567,13 +514,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
 
 
                 <!-- Zoom meeting-->
-                @if (\Auth::user()->type != 'super admin')
+                {{-- @if (\Auth::user()->type != 'super admin')
                     <li class="dash-item {{ Request::segment(1) == 'zoommeeting' ? 'active' : '' }}">
                         <a href="{{ route('zoom-meeting.index') }}" class="dash-link"><span
                                 class="dash-micon"><i class="ti ti-video"></i></span><span
                                 class="dash-mtext">{{ __('Zoom Meeting') }}</span></a>
                     </li>
-                @endif
+                @endif --}}
 
                 <!-- assets-->
                 @if (Gate::check('Manage Assets'))
@@ -701,6 +648,57 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     </li>
                 @endif -->
 
+                <!-- HR-->
+                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
+                    <li
+                        class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
+                        <a href="#!" class="dash-link"><span class="dash-micon"><i
+                                    class="ti ti-user-plus"></i></span><span
+                                class="dash-mtext">{{ __('HR Setup') }}</span><span class="dash-arrow"><i
+                                    data-feather="chevron-right"></i></span></a>
+                        <ul class="dash-submenu">
+                            <li class="dash-item {{ Request::segment(1) == 'shift' ? 'active' : '' }}">
+                                <a class="dash-link" href="{{ route('shift.index') }}">{{ __('Shift') }}</a>
+                            </li>
+                            <li class="dash-item {{ Request::segment(1) == 'award' ? 'active' : '' }}">
+                                <a class="dash-link" href="{{ route('award.index') }}">{{ __('Award') }}</a>
+                            </li>
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('transfer.index') }}">{{ __('Transfer') }}</a>
+                            </li>
+                            {{-- <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('resignation.index') }}">{{ __('Resignation') }}</a>
+                            </li> --}}
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('travel.index') }}">{{ __('Trip') }}</a>
+                            </li>
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('promotion.index') }}">{{ __('Promotion') }}</a>
+                            </li>
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('complaint.index') }}">{{ __('Complaints') }}</a>
+                            </li>
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('warning.index') }}">{{ __('Warning') }}</a>
+                            </li>
+                            <li class="dash-item">
+                                <a class="dash-link"
+                                    href="{{ route('announcement.index') }}">{{ __('Announcement') }}</a>
+                            </li>
+                            <li class="dash-item {{ Request::segment(1) == 'holiday' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('holiday.index') }}">{{ __('Holidays') }}</a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
+                <!-- HR-->
 
                 <!--constant-->
                 @if (Gate::check('Manage Department') ||
