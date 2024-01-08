@@ -169,10 +169,12 @@ class EmployeeAttendanceHistoryController extends Controller
 
         // calculating overtime
         $total_overtime = 0;
+
+        $overtimes = $overtimes->reject(function ($overtime) {
+            return empty($overtime->clock_in) || empty($overtime->clock_out);
+        });
+        
         foreach ($overtimes as $overtime) {
-            if (empty($overtime->clock_in) || empty($overtime->clock_out)) {
-                continue;
-            }
             $overtime_hours  = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
             $total_overtime += $overtime_hours;
 

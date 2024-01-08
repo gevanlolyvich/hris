@@ -331,13 +331,11 @@
                               </thead>
                               <tbody>
                                   @foreach ($overtimes as $overtime)
-                                      @if (!empty($overtime->clock_in) && !empty($overtime->clock_out))
-                                          <tr>
-                                              <td>{{ \Auth::user()->dateFormat($overtime->date) }}</td>
-                                              <!-- Modify Clock In and Clock Out columns in your table -->
-                                              <td>{{ $overtime->total }}</td>
-                                          </tr>
-                                      @endif
+                                      <tr>
+                                          <td>{{ \Auth::user()->dateFormat($overtime->date) }}</td>
+                                          <!-- Modify Clock In and Clock Out columns in your table -->
+                                          <td>{{ $overtime->total }}</td>
+                                      </tr>
                                   @endforeach
                               </tbody>
                           </table>
