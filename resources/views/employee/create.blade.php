@@ -119,7 +119,7 @@
                                 </div>
 
                                 <div class="form-group col-md-12">
-                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
+                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
 
                                     <div class="form-icon-user">
                                         <div class="designation_div">
@@ -130,7 +130,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group col-md-12">
-                                    {!! Form::label('shift_type_id', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::label('shift_type_id', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}
                                     {{ Form::select('managed_by', $employees, null, ['class' => 'form-control select2', 'id' => 'shift_type_id','placeholder' =>  __('Select Direct Supervisor')]) }}
                                     {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
                                 </div>

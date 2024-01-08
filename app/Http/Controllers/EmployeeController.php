@@ -257,7 +257,7 @@ class EmployeeController extends Controller
                 $request->all(),
                 [
                     'employee_id' => 'required|unique:employees,employee_id,' . $id,
-                    'personel_id' => 'required|unique:employees,personel_id,' . $id,
+                    // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
