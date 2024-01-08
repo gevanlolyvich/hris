@@ -1755,5 +1755,8 @@
     "Select Role": "Select Role",
     "Success is not achieved alone":"Success isn't achieved alone",
     "But through strong team collaboration. Every small step brings us closer to our common goal.":"But through strong team collaboration. Every small step brings us closer to our common goal.",
-    "Approved By": "Approved By"
+    "Approved By": "Approved By",
+    "Overtime Limit": "Overtime Limit",
+    "Overtime Limit (Hour/Month)": "Overtime Limit (Hour/Month)",
+    "Enter Overtime Limit": "Enter Overtime Limit"
 }

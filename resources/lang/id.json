@@ -1754,5 +1754,8 @@
   "Select Role": "Pilih Peran",
   "Success is not achieved alone":"Kesuksesan tidak dicapai sendirian",
   "But through strong team collaboration. Every small step brings us closer to our common goal.":"Tetapi melalui kolaborasi tim yang kuat. Setiap langkah kecil membawa kita lebih dekat pada tujuan bersama.",
-  "Approved By": "Disetujui Oleh"
+  "Approved By": "Disetujui Oleh",
+  "Overtime Limit": "Batasan Lembur",
+  "Overtime Limit (Hour/Month)": "Batasan Lembur (Jam/Bulan)",
+  "Enter Overtime Limit": "Masukkan Batasan Lembur"
 }
