@@ -8,10 +8,12 @@ class Department extends Model
 {
     protected $fillable = [
         'name',
+        'overtime_limit',
         'created_by',
     ];
 
-    public function branch(){
-        return $this->hasOne('App\Models\Branch','id','branch_id');
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
     }
 }

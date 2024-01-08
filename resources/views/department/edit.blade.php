@@ -26,6 +26,15 @@
             </div>
         </div>
 
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+                {{ Form::label('overtime_limit', __('Overtime Limit (Hour/Month)'), ['class' => 'form-label']) }}
+                <div class="form-icon-user">
+                    {{ Form::number('overtime_limit', null, ['class' => 'form-control', 'placeholder' => __('Enter Overtime Limit')]) }}
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 <div class="modal-footer">
