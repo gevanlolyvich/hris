@@ -330,12 +330,14 @@
                                   </tr>
                               </thead>
                               <tbody>
-                                  @foreach ($attendanceEmployee as $attendance)
-                                      <tr>
-                                          <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
-                                          <!-- Modify Clock In and Clock Out columns in your table -->
-                                          <td>{{ $attendance->overtime }}</td>
-                                      </tr>
+                                  @foreach ($overtimes as $overtime)
+                                      @if (!empty($overtime->clock_in) && !empty($overtime->clock_out))
+                                          <tr>
+                                              <td>{{ \Auth::user()->dateFormat($overtime->date) }}</td>
+                                              <!-- Modify Clock In and Clock Out columns in your table -->
+                                              <td>{{ $overtime->total }}</td>
+                                          </tr>
+                                      @endif
                                   @endforeach
                               </tbody>
                           </table>
