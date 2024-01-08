@@ -11,18 +11,18 @@ class PerformanceTypeController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->id)->orderBy('id', 'ASC')->get();
+        $performance_types = Performance_Type::orderBy('id', 'ASC')->get();
         return view('performance_type.index', compact('performance_types'));
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -37,7 +37,7 @@ class PerformanceTypeController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -65,7 +65,7 @@ class PerformanceTypeController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Performance_Type  $performance_Type
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function show(Performance_Type $performance_Type)
     {
@@ -76,7 +76,7 @@ class PerformanceTypeController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Performance_Type  $performance_Type
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
@@ -94,7 +94,7 @@ class PerformanceTypeController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Performance_Type  $performance_Type
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -121,7 +121,7 @@ class PerformanceTypeController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Performance_Type  $performance_Type
-     * @return \Illuminate\Http\Response
+    //  * @return \Illuminate\Http\Response
      */
     public function destroy(Performance_Type $performance_Type, $id)
     {
