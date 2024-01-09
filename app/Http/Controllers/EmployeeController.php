@@ -68,8 +68,19 @@ class EmployeeController extends Controller
             $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types'));
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -90,6 +101,8 @@ class EmployeeController extends Controller
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
+                    'emergency_contact_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
+                    'emergency_contact_relation' => 'required',
                     'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
                     'department_id' => 'required',
@@ -139,6 +152,10 @@ class EmployeeController extends Controller
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
                     'address' => $request['address'],
+                    'domicile_address' => $request['domicile_address'] || null,
+                    'emergency_contact_number' => $request['emergency_contact_number'],
+                    'emergency_contact_relation' => $request['emergency_contact_relation'],
+                    'marital_status' => $request['marital_status'],
                     'email' => $request['email'],
                     'password' => Hash::make($request['password']),
                     'employee_id' => $request['employee_id'],
