@@ -102,7 +102,7 @@ class PaySlipController extends Controller
         $month = date('m', strtotime($request->month));
         $year = date('Y', strtotime($request->month));
 
-        $validatePaysilp    = !empty(\Auth::user()->branch_id) ? PaySlip::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', '=', $formate_month_year)->pluck('employee_id') : PaySlip::where('salary_month', '=', $formate_month_year)->pluck('employee_id');
+        $validatePaysilp    = !empty(\Auth::user()->branch_id) ? PaySlip::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id') : PaySlip::where('salary_month', $formate_month_year)->pluck('employee_id');
         $payslip_employee   = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
 
         if ($payslip_employee > count($validatePaysilp)) {
@@ -114,6 +114,8 @@ class PaySlipController extends Controller
             if (!empty($employeesSalary)) {
                 return redirect()->back()->with('error', __('Please set employee salary.'));
             }
+
+            $employees = $employees->whereNotIn('id', $validatePaysilp);
 
             foreach ($employees as $employee) {
                 $payslipEmployee                       = new PaySlip();

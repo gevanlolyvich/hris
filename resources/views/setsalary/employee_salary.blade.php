@@ -371,8 +371,17 @@
                                     @endphp
                                     @foreach ($overtimes as $overtime)
                                         @php
-                                            $total_hours = null;
-                                            $total_hours = $overtime->type == 'daily' ? 8 : max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                            $total_hours = 0;
+                                            if ($overtime->type == 'daily') {
+                                                $total_hours = 8;
+                                            } else {
+                                                if (date('Y-m-d', strtotime($overtime->clock_out)) != date('Y-m-d', strtotime($overtime->clock_in))) {
+                                                    $end = date('Y-m-d', strtotime($overtime->clock_in . ' +1 day'));
+                                                    $total_hours = max(0, round((strtotime($end) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                } else {
+                                                    $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                }
+                                            }
                                         
                                             if($maximum_hours) {
                                                 if ($overall_total_hours >= $maximum_hours) {

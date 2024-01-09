@@ -171,12 +171,23 @@ class EmployeeAttendanceHistoryController extends Controller
         $total_overtime = 0;
 
         foreach ($overtimes as $overtime) {
-            $overtime_hours  = 0;
-            if ($overtime->type != 'hourly') {
-                $overtime_hours = 28800; // 8 Hours
+            $overtime_hours = 0;
+            if ($overtime->type == 'daily') {
+                $overtime_hours = 28800;
             } else {
-                $overtime_hours  = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
+                if (date('Y-m-d', strtotime($overtime->clock_out)) != date('Y-m-d', strtotime($overtime->clock_in))) {
+                    $end = date('Y-m-d', strtotime($overtime->clock_in . ' +1 day'));
+                    $overtime_hours = strtotime($end) - strtotime($overtime->clock_in);
+                } else {
+                    $overtime_hours = strtotime($overtime->clock_out) - strtotime($overtime->clock_in);
+                }
             }
+            // $overtime_hours  = 0;
+            // if ($overtime->type != 'hourly') {
+            //     $overtime_hours = 28800; // 8 Hours
+            // } else {
+            //     $overtime_hours  = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
+            // }
             $total_overtime += $overtime_hours;
 
             $hours              = floor($overtime_hours / 3600);

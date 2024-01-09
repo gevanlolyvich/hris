@@ -269,7 +269,18 @@ class Utility extends Model
         $total_over_time_hours  = 0;
         $overtime_limit         = $employee?->departments?->overtime_limit;
         foreach ($earning['overTime'] as $over_time) {
-            $total_hours              = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            // $total_hours              = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            $total_hours = 0;
+            if ($over_time->type == 'daily') {
+                $total_hours = 8;
+            } else {
+                if (date('Y-m-d', strtotime($over_time->clock_out)) != date('Y-m-d', strtotime($over_time->clock_in))) {
+                    $end = date('Y-m-d', strtotime($over_time->clock_in . ' +1 day'));
+                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600, 2));
+                } else {
+                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+                }
+            }
 
             if($overtime_limit) {
                 if ($total_over_time_hours >= $overtime_limit) {
