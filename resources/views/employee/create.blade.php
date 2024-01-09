@@ -58,6 +58,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="form-group col-md-6">
                                     {!! Form::label('email', __('Email'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::email('email', old('email'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee Email']) !!}
@@ -66,22 +67,42 @@
                                     {!! Form::label('password', __('Password'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::password('password', ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter Password']) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
+                                    {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('emergency_contact_relation', $emergency_contact_relations, old('emergency_contact_relation'), ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('marital_status', $marital_statuses, old('marital_status'), ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                                </div>
+                                
+                                
+                                <div class="form-group col-md-6">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control select2', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                    {!! Form::select('nationality', $nationalities, old('nationality'), ['class' => 'form-control', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control select2', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                    {!! Form::select('identity_type', $identity_types, old('identity_type'), ['class' => 'form-control', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>'Enter Identity Number']) !!}
+                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>__('Enter Identity Number')]) !!}
                                 </div>
                             </div>
                             <div class="form-group">
                                 {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>'Enter employee Address']) !!}
+                                {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Employee Address')]) !!}
+                            </div>
+                            <div class="form-group">
+                                {!! Form::label('domicile_address', __('Domicile Address'), ['class' => 'form-label']) !!}
+                                {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
                             </div>
                         </div>
                     </div>
@@ -322,11 +343,13 @@
     $(document).on('change', 'select[name=branch_id]', function() {
         var branch_id = $(this).val();
         // console.log({branch_id})
+        // $('.designation_id').empty();
         getDepartment(branch_id);
         getEmployeeBranch(branch_id);
     });
 
     function getDepartment(branch_id) {
+        console.log({loc:'departement'})
         $.ajax({
             url: '{{ route('department.employee.json') }}',
             type: 'POST',
@@ -335,14 +358,14 @@
                 "_token": "{{ csrf_token() }}",
             },
             success: function(data) {
-                // console.log(data);
+                $('.designation_id').empty();
                 $('.department_id').empty();
                 var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
                                         placeholder="Select Department" >
                                         </select>`;
                 $('.department_div').html(emp_selct);
 
-                $('.department_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
+                $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
                 $.each(data, function(key, value) {
                     $('.department_id').append('<option value="' + key + '">' + value +
                         '</option>');
@@ -358,6 +381,7 @@
 
     function getEmployeeBranch(branch_id) {
         // console.log({branch_id})
+        console.log({loc:'empbranch'})
         $.ajax({
             url: '{{ route('branch.employee.json') }}',
             type: 'POST',
@@ -388,6 +412,7 @@
     }
 
     function getDesignation(did) {
+        console.log({loc:'designation'})
 
         $.ajax({
             url: '{{ route('employee.json') }}',

@@ -393,17 +393,17 @@
 <script>
     $(document).on('change', 'select[name=department_id]', function() {
         var department_id = $(this).val();
-        console.log({department_id})
+        // console.log({department_id});
         getDesignation(department_id);
     });
     
     $(document).on('change', 'select[name=branch_id]', function() {
         var branch_id = $(this).val();
-        console.log({branch_id})
+        // console.log({branch_id});
         getDepartment(branch_id);
         getEmployeeBranch(branch_id);
     });
-
+    
     function getDepartment(branch_id) {
         $('.designation_id').empty();
         $.ajax({
