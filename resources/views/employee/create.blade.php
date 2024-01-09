@@ -141,12 +141,6 @@
                                     </div>
                                 </div>
 
-                                {{-- <div class="form-group col-md-12">
-                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                                    <div class="form-icon-user">
-                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control select2', 'id' => 'department_id', 'required' => 'required' ,'placeholder' => 'Select Department']) }}
-                                    </div>
-                                </div> --}}
 
                                 <div class="form-group col-md-12">
                                     {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}

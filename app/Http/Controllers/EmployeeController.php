@@ -251,17 +251,29 @@ class EmployeeController extends Controller
             $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-            $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $employee     = Employee::find($id);
-            $employeesId  = ($employee->employee_id);
-            $shift_types  = ShiftType::get()->pluck('name', 'id');
-            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
-            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
-            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
+            $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
+            $employee         = Employee::find($id);
+            $employeesId      = ($employee->employee_id);
+            $shift_types      = ShiftType::get()->pluck('name', 'id');
+            $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+            $marital_status = [
+                'Single'  => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
+            $emergency_contact_relations = [
+                'Parent'  => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse'  => __('Spouse'),
+                'Friend'  => __('Friend'),
+            ];
+
             // return $employee->managed_by;
 
             // return $employee;
-            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types'));
+            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types', 'marital_status', 'emergency_contact_relations'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -464,8 +476,19 @@ class EmployeeController extends Controller
 
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations->prepend('All', '');
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances'));
+            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -489,8 +512,19 @@ class EmployeeController extends Controller
                 $employee     = Employee::where('user_id', $empId)->first();
             }
             $employeesId  = $employee->employee_id;
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

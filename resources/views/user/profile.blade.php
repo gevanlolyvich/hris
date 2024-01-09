@@ -284,6 +284,20 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
                                         </div>
                                     </div>
+
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::text('emergency_contact_number', $userDetail?->employee?->emergency_contact_number, ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
+                                        {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::select('emergency_contact_relation', $emergency_contact_relations, $userDetail?->employee?->emergency_contact_relation, ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::select('marital_status', $marital_status, $userDetail?->employee?->marital_status, ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                                    </div>
                                     
                                     <div class="col-lg-12 col-sm-12">
                                         <div class="form-group">
@@ -294,6 +308,20 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 ])
                                             }}
                                             @error('address')
+                                                <span class="invalid-feedback text-danger text-xs"
+                                                    role="alert">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="domicile_address" class="col-form-label text-dark">{{ __('Domicile Address') }}</label>
+                                            {{ Form::textarea('domicile_address', $userDetail?->employee?->domicile_address, [
+                                                    'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Domicile Address'),
+                                                    'name' => 'domicile_address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'domicile_address'
+                                                ])
+                                            }}
+                                            @error('domicile_address')
                                                 <span class="invalid-feedback text-danger text-xs"
                                                     role="alert">{{ $message }}</span>
                                             @enderror
@@ -356,60 +384,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                     </div>
                 </div>
 
-                <div id="useradd-2">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">{{ __('Change Password') }}</h5>
-                            <small> {{ __('Details about your account password change') }}</small>
-                        </div>
-                        <div class="card-body">
-                            {{ Form::model($userDetail, ['route' => ['update.password', $userDetail->id], 'method' => 'post']) }}
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('current_password', __('Current Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('current_password', ['class' => 'form-control', 'placeholder' => __('Enter Current Password')]) }}
-                                        @error('current_password')
-                                            <span class="invalid-current_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('new_password', __('New Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('new_password', ['class' => 'form-control', 'placeholder' => __('Enter New Password')]) }}
-                                        @error('new_password')
-                                            <span class="invalid-new_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('confirm_password', __('Re-type New Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('confirm_password', ['class' => 'form-control', 'placeholder' => __('Enter Re-type New Password')]) }}
-                                        @error('confirm_password')
-                                            <span class="invalid-confirm_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="modal-footer pr-0">
-                                {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
-                            </div>
-                            {{ Form::close() }}
-                        </div>
-                    </div>
-                </div>
+                
 
                 @if (\Auth::user()->type == 'employee')
                     <div id="useradd-3">
@@ -506,6 +481,60 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                     </div>
                 @endif
                 
+                <div id="useradd-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ __('Change Password') }}</h5>
+                            <small> {{ __('Details about your account password change') }}</small>
+                        </div>
+                        <div class="card-body">
+                            {{ Form::model($userDetail, ['route' => ['update.password', $userDetail->id], 'method' => 'post']) }}
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('current_password', __('Current Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('current_password', ['class' => 'form-control', 'placeholder' => __('Enter Current Password')]) }}
+                                        @error('current_password')
+                                            <span class="invalid-current_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('new_password', __('New Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('new_password', ['class' => 'form-control', 'placeholder' => __('Enter New Password')]) }}
+                                        @error('new_password')
+                                            <span class="invalid-new_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('confirm_password', __('Re-type New Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('confirm_password', ['class' => 'form-control', 'placeholder' => __('Enter Re-type New Password')]) }}
+                                        @error('confirm_password')
+                                            <span class="invalid-confirm_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer pr-0">
+                                {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                            </div>
+                            {{ Form::close() }}
+                        </div>
+                    </div>
+                </div>
 
             </div>
 

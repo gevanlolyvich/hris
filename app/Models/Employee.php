@@ -25,7 +25,7 @@ class Employee extends Model
         'phone',
         'address',
         'domicile_address',
-        'martial_status',
+        'marital_status',
         'emergency_contact_number',
         'emergency_contact_relation',
         'email',
