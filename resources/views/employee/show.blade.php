@@ -1,3 +1,8 @@
+@php
+    $site_currency_symbol_position  = Utility::getValByName('site_currency_symbol_position');
+    $site_currency_symbol           = Utility::getValByName('site_currency_symbol');
+@endphp
+
 @extends('layouts.admin')
 
 @section('page-title')
@@ -120,7 +125,13 @@
                         <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Basic Salary')}} :</strong>
-                                <span>{{toCurrency($employee->salary,"USD")}}</span>
+                                <span>
+                                    @if ($site_currency_symbol_position=='pre')
+                                        {{ $site_currency_symbol }} @convert($employee->salary)
+                                    @elseif ($site_currency_symbol_position=='post')
+                                        @convert($employee->salary) {{ $site_currency_symbol }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
