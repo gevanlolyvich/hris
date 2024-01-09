@@ -381,21 +381,21 @@
                                         <div class="col-md-6">
                                             <div class="info font-style">
                                                 <strong>{{ __('Bank Name') }}</strong>
-                                                <span>{{ $employee->bank_name }}</span>
+                                                <span>{{ $employee->bank->name }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="info">
                                                 <strong>{{ __('Bank Identifier Code') }}</strong>
-                                                <span>{{ $employee->bank_identifier_code }}</span>
+                                                <span>{{ $employee->bank->code }}</span>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        {{-- <div class="col-md-6">
                                             <div class="info">
                                                 <strong>{{ __('Branch Location') }}</strong>
                                                 <span>{{ $employee->branch_location }}</span>
                                             </div>
-                                        </div>
+                                        </div> --}}
                                         <div class="col-md-6">
                                             <div class="info">
                                                 <strong>{{ __('Tax Payer Id') }}</strong>

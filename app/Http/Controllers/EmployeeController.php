@@ -270,7 +270,7 @@ class EmployeeController extends Controller
                 'Friend'  => __('Friend'),
             ];
 
-            // return $employee->managed_by;
+            // return $employee->bank_id;
 
             // return $employee;
             return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types', 'marital_status', 'emergency_contact_relations'));

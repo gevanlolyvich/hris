@@ -120,7 +120,7 @@
                         <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Basic Salary')}} :</strong>
-                                <span>{{$employee->salary}}</span>
+                                <span>{{toCurrency($employee->salary,"USD")}}</span>
                             </div>
                         </div>
                     </div>
@@ -214,21 +214,21 @@
                         <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Bank Name')}} :</strong>
-                                <span>{{$employee->bank_name}}</span>
+                                <span>{{$employee->bank?->name}}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Bank Identifier Code')}} :</strong>
-                                <span>{{$employee->bank_identifier_code}}</span>
+                                <span>{{$employee->bank?->code}}</span>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Branch Location')}} :</strong>
                                 <span>{{$employee->branch_location}}</span>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-md-6">
                             <div class="info text-sm">
                                 <strong class="font-bold">{{__('Tax Payer Id')}} :</strong>

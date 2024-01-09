@@ -172,6 +172,10 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type')->pluck('name')->first();
     }
+    public function bank()
+    {
+        return $this->belongsTo('App\Models\Bank', 'bank_id', 'id');
+    }
     public function direct_spv()
     {
         return $this->belongsTo('App\Models\Employee', 'managed_by');
@@ -269,7 +273,7 @@ class Employee extends Model
                 }
             }
 
-            if($overtime_limit) {
+            if ($overtime_limit) {
                 if ($total_over_time_hours >= $overtime_limit) {
                     continue;
                 }
