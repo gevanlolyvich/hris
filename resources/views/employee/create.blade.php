@@ -207,20 +207,6 @@
                                         <div class="float-right col-8">
                                             <input type="hidden" name="emp_doc_id[{{ $document->id }}]" id=""
                                                 value="{{ $document->id }}">
-                                           <!--  <div class="choose-file form-group">
-                                                <label for="document[{{ $document->id }}]"
-                                                    class="choose-files bg-primary">
-                                                    <div>{{ __('Choose File') }}</div>
-                                                    <input
-                                                        class="form-control d-none @error('document') is-invalid @enderror border-0"
-                                                        @if ($document->is_required == 1) required @endif
-                                                        name="document[{{ $document->id }}]" type="file"
-                                                        id="document[{{ $document->id }}]"
-                                                        data-filename="{{ $document->id . '_filename' }}">
-                                                </label>
-                                               <a href="#"><p class="{{ $document->id . '_filename' }} "></p></a>
-
-                                            </div> -->
 
                                             <div class="choose-files ">
                                                 <label for="document[{{ $document->id }}]">

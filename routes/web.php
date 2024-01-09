@@ -969,6 +969,8 @@ Route::post('update-bank', [UserController::class, 'updateBank'])->name('update.
 
 Route::post('update-nationality', [UserController::class, 'updateNationality'])->name('update.nationality');
 
+Route::post('update-documents', [UserController::class, 'updateDocuments'])->name('update.documents');
+
 // Route::resource('coupons', CouponController::class)->middleware(
 //     [
 //         'auth',

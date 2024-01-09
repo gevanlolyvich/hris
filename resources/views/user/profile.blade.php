@@ -11,47 +11,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
         })
     </script>
 
-    {{-- <script>
-        async function getLocation() {
-          return new Promise((resolve, reject) => {
-            if ("geolocation" in navigator) {
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  const latitude = position.coords.latitude;
-                  const longitude = position.coords.longitude;
-                  const accuracy = position.coords.accuracy;
-                  resolve({ latitude, longitude, accuracy });
-                },
-                (error) => {
-                  if (error.code === 1) {
-                    reject(new Error("User denied Geolocation"));
-                  } else {
-                    reject(error);
-                  }
-                }
-              );
-            } else {
-              reject(new Error("Geolocation is not supported by your browser."));
-            }
-          });
-        }
-
-        $('#coordinate').on('click', async function () {
-            try {
-                const { latitude, longitude, accuracy } = await getLocation();
-                console.log(`${latitude}, ${longitude}, ${accuracy}`);
-    
-                document.getElementById('latitude').value = latitude;
-                document.getElementById('longitude').value = longitude;
-                document.getElementById('accuracy').value = accuracy;
-
-                alert('Success Getting Current Location Coordinate');
-            } catch (error) {
-                console.log(error);
-            }
-        })
-    </script> --}}
-
     <script>
         let map = null;
         let layer = L.layerGroup();
@@ -215,6 +174,9 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                     class="float-end"><i class="ti ti-chevron-right"></i></div></a>
                             <a href="#useradd-4"
                                 class="list-group-item list-group-item-action border-0">{{ __('Nationality') }} <div
+                                    class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                            <a href="#useradd-5"
+                                class="list-group-item list-group-item-action border-0">{{ __('Document') }} <div
                                     class="float-end"><i class="ti ti-chevron-right"></i></div></a>
                             
                         @endif
@@ -471,6 +433,86 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="modal-footer pr-0">
+                                    {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                                </div>
+                                {{ Form::close() }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="useradd-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ __('Document') }}</h5>
+                                <small> {{ __('Details about your document information') }}</small>
+                            </div>
+                            <div class="card-body">
+                                {{ Form::model($userDetail, ['route' => ['update.documents', $userDetail->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+
+                                @php
+                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value', __('document_id'));
+                                @endphp
+                                @foreach ($documents as $key => $document)
+                                <div class="row">
+                                    <div class="form-group col-12 d-flex">
+                                        <div class="float-left col-4">
+                                            <label for="document"
+                                                class="float-left pt-1 form-label">{{ $document->name }} @if ($document->is_required == 1)
+                                                    <span class="text-danger">*</span>
+                                                @endif
+                                            </label>
+                                            <div class="info">
+                                                <span>
+                                                    <a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
+                                                       class="btn btn-primary btn-sm" target="_blank" data-bs-toggle="tooltip" disabled
+                                                       data-bs-original-title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}"
+                                                       title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}">
+                                                       <i class="ti ti-eye"></i> Show File
+                                                    </a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="float-right col-8">
+                                            
+                                            <input type="hidden" name="emp_doc_id[{{ $document->id }}]" id=""
+                                                value="{{ $document->id }}">
+
+                                            <div class="choose-files ">
+                                                <label for="document[{{ $document->id }}]">
+                                                    <div class=" bg-primary document "> <i
+                                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                                    </div>
+                                                    <input type="file"
+                                                        class="form-control file   @error('document') is-invalid @enderror "
+                                                        {{-- @if ($document->is_required == 1) required @endif --}}
+                                                        name="document[{{ $document->id }}]" id="document[{{ $document->id }}]"
+                                                        data-filename="{{ $document->id . '_filename' }}" onchange="document.getElementById('{{'blah'.$key}}').src = window.URL.createObjectURL(this.files[0])">
+                                                </label>
+                                                {{-- <a href="#"><p class="{{ $document->id . '_filename' }} "></p></a> --}}
+                                                <img id="{{'blah'.$key}}" src=""  width="75%" />
+
+                                            </div>
+
+                                            
+                                            {{-- @foreach ($documents as $key => $document)
+                                                <div class="col-md-12">
+                                                    <div class="info">
+                                                        <strong>{{ $document->name }}</strong>
+                                                        <span><a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
+                                                                target="_blank">{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}</a></span>
+                                                    </div>
+                                                </div>
+                                            @endforeach --}}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <hr>
+
+                            @endforeach
 
                                 <div class="modal-footer pr-0">
                                     {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}

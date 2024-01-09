@@ -10,6 +10,8 @@ use App\Models\Bank;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\Branch;
+use App\Models\Document;
+use App\Models\EmployeeDocument;
 use App\Models\EmployeeHomeHistory;
 use File;
 use Illuminate\Http\Request;
@@ -220,8 +222,9 @@ class UserController extends Controller
             'Widowed' => __('Widowed'),
         ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
+        $documents        = Document::get();
 
-        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status'));
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents'));
     }
 
     public function editprofile(Request $request)
@@ -386,6 +389,48 @@ class UserController extends Controller
         } else {
             return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
         }
+    }
+    public function updateDocuments(Request $request)
+    {
+        $employee          = Auth::user()->employee;
+        // return $employee['employee_id'];
+        // return $request->file('document')[1]->getClientOriginalName();
+        if ($request->hasFile('document')) {
+            foreach ($request->document as $key => $document) {
+
+                $filenameWithExt = $request->file('document')[$key]->getClientOriginalName();
+                $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                $extension       = $request->file('document')[$key]->getClientOriginalExtension();
+                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+                $dir             = 'app/public/uploads/document/';
+
+                $image_path      = $dir . $fileNameToStore;
+
+                if (File::exists($image_path)) {
+                    File::delete($image_path);
+                }
+
+                $path = Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
+
+                if ($path['flag'] == 1) {
+                    $url = $path['url'];
+                } else {
+                    return redirect()->back()->with('error', __($path['msg']));
+                }
+
+                $form = [
+                    'employee_id' => $employee['employee_id'],
+                    'document_id' => $key,
+                    'document_value' => $fileNameToStore,
+                    'created_by' => \Auth::user()->creatorId(),
+                ];
+                $employee_document = EmployeeDocument::create($form);
+                $employee_document->save();
+                Log::info($form);
+            }
+        }
+        // return $employee;
+        return redirect()->route('profile', Auth::user()->id)->with('success', __('Document successfully updated.'));
     }
 
     public function notificationSeen($user_id)
