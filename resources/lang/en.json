@@ -1779,5 +1779,6 @@
     "Widowed":"Widowed",
     "Enter Employee Address":"Enter Employee Address",
     "Overtime Type": "Overtime Type",
-    "Select Overtime Type": "Select Overtime Type"
+    "Select Overtime Type": "Select Overtime Type",
+    "Overtime Already Exist For Date": "Overtime Already Exist For Date"
 }

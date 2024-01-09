@@ -143,6 +143,12 @@ class OvertimeController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            // check duplicate date overtime
+            $duplicate_overtime = Overtime::where('employee_id', $request->employee_id)->where('date', $request->date)->first();
+            if (!empty($duplicate_overtime)) {
+                return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' '. $request->date);
+            }
+
             $month = date('m', strtotime($request->date));
             $year  = date('Y', strtotime($request->date));
 
@@ -161,13 +167,16 @@ class OvertimeController extends Controller
                 return redirect()->back()->with('error', __('Overtime Exceeding The Overtime Limit Of') . ' ' . $employee->departments->overtime_limit . ' ' . __('Hours Per Month') );
             }
 
+            // determine work day or not
+            $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($request->date)))->first();
+
             $overtime                 = new Overtime();
             $overtime->employee_id    = $request->employee_id;
             $overtime->title          = $request->title;
             $overtime->date           = $request->date;
             $overtime->type           = $request->type;
             $overtime->description    = $request->description;
-            $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
+            $overtime->is_work_day    = $shift->is_working;
             $overtime->created_by     = \Auth::user()->id;
 
             $document_path = null;
@@ -256,12 +265,22 @@ class OvertimeController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                // check duplicate date overtime
+                $duplicate_overtime = Overtime::where('id', '!=', $overtime->id)->where('employee_id', $request->employee_id)->where('date', $request->date)->first();
+                if (!empty($duplicate_overtime)) {
+                    return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' '. $request->date);
+                }
+
+                $employee = Employee::find($request->employee_id);
+                // determine work day or not
+                $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($request->date)))->first();
+
                 $overtime->employee_id    = $request->employee_id;
                 $overtime->title          = $request->title;
                 $overtime->date           = $request->date;
                 $overtime->type           = $request->type;
                 $overtime->description    = $request->description;
-                $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
+                $overtime->is_work_day    = $shift->is_working;
 
                 if ($overtime->document && $request->file('overtimeDocument')) {
                     $filepath_array = explode('/', $overtime->document);
