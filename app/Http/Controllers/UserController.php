@@ -208,9 +208,20 @@ class UserController extends Controller
         // $employee   = Employee::where('user_id', $userDetail->id)->first();
         $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
         $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+        $emergency_contact_relations = [
+            'Parent' => __('Parent'),
+            'Sibling' => __('Sibling'),
+            'Spouse' => __('Spouse'),
+            'Friend' => __('Friend'),
+        ];
+        $marital_status = [
+            'Single' => __('Single'),
+            'Married' => __('Married'),
+            'Widowed' => __('Widowed'),
+        ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
 
-        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks'));
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status'));
     }
 
     public function editprofile(Request $request)
@@ -282,6 +293,10 @@ class UserController extends Controller
             $employee->address    = $request->address;
             $employee->dob        = $request->birthdate;
             $employee->phone      = $request->phone;
+            $employee->marital_status                   = $request->marital_status;
+            $employee->domicile_address                 = $request->domicile_address;
+            $employee->emergency_contact_number         = $request->emergency_contact_number;
+            $employee->emergency_contact_relation       = $request->emergency_contact_relation;
             $employee->save();
         }
 

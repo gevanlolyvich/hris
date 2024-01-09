@@ -259,15 +259,15 @@ class EmployeeController extends Controller
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
             $marital_status = [
-                'Single' => __('Single'),
+                'Single'  => __('Single'),
                 'Married' => __('Married'),
                 'Widowed' => __('Widowed'),
             ];
             $emergency_contact_relations = [
-                'Parent' => __('Parent'),
+                'Parent'  => __('Parent'),
                 'Sibling' => __('Sibling'),
-                'Spouse' => __('Spouse'),
-                'Friend' => __('Friend'),
+                'Spouse'  => __('Spouse'),
+                'Friend'  => __('Friend'),
             ];
 
             // return $employee->managed_by;
@@ -476,8 +476,19 @@ class EmployeeController extends Controller
 
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations->prepend('All', '');
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances'));
+            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -501,8 +512,19 @@ class EmployeeController extends Controller
                 $employee     = Employee::where('user_id', $empId)->first();
             }
             $employeesId  = $employee->employee_id;
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
