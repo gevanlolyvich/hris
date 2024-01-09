@@ -1777,5 +1777,7 @@
     "Single":"Single",
     "Married":"Married",
     "Widowed":"Widowed",
-    "Enter Employee Address":"Enter Employee Address"
+    "Enter Employee Address":"Enter Employee Address",
+    "Overtime Type": "Overtime Type",
+    "Select Overtime Type": "Select Overtime Type"
 }

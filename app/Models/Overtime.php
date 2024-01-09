@@ -30,7 +30,7 @@ class Overtime extends Model
     }
 
     public static $Overtimetype =[
-        'fixed'=>'Fixed',
-        'percentage'=> 'Percentage',
+        'hourly'=>'Hourly',
+        'daily'=> 'Daily',
     ];
 }

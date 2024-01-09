@@ -1,17 +1,21 @@
 {{ Form::model($overtime, ['route' => ['overtime.update', $overtime->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     <div class="row">
-        <div class="form-group col-md-12">
-                {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
+        <div class="form-group col-md-6">
+                {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1"> *</span>
                 {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee')]) }}
         </div>
         <div class="form-group col-md-6">
-                {{ Form::label('title', __('Title'), ['class' => 'col-form-label']) }}
+                {{ Form::label('title', __('Title'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1"> *</span>
                 {{ Form::text('title', null, ['class' => 'form-control ', 'required' => 'required','placeholder'=>'Enter Title']) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
+            {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1"> *</span>
             {{ Form::date('date', null, ['class' => 'form-control datetime-local ', 'required' => 'required', 'autocomplete'=>'off']) }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('type', __('Overtime Type'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1"> *</span>
+            {{ Form::select('type', $types, null, ['class' => 'form-control select2', 'placeholder' => __('Select Overtime Type')]) }}
         </div>
         <div class="form-group col-md-12">
             {{ Form::label('description', __('Description'), ['class' => 'col-form-label']) }}
@@ -43,10 +47,6 @@
                     </div>
                 @endif
             </div>
-        </div>
-        <div class="form-group col-md-6">
-            {{ Form::checkbox('is_work_day', 'yes', null, ['class' => 'form-check-input', 'autocomplete'=>'off']) }}
-            {{ Form::label('is_work_day', __('Is Work Day'), ['class' => 'form-check-label']) }}
         </div>
     </div>
 </div>

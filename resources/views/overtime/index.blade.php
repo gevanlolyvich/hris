@@ -774,6 +774,7 @@
                             <th>{{ __('Employee') }}</th>
                             <th>{{ __('Title') }}</th>
                             <th>{{ __('Date') }}</th>
+                            <th>{{ __('Type') }}</th>
                             <th>{{ __('Description') }}</th>
                             <th>{{ __('Document') }}</th>
                             <th>{{ __('Report') }}</th>
@@ -786,6 +787,7 @@
                                 <td>{{ !empty($overtime->employee) ? $overtime->employee->name : '' }}</td>
                                 <td>{{ $overtime->title }}</td>
                                 <td>{{ $overtime->date }}</td>
+                                <td>{{ $overtime->type ?? 'hourly' }}</td>
                                 <td>{{ $overtime->description }}</td>
                                 <td>
                                     @if ($overtime->document)
@@ -802,12 +804,14 @@
                                 </td>
                                 <td>
                                     @if ($overtime->employee_id == \Auth::user()?->employee?->id)
-                                        <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
-                                            data-overtime-id="{{ $overtime->id }}"
-                                            data-clock-in="{{ $overtime->clock_in }}"
-                                            data-bs-original-title="{{ __('Clock In / Clock Out') }}">
-                                            <i class="fa fa-solid fa-clock"></i>
-                                        </button>
+                                        @if ($overtime->type != 'daily')
+                                            <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
+                                                data-overtime-id="{{ $overtime->id }}"
+                                                data-clock-in="{{ $overtime->clock_in }}"
+                                                data-bs-original-title="{{ __('Clock In / Clock Out') }}">
+                                                <i class="fa fa-solid fa-clock"></i>
+                                            </button>
+                                        @endif
                                         <button class="btn btn-primary btn-sm report-input" data-bs-toggle="tooltip"
                                             data-overtime-id="{{ $overtime->id }}"
                                             data-document="{{ $overtime->report_document }}"
@@ -816,17 +820,19 @@
                                             <i class="fa fa-solid fa-file-import"></i>
                                         </button>
                                     @elseif (\Auth::user()?->employee ? in_array($overtime->employee_id, \Auth::user()?->employee?->subordinatesFlatten()?->pluck('id')?->toArray()) : false || Auth::user()->type != 'employee')
-                                        <button class="btn btn-success btn-sm clock-data" data-bs-toggle="tooltip"
-                                            data-overtime-id="{{ $overtime->id }}"
-                                            data-clock-in="{{ $overtime->clock_in }}"
-                                            data-clock-out="{{ $overtime->clock_out }}"
-                                            data-coord-in="{{ $overtime->coord_in }}"
-                                            data-coord-out="{{ $overtime->coord_out }}"
-                                            data-picture-in="{{ $overtime->picture_in }}"
-                                            data-picture-out="{{ $overtime->picture_out }}"
-                                            data-bs-original-title="{{ __('Clock In / Clock Out') }}">
-                                            <i class="fa fa-solid fa-clock"></i>
-                                        </button>
+                                        @if ($overtime->type != 'daily')
+                                            <button class="btn btn-success btn-sm clock-data" data-bs-toggle="tooltip"
+                                                data-overtime-id="{{ $overtime->id }}"
+                                                data-clock-in="{{ $overtime->clock_in }}"
+                                                data-clock-out="{{ $overtime->clock_out }}"
+                                                data-coord-in="{{ $overtime->coord_in }}"
+                                                data-coord-out="{{ $overtime->coord_out }}"
+                                                data-picture-in="{{ $overtime->picture_in }}"
+                                                data-picture-out="{{ $overtime->picture_out }}"
+                                                data-bs-original-title="{{ __('Clock In / Clock Out') }}">
+                                                <i class="fa fa-solid fa-clock"></i>
+                                            </button>
+                                        @endif
                                         <button class="btn btn-success btn-sm report-data" data-bs-toggle="tooltip"
                                             data-overtime-id="{{ $overtime->id }}"
                                             data-document="{{ $overtime->report_document }}"

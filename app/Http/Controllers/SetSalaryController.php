@@ -206,7 +206,7 @@ class SetSalaryController extends Controller
         $loans                = Loan::where('employee_id', $employee->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
         $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->get();
         $otherpayments        = OtherPayment::where('employee_id', $employee->id)->get();
-        $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();
+        $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
 
         $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
         $total_work_hours     = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);

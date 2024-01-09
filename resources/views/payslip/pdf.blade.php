@@ -130,7 +130,7 @@ $company_logo = Utility::getValByName('company_logo');
                                             <tr>
                                                 <td>{{ __('OverTime') }}</td>
                                                 <td>{{ $overTime->title }}</td>
-                                                <td>-</td>
+                                                <td>{{ $overTime->type ?? 'hourly' }}</td>
                                                 <td class="text-right">
                                                     {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
                                             </tr>

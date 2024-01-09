@@ -328,6 +328,7 @@
                               <thead>
                                   <tr>
                                       <th>{{ __('Date') }}</th>
+                                      <th>{{ __('Type') }}</th>
                                       <th>{{ __('Overtime') }}</th>
                                   </tr>
                               </thead>
@@ -336,6 +337,7 @@
                                       <tr>
                                           <td>{{ \Auth::user()->dateFormat($overtime->date) }}</td>
                                           <!-- Modify Clock In and Clock Out columns in your table -->
+                                          <td>{{ $overtime->type ?? 'hourly' }}</td>
                                           <td>{{ $overtime->total }}</td>
                                       </tr>
                                   @endforeach

@@ -94,6 +94,8 @@ class OvertimeController extends Controller
     public function create()
     {
         $employees = null;
+        $types = Overtime::$Overtimetype;
+
         if (\Auth::user()->type == 'employee') {
             $subordinates = \Auth::user()->employee->subordinatesFlatten();
 
@@ -111,7 +113,7 @@ class OvertimeController extends Controller
         } else {
             $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
         }
-        return view('overtime.create', compact('employees'));
+        return view('overtime.create', compact('employees', 'types'));
     }
 
     public function overtimeCreate($id)
@@ -130,6 +132,7 @@ class OvertimeController extends Controller
                                    'employee_id' => 'required',
                                    'title' => 'required',
                                    'date' => 'required',
+                                   'type' => 'required',
                                    'overtimeDocument' => 'required',
                                ]
             );
@@ -162,6 +165,7 @@ class OvertimeController extends Controller
             $overtime->employee_id    = $request->employee_id;
             $overtime->title          = $request->title;
             $overtime->date           = $request->date;
+            $overtime->type           = $request->type;
             $overtime->description    = $request->description;
             $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
             $overtime->created_by     = \Auth::user()->id;
@@ -193,6 +197,8 @@ class OvertimeController extends Controller
     public function edit($overtime)
     {
         $overtime = Overtime::find($overtime);
+        $types = Overtime::$Overtimetype;
+
         if(\Auth::user()->can('Edit Overtime'))
         {
             if($overtime->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
@@ -215,7 +221,7 @@ class OvertimeController extends Controller
                 } else {
                     $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
-                return view('overtime.edit', compact('overtime', 'employees'));
+                return view('overtime.edit', compact('overtime', 'employees', 'types'));
             }
             else
             {
@@ -240,6 +246,7 @@ class OvertimeController extends Controller
                                         'employee_id' => 'required',
                                         'title' => 'required',
                                         'date' => 'required',
+                                        'type' => 'required',
                                     ]
                 );
                 if($validator->fails())
@@ -252,6 +259,7 @@ class OvertimeController extends Controller
                 $overtime->employee_id    = $request->employee_id;
                 $overtime->title          = $request->title;
                 $overtime->date           = $request->date;
+                $overtime->type           = $request->type;
                 $overtime->description    = $request->description;
                 $overtime->is_work_day    = $request->is_work_day == 'yes' ? true : false;
 

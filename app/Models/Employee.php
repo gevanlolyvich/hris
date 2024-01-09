@@ -251,12 +251,12 @@ class Employee extends Model
         }
 
         //Overtime
-        $over_times             = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $over_times             = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
         $total_over_time        = 0;
         $total_over_time_hours  = 0;
         $overtime_limit         = $employee?->departments?->overtime_limit;
         foreach ($over_times as $over_time) {
-            $total_hours        = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            $total_hours        = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
 
             if($overtime_limit) {
                 if ($total_over_time_hours >= $overtime_limit) {

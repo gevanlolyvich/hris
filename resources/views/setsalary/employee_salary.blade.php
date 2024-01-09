@@ -118,7 +118,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Allownace Option') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
@@ -129,8 +128,6 @@
                                 <tbody>
                                     @foreach ($allowances as $allowance)
                                         <tr>
-                                            <td>{{ !empty($allowance->employee()) ? $allowance->employee()->name : '' }}
-                                            </td>
                                             <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
                                             </td>
                                             <td>{{ $allowance->title }}</td>
@@ -201,7 +198,6 @@
                                 <thead>
 
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -212,8 +208,6 @@
                                 <tbody>
                                     @foreach ($commissions as $commission)
                                         <tr>
-                                            <td>{{ !empty($commission->employee()) ? $commission->employee()->name : '' }}
-                                            </td>
                                             <td>{{ $commission->title }}</td>
                                             <td>{{ $commission->date }}</td>
 
@@ -290,7 +284,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
@@ -300,8 +293,6 @@
                                 <tbody>
                                     @foreach ($otherpayments as $otherpayment)
                                         <tr>
-                                            <td>{{ !empty($otherpayment->employee()) ? $otherpayment->employee()->name : '' }}
-                                            </td>
                                             <td>{{ $otherpayment->title }}</td>
                                             <td>{{ ucfirst($otherpayment->type) }}</td>
                                             @if ($otherpayment->type == 'fixed')
@@ -363,9 +354,9 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Type') }}</th>
                                         <th>{{ __('Work Days') }}</th>
                                         <th>{{ __('Start Time') }}</th>
                                         <th>{{ __('End Time') }}</th>
@@ -381,7 +372,7 @@
                                     @foreach ($overtimes as $overtime)
                                         @php
                                             $total_hours = null;
-                                            $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                            $total_hours = $overtime->type == 'daily' ? 8 : max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
                                         
                                             if($maximum_hours) {
                                                 if ($overall_total_hours >= $maximum_hours) {
@@ -395,13 +386,12 @@
                                             $rate = $overtime->is_work_day ? $total_hours * ($overtime->employee->salary / $total_work_hours) : $total_hours * ($overtime->employee->salary / $total_work_hours) * 2;
                                         @endphp
                                         <tr>
-                                            <td>{{ !empty($overtime->employee) ? $overtime->employee->name : '' }}
-                                            </td>
                                             <td>{{ $overtime->title }}</td>
                                             <td>{{ $overtime->date }}</td>
+                                            <td>{{ $overtime->type ?? 'hourly' }}</td>
                                             <td>{{ $overtime->is_work_day ? __('Work Days') : __('Holidays') }}</td>
-                                            <td>{{ $overtime->clock_in }}</td>
-                                            <td>{{ $overtime->clock_out }}</td>
+                                            <td>{{ $overtime->clock_in ?? '-' }}</td>
+                                            <td>{{ $overtime->clock_out ?? '-' }}</td>
                                             <td>{{ $total_hours }} {{  __('Hours')}}</td>
                                             <td>{{ \Auth::user()->priceFormat($rate) }}</td>
                                         </tr>
@@ -440,7 +430,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee') }}</th>
                                         <th>{{ __('Loan Options') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -453,7 +442,6 @@
                                 <tbody>
                                     @foreach ($loans as $loan)
                                         <tr>
-                                            <td>{{ !empty($loan->employee()) ? $loan->employee()->name : '' }}</td>
                                             <td>{{ !empty($loan->loan_option()) ? $loan->loan_option()->name : '' }}
                                             </td>
                                             <td>{{ $loan->title }}</td>
@@ -530,7 +518,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Deduction Option') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -541,8 +528,6 @@
                                 <tbody>
                                     @foreach ($saturationdeductions as $saturationdeduction)
                                         <tr>
-                                            <td>{{ !empty($saturationdeduction->employee()) ? $saturationdeduction->employee()->name : '' }}
-                                            </td>
                                             <td>{{ !empty($saturationdeduction->deduction_option()) ? $saturationdeduction->deduction_option()->name : '' }}
                                             </td>
                                             <td>{{ $saturationdeduction->title }}</td>

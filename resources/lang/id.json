@@ -486,7 +486,7 @@
   "E-Mail has been not sent due to SMTP configuration" : "E-Mail telah tidak dikirim karena konfigurasi SMTP",
   "Early leave" : "Cuti awal",
   "Early Leaving" : "Pulang Lebih Awal",
-  "Earning" : "Berpenghasilan",
+  "Earning" : "Pendapatan",
   "Edit" : "Rubah",
   "Edit " : "Rubah  ",
   "Edit Account List" : "Rubah Daftar Akun",
@@ -1540,9 +1540,9 @@
   "Total Credit" : "Total Kredit",
   "Total Days" : "Total Hari",
   "Total Debit" : "Total debit",
-  "Total Deduction" : "Deduksi Total",
+  "Total Deduction" : "Total Deduksi",
   "Total early leave in hours" : "Total cuti awal dalam beberapa jam",
-  "Total Earning" : "Total penghasilan:",
+  "Total Earning" : "Total Pendapatan",
   "Total Expense" : "Total Pengeluaran",
   "Total Income" : "Total Pendapatan",
   "Total late in hours" : "Total akhir dalam jam",
@@ -1776,5 +1776,7 @@
   "Single":"Belum Menikah",
   "Married":"Sudah Menikah",
   "Widowed":"Duda/Janda",
-  "Enter Employee Address":"Masukkan Alamat KTP"
+  "Enter Employee Address":"Masukkan Alamat KTP",
+  "Overtime Type": "Tipe Lembur",
+  "Select Overtime Type": "Pilih Tipe Lembur"
 }

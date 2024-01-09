@@ -88,7 +88,7 @@ class EmployeeAttendanceHistoryController extends Controller
         $employeesId  = $employee->employee_id;
 
         $attendanceEmployee   = AttendanceEmployee::where('employee_id', $empId);
-        $overtimes             = Overtime::where('employee_id', $empId);
+        $overtimes            = Overtime::where('employee_id', $empId)->whereNotNull(['report_document']);
 
         if ($request->type == 'monthly' && !empty($request->month)) {
             $month = date('m', strtotime($request->month));
@@ -170,12 +170,13 @@ class EmployeeAttendanceHistoryController extends Controller
         // calculating overtime
         $total_overtime = 0;
 
-        $overtimes = $overtimes->reject(function ($overtime) {
-            return empty($overtime->clock_in) || empty($overtime->clock_out);
-        });
-        
         foreach ($overtimes as $overtime) {
-            $overtime_hours  = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
+            $overtime_hours  = 0;
+            if ($overtime->type != 'hourly') {
+                $overtime_hours = 28800; // 8 Hours
+            } else {
+                $overtime_hours  = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
+            }
             $total_overtime += $overtime_hours;
 
             $hours              = floor($overtime_hours / 3600);
