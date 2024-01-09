@@ -263,6 +263,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- other payment-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -346,6 +347,7 @@
                     </div>
                 </div>
             </div>
+
             <!--overtime-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -354,16 +356,6 @@
                             <div class="col-6">
                                 <h5>{{ __('Overtime') . " (+)" }}</h5>
                             </div>
-                            {{-- @can('Create Overtime')
-                                <div class="col text-end">
-                                    <a  data-url="{{ route('overtimes.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Overtime') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
-                                        <i class="ti ti-plus"></i>
-                                    </a>
-                                </div>
-                            @endcan --}}
                         </div>
                     </div>
                     <div class=" card-body table-border-style" style=" overflow:auto">
@@ -382,10 +374,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $overall_total_hours = 0;
+                                        $maximum_hours       = $employee->departments->overtime_limit;
+                                    @endphp
                                     @foreach ($overtimes as $overtime)
                                         @php
                                             $total_hours = null;
                                             $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                        
+                                            if($maximum_hours) {
+                                                if ($overall_total_hours >= $maximum_hours) {
+                                                    continue;
+                                                }
+                                                if (($overall_total_hours + $total_hours) >= $maximum_hours) {
+                                                    $total_hours =  $maximum_hours - $overall_total_hours;
+                                                }
+                                                $overall_total_hours += $total_hours;
+                                            }
                                             $rate = $overtime->is_work_day ? $total_hours * ($overtime->employee->salary / $total_work_hours) : $total_hours * ($overtime->employee->salary / $total_work_hours) * 2;
                                         @endphp
                                         <tr>
@@ -406,6 +412,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- loan-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -497,6 +504,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Saturation -->
             <div class="col-md-6">
                 <div class="card set-card">
