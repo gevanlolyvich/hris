@@ -58,7 +58,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group col-md-12">
+                                {{-- <div class="form-group col-md-12">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::select('nationality', $nationalities, $employee->nationality, ['class' => 'form-control select2', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
                                 </div>
@@ -76,7 +76,43 @@
                             <div class="form-group">
                                 {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                 {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => 2]) !!}
+                            </div> --}}
+                            <div class="form-group col-md-6">
+                                {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
+                                {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
                             </div>
+                            <div class="form-group col-md-6">
+                                {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::select('emergency_contact_relation', $emergency_contact_relations, old('emergency_contact_relation'), ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                            </div>
+                            <div class="form-group col-md-6">
+                                {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::select('marital_status', $marital_status, null, ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                            </div>
+                            
+                            
+                            <div class="form-group col-md-6">
+                                {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::select('nationality', $nationalities, old('nationality'), ['class' => 'form-control', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                            </div>
+                            <div class="form-group col-md-6">
+                                {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::select('identity_type', $identity_types, old('identity_type'), ['class' => 'form-control', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                            </div>
+                            <div class="form-group col-md-6">
+                                {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>__('Enter Identity Number')]) !!}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                            {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Employee Address')]) !!}
+                        </div>
+                        <div class="form-group">
+                            {!! Form::label('domicile_address', __('Domicile Address'), ['class' => 'form-label']) !!}
+                            {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
+                        </div>
                             @if (\Auth::user()->type == 'employee')
                                 {!! Form::submit('Update', ['class' => 'btn-create btn-xs badge-blue radius-10px float-right']) !!}
                             @endif
@@ -275,20 +311,20 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         {!! Form::label('bank_id', __('Bank Name'), ['class' => 'form-label']) !!}
-                                        {!! Form::select('bank_id', $banks, null, ['class' => 'form-control select2','placeholder' =>  __('Select Bank Name')]) !!}
+                                        {!! Form::select('bank_id', $banks, $employee->bank_id, ['class' => 'form-control select2','placeholder' =>  __('Select Bank Name')]) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('account_number', __('Account Number'), ['class' => 'form-label']) !!}
-                                        {!! Form::number('account_number', null, ['class' => 'form-control']) !!}
+                                        {!! Form::number('account_number', $employee->account_number, ['class' => 'form-control']) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('account_holder_name', __('Account Holder Name'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('account_holder_name', null, ['class' => 'form-control']) !!}
+                                        {!! Form::text('account_holder_name', $employee->account_holder_name, ['class' => 'form-control']) !!}
 
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('tax_payer_id', __('Tax Payer Id'), ['class' => 'form-label']) !!}
-                                        {!! Form::text('tax_payer_id', null, ['class' => 'form-control']) !!}
+                                        {!! Form::text('tax_payer_id', $employee->tax_payer_id, ['class' => 'form-control']) !!}
                                     </div>
                                 </div>
                             </div>

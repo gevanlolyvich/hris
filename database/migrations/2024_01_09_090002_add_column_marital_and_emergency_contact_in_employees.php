@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::table('employees', function (Blueprint $table) {
             $table->string('domicile_address')->after('address')->nullable();
-            $table->string('martial_status')->after('domicile_address')->nullable();
-            $table->string('emergency_contact_number')->after('martial_status')->nullable();
+            $table->string('marital_status')->after('domicile_address')->nullable();
+            $table->string('emergency_contact_number')->after('marital_status')->nullable();
             $table->string('emergency_contact_relation')->after('emergency_contact_number')->nullable();
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     {
         Schema::table('employees', function (Blueprint $table) {
             $table->dropColumn([
-                'martial_status',
+                'marital_status',
                 'emergency_contact_number',
                 'emergency_contact_relation',
                 'domicile_address'
