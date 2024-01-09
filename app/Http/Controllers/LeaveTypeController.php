@@ -11,7 +11,7 @@ class LeaveTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Leave Type')) {
-            $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $leavetypes = LeaveType::orderBy('id', 'ASC')->get();
 
             return view('leavetype.index', compact('leavetypes'));
         } else {

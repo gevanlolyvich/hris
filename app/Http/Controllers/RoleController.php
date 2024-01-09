@@ -12,64 +12,48 @@ class RoleController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Role'))
-        {
-            $roles = Role::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Role')) {
+            $roles = Role::get();
 
             return view('role.index')->with('roles', $roles);
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Role'))
-        {
+        if (\Auth::user()->can('Create Role')) {
             $user = \Auth::user();
-            if($user->type == 'super admin' || $user->type == 'company')
-            {
+            if ($user->type == 'super admin' || $user->type == 'company') {
                 $permissions = Permission::all()->pluck('name', 'id')->toArray();
-            }
-            else
-            {
+            } else {
                 $permissions = new Collection();
-                foreach($user->roles as $role)
-                {
+                foreach ($user->roles as $role) {
                     $permissions = $permissions->merge($role->permissions);
                 }
                 $permissions = $permissions->pluck('name', 'id')->toArray();
-
             }
 
             return view('role.create', ['permissions' => $permissions]);
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Role'))
-        {
+        if (\Auth::user()->can('Create Role')) {
             $role = Role::where('name', '=', $request->name)->first();
-            if(isset($role))
-            {
+            if (isset($role)) {
                 return redirect()->back()->with('error', __('The Role has Already Been Taken.'));
-            }
-            else
-            {
+            } else {
                 $this->validate(
-                    $request, [
-                                'name' => 'required|max:100|unique:roles,name,NULL,id,created_by,' . \Auth::user()->creatorId(),
-                                'permissions' => 'required',
-                            ]
+                    $request,
+                    [
+                        'name' => 'required|max:100|unique:roles,name,NULL,id,created_by,' . \Auth::user()->creatorId(),
+                        'permissions' => 'required',
+                    ]
                 );
 
                 $name             = $request['name'];
@@ -79,44 +63,30 @@ class RoleController extends Controller
                 $permissions      = $request['permissions'];
                 $role->save();
 
-                foreach($permissions as $permission)
-                {
+                foreach ($permissions as $permission) {
                     $p    = Permission::where('id', '=', $permission)->firstOrFail();
                     $role = Role::where('name', '=', $name)->first();
                     $role->givePermissionTo($p);
                 }
 
                 return redirect()->route('roles.index')->with('success', 'Role successfully created.');
-
             }
-
-
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
-
     }
 
     public function edit(Role $role)
     {
 
-        if(\Auth::user()->can('Edit Role'))
-        {
+        if (\Auth::user()->can('Edit Role')) {
 
             $user = \Auth::user();
-            if($user->type == 'super admin' || $user->type == 'company')
-            {
+            if ($user->type == 'super admin' || $user->type == 'company') {
                 $permissions = Permission::all()->pluck('name', 'id')->toArray();
-
-            }
-            else
-            {
+            } else {
                 $permissions = new Collection();
-                foreach($user->roles as $role1)
-                {
+                foreach ($user->roles as $role1) {
                     $permissions = $permissions->merge($role1->permissions);
                 }
                 $permissions = $permissions->pluck('name', 'id')->toArray();
@@ -124,34 +94,28 @@ class RoleController extends Controller
 
 
             return view('role.edit', compact('role', 'permissions'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
-
     }
 
     public function update(Request $request, Role $role)
     {
-        if(\Auth::user()->can('Edit Role'))
-        {
-            if($role->name == 'employee')
-            {
+        if (\Auth::user()->can('Edit Role')) {
+            if ($role->name == 'employee') {
                 $this->validate(
-                    $request, [
-                                'permissions' => 'required',
-                            ]
+                    $request,
+                    [
+                        'permissions' => 'required',
+                    ]
                 );
-            }
-            else
-            {
+            } else {
                 $this->validate(
-                    $request, [
-                                'name' => 'required|max:100|unique:roles,name,' . $role['id'] . ',id,created_by,' . \Auth::user()->creatorId(),
-                                'permissions' => 'required',
-                            ]
+                    $request,
+                    [
+                        'name' => 'required|max:100|unique:roles,name,' . $role['id'] . ',id,created_by,' . \Auth::user()->creatorId(),
+                        'permissions' => 'required',
+                    ]
                 );
             }
 
@@ -161,41 +125,32 @@ class RoleController extends Controller
 
             $p_all = Permission::all();
 
-            foreach($p_all as $p)
-            {
+            foreach ($p_all as $p) {
                 $role->revokePermissionTo($p);
             }
 
-            foreach($permissions as $permission)
-            {
+            foreach ($permissions as $permission) {
                 $p = Permission::where('id', '=', $permission)->firstOrFail();
                 $role->givePermissionTo($p);
             }
 
             return redirect()->route('roles.index')->with('success', 'Role successfully updated.');
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
     }
 
     public function destroy(Role $role)
     {
-        if(\Auth::user()->can('Delete Role'))
-        {
+        if (\Auth::user()->can('Delete Role')) {
             $role->delete();
 
             return redirect()->route('roles.index')->with(
-                'success', 'Role successfully deleted.'
+                'success',
+                'Role successfully deleted.'
             );
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-
-
     }
 }

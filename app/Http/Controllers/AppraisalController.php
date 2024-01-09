@@ -15,25 +15,19 @@ class AppraisalController extends Controller
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Appraisal'))
-        {
+        if (\Auth::user()->can('Manage Appraisal')) {
             $user = \Auth::user();
-            if($user->type == 'employee')
-            {
+            if ($user->type == 'employee') {
                 $employee   = Employee::where('user_id', $user->id)->first();
                 $competencyCount = Competencies::where('created_by', '=', $user->creatorId())->count();
-                $appraisals = Appraisal::where('created_by', '=', \Auth::user()->creatorId())->where('branch', $employee->branch_id)->where('employee', $employee->id)->get();
-            }
-            else
-            {
+                $appraisals = Appraisal::where('branch', $employee->branch_id)->where('employee', $employee->id)->get();
+            } else {
                 $appraisals = !empty(\Auth::user()->branch_id) ? Appraisal::where('branch', \Auth::user()->branch_id)->get() : Appraisal::get();
                 $competencyCount = Competencies::where('created_by', '=', $user->creatorId())->count();
             }
 
-            return view('appraisal.index', compact('appraisals','competencyCount'));
-        }
-        else
-        {
+            return view('appraisal.index', compact('appraisals', 'competencyCount'));
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -41,19 +35,16 @@ class AppraisalController extends Controller
 
     public function create()
     {
-        if(\Auth::user()->can('Create Appraisal'))
-        {
-            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name','id') : Employee::where('is_active', 1)->get()->pluck('name','id');
+        if (\Auth::user()->can('Create Appraisal')) {
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
             $employee->prepend('Select Employee', '');
-            
-            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name','id') : Branch::get()->pluck('name','id');
 
-            $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+
+            $performance_types = Performance_Type::get();
 
             return view('appraisal.create', compact('employee', 'brances', 'performance_types'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -61,17 +52,16 @@ class AppraisalController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Appraisal'))
-        {
+        if (\Auth::user()->can('Create Appraisal')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'branch' => 'required',
-                                   'employee' => 'required',
-                                   'rating'=> 'required',
-                               ]
+                $request->all(),
+                [
+                    'branch' => 'required',
+                    'employee' => 'required',
+                    'rating' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -93,32 +83,29 @@ class AppraisalController extends Controller
     public function show(Appraisal $appraisal)
     {
         $rating = json_decode($appraisal->rating, true);
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
+        $performance_types = Performance_Type::get();
         $employee = Employee::find($appraisal->employee);
-        $indicator = Indicator::where('branch',$employee->branch_id)->where('department',$employee->department_id)->where('designation',$employee->designation_id)->first();
-     
+        $indicator = Indicator::where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->first();
+
         $ratings = json_decode($indicator->rating, true);
-        return view('appraisal.show', compact('appraisal', 'performance_types', 'ratings','rating'));
+        return view('appraisal.show', compact('appraisal', 'performance_types', 'ratings', 'rating'));
     }
 
 
     public function edit(Appraisal $appraisal)
     {
-        if(\Auth::user()->can('Edit Appraisal'))
-        {
-            $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Edit Appraisal')) {
+            $performance_types = Performance_Type::get();
 
-            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name','id') : Employee::where('is_active', 1)->get()->pluck('name','id');
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
             $employee->prepend('Select Employee', '');
-            
-            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name','id') : Branch::get()->pluck('name','id');
 
-            $rating = json_decode($appraisal->rating,true);
+            $brances = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
-            return view('appraisal.edit', compact('brances', 'employee', 'appraisal', 'performance_types','rating'));
-        }
-        else
-        {
+            $rating = json_decode($appraisal->rating, true);
+
+            return view('appraisal.edit', compact('brances', 'employee', 'appraisal', 'performance_types', 'rating'));
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -126,17 +113,16 @@ class AppraisalController extends Controller
 
     public function update(Request $request, Appraisal $appraisal)
     {
-        if(\Auth::user()->can('Edit Appraisal'))
-        {
+        if (\Auth::user()->can('Edit Appraisal')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'brances' => 'required',
-                                   'employees' => 'required',
-                                   'rating'=> 'required',
-                               ]
+                $request->all(),
+                [
+                    'brances' => 'required',
+                    'employees' => 'required',
+                    'rating' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -156,65 +142,55 @@ class AppraisalController extends Controller
 
     public function destroy(Appraisal $appraisal)
     {
-        if(\Auth::user()->can('Delete Appraisal'))
-        {
-            if($appraisal->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Appraisal')) {
+            if ($appraisal->created_by == \Auth::user()->creatorId()) {
                 $appraisal->delete();
 
                 return redirect()->route('appraisal.index')->with('success', __('Appraisal successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
     public function empByStar(Request $request)
     {
         $employee = Employee::where('is_active', 1)->find($request->employee);
-        
-        $indicator = Indicator::where('branch',$employee->branch_id)->where('department',$employee->department_id)->where('designation',$employee->designation_id)->first();
-     
+
+        $indicator = Indicator::where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->first();
+
         $ratings = json_decode($indicator->rating, true);
-        
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
-        
-        $viewRender = view('appraisal.star', compact('ratings','performance_types'))->render();
+
+        $performance_types = Performance_Type::get();
+
+        $viewRender = view('appraisal.star', compact('ratings', 'performance_types'))->render();
         // dd($viewRender);
-        return response()->json(array('success' => true, 'html'=>$viewRender));
-  
+        return response()->json(array('success' => true, 'html' => $viewRender));
     }
     public function empByStar1(Request $request)
     {
         $employee = Employee::where('is_active', 1)->find($request->employee);
-        
+
         $appraisal = Appraisal::find($request->appraisal);
 
-        $indicator = Indicator::where('branch',$employee->branch_id)->where('department',$employee->department_id)->where('designation',$employee->designation_id)->first();
-     
+        $indicator = Indicator::where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->first();
+
         $ratings = json_decode($indicator->rating, true);
-        $rating = json_decode($appraisal->rating,true);
-        $performance_types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get();
-        $viewRender = view('appraisal.staredit', compact('ratings','rating','performance_types'))->render();
+        $rating = json_decode($appraisal->rating, true);
+        $performance_types = Performance_Type::get();
+        $viewRender = view('appraisal.staredit', compact('ratings', 'rating', 'performance_types'))->render();
         // dd($viewRender);
-        return response()->json(array('success' => true, 'html'=>$viewRender));
-  
+        return response()->json(array('success' => true, 'html' => $viewRender));
     }
     public function getemployee(Request $request)
     {
         $data['employee'] = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->get();
 
-    
+
 
         // $employees = Employee::where('branch_id', $request->branch)->get()->pluck('name', 'id')->toArray();
-   
+
         return response()->json($data);
-
-
-    }      
+    }
 }

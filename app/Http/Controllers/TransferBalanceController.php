@@ -15,50 +15,43 @@ class TransferBalanceController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Transfer Balance'))
-        {
+        if (\Auth::user()->can('Manage Transfer Balance')) {
             $transferbalances = TransferBalance::where('created_by', '=', Auth::user()->creatorId())->get();
 
             return view('transferbalance.index', compact('transferbalances'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Transfer Balance'))
-        {
-            $transferbalances = TransferBalance::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $accounts         = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
-            $paymentTypes     = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Create Transfer Balance')) {
+            $transferbalances = TransferBalance::get();
+            $accounts         = AccountList::get()->pluck('account_name', 'id');
+            $paymentTypes     = PaymentType::get()->pluck('name', 'id');
 
             return view('transferbalance.create', compact('transferbalances', 'accounts', 'paymentTypes'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Transfer Balance'))
-        {
+        if (\Auth::user()->can('Create Transfer Balance')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'from_account_id' => 'required',
-                                   'to_account_id' => 'required',
-                                   'date' => 'required',
-                                   'amount' => 'required',
-                                   'payment_type_id' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'from_account_id' => 'required',
+                    'to_account_id' => 'required',
+                    'date' => 'required',
+                    'amount' => 'required',
+                    'payment_type_id' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -80,9 +73,7 @@ class TransferBalanceController extends Controller
 
 
             return redirect()->route('transferbalance.index')->with('success', __('TransferBalance  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -94,45 +85,37 @@ class TransferBalanceController extends Controller
 
     public function edit(TransferBalance $transferbalance)
     {
-        if(\Auth::user()->can('Edit Transfer Balance'))
-        {
-            if($transferbalance->created_by == \Auth::user()->creatorId())
-            {
-                $transferbalances = TransferBalance::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $accounts         = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
-                $incomeCategory   = IncomeType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $paymentTypes     = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Transfer Balance')) {
+            if ($transferbalance->created_by == \Auth::user()->creatorId()) {
+                $transferbalances = TransferBalance::get();
+                $accounts         = AccountList::get()->pluck('account_name', 'id');
+                $incomeCategory   = IncomeType::get()->pluck('name', 'id');
+                $paymentTypes     = PaymentType::get()->pluck('name', 'id');
 
                 return view('transferbalance.edit', compact('transferbalance', 'accounts', 'incomeCategory', 'paymentTypes'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, TransferBalance $transferbalance)
     {
-        if(\Auth::user()->can('Edit Transfer Balance'))
-        {
-            if($transferbalance->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Transfer Balance')) {
+            if ($transferbalance->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'from_account_id' => 'required',
-                                       'to_account_id' => 'required',
-                                       'date' => 'required',
-                                       'amount' => 'required',
-                                       'payment_type_id' => 'required',
-                                   ]
+                    $request->all(),
+                    [
+                        'from_account_id' => 'required',
+                        'to_account_id' => 'required',
+                        'date' => 'required',
+                        'amount' => 'required',
+                        'payment_type_id' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -148,35 +131,25 @@ class TransferBalanceController extends Controller
                 $transferbalance->save();
 
                 return redirect()->route('transferbalance.index')->with('success', __('TransferBalance successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(TransferBalance $transferbalance)
     {
-        if(\Auth::user()->can('Delete Transfer Balance'))
-        {
-            if($transferbalance->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Transfer Balance')) {
+            if ($transferbalance->created_by == \Auth::user()->creatorId()) {
                 $transferbalance->delete();
 
                 return redirect()->route('transferbalance.index')->with('success', __('TransferBalance successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
