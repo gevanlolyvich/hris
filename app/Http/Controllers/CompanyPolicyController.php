@@ -13,7 +13,7 @@ class CompanyPolicyController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Company Policy')) {
-            $companyPolicy = CompanyPolicy::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $companyPolicy = CompanyPolicy::get();
 
             return view('companyPolicy.index', compact('companyPolicy'));
         } else {

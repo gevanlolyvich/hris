@@ -15,54 +15,47 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Expense'))
-        {
-            $expenses = Expense::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Expense')) {
+            $expenses = Expense::get();
 
             return view('expense.index', compact('expenses'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Expense'))
-        {
-            $expenses = Expense::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $accounts = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
+        if (\Auth::user()->can('Create Expense')) {
+            $expenses = Expense::get();
+            $accounts = AccountList::get()->pluck('account_name', 'id');
 
-            $expenseCategory = ExpenseType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $payees          = Payees::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('payee_name', 'id');
-            $paymentTypes    = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $expenseCategory = ExpenseType::get()->pluck('name', 'id');
+            $payees          = Payees::get()->pluck('payee_name', 'id');
+            $paymentTypes    = PaymentType::get()->pluck('name', 'id');
 
             return view('expense.create', compact('expenses', 'accounts', 'expenseCategory', 'payees', 'paymentTypes'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Expense'))
-        {
+        if (\Auth::user()->can('Create Expense')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'account_id' => 'required',
-                                   'amount' => 'required',
-                                   'date' => 'required',
-                                   'expense_category_id' => 'required',
-                                   'payee_id' => 'required',
-                                   'payment_type_id'=>'required',
-                               ]
+                $request->all(),
+                [
+                    'account_id' => 'required',
+                    'amount' => 'required',
+                    'date' => 'required',
+                    'expense_category_id' => 'required',
+                    'payee_id' => 'required',
+                    'payment_type_id' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -83,9 +76,7 @@ class ExpenseController extends Controller
             AccountList::remove_Balance($request->account_id, $request->amount);
 
             return redirect()->route('expense.index')->with('success', __('Expense  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -97,46 +88,38 @@ class ExpenseController extends Controller
 
     public function edit(Expense $expense)
     {
-        if(\Auth::user()->can('Edit Expense'))
-        {
-            if($expense->created_by == \Auth::user()->creatorId())
-            {
-                $expenses        = Expense::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $accounts        = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
-                $expenseCategory = ExpenseType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $payees          = Payees::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('payee_name', 'id');
-                $paymentTypes    = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Expense')) {
+            if ($expense->created_by == \Auth::user()->creatorId()) {
+                $expenses        = Expense::get();
+                $accounts        = AccountList::get()->pluck('account_name', 'id');
+                $expenseCategory = ExpenseType::get()->pluck('name', 'id');
+                $payees          = Payees::get()->pluck('payee_name', 'id');
+                $paymentTypes    = PaymentType::get()->pluck('name', 'id');
 
                 return view('expense.edit', compact('expense', 'accounts', 'expenseCategory', 'payees', 'paymentTypes'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Expense $expense)
     {
-        if(\Auth::user()->can('Edit Expense'))
-        {
-            if($expense->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Expense')) {
+            if ($expense->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'account_id' => 'required',
-                                       'amount' => 'required',
-                                       'date' => 'required',
-                                       'expense_category_id' => 'required',
-                                       'payee_id' => 'required',
-                                   ]
+                    $request->all(),
+                    [
+                        'account_id' => 'required',
+                        'amount' => 'required',
+                        'date' => 'required',
+                        'expense_category_id' => 'required',
+                        'payee_id' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -153,35 +136,25 @@ class ExpenseController extends Controller
                 $expense->save();
 
                 return redirect()->route('expense.index')->with('success', __('Expense successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Expense $expense)
     {
-        if(\Auth::user()->can('Delete Expense'))
-        {
-            if($expense->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Expense')) {
+            if ($expense->created_by == \Auth::user()->creatorId()) {
                 $expense->delete();
 
                 return redirect()->route('expense.index')->with('success', __('Expense successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
