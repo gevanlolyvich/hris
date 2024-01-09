@@ -1780,5 +1780,6 @@
   "Widowed":"Duda/Janda",
   "Enter Employee Address":"Masukkan Alamat KTP",
   "Overtime Type": "Tipe Lembur",
-  "Select Overtime Type": "Pilih Tipe Lembur"
+  "Select Overtime Type": "Pilih Tipe Lembur",
+  "Overtime Already Exist For Date": "Sudah Ada Lembur Pada Tanggal"
 }
