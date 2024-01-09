@@ -344,7 +344,7 @@
                         </div>
                         <div class="text-center mt-4">
                             @if ($overtime_exceed_limit)
-                            <h6>Total: {{ $max_overtime }} {{__('Hours')}} 0 {{__(' Minute')}} | {{ __('Maximum Overtime')}}</h6>
+                                <h6>Total: {{ $max_overtime }} {{__('Hours')}} 0 {{__(' Minute')}} | {{ __('Maximum Overtime')}}</h6>
                             @else
                                 <h6>Total: {{ $total_overtime['hours'] }} {{__('Hours')}}  {{ $total_overtime['minutes'] }} {{__(' Minute')}}</h6>
                             @endif

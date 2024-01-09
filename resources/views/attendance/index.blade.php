@@ -294,7 +294,7 @@
                                                         data-bs-original-title="{{__('Invalid / Required Validation')}}"
                                                         title="{{__('Invalid / Required Validation')}}"
                                                         style="pointer-events: auto">
-                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                        <i class="ti ti-alert-triangle text-white text-white"></i>
                                                     </button>
                                                     {!! Form::close() !!}
                                                 </div>
@@ -314,7 +314,7 @@
                                                         data-bs-toggle="tooltip" title="{{__('Invalid / Required Validation')}}"
                                                         data-bs-original-title="{{__('Invalid / Required Validation')}}"
                                                         style="pointer-events: auto">
-                                                        <i class="ti ti-checks text-white text-white"></i>
+                                                        <i class="ti ti-alert-triangle text-white text-white"></i>
                                                     </button>
                                                 </div>
                                             @endif

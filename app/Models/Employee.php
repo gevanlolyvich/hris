@@ -251,12 +251,24 @@ class Employee extends Model
         }
 
         //Overtime
-        $over_times      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $total_over_time = 0;
+        $over_times             = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $total_over_time        = 0;
+        $total_over_time_hours  = 0;
+        $overtime_limit         = $employee?->departments?->overtime_limit;
         foreach ($over_times as $over_time) {
-            $total_hours     = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
-            $amount          = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
-            $total_over_time = $amount + $total_over_time;
+            $total_hours        = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+
+            if($overtime_limit) {
+                if ($total_over_time_hours >= $overtime_limit) {
+                    continue;
+                }
+                if (($total_over_time_hours + $total_hours) >= $overtime_limit) {
+                    $total_hours =  $overtime_limit - $total_over_time_hours;
+                }
+                $total_over_time_hours += $total_hours;
+            }
+            $amount             = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
+            $total_over_time    = $amount + $total_over_time;
         }
 
         // Normal Salary Calculate
