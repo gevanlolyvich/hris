@@ -765,7 +765,7 @@
 <div class="col-md-12">
     <div class="card">
         <div class="card-header card-body table-border-style">
-            <h5>{{__('Employees')}}</h5>
+            <h5>{{__('Overtime List')}}</h5>
             <hr>
             <div class="table-responsive">
                 <table class="table" id="pc-dt-simple">

@@ -19,6 +19,7 @@ use App\Models\ShiftType;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Utility;
+use App\Models\Overtime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -46,13 +47,15 @@ class HomeController extends Controller
             // Get today's date
             $today = Carbon::today()->toDateString();
             if ($user->type == 'employee') {
-                $settings = Utility::settings();
+                $settings       = Utility::settings();
 
-                $emp = Employee::where('user_id', $user->id)->first();
+                $emp            = Employee::where('user_id', $user->id)->first();
 
-                $subordinates = \Auth::user()->employee->subordinatesFlatten();
+                $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
 
-                $employees_id = collect();
+                $subordinates   = \Auth::user()->employee->subordinatesFlatten();
+
+                $employees_id   = collect();
                 // Check if employee managing other employee or not
                 if ($subordinates->isNotEmpty()) {
                     
@@ -171,7 +174,7 @@ class HomeController extends Controller
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime'));
             } else {
                 // $events    = Event::get();
                 // $arrEvents = [];

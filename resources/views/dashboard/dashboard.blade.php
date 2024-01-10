@@ -21,6 +21,108 @@
     @endif
 
     @if (\Auth::user()->type == 'employee')
+    {{-- Modal --}}
+    <div class="modal fade" id="clockInOutInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding-top: 0.35rem">
+                    <div class="row d-flex flex-column align-items-center">
+                        {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                        <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
+                            <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
+                                class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                            </button>
+                            <div id="camera-overtime" style="display: none; position: relative" class="col-12">
+                                <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                                <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
+                                    class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                </button>
+                            </div>
+                            <canvas id="canvas-overtime" style="display: none;"></canvas>
+                            <div id="output-overtime" style="display: none;">
+                                <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                            </div>
+                            <label for="picture-overtime">
+                                <input type="hidden" name="picture" id="picture-overtime">
+                            </label>      
+                        </div>
+                        <hr>
+                        <input type="hidden" name="latitude" id="latitude-overtime" value="0">
+                        <input type="hidden" name="longitude" id="longitude-overtime" value="0">
+                        <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
+                        <input type="hidden" name="overtimeId" id="overtimeId" value="">
+                        <div class="col-md-6 text-center mx-auto mt-3">
+                            <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
+                            {{ Form::close() }}
+                        </div>                                                    
+                        <div class="col-md-6 text-center mx-auto mt-3">
+                            {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                                <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
+                                <input type="hidden" name="picture_out" id="picture_out-overtime">
+                                <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
+                                <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
+                                    class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
+                            {{ Form::close() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding-top: 0.35rem">
+                    {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                        <div class="form-group" style="margin-bottom: 0px">
+                            {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
+                            <div class="row">
+                                <label for="myDocument" class="col-6">
+                                <div class="btn btn-block btn-primary bg-primary document"> <i
+                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                    </div>
+                                    <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
+                                </label>
+                                <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
+                                    class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="exist-document-class" style="display: none;">
+                                {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
+                                <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                                    data-bs-toggle="tooltip" id="exist-document-view"
+                                    data-bs-original-title="{{ __('View') }}">
+                                    <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
+                            {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
+                        </div>
+                        <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
+                    </div>
+                {{ Form::close() }}
+            </div>
+        </div>
+    </div>
+    
     <div class="col-xxl-5">
         <div class="card">
             <div class="card-header">
@@ -145,6 +247,38 @@
                 </div>
             </div>
         </div>
+        @if (!empty($overtime))
+            <div class="card">
+                <div class="card-header card-body table-border-style">
+                    <h5>{{ __('Overtime') }}</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ __('Title')}} :</h6>
+                    <p class="text-muted pb-0-5">{{ $overtime->title}}</p>
+                    <h6>{{ __('Description')}} :</h6>
+                    <p class="text-muted pb-0-5">{{ $overtime->description}}</p>
+                    <hr>
+                    <hr>
+                    <div class="text-center">
+                        @if ($overtime->type != 'daily')
+                            <button class="btn btn-primary btn-xl clock-input mx-3" data-bs-toggle="tooltip"
+                                data-overtime-id="{{ $overtime->id }}"
+                                data-clock-in="{{ $overtime->clock_in }}"
+                                data-bs-original-title="{{ __('Clock In / Clock Out') }}">
+                                <i class="fa fa-solid fa-clock"></i>
+                            </button>
+                        @endif
+                        <button class="btn btn-primary btn-xxl report-input" data-bs-toggle="tooltip"
+                            data-overtime-id="{{ $overtime->id }}"
+                            data-document="{{ $overtime->report_document }}"
+                            data-note="{{ $overtime->report_note }}"
+                            data-bs-original-title="{{ __('Report Document') }}">
+                            <i class="fa fa-solid fa-file-import"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="card">
             <div class="card-header card-body table-border-style">
                 <h5>{{ __('Meeting schedule') }}</h5>
@@ -538,6 +672,16 @@
             border: none;
             cursor: pointer;
         }
+
+        .custBtn3{
+            position: absolute;
+            top: 83%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            border: none;
+            cursor: pointer;
+        }
     </style>
 @endpush
 
@@ -573,8 +717,6 @@
           try {
             const { latitude, longitude, accuracy } = await getLocation();
 
-            console.log(`${latitude}, ${longitude}, ${accuracy}`);
-      
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
             const clockInData = document.getElementById("clockInData");
@@ -895,4 +1037,241 @@
             }
         })();
     </script>
+
+    @if (Auth::user()->type == 'employee')
+        <script>
+            $(document).ready(() => {
+                $(document).on('change', '[name="overtimeDocument"]', function () {
+                    const overFile = document.getElementById('overtimeFile');
+                    overFile.style.display = '';
+                    overFile.style['max-width'] = '';
+                    document.getElementById('overtimeFileName').textContent = this.files[0].name;
+                });
+
+                $(document).on('change', '[name="myDocument"]', function () {
+                    const overFile = document.getElementById('uploadFile');
+                    overFile.style.display = '';
+                    overFile.style['max-width'] = '';
+                    document.getElementById('fileName').textContent = this.files[0].name;
+                });
+            })
+        </script>
+        <script>
+            /* JS comes here */
+            (function() {
+
+                var width_overtime = 320; // We will scale the photo width to this
+                var height_overtime = 0; // This will be computed based on the input stream
+
+                var streaming_overtime = false;
+
+                var video_overtime = null;
+                var canvas_overtime = null;
+                var photo_overtime = null;
+                var takepic_overtime = null;
+                var loadbutton_overtime = document.getElementById('load-overtime');
+
+                loadbutton_overtime.addEventListener('click', startupOvertime, false);
+
+                function startupOvertime() {
+                    video_overtime = document.getElementById('video-overtime');
+                    canvas_overtime = document.getElementById('canvas-overtime');
+                    photo_overtime = document.getElementById('photo-overtime');
+                    takepic_overtime = document.getElementById('takepic-overtime');
+
+                    navigator.mediaDevices.getUserMedia({
+                            video: true,
+                            audio: false
+                        })
+                        .then(function(stream) {
+                            document.getElementById('load-overtime').style.display = 'none';
+                            document.getElementById('camera-overtime').style.display = 'block';
+                            document.getElementById('output-overtime').style.display = 'block';
+
+                            takepic_overtime.style.display = '';
+                            video_overtime.srcObject = stream;
+                            video_overtime.play();
+                        })
+                        .catch(function(err) {
+                            alert("Please Allow Camera Access To Take Picture For Clock In / Out");
+                            console.log("An error occurred: " + err);
+                        });
+
+                    video_overtime.addEventListener('canplay', function(ev) {
+                        if (!streaming_overtime) {
+                            height_overtime = video_overtime.videoHeight / (video_overtime.videoWidth / width_overtime);
+
+                            if (isNaN(height_overtime)) {
+                                height_overtime = width / (4 / 3);
+                            }
+
+                            video_overtime.setAttribute('width', width_overtime);
+                            video_overtime.setAttribute('height', height_overtime);
+                            document.getElementById('camera-overtime').style.width = width_overtime;
+                            document.getElementById('camera-overtime').style.height = height_overtime;
+                            canvas_overtime.setAttribute('width', width_overtime);
+                            canvas_overtime.setAttribute('height', height_overtime);
+                            photo_overtime.setAttribute('width', width_overtime);
+                            photo_overtime.setAttribute('height', height_overtime);
+                            streaming_overtime = true;
+                        }
+                    }, false);
+
+                    takepic_overtime.addEventListener('click', function(ev) {
+                        takepictureOvertime();
+                        ev.preventDefault();
+                    }, false);
+
+                    clearphotoOvertime();
+                }
+
+                function clearphotoOvertime() {
+                    var context_overtime = canvas_overtime.getContext('2d');
+                    context_overtime.fillStyle = "#AAA";
+                    context_overtime.fillRect(0, 0, canvas_overtime.width, canvas_overtime.height);
+
+                    var data_overtime = canvas_overtime.toDataURL('image/png');
+                    photo_overtime.setAttribute('src', data_overtime);
+                }
+
+                function takepictureOvertime() {
+                    var context_overtime = canvas_overtime.getContext('2d');
+                    if (width_overtime && height_overtime) {
+                        canvas_overtime.width = width_overtime;
+                        canvas_overtime.height = height_overtime;
+                        context_overtime.drawImage(video_overtime, 0, 0, width_overtime, height_overtime);
+
+                        var data_overtime = canvas_overtime.toDataURL('image/png');
+                        photo_overtime.setAttribute('src', data_overtime);
+                        document.getElementById('picture').value = data_overtime;
+                        document.getElementById('picture_out').value = data_overtime;
+                    } else {
+                        clearphotoOvertime();
+                    }
+                }
+            })();
+        </script>
+        <script>
+            $(document).ready(function() {
+                let map = null;
+                let mapIn = null;
+                let mapOut = null;
+                let clockIn = null;
+                let clockOut = null;
+                let coordIn = null;
+                let coordOut = null;
+                let pictureIn = null;
+                let pictureOut = null;
+    
+                $('body').on('click', '.clock-input', async function() {
+                    try {
+                        let overtimeId = $(this).data('overtime-id');
+                        document.getElementById('overtimeId').value = overtimeId;
+                        document.getElementById('overtimeIdOut').value = overtimeId;
+    
+                        const { latitude, longitude, accuracy } = await getLocation();
+
+                        const latElement = document.getElementById("latitude-overtime");
+                        const longElement = document.getElementById("longitude-overtime");
+                        const accElement = document.getElementById("accuracy-overtime");
+    
+                        const latOutElement = document.getElementById("latitude_out-overtime");
+                        const longOutElement = document.getElementById("longitude_out-overtime");
+                        const accOutElement = document.getElementById("accuracy_out-overtime");
+    
+                        if (latElement) {
+                            latElement.value = latitude;
+                        }
+                        if (longElement) {
+                            longElement.value = longitude
+                        }
+                        if (accElement) {
+                            accElement.value = accuracy;
+                        }
+    
+                        if (latOutElement) {
+                            latOutElement.value = latitude;
+                        }
+                        if (longOutElement) {
+                            longOutElement.value = longitude
+                        }
+                        if (accOutElement) {
+                            accOutElement.value = accuracy;
+                        }
+                        
+                        let clock_in = $(this).data('clock-in');
+                        if (!clock_in){
+                            document.getElementById("clock_in-overtime").disabled = false;
+                            document.getElementById("clock_out-overtime").disabled = true;
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        if (error.message === "User denied Geolocation") {
+                        // Handle the case where the user denied geolocation access
+                        const clockInButton = document.getElementById("clock_in");
+                        const clockOutButton = document.getElementById("clock_out");
+                        if (clockInButton) {
+                            clockInButton.disabled = true;
+                        }
+                        if (clockOutButton) {
+                            clockOutButton.disabled = true;
+                        }
+                        }
+                    }
+                
+                    // Open the modal
+                    $('#clockInOutInputModal').modal('show');
+                });
+    
+                $('body').on('click', '.report-input', function() {
+                    // Open the modal
+                    $('#reportInputModal').modal('show');
+    
+                    // Set the modal's data attributes
+                    // Get the values from the clicked button
+                    let overtimeId = $(this).data('overtime-id');
+                    document.getElementById('overtimeIdReportInput').value = overtimeId;
+    
+                    let documentFile = $(this).data('document');
+                    if (documentFile) {
+                    document.getElementById('exist-document-class').style.display = '';
+                    document.getElementById('exist-document-view').href = documentFile;
+                    }
+    
+                    let notes = $(this).data('note');
+                    if (notes) {
+                        document.getElementById('note').value = notes;
+                    }
+                });
+    
+                $('#reportInputModal').on('hidden.bs.modal', function () {
+                    let file = document.getElementById('uploadFile');
+                    if (file) {
+                        file.style.display = 'none';
+                    }
+    
+                    document.getElementById('exist-document-class').style.display = 'none';
+                    document.getElementById('exist-document-view').href = '#';
+                });
+    
+                $('#commonModal').on('hidden.bs.modal', function () {
+                    let file = document.getElementById('uploadFile');
+                    if (file) {
+                        file.style.display = 'none';
+                    }
+                });
+    
+                $('#clockInOutInputModal').on('hidden.bs.modal', function () {
+                    document.getElementById('load-overtime').style.display = '';
+                    document.getElementById('camera-overtime').style.display = 'none';
+                    document.getElementById('output-overtime').style.display = 'none';
+                
+                    video_overtime = document.getElementById('video-overtime');
+                    var tracks = video_overtime?.srcObject?.getTracks();
+                    tracks?.forEach(track => track.stop());
+                    video_overtime.srcObject = null;
+                });
+            });
+        </script>
+    @endif
 @endpush

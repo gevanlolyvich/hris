@@ -38,9 +38,8 @@ class OvertimeController extends Controller
                 foreach ($subordinates as $subordinate) {
                     $employees->push($subordinate->id);
                 }
-            } else {
-                $employees->push($emp);
             }
+            $employees->push($emp);            
 
             $overtimes = Overtime::whereIn('employee_id', $employees);
         } else {
@@ -388,7 +387,7 @@ class OvertimeController extends Controller
             $overtime->picture_out = $picture_path;
             $overtime->save();
 
-            return redirect()->back()->with('success', __('Attendance Successfully Added'));
+            return redirect()->back()->with('success', __('Overtime Attendance Successfully Added'));
         } elseif ($overtime) {
             // clock in
             Log::info('Clock In');
@@ -418,7 +417,7 @@ class OvertimeController extends Controller
             $overtime->picture_in = $picture_path;
             $overtime->save();
 
-            return redirect()->back()->with('success', __('Attendance Successfully Added'));
+            return redirect()->back()->with('success', __('Overtime Attendance Successfully Added'));
         } else {
             return redirect()->back()->with('error', __('Failed Adding Attendance'));
         }
@@ -429,7 +428,7 @@ class OvertimeController extends Controller
         $overtime = Overtime::find($request->overtimeId);
         if ($overtime) {
             $document_path = null;
-            $employee = Employee::where('is_active')->where('user_id', Auth::user()->id)->first();
+            $employee = Employee::where('is_active', '1')->where('user_id', \Auth::user()->id)->first();
 
             if (empty($employee) || !$employee) {
                 return redirect()->back()->with('error', __('Inactive'));
@@ -455,7 +454,7 @@ class OvertimeController extends Controller
             $overtime->report_note     = $request->note;
             $overtime->report_document = $document_path;
             $overtime->save();
-            return redirect()->back()->with('success', __('Report Successfully Added'));
+            return redirect()->back()->with('success', __('Overtime Report Successfully Added'));
         } else {
             return redirect()->back()->with('error', __('Failed Adding Report'));
         }
