@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transfers', function (Blueprint $table) {
-            $table->string('designation_id')->after('department_id')->nullable();
-            $table->string('document_path')->after('designation_id')->nullable();
+            $table->integer('designation_id')->after('department_id')->nullable();
+            $table->integer('managed_by')->after('designation_id')->nullable();
+            $table->string('document_path')->after('managed_by')->nullable();
         });
     }
 
@@ -27,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('transfers', function (Blueprint $table) {
-            $table->dropColumn(['designation_id', 'document_path']);
+            $table->dropColumn(['designation_id', 'managed_by', 'document_path']);
         });
     }
 };

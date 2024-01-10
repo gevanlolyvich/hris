@@ -232,6 +232,12 @@ Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])
         'XSS',
     ]
 );
+Route::post('direct/employee/json', [EmployeeController::class, 'directSpvJson'])->name('direct.employee.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::get('employee-profile', [EmployeeController::class, 'profile'])->name('employee.profile')->middleware(
     [
         'auth',

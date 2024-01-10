@@ -518,4 +518,8 @@ class Employee extends Model
     {
         return $this->hasMany(EmployeeHomeHistory::class);
     }
+    public function getNameBranch()
+    {
+        return $this->name . '|' . $this->branch->name;
+    }
 }
