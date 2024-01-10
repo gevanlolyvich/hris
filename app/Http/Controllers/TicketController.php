@@ -16,23 +16,31 @@ class TicketController extends Controller
 {
     public function index()
     {   
-        $countTicket        = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->count() : Ticket::count();
-        $countOpenTicket    = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'open')->count() : Ticket::where('status', '=', 'open')->count();
-        $countonholdTicket  = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'onhold')->count() : Ticket::where('status', '=', 'onhold')->count();
-        $countCloseTicket   = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'close')->count() : Ticket::where('status', '=', 'close')->count();
-
-
-        $arr=[];
-        array_push($arr,$countTicket,$countOpenTicket,$countonholdTicket,$countCloseTicket);
-        $ticket_arr=json_encode($arr);
-
         if (\Auth::user()->can('Manage Ticket')) {
-            $user = Auth::user();
-            if ($user->type == 'employee') {
-                $tickets = Ticket::where('employee_id', '=', \Auth::user()->id)->orWhere('ticket_created', \Auth::user()->id)->get();
+            $employee_id = collect();
+
+            if (\Auth::user()->type == 'employee') {
+                $subordinates = \Auth::user()->employee->subordinatesFlatten();
+
+                foreach ($subordinates as $subordinate) {
+                    $employee_id->push($subordinate->id);
+                }
+    
+                $employee_id->push(\Auth::user()->employee->id);
             } else {
-                $tickets = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get() : Ticket::select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get();
+                $employee_id = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id') : Employee::get()->pluck('id');
+                // $tickets = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get() : Ticket::select('tickets.*')->join('users', 'tickets.created_by', '=', 'users.id')->get();
             }
+
+            $tickets            = Ticket::whereIn('employee_id', $employee_id)->orWhere('ticket_created', \Auth::user()->id)->get();
+            $countTicket        = Ticket::whereIn('employee_id', $employee_id)->orWhere('ticket_created', \Auth::user()->id)->count();
+            $countOpenTicket    = Ticket::whereIn('employee_id', $employee_id)->where('status', '=', 'open')->count();
+            $countonholdTicket  = Ticket::whereIn('employee_id', $employee_id)->where('status', '=', 'onhold')->count();
+            $countCloseTicket   = Ticket::whereIn('employee_id', $employee_id)->where('status', '=', 'close')->count();
+
+            $arr=[];
+            array_push($arr,$countTicket,$countOpenTicket,$countonholdTicket,$countCloseTicket);
+            $ticket_arr=json_encode($arr);
 
             return view('ticket.index', compact('tickets','countTicket','countOpenTicket','countonholdTicket','countCloseTicket','ticket_arr'));
         } else {
@@ -43,7 +51,7 @@ class TicketController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Ticket')) {
-            $employees = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->where('type', '=', 'employee')->get()->pluck('name', 'id') : User::where('type', '=', 'employee')->get()->pluck('name', 'id');
+            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', '1')->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Employee::where('is_active', '1')->get()->pluck('name', 'id');
 
             return view('ticket.create', compact('employees'));
         } else {
@@ -74,7 +82,7 @@ class TicketController extends Controller
             $ticket        = new Ticket();
             $ticket->title = $request->title;
             if (Auth::user()->type == "employee") {
-                $ticket->employee_id = \Auth::user()->id;
+                $ticket->employee_id = \Auth::user()->employee->id;
             } else {
                 $ticket->employee_id = $request->employee_id;
             }

@@ -20,7 +20,7 @@ $logo=\App\Models\Utility::get_file('uploads/logo/');
 <li class="nav-item">
     <select name="language" id="language" class="lang-dropdown btn btn-primary my-1 me-2" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
         @foreach(App\Models\Utility::languages() as $language)
-            <option @if($lang == $language) selected @endif value="{{ route('login',$language) }}">{{Str::upper($language)}}</option>
+            <option @if($lang == $language) selected @endif value="{{ route('login', ['lang'=>$language]) }}">{{Str::upper($language)}}</option>
         @endforeach
     </select>
 </li>
