@@ -146,7 +146,7 @@
                                     <td>{{ $ticket->title }}</td>
                                     <td>{{ $ticket->ticket_code }}</td>
                                     @role('company')
-                                        <td>{{ !empty(\Auth::user()->getUser($ticket->employee_id)) ? \Auth::user()->getUser($ticket->employee_id)->name : '' }}
+                                        <td>{{ $ticket->employee->name ?? '-' }}
                                         </td>
                                     @endrole
                                     <td>
@@ -155,7 +155,7 @@
                                         @elseif($ticket->priority == 'low')
                                             <div class="badge bg-warning p-2 px-3 rounded status-badde3">{{ __('Low') }}</div>
                                         @elseif($ticket->priority == 'high')
-                                            <div class="badge bg-success p-2 px-3 rounded status-badde3">{{ __('Success') }}</div>
+                                            <div class="badge bg-success p-2 px-3 rounded status-badde3">{{ __('High') }}</div>
                                         @elseif($ticket->priority == 'critical')
                                             <div class="badge bg-danger p-2 px-3 rounded status-badde3">{{ __('Critical') }}</div>
                                         @endif

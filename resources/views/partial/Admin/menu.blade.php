@@ -485,13 +485,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
                
 
                 <!-- ticket-->
-                @can('Manage Ticket')
+                {{-- @can('Manage Ticket')
                     <li class="dash-item {{ Request::segment(1) == 'ticket' ? 'active' : '' }}">
                         <a href="{{ route('ticket.index') }}" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-ticket"></i></span><span
                                 class="dash-mtext">{{ __('Ticket') }}</span></a>
                     </li>
-                @endcan
+                @endcan --}}
 
                 <!-- Event-->
                 @can('Manage Event')
