@@ -12,7 +12,7 @@ class JobCategoryController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Job Category')) {
-            $categories = JobCategory::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $categories = JobCategory::orderBy('id', 'ASC')->get();
 
             return view('jobCategory.index', compact('categories'));
         } else {

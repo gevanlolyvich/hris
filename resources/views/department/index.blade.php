@@ -34,6 +34,7 @@
                                 <th width="10px">ID</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
+                                <th>{{ __('Overtime Limit') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
@@ -43,6 +44,7 @@
                                     <td>{{ $department->id }}</td>
                                     <td>{{ !empty($department->branch) ? $department->branch->name : '' }}</td>
                                     <td>{{ $department->name }}</td>
+                                    <td>{{$department->overtime_limit ? $department->overtime_limit . ' ' . __('Hours') : '-' }}</td>
 
                                     <td class="Action">
                                         <span>

@@ -33,16 +33,16 @@ class ContractController extends Controller
         if (\Auth::user()->can('Manage Contracts')) {
             if (\Auth::user()->type == 'company') {
 
-                $contracts   = Contract::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $curr_month  = Contract::where('created_by', '=', \Auth::user()->creatorId())->whereMonth('start_date', '=', date('m'))->get();
-                $curr_week   = Contract::where('created_by', '=', \Auth::user()->creatorId())->whereBetween(
+                $contracts   = Contract::get();
+                $curr_month  = Contract::whereMonth('start_date', '=', date('m'))->get();
+                $curr_week   = Contract::whereBetween(
                     'start_date',
                     [
                         \Carbon\Carbon::now()->startOfWeek(),
                         \Carbon\Carbon::now()->endOfWeek(),
                     ]
                 )->get();
-                $last_30days = Contract::where('created_by', '=', \Auth::user()->creatorId())->whereDate('start_date', '>', \Carbon\Carbon::now()->subDays(30))->get();
+                $last_30days = Contract::whereDate('start_date', '>', \Carbon\Carbon::now()->subDays(30))->get();
 
                 // Contracts Summary
                 $cnt_contract                = [];
@@ -62,7 +62,7 @@ class ContractController extends Controller
                         \Carbon\Carbon::now()->endOfWeek(),
                     ]
                 )->get();
-                $last_30days = Contract::where('created_by', '=', \Auth::user()->creatorId())->whereDate('start_date', '>', \Carbon\Carbon::now()->subDays(30))->get();
+                $last_30days = Contract::whereDate('start_date', '>', \Carbon\Carbon::now()->subDays(30))->get();
 
                 // Contracts Summary
                 $cnt_contract                = [];
@@ -89,7 +89,7 @@ class ContractController extends Controller
             if (\Auth::user()->type == 'company') {
                 $employee       = User::where('type', '=', 'employee')->get()->pluck('name', 'id');
 
-                $contractType = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $contractType = ContractType::get()->pluck('name', 'id');
 
                 return view('contracts.create', compact('contractType', 'employee'));
             } else {
@@ -168,7 +168,7 @@ class ContractController extends Controller
 
     function contractNumber()
     {
-        $latest = Contract::where('created_by', '=', \Auth::user()->creatorId())->latest()->first();
+        $latest = Contract::latest()->first();
         if (!$latest) {
             return 1;
         }
@@ -211,7 +211,7 @@ class ContractController extends Controller
             if (\Auth::user()->type == 'company') {
                 if ($contract->created_by == \Auth::user()->creatorId()) {
                     $employee       = User::where('type', '=', 'employee')->get()->pluck('name', 'id');
-                    $contractType = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                    $contractType = ContractType::get()->pluck('name', 'id');
 
                     return view('contracts.edit', compact('contract', 'contractType', 'employee'));
                 } else {
@@ -599,7 +599,7 @@ class ContractController extends Controller
                 // dd($contract->created_by);
                 if ($contract->created_by == \Auth::user()->creatorId()) {
                     $employee       = User::where('type', '=', 'employee')->get()->pluck('name', 'id');
-                    $contractType = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                    $contractType = ContractType::get()->pluck('name', 'id');
 
                     return view('contracts.copy', compact('contract', 'contractType', 'employee'));
                 } else {

@@ -45,6 +45,7 @@
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
                                 <th>{{ __('Designation') }}</th>
+                                <th>{{ __('Type') }}</th>
                                 <th>{{ __('Shift') }}</th>
                                 @if (Gate::check('Edit Employee') || Gate::check('Delete Employee'))
                                     <th width="200px">{{ __('Action') }}</th>
@@ -65,14 +66,15 @@
                                     <td>{{ $employee->name }}</td>
                                     <td>{{ $employee->email }}</td>
                                     <td>
-                                        {{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '' }}
+                                        {{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}
                                     </td>
                                     <td>
-                                        {{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '' }}
+                                        {{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}
                                     </td>
                                     <td>
-                                        {{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '' }}
+                                        {{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}
                                     </td>
+                                    <td>{{ ucwords( $employee->type) }}</td>
                                     <td>{{ $employee->shift_type?->name ?? '' }}</td>
                                     @if (Gate::check('Edit Employee') || Gate::check('Delete Employee'))
                                         <td class="Action">

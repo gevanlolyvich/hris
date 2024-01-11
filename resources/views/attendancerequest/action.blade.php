@@ -54,6 +54,10 @@
                             @endif
                         </td>
                     </tr>
+                    <tr>
+                        <th>{{ __('Approved By') }}</th>
+                        <td>{{ $attendance_request?->approvedBy?->employee?->name ?? $attendance_request?->approvedBy?->name ?? '-' }}</td>
+                    </tr>
                     <input type="hidden" value="{{ $attendance_request->id }}" name="attendance_request_id">
                 </table>
             </div>

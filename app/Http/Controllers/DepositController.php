@@ -16,53 +16,46 @@ class DepositController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Deposit'))
-        {
+        if (\Auth::user()->can('Manage Deposit')) {
             $deposits = Deposit::where('created_by', '=', Auth::user()->creatorId())->get();
 
             return view('deposit.index', compact('deposits'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Deposit'))
-        {
-            $deposits       = Deposit::where('created_by', '=', \Auth::user()->creatorId())->get();
-            $accounts       = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
-            $incomeCategory = IncomeType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $payers         = Payer::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('payer_name', 'id');
-            $paymentTypes   = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Create Deposit')) {
+            $deposits       = Deposit::get();
+            $accounts       = AccountList::get()->pluck('account_name', 'id');
+            $incomeCategory = IncomeType::get()->pluck('name', 'id');
+            $payers         = Payer::get()->pluck('payer_name', 'id');
+            $paymentTypes   = PaymentType::get()->pluck('name', 'id');
 
             return view('deposit.create', compact('deposits', 'accounts', 'incomeCategory', 'payers', 'paymentTypes'));
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Deposit'))
-        {
+        if (\Auth::user()->can('Create Deposit')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'account_id' => 'required',
-                                   'amount' => 'required|numeric',
-                                   'date' => 'required',
-                                   'income_category_id' => 'required',
-                                   'payer_id' => 'required',
-                                   'payment_type_id' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'account_id' => 'required',
+                    'amount' => 'required|numeric',
+                    'date' => 'required',
+                    'income_category_id' => 'required',
+                    'payer_id' => 'required',
+                    'payment_type_id' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -85,9 +78,7 @@ class DepositController extends Controller
 
 
             return redirect()->route('deposit.index')->with('success', __('Deposit  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -99,47 +90,39 @@ class DepositController extends Controller
 
     public function edit(Deposit $deposit)
     {
-        if(\Auth::user()->can('Edit Deposit'))
-        {
-            if($deposit->created_by == \Auth::user()->creatorId())
-            {
-                $deposits       = Deposit::where('created_by', '=', \Auth::user()->creatorId())->get();
-                $accounts       = AccountList::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('account_name', 'id');
-                $incomeCategory = IncomeType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $payers         = Payer::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('payer_name', 'id');
-                $paymentTypes   = PaymentType::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Deposit')) {
+            if ($deposit->created_by == \Auth::user()->creatorId()) {
+                $deposits       = Deposit::get();
+                $accounts       = AccountList::get()->pluck('account_name', 'id');
+                $incomeCategory = IncomeType::get()->pluck('name', 'id');
+                $payers         = Payer::get()->pluck('payer_name', 'id');
+                $paymentTypes   = PaymentType::get()->pluck('name', 'id');
 
                 return view('deposit.edit', compact('deposit', 'accounts', 'incomeCategory', 'payers', 'paymentTypes'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Deposit $deposit)
     {
-        if(\Auth::user()->can('Edit Deposit'))
-        {
-            if($deposit->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Deposit')) {
+            if ($deposit->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'account_id' => 'required',
-                                       'amount' => 'required|numeric',
-                                       'date' => 'required',
-                                       'income_category_id' => 'required',
-                                       'payer_id' => 'required',
-                                       'payment_type_id' => 'required',
-                                   ]
+                    $request->all(),
+                    [
+                        'account_id' => 'required',
+                        'amount' => 'required|numeric',
+                        'date' => 'required',
+                        'income_category_id' => 'required',
+                        'payer_id' => 'required',
+                        'payment_type_id' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -156,42 +139,32 @@ class DepositController extends Controller
                 $deposit->save();
 
                 return redirect()->route('deposit.index')->with('success', __('Deposit successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Deposit $deposit)
     {
-        if(\Auth::user()->can('Delete Deposit'))
-        {
-            if($deposit->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Deposit')) {
+            if ($deposit->created_by == \Auth::user()->creatorId()) {
                 $deposit->delete();
 
                 return redirect()->route('deposit.index')->with('success', __('Deposit successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
     public function export(Request $request)
     {
         $name = 'Deposite' . date('Y-m-d i:h:s');
-        $data = Excel::download(new DepositExport(), $name . '.xlsx'); 
+        $data = Excel::download(new DepositExport(), $name . '.xlsx');
 
         return $data;
     }

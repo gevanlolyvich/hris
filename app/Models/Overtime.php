@@ -10,6 +10,7 @@ class Overtime extends Model
         'employee_id',
         'title',
         'date',
+        'type',
         'is_work_day',
         'clock_in',
         'clock_out',
@@ -30,7 +31,7 @@ class Overtime extends Model
     }
 
     public static $Overtimetype =[
-        'fixed'=>'Fixed',
-        'percentage'=> 'Percentage',
+        'hourly'=>'Hourly',
+        'daily'=> 'Daily',
     ];
 }

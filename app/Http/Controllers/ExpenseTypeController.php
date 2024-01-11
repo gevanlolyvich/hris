@@ -10,7 +10,7 @@ class ExpenseTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Expense Type')) {
-            $expensetypes = ExpenseType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $expensetypes = ExpenseType::orderBy('id', 'ASC')->get();
 
             return view('expensetype.index', compact('expensetypes'));
         } else {

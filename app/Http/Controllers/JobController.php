@@ -35,7 +35,7 @@ class JobController extends Controller
         $categories = JobCategory::get()->pluck('title', 'id');
         $categories->prepend('--', '');
 
-        $branches = JobCategory::get()->pluck('title', 'id')? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+        $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
         $branches->prepend('All', 0);
 
         $status = Job::$status;

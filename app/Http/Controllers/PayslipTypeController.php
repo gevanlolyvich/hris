@@ -11,7 +11,7 @@ class PayslipTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Payslip Type')) {
-            $paysliptypes = PayslipType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $paysliptypes = PayslipType::orderBy('id', 'ASC')->get();
 
             return view('paysliptype.index', compact('paysliptypes'));
         } else {

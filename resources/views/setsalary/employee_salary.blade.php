@@ -38,6 +38,32 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body fulls-card p-3 align-items-center">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee->type) }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-12">
         <div class="row">
             <div class="col-xl-12">
@@ -76,16 +102,16 @@
                             <hr>
                             <div class="project-info d-flex text-md">
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Required Days') }} </b>
-                                    <div class="project-amnt ">{{ $total_work_days }}</div>
+                                    <b class="m-0"> {{ __('Required Days') }} </b>
+                                    <div class="project-amnt ">{{ $employee->type == 'full time' ? $total_work_days : '-' }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Valid Days') }} </b>
+                                    <b class="m-0"> {{ __('Valid Days') }} </b>
                                     <div class="project-amnt ">{{ $total_present_days }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Total Main Salary') }} </b>
-                                    <div class="project-amnt ">{{ \Auth::user()->priceFormat($employee->salary * ($total_present_days / $total_work_days)) }}</div>
+                                    <b class="m-0"> {{ __('Total Main Salary') }} </b>
+                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($employee->type == 'full time' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -118,7 +144,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Allownace Option') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
@@ -129,8 +154,6 @@
                                 <tbody>
                                     @foreach ($allowances as $allowance)
                                         <tr>
-                                            <td>{{ !empty($allowance->employee()) ? $allowance->employee()->name : '' }}
-                                            </td>
                                             <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
                                             </td>
                                             <td>{{ $allowance->title }}</td>
@@ -201,7 +224,6 @@
                                 <thead>
 
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -212,8 +234,6 @@
                                 <tbody>
                                     @foreach ($commissions as $commission)
                                         <tr>
-                                            <td>{{ !empty($commission->employee()) ? $commission->employee()->name : '' }}
-                                            </td>
                                             <td>{{ $commission->title }}</td>
                                             <td>{{ $commission->date }}</td>
 
@@ -263,6 +283,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- other payment-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -289,7 +310,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
@@ -299,8 +319,6 @@
                                 <tbody>
                                     @foreach ($otherpayments as $otherpayment)
                                         <tr>
-                                            <td>{{ !empty($otherpayment->employee()) ? $otherpayment->employee()->name : '' }}
-                                            </td>
                                             <td>{{ $otherpayment->title }}</td>
                                             <td>{{ ucfirst($otherpayment->type) }}</td>
                                             @if ($otherpayment->type == 'fixed')
@@ -346,6 +364,7 @@
                     </div>
                 </div>
             </div>
+
             <!--overtime-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -354,16 +373,6 @@
                             <div class="col-6">
                                 <h5>{{ __('Overtime') . " (+)" }}</h5>
                             </div>
-                            {{-- @can('Create Overtime')
-                                <div class="col text-end">
-                                    <a  data-url="{{ route('overtimes.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Overtime') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
-                                        <i class="ti ti-plus"></i>
-                                    </a>
-                                </div>
-                            @endcan --}}
                         </div>
                     </div>
                     <div class=" card-body table-border-style" style=" overflow:auto">
@@ -371,9 +380,9 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Type') }}</th>
                                         <th>{{ __('Work Days') }}</th>
                                         <th>{{ __('Start Time') }}</th>
                                         <th>{{ __('End Time') }}</th>
@@ -382,20 +391,42 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $overall_total_hours = 0;
+                                        $maximum_hours       = $employee->departments->overtime_limit;
+                                    @endphp
                                     @foreach ($overtimes as $overtime)
                                         @php
-                                            $total_hours = null;
-                                            $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                            $total_hours = 0;
+                                            if ($overtime->type == 'daily') {
+                                                $total_hours = 8;
+                                            } else {
+                                                if (date('Y-m-d', strtotime($overtime->clock_out)) != date('Y-m-d', strtotime($overtime->clock_in))) {
+                                                    $end = date('Y-m-d', strtotime($overtime->clock_in . ' +1 day'));
+                                                    $total_hours = max(0, round((strtotime($end) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                } else {
+                                                    $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                }
+                                            }
+                                        
+                                            if($maximum_hours) {
+                                                if ($overall_total_hours >= $maximum_hours) {
+                                                    continue;
+                                                }
+                                                if (($overall_total_hours + $total_hours) >= $maximum_hours) {
+                                                    $total_hours =  $maximum_hours - $overall_total_hours;
+                                                }
+                                                $overall_total_hours += $total_hours;
+                                            }
                                             $rate = $overtime->is_work_day ? $total_hours * ($overtime->employee->salary / $total_work_hours) : $total_hours * ($overtime->employee->salary / $total_work_hours) * 2;
                                         @endphp
                                         <tr>
-                                            <td>{{ !empty($overtime->employee) ? $overtime->employee->name : '' }}
-                                            </td>
                                             <td>{{ $overtime->title }}</td>
                                             <td>{{ $overtime->date }}</td>
+                                            <td>{{ $overtime->type ?? 'hourly' }}</td>
                                             <td>{{ $overtime->is_work_day ? __('Work Days') : __('Holidays') }}</td>
-                                            <td>{{ $overtime->clock_in }}</td>
-                                            <td>{{ $overtime->clock_out }}</td>
+                                            <td>{{ $overtime->clock_in ?? '-' }}</td>
+                                            <td>{{ $overtime->clock_out ?? '-' }}</td>
                                             <td>{{ $total_hours }} {{  __('Hours')}}</td>
                                             <td>{{ \Auth::user()->priceFormat($rate) }}</td>
                                         </tr>
@@ -406,6 +437,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- loan-->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -433,7 +465,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee') }}</th>
                                         <th>{{ __('Loan Options') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -446,7 +477,6 @@
                                 <tbody>
                                     @foreach ($loans as $loan)
                                         <tr>
-                                            <td>{{ !empty($loan->employee()) ? $loan->employee()->name : '' }}</td>
                                             <td>{{ !empty($loan->loan_option()) ? $loan->loan_option()->name : '' }}
                                             </td>
                                             <td>{{ $loan->title }}</td>
@@ -497,6 +527,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Saturation -->
             <div class="col-md-6">
                 <div class="card set-card">
@@ -522,7 +553,6 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Employee Name') }}</th>
                                         <th>{{ __('Deduction Option') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Type') }}</th>
@@ -533,8 +563,6 @@
                                 <tbody>
                                     @foreach ($saturationdeductions as $saturationdeduction)
                                         <tr>
-                                            <td>{{ !empty($saturationdeduction->employee()) ? $saturationdeduction->employee()->name : '' }}
-                                            </td>
                                             <td>{{ !empty($saturationdeduction->deduction_option()) ? $saturationdeduction->deduction_option()->name : '' }}
                                             </td>
                                             <td>{{ $saturationdeduction->title }}</td>

@@ -149,19 +149,22 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-body fulls-card">
+            <div class="card-body fulls-card p-3 align-items-center">
                 <div class="row text-center">
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ $employee->name }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee->type) }}</h6>
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
                     </div>
                 </div>
             </div>
@@ -301,11 +304,13 @@
                               </thead>
                               <tbody>
                                   @foreach ($attendanceEmployee as $attendance)
-                                      <tr>
-                                          <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
-                                          <!-- Modify Clock In and Clock Out columns in your table -->
-                                          <td>{{ $attendance->work_hours }}</td>
-                                      </tr>
+                                    @if ($attendance->work_hours !== '00:00:00')
+                                        <tr>
+                                            <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                            <!-- Modify Clock In and Clock Out columns in your table -->
+                                            <td>{{ $attendance->work_hours }}</td>
+                                        </tr>
+                                    @endif
                                   @endforeach
                               </tbody>
                           </table>
@@ -326,22 +331,28 @@
                               <thead>
                                   <tr>
                                       <th>{{ __('Date') }}</th>
+                                      <th>{{ __('Type') }}</th>
                                       <th>{{ __('Overtime') }}</th>
                                   </tr>
                               </thead>
                               <tbody>
-                                  @foreach ($attendanceEmployee as $attendance)
+                                  @foreach ($overtimes as $overtime)
                                       <tr>
-                                          <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                          <td>{{ \Auth::user()->dateFormat($overtime->date) }}</td>
                                           <!-- Modify Clock In and Clock Out columns in your table -->
-                                          <td>{{ $attendance->overtime }}</td>
+                                          <td>{{ $overtime->type ?? 'hourly' }}</td>
+                                          <td>{{ $overtime->total }}</td>
                                       </tr>
                                   @endforeach
                               </tbody>
                           </table>
                         </div>
                         <div class="text-center mt-4">
-                          <h6>Total: {{ $total_overtime['hours'] }} {{__('Hours')}}  {{ $total_overtime['minutes'] }} {{__(' Minute')}}</h6>
+                            @if ($overtime_exceed_limit)
+                                <h6>Total: {{ $max_overtime }} {{__('Hours')}} 0 {{__(' Minute')}} | {{ __('Maximum Overtime')}}</h6>
+                            @else
+                                <h6>Total: {{ $total_overtime['hours'] }} {{__('Hours')}}  {{ $total_overtime['minutes'] }} {{__(' Minute')}}</h6>
+                            @endif
                         </div>
                     </div>
                 </div>

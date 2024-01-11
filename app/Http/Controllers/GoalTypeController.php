@@ -11,7 +11,7 @@ class GoalTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Goal Type')) {
-            $goaltypes = GoalType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $goaltypes = GoalType::orderBy('id', 'ASC')->get();
 
             return view('goaltype.index', compact('goaltypes'));
         } else {

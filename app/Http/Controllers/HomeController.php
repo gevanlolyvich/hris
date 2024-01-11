@@ -8,6 +8,7 @@ use App\Models\AttendanceEmployee;
 use App\Models\AttendanceType;
 use App\Models\Employee;
 use App\Models\Event;
+use App\Models\Termination;
 use App\Models\LandingPageSection;
 use App\Models\Meeting;
 use App\Models\Job;
@@ -18,8 +19,10 @@ use App\Models\ShiftType;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Utility;
+use App\Models\Overtime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -41,16 +44,49 @@ class HomeController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
+            // Get today's date
+            $today = Carbon::today()->toDateString();
             if ($user->type == 'employee') {
-                $settings = Utility::settings();
+                $settings       = Utility::settings();
 
-                $emp = Employee::where('user_id', $user->id)->first();
+                $emp            = Employee::where('user_id', $user->id)->first();
+
+                $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
+
+                $subordinates   = \Auth::user()->employee->subordinatesFlatten();
+
+                $employees_id   = collect();
+                // Check if employee managing other employee or not
+                if ($subordinates->isNotEmpty()) {
+                    
+                    foreach ($subordinates as $subordinate) {
+                        $employees_id->push($subordinate->id);
+                    }
+                }
+                $employees_id->push($emp->id);
 
                 $announcements = Announcement::orderBy('announcements.id', 'desc')->take(5)->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', '=', $emp->id)->orWhere(
                     function ($q) {
                         $q->where('announcements.department_id', '["0"]')->whereOr('announcements.employee_id', '["0"]');
                     }
                 )->get();
+
+                $terminations = Termination::whereIn('employee_id', $employees_id)->where('notice_date', '<=', $today)->where('termination_date', '>=', $today)->get();
+
+                foreach($terminations as $termination) {
+
+                    // Create a new "Announcement-like" structure for the termination
+                    $terminationAsAnnouncement = new Announcement([
+                        'title' => $termination?->employee?->name . ' | ' . $termination?->terminationType?->name,
+                        'start_date' => $termination->notice_date,
+                        'end_date' => $termination->termination_date,
+                        'description' => $termination->description ?? '-',
+                    ]);
+
+                    $announcements->push($terminationAsAnnouncement);
+                }
+
+                $announcements = $announcements->sortByDesc('start_date');
 
                 $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
                 $meetings  = !empty(\Auth::user()->branch_id) ? Meeting::where('branch_id', \Auth::user()->branch_id)->orderby('start_time', 'DESC')->take(5)->leftjoin('meeting_employees', 'meetings.id', '=', 'meeting_employees.meeting_id')->where('meeting_employees.employee_id', '=', $emp->id)->orWhere(
@@ -138,7 +174,7 @@ class HomeController extends Controller
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime'));
             } else {
                 // $events    = Event::get();
                 // $arrEvents = [];
@@ -177,9 +213,11 @@ class HomeController extends Controller
 
                 $currentDate = date('Y-m-d');
 
-                $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
-                $countEmployee = count($employees);
-                $notClockIn    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
+                $countEmployee      = count($employees);
+                $notClockIn         = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $validAttendance    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
+                $invalidAttendance  = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
 
                 $notClockIns    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
@@ -192,7 +230,25 @@ class HomeController extends Controller
 
                 $meetings = !empty(\Auth::user()->branch_id) ? Meeting::where('branch_id', \Auth::user()->branch_id)->orderby('start_time', 'DESC')->limit(5)->get() : Meeting::orderby('start_time', 'DESC')->limit(5)->get();
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer'));
+                $employees_id = $employees->pluck('id');    
+                $terminations = Termination::whereIn('employee_id', $employees_id)->where('notice_date', '<=', $today)->where('termination_date', '>=', $today)->get();
+
+                foreach($terminations as $termination) {
+
+                    // Create a new "Announcement-like" structure for the termination
+                    $terminationAsAnnouncement = new Announcement([
+                        'title' => $termination?->employee?->name . ' | ' . $termination?->terminationType?->name,
+                        'start_date' => $termination->notice_date,
+                        'end_date' => $termination->termination_date,
+                        'description' => $termination->description ?? '-',
+                    ]);
+
+                    $announcements->push($terminationAsAnnouncement);
+                }
+
+                $announcements = $announcements->sortByDesc('start_date');
+
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {

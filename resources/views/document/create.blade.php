@@ -23,7 +23,7 @@
             <div class="form-group">
                 {{ Form::label('is_required', __('Required Field'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {{ Form::select('is_required', ['0'=>'Not Required' ,'1'=>'Is Required'], null, ['class' => 'form-control select2 ','placeholder' => __('Select Department')]) }}
+                    {{ Form::select('is_required', ['0'=>'Optional' ,'1'=>'Is Required'], null, ['class' => 'form-control select2 ','placeholder' => __('Select Required Field')]) }}
                 </div>
             </div>
         </div>

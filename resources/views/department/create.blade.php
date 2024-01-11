@@ -6,7 +6,7 @@
             <div class="form-group">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2 ','placeholder' => __('Select Branch')]) }}
+                    {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2 ', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
                 </div>
             </div>
         </div>
@@ -15,13 +15,22 @@
             <div class="form-group">
                 {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => __('Enter Department Name')]) }}
+                    {{ Form::text('name', null, ['class' => 'form-control', 'required' => 'required', 'placeholder' => __('Enter Department Name')]) }}
                 </div>
                 @error('name')
                     <span class="invalid-name" role="alert">
                         <strong class="text-danger">{{ $message }}</strong>
                     </span>
                 @enderror
+            </div>
+        </div>
+        
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+                {{ Form::label('overtime_limit', __('Overtime Limit (Hour/Month)'), ['class' => 'form-label']) }}
+                <div class="form-icon-user">
+                    {{ Form::number('overtime_limit', null, ['class' => 'form-control', 'placeholder' => __('Enter Overtime Limit')]) }}
+                </div>
             </div>
         </div>
 

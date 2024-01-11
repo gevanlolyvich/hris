@@ -12,7 +12,7 @@ class TrainingTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Training Type')) {
-            $trainingtypes = TrainingType::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $trainingtypes = TrainingType::orderBy('id', 'ASC')->get();
 
             return view('trainingtype.index', compact('trainingtypes'));
         } else {

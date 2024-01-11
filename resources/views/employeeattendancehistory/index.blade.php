@@ -93,17 +93,17 @@
                                 </td>
                                 <td>
                                     <a class="btn" style="padding-left: 0px"
-                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '' }}
+                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}
                                     </a>
                                 </td>
                                 <td>
                                     <a class="btn" style="padding-left: 0px"
-                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '' }}
+                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}
                                     </a>
                                 </td>
                                 <td>
                                     <a class="btn" style="padding-left: 0px"
-                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '' }}
+                                        href="{{ route('employeeattendancehistory.show', \Illuminate\Support\Facades\Crypt::encrypt($employee->id)) }}">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}
                                     </a>
                                 </td>
                             </tr>

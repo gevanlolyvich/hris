@@ -11,47 +11,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
         })
     </script>
 
-    {{-- <script>
-        async function getLocation() {
-          return new Promise((resolve, reject) => {
-            if ("geolocation" in navigator) {
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  const latitude = position.coords.latitude;
-                  const longitude = position.coords.longitude;
-                  const accuracy = position.coords.accuracy;
-                  resolve({ latitude, longitude, accuracy });
-                },
-                (error) => {
-                  if (error.code === 1) {
-                    reject(new Error("User denied Geolocation"));
-                  } else {
-                    reject(error);
-                  }
-                }
-              );
-            } else {
-              reject(new Error("Geolocation is not supported by your browser."));
-            }
-          });
-        }
-
-        $('#coordinate').on('click', async function () {
-            try {
-                const { latitude, longitude, accuracy } = await getLocation();
-                console.log(`${latitude}, ${longitude}, ${accuracy}`);
-    
-                document.getElementById('latitude').value = latitude;
-                document.getElementById('longitude').value = longitude;
-                document.getElementById('accuracy').value = accuracy;
-
-                alert('Success Getting Current Location Coordinate');
-            } catch (error) {
-                console.log(error);
-            }
-        })
-    </script> --}}
-
     <script>
         let map = null;
         let layer = L.layerGroup();
@@ -216,6 +175,9 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             <a href="#useradd-4"
                                 class="list-group-item list-group-item-action border-0">{{ __('Nationality') }} <div
                                     class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                            <a href="#useradd-5"
+                                class="list-group-item list-group-item-action border-0">{{ __('Document') }} <div
+                                    class="float-end"><i class="ti ti-chevron-right"></i></div></a>
                             
                         @endif
                         <a href="#useradd-2"
@@ -284,6 +246,20 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 value="{{ $userDetail?->employee?->phone }}" required autocomplete="phone">
                                         </div>
                                     </div>
+
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::text('emergency_contact_number', $userDetail?->employee?->emergency_contact_number, ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
+                                        {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::select('emergency_contact_relation', $emergency_contact_relations, $userDetail?->employee?->emergency_contact_relation, ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::select('marital_status', $marital_status, $userDetail?->employee?->marital_status, ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                                    </div>
                                     
                                     <div class="col-lg-12 col-sm-12">
                                         <div class="form-group">
@@ -294,6 +270,20 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 ])
                                             }}
                                             @error('address')
+                                                <span class="invalid-feedback text-danger text-xs"
+                                                    role="alert">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-sm-12">
+                                        <div class="form-group">
+                                            <label for="domicile_address" class="col-form-label text-dark">{{ __('Domicile Address') }}</label>
+                                            {{ Form::textarea('domicile_address', $userDetail?->employee?->domicile_address, [
+                                                    'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Domicile Address'),
+                                                    'name' => 'domicile_address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'domicile_address'
+                                                ])
+                                            }}
+                                            @error('domicile_address')
                                                 <span class="invalid-feedback text-danger text-xs"
                                                     role="alert">{{ $message }}</span>
                                             @enderror
@@ -356,60 +346,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                     </div>
                 </div>
 
-                <div id="useradd-2">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">{{ __('Change Password') }}</h5>
-                            <small> {{ __('Details about your account password change') }}</small>
-                        </div>
-                        <div class="card-body">
-                            {{ Form::model($userDetail, ['route' => ['update.password', $userDetail->id], 'method' => 'post']) }}
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('current_password', __('Current Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('current_password', ['class' => 'form-control', 'placeholder' => __('Enter Current Password')]) }}
-                                        @error('current_password')
-                                            <span class="invalid-current_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('new_password', __('New Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('new_password', ['class' => 'form-control', 'placeholder' => __('Enter New Password')]) }}
-                                        @error('new_password')
-                                            <span class="invalid-new_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ Form::label('confirm_password', __('Re-type New Password'), ['class' => 'col-form-label text-dark']) }}
-                                        {{ Form::password('confirm_password', ['class' => 'form-control', 'placeholder' => __('Enter Re-type New Password')]) }}
-                                        @error('confirm_password')
-                                            <span class="invalid-confirm_password" role="alert">
-                                                <strong class="text-danger">{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="modal-footer pr-0">
-                                {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
-                            </div>
-                            {{ Form::close() }}
-                        </div>
-                    </div>
-                </div>
+                
 
                 @if (\Auth::user()->type == 'employee')
                     <div id="useradd-3">
@@ -504,8 +441,142 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             </div>
                         </div>
                     </div>
+                    
+                    <div id="useradd-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ __('Document') }}</h5>
+                                <small> {{ __('Details about your document information') }}</small>
+                            </div>
+                            <div class="card-body">
+                                {{ Form::model($userDetail, ['route' => ['update.documents', $userDetail->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+
+                                @php
+                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value', __('document_id'));
+                                @endphp
+                                @foreach ($documents as $key => $document)
+                                <div class="row">
+                                    <div class="form-group col-12 d-flex">
+                                        <div class="float-left col-4">
+                                            <label for="document"
+                                                class="float-left pt-1 form-label">{{ $document->name }} @if ($document->is_required == 1)
+                                                    <span class="text-danger">*</span>
+                                                @endif
+                                            </label>
+                                            <div class="info">
+                                                <span>
+                                                    <a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
+                                                       class="btn btn-primary btn-sm" target="_blank" data-bs-toggle="tooltip" disabled
+                                                       data-bs-original-title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}"
+                                                       title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}">
+                                                       <i class="ti ti-eye"></i> Show File
+                                                    </a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="float-right col-8">
+                                            
+                                            <input type="hidden" name="emp_doc_id[{{ $document->id }}]" id=""
+                                                value="{{ $document->id }}">
+
+                                            <div class="choose-files ">
+                                                <label for="document[{{ $document->id }}]">
+                                                    <div class=" bg-primary document "> <i
+                                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                                    </div>
+                                                    <input type="file"
+                                                        class="form-control file   @error('document') is-invalid @enderror "
+                                                        {{-- @if ($document->is_required == 1) required @endif --}}
+                                                        name="document[{{ $document->id }}]" id="document[{{ $document->id }}]"
+                                                        data-filename="{{ $document->id . '_filename' }}" onchange="document.getElementById('{{'blah'.$key}}').src = window.URL.createObjectURL(this.files[0])">
+                                                </label>
+                                                {{-- <a href="#"><p class="{{ $document->id . '_filename' }} "></p></a> --}}
+                                                <img id="{{'blah'.$key}}" src=""  width="75%" />
+
+                                            </div>
+
+                                            
+                                            {{-- @foreach ($documents as $key => $document)
+                                                <div class="col-md-12">
+                                                    <div class="info">
+                                                        <strong>{{ $document->name }}</strong>
+                                                        <span><a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
+                                                                target="_blank">{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}</a></span>
+                                                    </div>
+                                                </div>
+                                            @endforeach --}}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <hr>
+
+                            @endforeach
+
+                                <div class="modal-footer pr-0">
+                                    {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                                </div>
+                                {{ Form::close() }}
+                            </div>
+                        </div>
+                    </div>
                 @endif
                 
+                <div id="useradd-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ __('Change Password') }}</h5>
+                            <small> {{ __('Details about your account password change') }}</small>
+                        </div>
+                        <div class="card-body">
+                            {{ Form::model($userDetail, ['route' => ['update.password', $userDetail->id], 'method' => 'post']) }}
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('current_password', __('Current Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('current_password', ['class' => 'form-control', 'placeholder' => __('Enter Current Password')]) }}
+                                        @error('current_password')
+                                            <span class="invalid-current_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('new_password', __('New Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('new_password', ['class' => 'form-control', 'placeholder' => __('Enter New Password')]) }}
+                                        @error('new_password')
+                                            <span class="invalid-new_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ Form::label('confirm_password', __('Re-type New Password'), ['class' => 'col-form-label text-dark']) }}
+                                        {{ Form::password('confirm_password', ['class' => 'form-control', 'placeholder' => __('Enter Re-type New Password')]) }}
+                                        @error('confirm_password')
+                                            <span class="invalid-confirm_password" role="alert">
+                                                <strong class="text-danger">{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer pr-0">
+                                {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                            </div>
+                            {{ Form::close() }}
+                        </div>
+                    </div>
+                </div>
 
             </div>
 

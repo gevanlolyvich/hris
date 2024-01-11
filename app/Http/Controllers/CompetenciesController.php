@@ -68,7 +68,7 @@ class CompetenciesController extends Controller
     public function edit($id)
     {
         $competencies = Competencies::find($id);
-        $types = Performance_Type::where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+        $types = Performance_Type::get()->pluck('name', 'id');
 
         return view('competencies.edit', compact('types', 'competencies'));
     }

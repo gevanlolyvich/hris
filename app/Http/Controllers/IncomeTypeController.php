@@ -9,42 +9,35 @@ class IncomeTypeController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Income Type'))
-        {
-            $incometypes = IncomeType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Income Type')) {
+            $incometypes = IncomeType::get();
 
             return view('incometype.index', compact('incometypes'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Income Type'))
-        {
+        if (\Auth::user()->can('Create Income Type')) {
             return view('incometype.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Income Type'))
-        {
+        if (\Auth::user()->can('Create Income Type')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -55,9 +48,7 @@ class IncomeTypeController extends Controller
             $incometype->save();
 
             return redirect()->route('incometype.index')->with('success', __('IncomeType  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -69,38 +60,30 @@ class IncomeTypeController extends Controller
 
     public function edit(IncomeType $incometype)
     {
-        if(\Auth::user()->can('Edit Income Type'))
-        {
-            if($incometype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Income Type')) {
+            if ($incometype->created_by == \Auth::user()->creatorId()) {
 
                 return view('incometype.edit', compact('incometype'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, IncomeType $incometype)
     {
-        if(\Auth::user()->can('Edit Income Type'))
-        {
-            if($incometype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Income Type')) {
+            if ($incometype->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'name' => 'required',
+                    $request->all(),
+                    [
+                        'name' => 'required',
 
-                                   ]
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -109,35 +92,25 @@ class IncomeTypeController extends Controller
                 $incometype->save();
 
                 return redirect()->route('incometype.index')->with('success', __('IncomeType successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(IncomeType $incometype)
     {
-        if(\Auth::user()->can('Delete Income Type'))
-        {
-            if($incometype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Income Type')) {
+            if ($incometype->created_by == \Auth::user()->creatorId()) {
                 $incometype->delete();
 
                 return redirect()->route('incometype.index')->with('success', __('IncomeType successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }

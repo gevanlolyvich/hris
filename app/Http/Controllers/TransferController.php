@@ -10,6 +10,7 @@ use App\Models\Transfer;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class TransferController extends Controller
@@ -17,94 +18,103 @@ class TransferController extends Controller
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Transfer'))
-        {
-            if(Auth::user()->type == 'employee')
-            {
+        if (\Auth::user()->can('Manage Transfer')) {
+            if (Auth::user()->type == 'employee') {
                 $emp       = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $transfers = Transfer::where('created_by', '=', \Auth::user()->creatorId())->where('employee_id', '=', $emp->id)->get();
+                $transfers = Transfer::where('employee_id', '=', $emp->id)->get();
+            } else {
+                $transfers = Transfer::get();
             }
-            else
-            {
-                $transfers = Transfer::where('created_by', '=', \Auth::user()->creatorId())->get();
-            }   
 
             return view('transfer.index', compact('transfers'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function create()
     {
-        if(\Auth::user()->can('Create Transfer'))
-        {
+        if (\Auth::user()->can('Create Transfer')) {
             $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $branches    = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branches    = Branch::get()->pluck('name', 'id');
+            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $direct_spv  = Employee::where('is_active', 1)->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
-            return view('transfer.create', compact('employees', 'departments', 'branches'));
-        }
-        else
-        {
+            return view('transfer.create', compact('employees', 'departments', 'branches', 'direct_spv'));
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function store(Request $request)
     {
-
-        if(\Auth::user()->can('Create Transfer'))
-        {
+        // return $request;
+        if (\Auth::user()->can('Create Transfer')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'employee_id' => 'required',
-                                   'branch_id' => 'required',
-                                   'department_id' => 'required',
-                                   'transfer_date' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'employee_id' => 'required',
+                    'branch_id' => 'required',
+                    'department_id' => 'required',
+                    'designation_id' => 'required',
+                    'transfer_date' => 'required'
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
+            }
+
+            $employee = Employee::find($request->employee_id);
+            // Update via cron
+            // $employee->branch_id     = $request->branch_id;
+            // $employee->department_id = $request->department_id;
+            // $employee->designation_id = $request->designation_id;
+            // $employee->managed_by    = $request->managed_by ?? null;
+            // $employee->save();
+
+            $document_path = null;
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/transfers', $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
             }
 
             $transfer                = new Transfer();
             $transfer->employee_id   = $request->employee_id;
             $transfer->branch_id     = $request->branch_id;
             $transfer->department_id = $request->department_id;
+            $transfer->designation_id = $request->designation_id;
+            $transfer->managed_by    = $request->managed_by ?? null;
             $transfer->transfer_date = $request->transfer_date;
+            $transfer->document_path = $document_path;
             $transfer->description   = $request->description;
-            $transfer->created_by    = \Auth::user()->creatorId();
+            $transfer->created_by    = \Auth::user()->id;
             $transfer->save();
 
+
             $setings = Utility::settings();
-            if($setings['employee_transfer'] == 1)
-            {
+            if ($setings['employee_transfer'] == 1) {
                 $branch  = Branch::find($transfer->branch_id);
                 $department = Department::find($transfer->department_id);
-                $employee= Employee::find($transfer->employee_id);
+                $employee = Employee::find($transfer->employee_id);
                 $uArr = [
-                    'transfer_name'=>$employee->name,
-                    'transfer_date'=>$request->transfer_date,
-                    'transfer_department'=>$department->name,
-                    'transfer_branch'=>$branch->name,
-                    'transfer_description'=>$request->description,
-                    
-                    
+                    'transfer_name' => $employee->name,
+                    'transfer_date' => $request->transfer_date,
+                    'transfer_department' => $department->name,
+                    'transfer_branch' => $branch->name,
+                    'transfer_description' => $request->description,
+
+
                 ];
-        $resp = Utility::sendEmailTemplate('employee_transfer', [$employee->email], $uArr);
-        return redirect()->route('transfer.index')->with('success', __('Transfer  successfully created.'). ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
+                $resp = Utility::sendEmailTemplate('employee_transfer', [$employee->email], $uArr);
+                return redirect()->route('transfer.index')->with('success', __('Transfer  successfully created.') . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
             }
 
             return redirect()->route('transfer.index')->with('success', __('Transfer  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -116,85 +126,89 @@ class TransferController extends Controller
 
     public function edit(Transfer $transfer)
     {
-        if(\Auth::user()->can('Edit Transfer'))
-        {
+        if (\Auth::user()->can('Edit Transfer')) {
             $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $branches    = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $employees   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            if($transfer->created_by == \Auth::user()->creatorId())
-            {
+            if ($transfer->created_by == \Auth::user()->creatorId()) {
                 return view('transfer.edit', compact('transfer', 'employees', 'departments', 'branches'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Transfer $transfer)
     {
-        if(\Auth::user()->can('Edit Transfer'))
-        {
-            if($transfer->created_by == \Auth::user()->creatorId())
-            {
+        // return $request;
+        if (\Auth::user()->can('Edit Transfer')) {
+            if ($transfer->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                       'employee_id' => 'required',
-                                       'branch_id' => 'required',
-                                       'department_id' => 'required',
-                                       'transfer_date' => 'required',
-                                   ]
+                    $request->all(),
+                    [
+                        'employee_id' => 'required',
+                        'branch_id' => 'required',
+                        'department_id' => 'required',
+                        'transfer_date' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                $employee = Employee::find($request->employee_id);
+                $document_path = $transfer->document_path;
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/transfers', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
                 $transfer->employee_id   = $request->employee_id;
                 $transfer->branch_id     = $request->branch_id;
                 $transfer->department_id = $request->department_id;
+                $transfer->designation_id = $request->designation_id;
+                $transfer->managed_by    = $request->managed_by ?? null;
                 $transfer->transfer_date = $request->transfer_date;
+                $transfer->document_path = $document_path;
                 $transfer->description   = $request->description;
                 $transfer->save();
 
                 return redirect()->route('transfer.index')->with('success', __('Transfer successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Transfer $transfer)
     {
-        if(\Auth::user()->can('Delete Transfer'))
-        {
-            if($transfer->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Transfer')) {
+            if ($transfer->created_by == \Auth::user()->creatorId()) {
                 $transfer->delete();
 
                 return redirect()->route('transfer.index')->with('success', __('Transfer successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
+
+    public function action($id)
+    {
+        $transfer     = Transfer::find($id);
+        $employee  = Employee::find($transfer->employee_id);
+
+        // return $employee;
+        return view('transfer.action', compact('employee', 'transfer'));
     }
 }

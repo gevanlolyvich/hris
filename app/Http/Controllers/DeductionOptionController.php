@@ -11,7 +11,7 @@ class DeductionOptionController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Deduction Option')) {
-            $deductionoptions = DeductionOption::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $deductionoptions = DeductionOption::orderBy('id', 'ASC')->get();
 
             return view('deductionoption.index', compact('deductionoptions'));
         } else {

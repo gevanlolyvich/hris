@@ -50,7 +50,7 @@
                                 <td>{{ !empty($termination->employee) ? $termination->employee->name : '' }}</td>
                             @endrole
 
-                            <td>{{ !empty($termination->terminationType()) ? $termination->terminationType()->name : '' }}
+                            <td>{{ !empty($termination->terminationType) ? $termination->terminationType->name : '' }}
                             </td>
                             <td>{{ \Auth::user()->dateFormat($termination->notice_date) }}</td>
                             <td>{{ \Auth::user()->dateFormat($termination->termination_date) }}</td>
