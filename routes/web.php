@@ -676,6 +676,18 @@ Route::resource('transfer', TransferController::class)->middleware(
         'XSS',
     ]
 );
+Route::get('transfer/{id}/action', [TransferController::class, 'action'])->name('transfer.action')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+// Route::post('leave/show', [LeaveController::class, 'show'])->name('leave.show')->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::resource('complaint', ComplaintController::class)->middleware(
     [
         'auth',
