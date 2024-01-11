@@ -590,12 +590,15 @@ class EmployeeController extends Controller
 
             $employee = $employees[$i];
 
-            $employeeByEmail = Employee::where('email', $employee[5])->first();
+            $duplicatedEmployee = Employee::where('email', $employee[5])
+                ->where('employee_id', $employee[7])
+                ->where('phone', $employee[3])
+                ->first();
             $userByEmail = User::where('email', $employee[5])->first();
 
 
-            if (!empty($employeeByEmail) && !empty($userByEmail)) {
-                $employeeData = $employeeByEmail;
+            if (!empty($duplicatedEmployee) && !empty($userByEmail)) {
+                $employeeData = $duplicatedEmployee;
             } else {
 
                 $user = new User();
@@ -611,30 +614,28 @@ class EmployeeController extends Controller
                 $employeeData = new Employee();
                 $employeeData->employee_id      = $employee[7];
                 $employeeData->user_id          = $user->id;
+                $employeeData->name                = $employee[0];
+                $employeeData->dob                 = $employee[1];
+                $employeeData->gender              = $employee[2];
+                $employeeData->phone               = $employee[3];
+                $employeeData->address             = $employee[4];
+                $employeeData->email               = $employee[5];
+                $employeeData->password            = Hash::make($employee[6]);
+                $employeeData->employee_id         = $employee[7];
+                $employeeData->branch_id           = $employee[8];
+                $employeeData->company_doj         = $employee[9];
+                $employeeData->nationality         = $employee[10];
+                $employeeData->identity_type       = $employee[11];
+                $employeeData->identity_number     = $employee[12];
+                $employeeData->tax_payer_id        = $employee[13] ?? null;
+                $employeeData->shift_type_id       = $employee[14];
+                $employeeData->created_by          = \Auth::user()->creatorId();
+                $employeeData->save();
             }
 
 
-            $employeeData->name                = $employee[0];
-            $employeeData->dob                 = $employee[1];
-            $employeeData->gender              = $employee[2];
-            $employeeData->phone               = $employee[3];
-            $employeeData->address             = $employee[4];
-            $employeeData->email               = $employee[5];
-            $employeeData->password            = Hash::make($employee[6]);
-            $employeeData->employee_id         = $employee[7];
-            $employeeData->branch_id           = $employee[8];
-            $employeeData->company_doj         = $employee[9];
-            $employeeData->nationality         = $employee[10];
-            $employeeData->identity_type       = $employee[11];
-            $employeeData->identity_number     = $employee[12];
-            $employeeData->tax_payer_id        = $employee[13] || null;
-            $employeeData->shift_type_id       = $employee[14];
-            $employeeData->created_by          = \Auth::user()->creatorId();
-
             if (empty($employeeData)) {
                 $errorArray[] = $employeeData;
-            } else {
-                $employeeData->save();
             }
         }
 

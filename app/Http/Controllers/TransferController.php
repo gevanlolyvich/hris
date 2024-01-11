@@ -94,10 +94,6 @@ class TransferController extends Controller
             $transfer->created_by    = \Auth::user()->id;
             $transfer->save();
 
-            Log::info($transfer);
-            Log::info($request);
-
-
 
             $setings = Utility::settings();
             if ($setings['employee_transfer'] == 1) {
