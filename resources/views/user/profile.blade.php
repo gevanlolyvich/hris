@@ -442,6 +442,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                         </div>
                     </div>
                     
+                    
                     <div id="useradd-5">
                         <div class="card">
                             <div class="card-header">
@@ -465,12 +466,14 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                             </label>
                                             <div class="info">
                                                 <span>
-                                                    <a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
-                                                       class="btn btn-primary btn-sm" target="_blank" data-bs-toggle="tooltip" disabled
-                                                       data-bs-original-title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}"
-                                                       title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}">
-                                                       <i class="ti ti-eye"></i> Show File
-                                                    </a>
+                                                    @if (!empty($employeedoc[$document->id]))
+                                                        <a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
+                                                        class="btn btn-primary btn-sm" target="_blank" data-bs-toggle="tooltip" disabled
+                                                        data-bs-original-title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}"
+                                                        title="{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}">
+                                                        <i class="ti ti-eye"></i> Show File
+                                                        </a>
+                                                    @endif
                                                 </span>
                                             </div>
                                         </div>
@@ -492,7 +495,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                         data-filename="{{ $document->id . '_filename' }}" onchange="document.getElementById('{{'blah'.$key}}').src = window.URL.createObjectURL(this.files[0])">
                                                 </label>
                                                 {{-- <a href="#"><p class="{{ $document->id . '_filename' }} "></p></a> --}}
-                                                <img id="{{'blah'.$key}}" src=""  width="75%" />
+                                                {{-- <img id="{{'blah'.$key}}" src=""  width="75%" /> --}}
 
                                             </div>
 
@@ -514,10 +517,14 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
 
                             @endforeach
 
-                                <div class="modal-footer pr-0">
-                                    {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
-                                </div>
-                                {{ Form::close() }}
+                            
+                            @if (count($documents))
+                        
+                            <div class="modal-footer pr-0">
+                                {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
+                            </div>
+                            {{ Form::close() }}
+                            @endif
                             </div>
                         </div>
                     </div>
