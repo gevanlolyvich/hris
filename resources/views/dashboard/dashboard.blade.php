@@ -401,16 +401,16 @@
                                 <div class="col-auto mb-3 mb-sm-0">
                                     <div class="d-flex align-items-center">
                                         <div class="theme-avtar bg-info">
-                                            <i class="ti ti-ticket"></i>
+                                            <i class="ti ti-calendar-event"></i>
                                         </div>
                                         <div class="ms-3">
                                             <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Ticket') }}</h6>
+                                            <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-auto text-end">
-                                    <h4 class="m-0 text-info"> {{ $countTicket }}</h4>
+                                    <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -423,16 +423,16 @@
                                 <div class="col-auto mb-3 mb-sm-0">
                                     <div class="d-flex align-items-center">
                                         <div class="theme-avtar bg-warning">
-                                            <i class="ti ti-wallet"></i>
+                                            <i class="ti ti-calendar-off"></i>
                                         </div>
                                         <div class="ms-3">
                                             <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Account Balance') }}</h6>
+                                            <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-auto text-end">
-                                    <h4 class="m-0 text-warning">{{ \Auth::user()->priceFormat($accountBalance) }}</h4>
+                                    <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
                                 </div>
                             </div>
                         </div>

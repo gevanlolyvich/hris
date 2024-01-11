@@ -1787,5 +1787,7 @@
   "Overtime Attendance Successfully Added": "Kehadiran Lembur Berhasil Ditambahkan",
   "Select Priority": "Pilih Prioritas",
   "Employee Type": "Tipe Karyawan",
-  "Select Employee Type": "Pilih Tipe Karyawan"
+  "Select Employee Type": "Pilih Tipe Karyawan",
+  "Valid Attendance": "Kehadiran Sah",
+  "Invalid Attendance": "Kehadiran Tidak Sah"
 }

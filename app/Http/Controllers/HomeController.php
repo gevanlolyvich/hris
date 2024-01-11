@@ -213,9 +213,11 @@ class HomeController extends Controller
 
                 $currentDate = date('Y-m-d');
 
-                $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
-                $countEmployee = count($employees);
-                $notClockIn    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
+                $countEmployee      = count($employees);
+                $notClockIn         = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $validAttendance    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
+                $invalidAttendance  = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
 
                 $notClockIns    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
@@ -246,7 +248,7 @@ class HomeController extends Controller
 
                 $announcements = $announcements->sortByDesc('start_date');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {
