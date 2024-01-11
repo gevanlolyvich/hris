@@ -401,7 +401,7 @@
                                 <div class="col-auto mb-3 mb-sm-0">
                                     <div class="d-flex align-items-center">
                                         <div class="theme-avtar bg-info">
-                                            <i class="ti ti-calendar-event"></i>
+                                            <i class="ti ti-calendar"></i>
                                         </div>
                                         <div class="ms-3">
                                             <small class="text-muted">{{ __('Total') }}</small>
@@ -622,6 +622,7 @@
                                     <th>{{ __('Start Date') }}</th>
                                     <th>{{ __('End Date') }}</th>
                                     <th>{{ __('Description') }}</th>
+                                    <th>{{ __('Document') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -631,6 +632,19 @@
                                         <td>{{ \Auth::user()->dateFormat($announcement->start_date) }}</td>
                                         <td>{{ \Auth::user()->dateFormat($announcement->end_date) }}</td>
                                         <td>{{ $announcement->description }}</td>
+                                        <td>
+                                            @if ($announcement->document)
+                                                <div class="action-btn bg-info ms-2">
+                                                    <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-original-title="{{ __('View Document') }}">
+                                                        <i class="ti ti-file text-white"></i>
+                                                    </a>
+                                                </div>
+                                            @else
+                                            -
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
