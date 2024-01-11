@@ -67,11 +67,12 @@ class TransferController extends Controller
             }
 
             $employee = Employee::find($request->employee_id);
-            $employee->branch_id     = $request->branch_id;
-            $employee->department_id = $request->department_id;
-            $employee->designation_id = $request->designation_id;
-            $employee->managed_by    = $request->managed_by ?? null;
-            $employee->save();
+            // Update via cron
+            // $employee->branch_id     = $request->branch_id;
+            // $employee->department_id = $request->department_id;
+            // $employee->designation_id = $request->designation_id;
+            // $employee->managed_by    = $request->managed_by ?? null;
+            // $employee->save();
 
             $document_path = null;
             if ($request->file('myDocument')) {
