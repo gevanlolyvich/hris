@@ -12,6 +12,7 @@ use App\Mail\PayslipSend;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PaySlip;
+use App\Models\PaySlipType;
 use App\Models\SaturationDeduction;
 use App\Models\Utility;
 use Illuminate\Http\Request;
@@ -373,14 +374,16 @@ class PaySlipController extends Controller
 
     public function pdf($id, $month)
     {
-        $payslip  = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
-        $employee = Employee::find($payslip->employee_id);
+        $payslip        = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
+        $employee       = Employee::find($payslip->employee_id);
 
-        $payslipDetail = Utility::employeePayslipDetail($id, $month);
+        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
 
-        $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+        $payslipDetail  = Utility::employeePayslipDetail($id, $month);
 
-        return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
+        $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+        return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
     }
 
     public function send($id, $month)
@@ -417,11 +420,13 @@ class PaySlipController extends Controller
         $payslip  = PaySlip::where('id', $payslipId)->first();
         $employee = Employee::find($payslip->employee_id);
 
+        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+
         $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id, $month);
 
         $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
 
-        return view('payslip.payslipPdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
+        return view('payslip.payslipPdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
     }
 
     public function editEmployee($paySlip, Request $request)

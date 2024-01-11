@@ -38,6 +38,32 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body fulls-card p-3 align-items-center">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee->type) }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                        </div>
+                        <div class="col">
+                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-12">
         <div class="row">
             <div class="col-xl-12">
@@ -76,16 +102,16 @@
                             <hr>
                             <div class="project-info d-flex text-md">
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Required Days') }} </b>
-                                    <div class="project-amnt ">{{ $total_work_days }}</div>
+                                    <b class="m-0"> {{ __('Required Days') }} </b>
+                                    <div class="project-amnt ">{{ $employee->type == 'full time' ? $total_work_days : '-' }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Valid Days') }} </b>
+                                    <b class="m-0"> {{ __('Valid Days') }} </b>
                                     <div class="project-amnt ">{{ $total_present_days }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
-                                    <b class="m-0 "> {{ __('Total Main Salary') }} </b>
-                                    <div class="project-amnt ">{{ \Auth::user()->priceFormat($employee->salary * ($total_present_days / $total_work_days)) }}</div>
+                                    <b class="m-0"> {{ __('Total Main Salary') }} </b>
+                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($employee->type == 'full time' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}</div>
                                 </div>
                             </div>
                         </div>

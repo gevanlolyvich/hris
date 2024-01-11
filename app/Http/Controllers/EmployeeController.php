@@ -80,7 +80,9 @@ class EmployeeController extends Controller
                 'Widowed' => __('Widowed'),
             ];
 
-            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses'));
+            $employeeTypes = Employee::$employeeTypes;
+
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses', 'employeeTypes'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -97,6 +99,7 @@ class EmployeeController extends Controller
                     'personel_id' => 'nullable|unique:employees',
                     'shift_type_id' => 'required',
                     'name' => 'required',
+                    'type' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
@@ -148,6 +151,7 @@ class EmployeeController extends Controller
                     'shift_type_id' => $request['shift_type_id'],
                     'managed_by' => $request['managed_by'],
                     'name' => $request['name'],
+                    'type' => $request['type'],
                     'dob' => $request['dob'],
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
@@ -270,10 +274,11 @@ class EmployeeController extends Controller
                 'Friend'  => __('Friend'),
             ];
 
+            $employeeTypes = Employee::$employeeTypes;
             // return $employee->bank_id;
 
             // return $employee;
-            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types', 'marital_status', 'emergency_contact_relations'));
+            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types', 'marital_status', 'emergency_contact_relations', 'employeeTypes'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -288,6 +293,7 @@ class EmployeeController extends Controller
                     'employee_id' => 'required|unique:employees,employee_id,' . $id,
                     // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
+                    'type' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',

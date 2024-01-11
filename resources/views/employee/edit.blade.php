@@ -136,14 +136,17 @@
                                         {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
                                         {!! Form::text('personel_id', $employee->personel_id, ['class' => 'form-control']) !!}
                                     </div>
-
+                                    <div class="form-group col-md-6">
+                                        {!! Form::label('type', __('Employee Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::select('type', $employeeTypes, null, ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
+                                    </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                         {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2', 'required' => 'required']) !!}
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12">
                                         {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
+                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
                                     </div>
                                     
                                     <div class="form-group col-md-12">

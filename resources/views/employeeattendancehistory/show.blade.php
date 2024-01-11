@@ -149,19 +149,22 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-body fulls-card">
+            <div class="card-body fulls-card p-3 align-items-center">
                 <div class="row text-center">
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ $employee->name }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee->type) }}</h6>
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
                     </div>
-                    <div class="col-3">
-                        <h6 style="margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
                     </div>
                 </div>
             </div>
