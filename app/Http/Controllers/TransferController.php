@@ -205,4 +205,13 @@ class TransferController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
+
+    public function action($id)
+    {
+        $transfer     = Transfer::find($id);
+        $employee  = Employee::find($transfer->employee_id);
+
+        // return $employee;
+        return view('transfer.action', compact('employee', 'transfer'));
+    }
 }
