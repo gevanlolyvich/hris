@@ -10,6 +10,7 @@ use App\Models\Transfer;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class TransferController extends Controller
@@ -35,10 +36,11 @@ class TransferController extends Controller
     {
         if (\Auth::user()->can('Create Transfer')) {
             $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $branches    = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branches    = Branch::get()->pluck('name', 'id');
+            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $direct_spv  = Employee::where('is_active', 1)->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
-            return view('transfer.create', compact('employees', 'departments', 'branches'));
+            return view('transfer.create', compact('employees', 'departments', 'branches', 'direct_spv'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -46,7 +48,7 @@ class TransferController extends Controller
 
     public function store(Request $request)
     {
-
+        // return $request;
         if (\Auth::user()->can('Create Transfer')) {
             $validator = \Validator::make(
                 $request->all(),
@@ -54,7 +56,8 @@ class TransferController extends Controller
                     'employee_id' => 'required',
                     'branch_id' => 'required',
                     'department_id' => 'required',
-                    'transfer_date' => 'required',
+                    'designation_id' => 'required',
+                    'transfer_date' => 'required'
                 ]
             );
             if ($validator->fails()) {
@@ -63,14 +66,37 @@ class TransferController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $employee = Employee::find($request->employee_id);
+            $employee->branch_id     = $request->branch_id;
+            $employee->department_id = $request->department_id;
+            $employee->designation_id = $request->designation_id;
+            $employee->managed_by    = $request->managed_by ?? null;
+            $employee->save();
+
+            $document_path = null;
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/transfers', $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
+            }
+
             $transfer                = new Transfer();
             $transfer->employee_id   = $request->employee_id;
             $transfer->branch_id     = $request->branch_id;
             $transfer->department_id = $request->department_id;
+            $transfer->designation_id = $request->designation_id;
+            $transfer->managed_by    = $request->managed_by ?? null;
             $transfer->transfer_date = $request->transfer_date;
+            $transfer->document_path = $document_path;
             $transfer->description   = $request->description;
-            $transfer->created_by    = \Auth::user()->creatorId();
+            $transfer->created_by    = \Auth::user()->id;
             $transfer->save();
+
+            Log::info($transfer);
+            Log::info($request);
+
+
 
             $setings = Utility::settings();
             if ($setings['employee_transfer'] == 1) {
@@ -119,6 +145,7 @@ class TransferController extends Controller
 
     public function update(Request $request, Transfer $transfer)
     {
+        // return $request;
         if (\Auth::user()->can('Edit Transfer')) {
             if ($transfer->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
@@ -136,10 +163,22 @@ class TransferController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
+                $employee = Employee::find($request->employee_id);
+                $document_path = $transfer->document_path;
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/transfers', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+                }
+
                 $transfer->employee_id   = $request->employee_id;
                 $transfer->branch_id     = $request->branch_id;
                 $transfer->department_id = $request->department_id;
+                $transfer->designation_id = $request->designation_id;
+                $transfer->managed_by    = $request->managed_by ?? null;
                 $transfer->transfer_date = $request->transfer_date;
+                $transfer->document_path = $document_path;
                 $transfer->description   = $request->description;
                 $transfer->save();
 

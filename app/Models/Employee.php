@@ -526,4 +526,9 @@ class Employee extends Model
         'full time'=>'Full Time',
         'daily worker'=> 'Daily Worker',
     ];
+
+    public function getNameBranch()
+    {
+        return $this->name . '|' . $this->branch->name;
+    }
 }

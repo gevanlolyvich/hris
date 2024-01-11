@@ -545,8 +545,21 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        $employees = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray() : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
+        return response()->json($employees);
+    }
+    public function directSpvJson(Request $request)
+    {
+        $employees = Employee::where('is_active', 1)
+            ->where('id', '!=', $request->employee_id)
+            ->orderby('name', 'asc')->get();
+        for ($i = 0; $i < count($employees); $i++) {
+            $employees[$i]['name'] = $employees[$i]['name'] . ' | ' . $employees[$i]->branch->name;
+        }
+
+        $employees = $employees->pluck('name', 'id')->toArray();
+        // Log::info($employees);
         return response()->json($employees);
     }
     public function importFile()

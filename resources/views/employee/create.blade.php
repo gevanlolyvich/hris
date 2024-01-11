@@ -275,154 +275,153 @@
 @endsection
 
 @push('script-page')
-<script>
-      $('input[type="file"]').change(function(e) {
-        var file = e.target.files[0].name;
-        var file_name=$(this).attr('data-filename');
-        $('.'+file_name).append(file);
-    });
-</script>
-<script>
-    $(document).ready(function() {
-        var d_id = $('.department_id').val();
-        // console.log(d_id);
-        getDesignation(d_id);
-    });
-
-    $(document).on('change', 'select[name=department_id]', function() {
-        var department_id = $(this).val();
-        // console.log({department_id})
-        getDesignation(department_id);
-    });
-
-    // function getDesignation(did) {
-
-    //     $.ajax({
-    //         url: '{{ route('employee.json') }}',
-    //         type: 'POST',
-    //         data: {
-    //             "department_id": did,
-    //             "_token": "{{ csrf_token() }}",
-    //         },
-    //         success: function(data) {
-    //             console.log(data);
-    //             $('.designation_id').empty();
-    //             var emp_selct = ` <select class="form-control select2  designation_id" name="designation_id"
-    //                                     placeholder="Select Designation" >
-    //                                     </select>`;
-    //             $('.designation_div').html(emp_selct);
-
-    //             $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
-    //             $.each(data, function(key, value) {
-    //                 $('.designation_id').append('<option value="' + key + '">' + value +
-    //                     '</option>');
-    //             });
-
-
-    //         }
-    //     });
-    // }
-    
-    $(document).on('change', 'select[name=branch_id]', function() {
-        var branch_id = $(this).val();
-        // console.log({branch_id})
-        // $('.designation_id').empty();
-        getDepartment(branch_id);
-        getEmployeeBranch(branch_id);
-    });
-
-    function getDepartment(branch_id) {
-        console.log({loc:'departement'})
-        $.ajax({
-            url: '{{ route('department.employee.json') }}',
-            type: 'POST',
-            data: {
-                "branch_id": branch_id,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                $('.designation_id').empty();
-                $('.department_id').empty();
-                var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
-                                        placeholder="Select Department" >
-                                        </select>`;
-                $('.department_div').html(emp_selct);
-
-                $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.department_id').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple', {
-                    removeItemButton: true,
-                });
-
-
-            }
+    <script>
+        $('input[type="file"]').change(function(e) {
+            var file = e.target.files[0].name;
+            var file_name=$(this).attr('data-filename');
+            $('.'+file_name).append(file);
         });
-    }
-
-    function getEmployeeBranch(branch_id) {
-        // console.log({branch_id})
-        console.log({loc:'empbranch'})
-        $.ajax({
-            url: '{{ route('branch.employee.json') }}',
-            type: 'POST',
-            data: {
-                "branch_id": branch_id,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                // console.log(data);
-                $('.managed_by').empty();
-                var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
-                                        placeholder={{ __('Select Direct Supervisor') }} >
-                                        </select>`;
-                $('.managed_by_div').html(emp_selct);
-
-                $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.managed_by').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple2', {
-                    removeItemButton: true,
-                });
-
-
-            }
+    </script>
+    <script>
+        $(document).ready(function() {
+            var d_id = $('.department_id').val();
+            // console.log(d_id);
+            getDesignation(d_id);
         });
-    }
 
-    function getDesignation(did) {
-        console.log({loc:'designation'})
-
-        $.ajax({
-            url: '{{ route('employee.json') }}',
-            type: 'POST',
-            data: {
-                "department_id": did,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-
-                $('.designation_id').empty();
-                var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple3"
-                                        placeholder="Select Designation" >
-                                        </select>`;
-                $('.designation_div').html(emp_selct);
-
-                $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.designation_id').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple3', {
-                    removeItemButton: true,
-                });
-            }
+        $(document).on('change', 'select[name=department_id]', function() {
+            var department_id = $(this).val();
+            // console.log({department_id})
+            getDesignation(department_id);
         });
-    }
-</script>
 
+        // function getDesignation(did) {
+
+        //     $.ajax({
+        //         url: '{{ route('employee.json') }}',
+        //         type: 'POST',
+        //         data: {
+        //             "department_id": did,
+        //             "_token": "{{ csrf_token() }}",
+        //         },
+        //         success: function(data) {
+        //             console.log(data);
+        //             $('.designation_id').empty();
+        //             var emp_selct = ` <select class="form-control select2  designation_id" name="designation_id"
+        //                                     placeholder="Select Designation" >
+        //                                     </select>`;
+        //             $('.designation_div').html(emp_selct);
+
+        //             $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
+        //             $.each(data, function(key, value) {
+        //                 $('.designation_id').append('<option value="' + key + '">' + value +
+        //                     '</option>');
+        //             });
+
+
+        //         }
+        //     });
+        // }
+        
+        $(document).on('change', 'select[name=branch_id]', function() {
+            var branch_id = $(this).val();
+            // console.log({branch_id})
+            // $('.designation_id').empty();
+            getDepartment(branch_id);
+            getEmployeeBranch(branch_id);
+        });
+
+        function getDepartment(branch_id) {
+            console.log({loc:'departement'})
+            $.ajax({
+                url: '{{ route('department.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.designation_id').empty();
+                    $('.department_id').empty();
+                    var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
+                                            placeholder="Select Department" >
+                                            </select>`;
+                    $('.department_div').html(emp_selct);
+
+                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.department_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
+        function getEmployeeBranch(branch_id) {
+            // console.log({branch_id})
+            console.log({loc:'empbranch'})
+            $.ajax({
+                url: '{{ route('branch.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    // console.log(data);
+                    $('.managed_by').empty();
+                    var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
+                                            placeholder={{ __('Select Direct Supervisor') }} >
+                                            </select>`;
+                    $('.managed_by_div').html(emp_selct);
+
+                    $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.managed_by').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple2', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
+        function getDesignation(did) {
+            console.log({loc:'designation'})
+
+            $.ajax({
+                url: '{{ route('employee.json') }}',
+                type: 'POST',
+                data: {
+                    "department_id": did,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+
+                    $('.designation_id').empty();
+                    var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple3"
+                                            placeholder="Select Designation" >
+                                            </select>`;
+                    $('.designation_div').html(emp_selct);
+
+                    $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.designation_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple3', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+    </script>
 @endpush
