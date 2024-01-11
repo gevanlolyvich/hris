@@ -10,6 +10,9 @@ class Transfer extends Model
         'employee_id',
         'branch_id',
         'department_id',
+        'designation_id',
+        'managed_by',
+        'document_path',
         'transfer_date',
         'description',
         'created_by',
@@ -17,12 +20,22 @@ class Transfer extends Model
 
     public function department()
     {
-        return $this->hasMany('App\Models\Department', 'id', 'department_id')->first();
+        return $this->belongsTo('App\Models\Department', 'department_id', 'id');
     }
 
     public function branch()
     {
         return $this->hasMany('App\Models\Branch', 'id', 'branch_id')->first();
+    }
+
+    public function designation()
+    {
+        return $this->belongsTo('App\Models\Designation', 'designation_id', 'id');
+    }
+
+    public function managed()
+    {
+        return $this->belongsTo('App\Models\Employee', 'managed_by', 'id');
     }
 
 

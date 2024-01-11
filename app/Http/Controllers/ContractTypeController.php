@@ -26,7 +26,7 @@ class ContractTypeController extends Controller
     {
         // if(\Auth::user()->can('Manage Contract Types'))
         // {
-        $contractTypes = ContractType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        $contractTypes = ContractType::orderBy('id', 'ASC')->get();
 
         return view('contract_type.index')->with('contractTypes', $contractTypes);
         // }

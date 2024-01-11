@@ -15,8 +15,8 @@ class LeaveExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $user     = \Auth::user();
-            $data= Leave::get();
+        $user       = \Auth::user();
+        $data       = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Leave::get();
             if (\Auth::user()->type == 'employee')
             {
                  $employee = Employee::where('user_id', '=', $user->id)->first();
@@ -35,8 +35,8 @@ class LeaveExport implements FromCollection, WithHeadings
                 
             }
             else{  
-                $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
-                $data= !empty(\Auth::user()?->branch_id) ? Leave::whereIn('employee_id', $employee_id)->get() : Leave::get();
+                $employee_id    = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
+                $data           = !empty(\Auth::user()?->branch_id) ? Leave::whereIn('employee_id', $employee_id)->get() : Leave::get();
                 foreach($data as $k=>$leave)
                 {    
                     
@@ -65,6 +65,9 @@ class LeaveExport implements FromCollection, WithHeadings
             "Total Leaves Days",
             "Leave Reason",
             "Remark",
+            "Location",
+            "Document",
+            "Note",
             "Status",
             "Created By"
         ];

@@ -19,7 +19,7 @@
                         <div class="col-4 month">
                             <div class="btn-box">
                                 {{Form::label('month',__('Month'),['class'=>'form-label'])}}
-                                {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'), ['class'=>'month-btn form-control month-btn', 'id'=>'month-filter'])}}
+                                {{Form::month('month',isset($_GET['month'])?$_GET['month'] : date('Y-m', strtotime(date('Y-m') . ' -1 month')), ['class'=>'month-btn form-control month-btn', 'id'=>'month-filter'])}}
                             </div>
                         </div>
                         <div class="col-auto p-1 pt-1 mt-4">

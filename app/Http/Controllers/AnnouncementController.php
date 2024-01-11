@@ -121,11 +121,11 @@ class AnnouncementController extends Controller
             $branch = Branch::find($request->branch_id);
             $departments = Department::where('branch_id', $request->branch_id)->first();
             $employees = Employee::where('is_active', 1)->where('employee_id', $request->employee_id)->first();
-            
-    
-            if (isset($setting['twilio_announcement_notification']) && $setting['twilio_announcement_notification'] == 1) {    
+
+
+            if (isset($setting['twilio_announcement_notification']) && $setting['twilio_announcement_notification'] == 1) {
                 $employeess = Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->whereIn('employee_id', $request->employee_id)->get();
-                
+
                 foreach ($employeess as $key => $employee) {
                     $msg = $request->title . ' ' . __("announcement created for branch") . ' ' . $branch->name . ' ' . __("from") . ' ' . $request->start_date . ' ' . __("to") . ' ' . $request->end_date . '.';
                     Utility::send_twilio_msg($employee->phone, $msg);
@@ -235,9 +235,9 @@ class AnnouncementController extends Controller
     {
 
         if ($request->branch_id == 0) {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'ASC');
+            $departments = Department::orderby('name', 'ASC');
         } else {
-            $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->where('branch_id', $request->branch_id)->orderby('name', 'ASC');
+            $departments = Department::where('branch_id', $request->branch_id)->orderby('name', 'ASC');
         }
 
         if (!empty(\Auth::user()->branch_id)) {
@@ -251,13 +251,10 @@ class AnnouncementController extends Controller
 
     public function getemployee(Request $request)
     {
-        if($request->department_id)
-        {   
+        if ($request->department_id) {
             $employees = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
-        }
-        else
-        {
-            $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();   
+        } else {
+            $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         }
         return response()->json($employees);
     }

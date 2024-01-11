@@ -28,6 +28,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Document') }}</th>
                                 <th>{{ __('Required Field') }}</th>
                                 @if (Gate::check('Edit Document Type') || Gate::check('Delete Document Type'))
@@ -38,13 +39,14 @@
                         <tbody>
                             @foreach ($documents as $document)
                                 <tr>
+                                    <td>{{ $document->id }}</td>
                                     <td>{{ $document->name }}</td>
                                     <td>
                                         <h6 class="float-left mr-1">
                                             @if ($document->is_required == 1)
                                                 <div class="badge bg-success p-2 px-3 rounded status-badge7">{{ __('Required') }}</div>
                                             @else
-                                                <div class="badge bg-danger p-2 px-3 rounded status-badge7">{{ __('Not Required') }}
+                                                <div class="badge bg-danger p-2 px-3 rounded status-badge7">{{ __('Optional') }}
                                                 </div>
                                             @endif
                                         </h6>

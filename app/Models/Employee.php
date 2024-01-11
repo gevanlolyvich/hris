@@ -20,10 +20,15 @@ class Employee extends Model
         'shift_type_id',
         'managed_by',
         'name',
+        'type',
         'dob',
         'gender',
         'phone',
         'address',
+        'domicile_address',
+        'marital_status',
+        'emergency_contact_number',
+        'emergency_contact_relation',
         'email',
         'password',
         'employee_id',
@@ -100,7 +105,7 @@ class Employee extends Model
         return $totalWorkingHours;
     }
 
-    function getPresentDays($attendanceData, $shiftTimes)
+    function getPresentDays($attendanceData, $shiftTimes, $type = 'full time')
     {
         // Initialize the present days count
         $presentDaysCount = 0;
@@ -113,7 +118,7 @@ class Employee extends Model
             // Check if the attendance date is a workday based on shift times
             $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
 
-            if ($shift && $shift['is_working']) {
+            if ($shift && $shift['is_working'] && $type == 'full time') {
                 // Calculate required work hours based on shift
 
                 $startShift = strtotime($shift['start_time']);
@@ -139,10 +144,12 @@ class Employee extends Model
                     $attendanceWorkHours = 0;
                 }
 
-                if ($attendanceWorkHours >= $requiredWorkHours) {
+                if ($attendanceWorkHours >= $requiredWorkHours || $type != 'full time') {
                     // Increment the present days count
                     $presentDaysCount++;
                 }
+            } else {
+                $presentDaysCount++;
             }
         }
 
@@ -168,13 +175,21 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type')->pluck('name')->first();
     }
+    public function bank()
+    {
+        return $this->belongsTo('App\Models\Bank', 'bank_id', 'id');
+    }
+    public function direct_spv()
+    {
+        return $this->belongsTo('App\Models\Employee', 'managed_by');
+    }
 
     public function get_salary($month, $year)
     {
-        $employee             = Employee::find($this->id);
-        $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
-        $normal_salary  = (!empty($employee->salary) ? $employee->salary : 0) * ($total_present_days / $total_work_days);
+        $employee               = Employee::find($this->id);
+        $total_work_days        = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_present_days     = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->type);
+        $normal_salary          = $employee->type == 'full time' ? (!empty($employee->salary) ? $employee->salary : 0) * ($total_present_days / $total_work_days) : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
 
         return $normal_salary;
     }
@@ -243,12 +258,35 @@ class Employee extends Model
         }
 
         //Overtime
-        $over_times      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $total_over_time = 0;
+        $over_times             = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+        $total_over_time        = 0;
+        $total_over_time_hours  = 0;
+        $overtime_limit         = $employee?->departments?->overtime_limit;
         foreach ($over_times as $over_time) {
-            $total_hours     = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
-            $amount          = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
-            $total_over_time = $amount + $total_over_time;
+            // $total_hours        = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            $total_hours = 0;
+            if ($over_time->type == 'daily') {
+                $total_hours = 8;
+            } else {
+                if (date('Y-m-d', strtotime($over_time->clock_out)) != date('Y-m-d', strtotime($over_time->clock_in))) {
+                    $end = date('Y-m-d', strtotime($over_time->clock_in . ' +1 day'));
+                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600, 2));
+                } else {
+                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+                }
+            }
+
+            if ($overtime_limit) {
+                if ($total_over_time_hours >= $overtime_limit) {
+                    continue;
+                }
+                if (($total_over_time_hours + $total_hours) >= $overtime_limit) {
+                    $total_hours =  $overtime_limit - $total_over_time_hours;
+                }
+                $total_over_time_hours += $total_hours;
+            }
+            $amount             = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
+            $total_over_time    = $amount + $total_over_time;
         }
 
         // Normal Salary Calculate
@@ -365,6 +403,11 @@ class Employee extends Model
         return $this->hasOne('App\Models\Department', 'id', 'department_id');
     }
 
+    public function departments()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
+
     public function designation()
     {
         return $this->hasOne('App\Models\Designation', 'id', 'designation_id');
@@ -477,5 +520,15 @@ class Employee extends Model
     public function home_histories(): HasMany
     {
         return $this->hasMany(EmployeeHomeHistory::class);
+    }
+
+    public static $employeeTypes =[
+        'full time'=>'Full Time',
+        'daily worker'=> 'Daily Worker',
+    ];
+
+    public function getNameBranch()
+    {
+        return $this->name . '|' . $this->branch->name;
     }
 }

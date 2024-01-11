@@ -14,11 +14,11 @@ class AssetsExport implements FromCollection,WithHeadings
     */
     public function collection()
     {
-        $data=Asset::get();
+        $data= !empty(\Auth::user()->branch_id) ? Asset::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Asset::get();
         foreach($data as $k=>$assets)
         {
-            $data[$k]["employee_id"]=Employee::employee_name($assets->employee_id);
-            $data[$k]["created_by"]=Employee::login_user($assets->created_by);
+            $data[$k]["employee_id"]    = Employee::employee_name($assets->employee_id);
+            $data[$k]["created_by"]     = Employee::login_user($assets->created_by);
             unset($assets->created_at,$assets->updated_at);
         }
         return $data;

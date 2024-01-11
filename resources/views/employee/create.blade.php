@@ -58,6 +58,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="form-group col-md-6">
                                     {!! Form::label('email', __('Email'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::email('email', old('email'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter employee Email']) !!}
@@ -66,22 +67,42 @@
                                     {!! Form::label('password', __('Password'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::password('password', ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>'Enter Password']) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
+                                    {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('emergency_contact_relation', $emergency_contact_relations, old('emergency_contact_relation'), ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('marital_status', $marital_statuses, old('marital_status'), ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                                </div>
+                                
+                                
+                                <div class="form-group col-md-6">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('nationality', $nationalities, null, ['class' => 'form-control select2', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
+                                    {!! Form::select('nationality', $nationalities, old('nationality'), ['class' => 'form-control', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('identity_type', $identity_types, null, ['class' => 'form-control select2', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
+                                    {!! Form::select('identity_type', $identity_types, old('identity_type'), ['class' => 'form-control', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
                                 </div>
-                                <div class="form-group col-md-12">
+                                <div class="form-group col-md-6">
                                     {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>'Enter Identity Number']) !!}
+                                    {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control' ,'required' => 'required','placeholder'=>__('Enter Identity Number')]) !!}
                                 </div>
                             </div>
                             <div class="form-group">
                                 {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>'Enter employee Address']) !!}
+                                {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Employee Address')]) !!}
+                            </div>
+                            <div class="form-group">
+                                {!! Form::label('domicile_address', __('Domicile Address'), ['class' => 'form-label']) !!}
+                                {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
                             </div>
                         </div>
                     </div>
@@ -102,47 +123,67 @@
                                     {!! Form::label('personel_id', "ID Personel (Access Door)", ['class' => 'form-label']) !!}
                                     {!! Form::text('personel_id', old('personel_id'), ['class' => 'form-control','placeholder'=>'Enter ID Personel']) !!}
                                 </div>
-
-                                <div class="form-group col-md-12">
-                                    {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                                    <div class="form-icon-user">
-                                        {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => 'Select Branch']) }}
-                                    </div>
-                                </div>
-
-                                <div class="form-group col-md-12">
-                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                                    <div class="form-icon-user">
-                                        {{-- {{ $departements }} --}}
-                                        {{ Form::select('department_id', $departments, null, ['class' => 'form-control select2', 'id' => 'department_id', 'required' => 'required' ,'placeholder' => 'Select Department']) }}
-                                    </div>
-                                </div>
-
-                                <div class="form-group col-md-12">
-                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-
-                                    <div class="form-icon-user">
-                                        <div class="designation_div">
-                                            <select class="form-control  designation_id" name="designation_id"
-                                                id="choices-multiple" placeholder="Select Designation">
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group col-md-12">
-                                    {!! Form::label('shift_type_id', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {{ Form::select('managed_by', $employees, null, ['class' => 'form-control select2', 'id' => 'shift_type_id','placeholder' =>  __('Select Direct Supervisor')]) }}
-                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('type', __('Employee Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {!! Form::select('type', $employeeTypes, old('type'), ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-12">
                                     {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control ', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
+                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
                                     {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
                                 </div>
+
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
+                                    <div class="form-icon-user">
+                                        {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+
+                                    <div class="form-icon-user">
+                                        <div class="department_div">
+                                            <select class="form-control select2  department_id" name="department_id"
+                                                 placeholder="{{ __('Select Department') }}">
+                                                 <option value="" disabled selected>{{ __('Select Department') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
+
+                                    <div class="form-icon-user">
+                                        <div class="designation_div">
+                                            <select class="form-control select2  designation_id" name="designation_id"
+                                                 placeholder="Select Designation">
+                                                 
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    {!! Form::label('managed_by', __('Select Direct Supervisor'), ['class' => 'form-label']) !!}
+                                    {{-- {{ Form::select('managed_by', $employees, null, ['class' => 'form-control select2', 'id' => 'managed_by','placeholder' =>  __('Select Direct Supervisor')]) }} --}}
+                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
+                                    <div class="form-icon-user">
+                                        <div class="managed_by_div">
+                                            <select class="form-control select2  managed_by" name="managed_by"
+                                                 placeholder="{{ __('Select Direct Supervisor') }}">
+                                                 <option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 
                             </div>
                         </div>
@@ -169,20 +210,6 @@
                                         <div class="float-right col-8">
                                             <input type="hidden" name="emp_doc_id[{{ $document->id }}]" id=""
                                                 value="{{ $document->id }}">
-                                           <!--  <div class="choose-file form-group">
-                                                <label for="document[{{ $document->id }}]"
-                                                    class="choose-files bg-primary">
-                                                    <div>{{ __('Choose File') }}</div>
-                                                    <input
-                                                        class="form-control d-none @error('document') is-invalid @enderror border-0"
-                                                        @if ($document->is_required == 1) required @endif
-                                                        name="document[{{ $document->id }}]" type="file"
-                                                        id="document[{{ $document->id }}]"
-                                                        data-filename="{{ $document->id . '_filename' }}">
-                                                </label>
-                                               <a href="#"><p class="{{ $document->id . '_filename' }} "></p></a>
-
-                                            </div> -->
 
                                             <div class="choose-files ">
                                                 <label for="document[{{ $document->id }}]">
@@ -190,7 +217,7 @@
                                                             class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                                                     </div>
                                                     <input type="file"
-                                                        class="form-control file  d-none @error('document') is-invalid @enderror "
+                                                        class="form-control file   @error('document') is-invalid @enderror "
                                                         @if ($document->is_required == 1) required @endif
                                                         name="document[{{ $document->id }}]" id="document[{{ $document->id }}]"
                                                         data-filename="{{ $document->id . '_filename' }}" onchange="document.getElementById('{{'blah'.$key}}').src = window.URL.createObjectURL(this.files[0])">
@@ -248,25 +275,127 @@
 @endsection
 
 @push('script-page')
-<script>
-      $('input[type="file"]').change(function(e) {
-        var file = e.target.files[0].name;
-        var file_name=$(this).attr('data-filename');
-        $('.'+file_name).append(file);
-    });
-</script>
+    <script>
+        $('input[type="file"]').change(function(e) {
+            var file = e.target.files[0].name;
+            var file_name=$(this).attr('data-filename');
+            $('.'+file_name).append(file);
+        });
+    </script>
     <script>
         $(document).ready(function() {
             var d_id = $('.department_id').val();
+            // console.log(d_id);
             getDesignation(d_id);
         });
 
         $(document).on('change', 'select[name=department_id]', function() {
             var department_id = $(this).val();
+            // console.log({department_id})
             getDesignation(department_id);
         });
 
+        // function getDesignation(did) {
+
+        //     $.ajax({
+        //         url: '{{ route('employee.json') }}',
+        //         type: 'POST',
+        //         data: {
+        //             "department_id": did,
+        //             "_token": "{{ csrf_token() }}",
+        //         },
+        //         success: function(data) {
+        //             console.log(data);
+        //             $('.designation_id').empty();
+        //             var emp_selct = ` <select class="form-control select2  designation_id" name="designation_id"
+        //                                     placeholder="Select Designation" >
+        //                                     </select>`;
+        //             $('.designation_div').html(emp_selct);
+
+        //             $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
+        //             $.each(data, function(key, value) {
+        //                 $('.designation_id').append('<option value="' + key + '">' + value +
+        //                     '</option>');
+        //             });
+
+
+        //         }
+        //     });
+        // }
+        
+        $(document).on('change', 'select[name=branch_id]', function() {
+            var branch_id = $(this).val();
+            // console.log({branch_id})
+            // $('.designation_id').empty();
+            getDepartment(branch_id);
+            getEmployeeBranch(branch_id);
+        });
+
+        function getDepartment(branch_id) {
+            console.log({loc:'departement'})
+            $.ajax({
+                url: '{{ route('department.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.designation_id').empty();
+                    $('.department_id').empty();
+                    var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
+                                            placeholder="Select Department" >
+                                            </select>`;
+                    $('.department_div').html(emp_selct);
+
+                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.department_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
+        function getEmployeeBranch(branch_id) {
+            // console.log({branch_id})
+            console.log({loc:'empbranch'})
+            $.ajax({
+                url: '{{ route('branch.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    // console.log(data);
+                    $('.managed_by').empty();
+                    var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
+                                            placeholder={{ __('Select Direct Supervisor') }} >
+                                            </select>`;
+                    $('.managed_by_div').html(emp_selct);
+
+                    $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.managed_by').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple2', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
         function getDesignation(did) {
+            console.log({loc:'designation'})
 
             $.ajax({
                 url: '{{ route('employee.json') }}',
@@ -278,24 +407,21 @@
                 success: function(data) {
 
                     $('.designation_id').empty();
-                    var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple"
+                    var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple3"
                                             placeholder="Select Designation" >
                                             </select>`;
                     $('.designation_div').html(emp_selct);
 
-                    $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
+                    $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
                     $.each(data, function(key, value) {
                         $('.designation_id').append('<option value="' + key + '">' + value +
                             '</option>');
                     });
-                    new Choices('#choices-multiple', {
+                    new Choices('#choices-multiple3', {
                         removeItemButton: true,
                     });
-
-
                 }
             });
         }
     </script>
-
 @endpush

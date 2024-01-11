@@ -28,6 +28,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Name') }}</th>
                                 <th>{{ __('Type') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -36,6 +37,7 @@
                         <tbody>
                             @foreach ($competencies as $competency)
                                 <tr>
+                                    <td>{{ $competency->id }}</td>
                                     <td>{{ $competency->name }}</td>
                                     <td>{{ !empty($competency->getPerformance_type->name) ? $competency->getPerformance_type->name : '-' }}
                                     <td class="Action">

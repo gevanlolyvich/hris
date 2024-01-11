@@ -89,7 +89,7 @@ class TimeSheetController extends Controller
             $timeSheet->date       = $request->date;
             $timeSheet->hours      = $request->hours;
             $timeSheet->remark     = $request->remark;
-            $timeSheet->created_by = \Auth::user()->creatorId();
+            $timeSheet->created_by = \Auth::user()->id;
             $timeSheet->save();
 
             return redirect()->route('timesheet.index')->with('success', __('Timesheet successfully created.'));

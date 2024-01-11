@@ -11,7 +11,7 @@ class TerminationTypeController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Termination Type')) {
-            $terminationtypes = TerminationType::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $terminationtypes = TerminationType::orderBy('id', 'ASC')->get();
 
             return view('terminationtype.index', compact('terminationtypes'));
         } else {

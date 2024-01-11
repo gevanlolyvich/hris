@@ -14,7 +14,7 @@ class TimesheetExport implements FromCollection,WithHeadings
     */
     public function collection()
     {
-        $data=TimeSheet::get();
+        $data= !empty(\Auth::user()->branch_id) ? TimeSheet::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : TimeSheet::get();
        
         foreach($data as $k=>$timesheet)
         {

@@ -263,10 +263,35 @@ class Utility extends Model
         }
 
         //Overtime
-        $earning['overTime']      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['overTime']      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+
         $earning['totalOverTime'] = 0;
+        $total_over_time_hours  = 0;
+        $overtime_limit         = $employee?->departments?->overtime_limit;
         foreach ($earning['overTime'] as $over_time) {
-            $total_hours              = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            // $total_hours              = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+            $total_hours = 0;
+            if ($over_time->type == 'daily') {
+                $total_hours = 8;
+            } else {
+                if (date('Y-m-d', strtotime($over_time->clock_out)) != date('Y-m-d', strtotime($over_time->clock_in))) {
+                    $end = date('Y-m-d', strtotime($over_time->clock_in . ' +1 day'));
+                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600, 2));
+                } else {
+                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+                }
+            }
+
+            if($overtime_limit) {
+                if ($total_over_time_hours >= $overtime_limit) {
+                    continue;
+                }
+                if (($total_over_time_hours + $total_hours) >= $overtime_limit) {
+                    $total_hours =  $overtime_limit - $total_over_time_hours;
+                }
+                $total_over_time_hours += $total_hours;
+            }
+
             $amount                   = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
             $over_time->amount        = $amount;
             $earning['totalOverTime'] += $amount;

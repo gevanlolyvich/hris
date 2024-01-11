@@ -11,7 +11,7 @@ class AllowanceOptionController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Allowance Option')) {
-            $allowanceoptions = AllowanceOption::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $allowanceoptions = AllowanceOption::orderBy('id', 'ASC')->get();
 
             return view('allowanceoption.index', compact('allowanceoptions'));
         } else {

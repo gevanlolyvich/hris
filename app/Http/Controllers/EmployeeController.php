@@ -68,8 +68,21 @@ class EmployeeController extends Controller
             $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types'));
+            $employeeTypes = Employee::$employeeTypes;
+
+            return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses', 'employeeTypes'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -86,10 +99,13 @@ class EmployeeController extends Controller
                     'personel_id' => 'nullable|unique:employees',
                     'shift_type_id' => 'required',
                     'name' => 'required',
+                    'type' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
+                    'emergency_contact_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
+                    'emergency_contact_relation' => 'required',
                     'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
                     'department_id' => 'required',
@@ -135,10 +151,15 @@ class EmployeeController extends Controller
                     'shift_type_id' => $request['shift_type_id'],
                     'managed_by' => $request['managed_by'],
                     'name' => $request['name'],
+                    'type' => $request['type'],
                     'dob' => $request['dob'],
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
                     'address' => $request['address'],
+                    'domicile_address' => $request['domicile_address'] || null,
+                    'emergency_contact_number' => $request['emergency_contact_number'],
+                    'emergency_contact_relation' => $request['emergency_contact_relation'],
+                    'marital_status' => $request['marital_status'],
                     'email' => $request['email'],
                     'password' => Hash::make($request['password']),
                     'employee_id' => $request['employee_id'],
@@ -234,17 +255,30 @@ class EmployeeController extends Controller
             $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-            $documents    = Document::where('created_by', \Auth::user()->creatorId())->get();
-            $employee     = Employee::find($id);
-            $employeesId  = ($employee->employee_id);
-            $shift_types  = ShiftType::get()->pluck('name', 'id');
-            $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
-            $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
-            $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
-            // return $employee;
+            $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
+            $employee         = Employee::find($id);
+            $employeesId      = ($employee->employee_id);
+            $shift_types      = ShiftType::get()->pluck('name', 'id');
+            $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
+            $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+            $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
+            $marital_status = [
+                'Single'  => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
+            $emergency_contact_relations = [
+                'Parent'  => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse'  => __('Spouse'),
+                'Friend'  => __('Friend'),
+            ];
+
+            $employeeTypes = Employee::$employeeTypes;
+            // return $employee->bank_id;
 
             // return $employee;
-            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types'));
+            return view('employee.edit', compact('shift_types', 'employee', 'employees', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'banks', 'nationalities', 'identity_types', 'marital_status', 'emergency_contact_relations', 'employeeTypes'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -257,8 +291,9 @@ class EmployeeController extends Controller
                 $request->all(),
                 [
                     'employee_id' => 'required|unique:employees,employee_id,' . $id,
-                    'personel_id' => 'required|unique:employees,personel_id,' . $id,
+                    // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
+                    'type' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
@@ -394,11 +429,24 @@ class EmployeeController extends Controller
 
     public function json(Request $request)
     {
-        $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
-        $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
+        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
         // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+        $designations = Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+
 
         return response()->json($designations);
+    }
+
+
+    public function departmentJson(Request $request)
+    {
+        $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Department::where('branch_id', $request->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
+        // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+
+        return response()->json($departments);
     }
 
     function employeeNumber()
@@ -434,8 +482,19 @@ class EmployeeController extends Controller
 
             $designations = Designation::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
             $designations->prepend('All', '');
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances'));
+            return view('employee.profile', compact('employees', 'departments', 'designations', 'brances', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -459,8 +518,19 @@ class EmployeeController extends Controller
                 $employee     = Employee::where('user_id', $empId)->first();
             }
             $employeesId  = $employee->employee_id;
+            $emergency_contact_relations = [
+                'Parent' => __('Parent'),
+                'Sibling' => __('Sibling'),
+                'Spouse' => __('Spouse'),
+                'Friend' => __('Friend'),
+            ];
+            $marital_statuses = [
+                'Single' => __('Single'),
+                'Married' => __('Married'),
+                'Widowed' => __('Widowed'),
+            ];
 
-            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));
+            return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents', 'emergency_contact_relations', 'marital_statuses'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -475,8 +545,21 @@ class EmployeeController extends Controller
 
     public function employeeJson(Request $request)
     {
-        $employees = Employee::where('is_active', 1)->where('branch_id', $request->branch)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        $employees = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1)->where('branch_id', $request->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray() : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
 
+        return response()->json($employees);
+    }
+    public function directSpvJson(Request $request)
+    {
+        $employees = Employee::where('is_active', 1)
+            ->where('id', '!=', $request->employee_id)
+            ->orderby('name', 'asc')->get();
+        for ($i = 0; $i < count($employees); $i++) {
+            $employees[$i]['name'] = $employees[$i]['name'] . ' | ' . $employees[$i]->branch->name;
+        }
+
+        $employees = $employees->pluck('name', 'id')->toArray();
+        // Log::info($employees);
         return response()->json($employees);
     }
     public function importFile()
@@ -507,12 +590,15 @@ class EmployeeController extends Controller
 
             $employee = $employees[$i];
 
-            $employeeByEmail = Employee::where('email', $employee[5])->first();
+            $duplicatedEmployee = Employee::where('email', $employee[5])
+                ->where('employee_id', $employee[7])
+                ->where('phone', $employee[3])
+                ->first();
             $userByEmail = User::where('email', $employee[5])->first();
 
 
-            if (!empty($employeeByEmail) && !empty($userByEmail)) {
-                $employeeData = $employeeByEmail;
+            if (!empty($duplicatedEmployee) && !empty($userByEmail)) {
+                $employeeData = $duplicatedEmployee;
             } else {
 
                 $user = new User();
@@ -528,30 +614,28 @@ class EmployeeController extends Controller
                 $employeeData = new Employee();
                 $employeeData->employee_id      = $employee[7];
                 $employeeData->user_id          = $user->id;
+                $employeeData->name                = $employee[0];
+                $employeeData->dob                 = $employee[1];
+                $employeeData->gender              = $employee[2];
+                $employeeData->phone               = $employee[3];
+                $employeeData->address             = $employee[4];
+                $employeeData->email               = $employee[5];
+                $employeeData->password            = Hash::make($employee[6]);
+                $employeeData->employee_id         = $employee[7];
+                $employeeData->branch_id           = $employee[8];
+                $employeeData->company_doj         = $employee[9];
+                $employeeData->nationality         = $employee[10];
+                $employeeData->identity_type       = $employee[11];
+                $employeeData->identity_number     = $employee[12];
+                $employeeData->tax_payer_id        = $employee[13] ?? null;
+                $employeeData->shift_type_id       = $employee[14];
+                $employeeData->created_by          = \Auth::user()->creatorId();
+                $employeeData->save();
             }
 
 
-            $employeeData->name                = $employee[0];
-            $employeeData->dob                 = $employee[1];
-            $employeeData->gender              = $employee[2];
-            $employeeData->phone               = $employee[3];
-            $employeeData->address             = $employee[4];
-            $employeeData->email               = $employee[5];
-            $employeeData->password            = Hash::make($employee[6]);
-            $employeeData->employee_id         = $employee[7];
-            $employeeData->branch_id           = $employee[8];
-            $employeeData->company_doj         = $employee[9];
-            $employeeData->nationality         = $employee[10];
-            $employeeData->identity_type       = $employee[11];
-            $employeeData->identity_number     = $employee[12];
-            $employeeData->tax_payer_id        = $employee[13] || null;
-            $employeeData->shift_type_id       = $employee[14];
-            $employeeData->created_by          = \Auth::user()->creatorId();
-
             if (empty($employeeData)) {
                 $errorArray[] = $employeeData;
-            } else {
-                $employeeData->save();
             }
         }
 

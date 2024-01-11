@@ -13,7 +13,7 @@ class DepartmentController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Department')) {
-            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get() : Department::orderBy('name', 'ASC')->get();
+            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('id', 'ASC')->get() : Department::orderBy('id', 'ASC')->get();
 
             return view('department.index', compact('departments'));
         } else {
@@ -35,7 +35,6 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         if (\Auth::user()->can('Create Department')) {
-
             $validator = \Validator::make(
                 $request->all(),
                 [
@@ -49,10 +48,11 @@ class DepartmentController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $department             = new Department();
-            $department->branch_id  = $request->branch_id;
-            $department->name       = $request->name;
-            $department->created_by = \Auth::user()->creatorId();
+            $department                 = new Department();
+            $department->branch_id      = $request->branch_id;
+            $department->overtime_limit = $request->overtime_limit;
+            $department->name           = $request->name;
+            $department->created_by     = \Auth::user()->id;
             $department->save();
 
             return redirect()->route('department.index')->with('success', __('Department  successfully created.'));
@@ -98,8 +98,9 @@ class DepartmentController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $department->branch_id = $request->branch_id;
-                $department->name      = $request->name;
+                $department->branch_id      = $request->branch_id;
+                $department->overtime_limit = $request->overtime_limit;
+                $department->name           = $request->name;
                 $department->save();
 
                 return redirect()->route('department.index')->with('success', __('Department successfully updated.'));

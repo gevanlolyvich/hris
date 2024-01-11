@@ -10,14 +10,11 @@ class GoalTypeController extends Controller
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Goal Type'))
-        {
-            $goaltypes = GoalType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Goal Type')) {
+            $goaltypes = GoalType::orderBy('id', 'ASC')->get();
 
             return view('goaltype.index', compact('goaltypes'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -25,12 +22,9 @@ class GoalTypeController extends Controller
 
     public function create()
     {
-        if(\Auth::user()->can('Create Goal Type'))
-        {
+        if (\Auth::user()->can('Create Goal Type')) {
             return view('goaltype.create');
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -38,16 +32,15 @@ class GoalTypeController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Goal Type'))
-        {
+        if (\Auth::user()->can('Create Goal Type')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -59,9 +52,7 @@ class GoalTypeController extends Controller
             $goaltype->save();
 
             return redirect()->route('goaltype.index')->with('success', __('GoalType  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -76,14 +67,11 @@ class GoalTypeController extends Controller
     public function edit($id)
     {
 
-        if(\Auth::user()->can('Edit Goal Type'))
-        {
+        if (\Auth::user()->can('Edit Goal Type')) {
             $goalType = GoalType::find($id);
 
             return view('goaltype.edit', compact('goalType'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -91,15 +79,14 @@ class GoalTypeController extends Controller
 
     public function update(Request $request, $id)
     {
-        if(\Auth::user()->can('Edit Goal Type'))
-        {
+        if (\Auth::user()->can('Edit Goal Type')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'name' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'name' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -109,9 +96,7 @@ class GoalTypeController extends Controller
             $goalType->save();
 
             return redirect()->route('goaltype.index')->with('success', __('GoalType  successfully updated.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -119,30 +104,22 @@ class GoalTypeController extends Controller
 
     public function destroy($id)
     {
-        if(\Auth::user()->can('Delete Goal Type'))
-        {
+        if (\Auth::user()->can('Delete Goal Type')) {
             $goalType = GoalType::find($id);
-            if($goalType->created_by == \Auth::user()->creatorId())
-            {
+            if ($goalType->created_by == \Auth::user()->creatorId()) {
                 $goalTrackings = GoalTracking::where('goal_type', $goalType->id)->get();
-                if(count($goalTrackings) == 0)
-                {
+                if (count($goalTrackings) == 0) {
                     $goalType->delete();
-                }else{
+                } else {
 
                     return redirect()->route('goaltype.index')->with('error', __('This GoalType has Goal. Please remove the Goal from this GoalType.'));
-
                 }
 
                 return redirect()->route('goaltype.index')->with('success', __('GoalType successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }

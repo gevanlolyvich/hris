@@ -15,7 +15,7 @@ class AssetController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Assets')) {
-            $assets = Asset::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $assets = !empty(\Auth::user()->branch_id) ? Asset::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Asset::get();
             return view('assets.index', compact('assets'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -26,7 +26,7 @@ class AssetController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Assets')) {
-            $employee   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
             return view('assets.create',compact('employee'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -63,7 +63,7 @@ class AssetController extends Controller
             $assets->supported_date = $request->supported_date;
             $assets->amount         = $request->amount;
             $assets->description    = $request->description;
-            $assets->created_by     = \Auth::user()->creatorId();
+            $assets->created_by     = \Auth::user()->id;
             $assets->save();
             return redirect()->route('account-assets.index')->with('success', __('Assets successfully created.'));
         } else {
@@ -82,7 +82,7 @@ class AssetController extends Controller
 
         if (\Auth::user()->can('Edit Assets')) {
             $asset = Asset::find($id);
-            $employee   = Employee::where('is_active', 1)->where('created_by', '=', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $employee   = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
             return view('assets.edit', compact('asset','employee'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -136,7 +136,7 @@ class AssetController extends Controller
         if(\Auth::user()->can('Delete Assets'))
         {
             $asset = Asset::find($id);
-            if($asset->created_by == \Auth::user()->creatorId())
+            if($asset->created_by == \Auth::user()->id || \Auth::user()->type == 'company')
             {
                 $asset->delete();
 

@@ -11,7 +11,7 @@ class DocumentController extends Controller
     {
 
         if (\Auth::user()->can('Manage Document Type')) {
-            $documents = Document::where('created_by', '=', \Auth::user()->creatorId())->get();
+            $documents = Document::orderBy('name', 'ASC')->get();
 
             return view('document.index', compact('documents'));
         } else {

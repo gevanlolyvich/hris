@@ -31,6 +31,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Name') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -38,6 +39,7 @@
                         <tbody>
                             @foreach ($performance_types as $performance_type)
                                 <tr>
+                                    <td>{{ $performance_type->id }}</td>
                                     <td>{{ $performance_type->name }}</td>
                                     <td class="Action">
                                         <span>

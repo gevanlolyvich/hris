@@ -10,14 +10,11 @@ class LeaveTypeController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Leave Type'))
-        {
-            $leavetypes = LeaveType::where('created_by', '=', \Auth::user()->creatorId())->get();
+        if (\Auth::user()->can('Manage Leave Type')) {
+            $leavetypes = LeaveType::orderBy('id', 'ASC')->get();
 
             return view('leavetype.index', compact('leavetypes'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -25,12 +22,9 @@ class LeaveTypeController extends Controller
     public function create()
     {
 
-        if(\Auth::user()->can('Create Leave Type'))
-        {
+        if (\Auth::user()->can('Create Leave Type')) {
             return view('leavetype.create');
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -38,18 +32,17 @@ class LeaveTypeController extends Controller
     public function store(Request $request)
     {
 
-        if(\Auth::user()->can('Create Leave Type'))
-        {
+        if (\Auth::user()->can('Create Leave Type')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                'title' => 'required',
-                'days' => 'required|gt:0',
-            ]
+                $request->all(),
+                [
+                    'title' => 'required',
+                    'days' => 'required|gt:0',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -62,9 +55,7 @@ class LeaveTypeController extends Controller
             $leavetype->save();
 
             return redirect()->route('leavetype.index')->with('success', __('LeaveType  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -76,39 +67,31 @@ class LeaveTypeController extends Controller
 
     public function edit(LeaveType $leavetype)
     {
-        if(\Auth::user()->can('Edit Leave Type'))
-        {
-            if($leavetype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Leave Type')) {
+            if ($leavetype->created_by == \Auth::user()->creatorId()) {
 
                 return view('leavetype.edit', compact('leavetype'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, LeaveType $leavetype)
     {
-        if(\Auth::user()->can('Edit Leave Type'))
-        {
-            if($leavetype->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Edit Leave Type')) {
+            if ($leavetype->created_by == \Auth::user()->creatorId()) {
                 $validator = \Validator::make(
-                    $request->all(), [
-                    'title' => 'required',
-                    'days' => 'required',
-                ]
+                    $request->all(),
+                    [
+                        'title' => 'required',
+                        'days' => 'required',
+                    ]
                 );
 
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -119,43 +102,30 @@ class LeaveTypeController extends Controller
                 $leavetype->save();
 
                 return redirect()->route('leavetype.index')->with('success', __('LeaveType successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(LeaveType $leavetype)
     {
-        if(\Auth::user()->can('Delete Leave Type'))
-        {
-            if($leavetype->created_by == \Auth::user()->creatorId())
-            {
-                $leave     = Leave::where('leave_type_id',$leavetype->id)->get();
-                if(count($leave) == 0)
-                {
+        if (\Auth::user()->can('Delete Leave Type')) {
+            if ($leavetype->created_by == \Auth::user()->creatorId()) {
+                $leave     = Leave::where('leave_type_id', $leavetype->id)->get();
+                if (count($leave) == 0) {
                     $leavetype->delete();
-                }
-                else
-                {
+                } else {
                     return redirect()->route('leavetype.index')->with('error', __('This leavetype has leave. Please remove the leave from this leavetype.'));
                 }
 
                 return redirect()->route('leavetype.index')->with('success', __('LeaveType successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }

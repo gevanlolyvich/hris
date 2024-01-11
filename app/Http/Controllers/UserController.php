@@ -10,6 +10,8 @@ use App\Models\Bank;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\Branch;
+use App\Models\Document;
+use App\Models\EmployeeDocument;
 use App\Models\EmployeeHomeHistory;
 use File;
 use Illuminate\Http\Request;
@@ -208,9 +210,21 @@ class UserController extends Controller
         // $employee   = Employee::where('user_id', $userDetail->id)->first();
         $nationalities = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
         $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
+        $emergency_contact_relations = [
+            'Parent' => __('Parent'),
+            'Sibling' => __('Sibling'),
+            'Spouse' => __('Spouse'),
+            'Friend' => __('Friend'),
+        ];
+        $marital_status = [
+            'Single' => __('Single'),
+            'Married' => __('Married'),
+            'Widowed' => __('Widowed'),
+        ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
+        $documents        = Document::get();
 
-        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks'));
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents'));
     }
 
     public function editprofile(Request $request)
@@ -282,6 +296,10 @@ class UserController extends Controller
             $employee->address    = $request->address;
             $employee->dob        = $request->birthdate;
             $employee->phone      = $request->phone;
+            $employee->marital_status                   = $request->marital_status;
+            $employee->domicile_address                 = $request->domicile_address;
+            $employee->emergency_contact_number         = $request->emergency_contact_number;
+            $employee->emergency_contact_relation       = $request->emergency_contact_relation;
             $employee->save();
         }
 
@@ -371,6 +389,48 @@ class UserController extends Controller
         } else {
             return redirect()->route('profile', \Auth::user()->id)->with('error', __('Something is wrong.'));
         }
+    }
+    public function updateDocuments(Request $request)
+    {
+        $employee          = Auth::user()->employee;
+        // return $employee['employee_id'];
+        // return $request->file('document')[1]->getClientOriginalName();
+        if ($request->hasFile('document')) {
+            foreach ($request->document as $key => $document) {
+
+                $filenameWithExt = $request->file('document')[$key]->getClientOriginalName();
+                $filename        = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                $extension       = $request->file('document')[$key]->getClientOriginalExtension();
+                $fileNameToStore = $filename . '_' . time() . '.' . $extension;
+                $dir             = 'app/public/uploads/document/';
+
+                $image_path      = $dir . $fileNameToStore;
+
+                if (File::exists($image_path)) {
+                    File::delete($image_path);
+                }
+
+                $path = Utility::upload_coustom_file($request, 'document', $fileNameToStore, $dir, $key, []);
+
+                if ($path['flag'] == 1) {
+                    $url = $path['url'];
+                } else {
+                    return redirect()->back()->with('error', __($path['msg']));
+                }
+
+                $form = [
+                    'employee_id' => $employee['employee_id'],
+                    'document_id' => $key,
+                    'document_value' => $fileNameToStore,
+                    'created_by' => \Auth::user()->creatorId(),
+                ];
+                $employee_document = EmployeeDocument::create($form);
+                $employee_document->save();
+                Log::info($form);
+            }
+        }
+        // return $employee;
+        return redirect()->route('profile', Auth::user()->id)->with('success', __('Document successfully updated.'));
     }
 
     public function notificationSeen($user_id)

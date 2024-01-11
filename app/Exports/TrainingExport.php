@@ -17,7 +17,7 @@ class TrainingExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = Training::get();
+        $data = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->get() : Training::get();
 
         foreach ($data as $k => $training) {
             unset($training->created_at,$training->updated_at);
@@ -35,7 +35,6 @@ class TrainingExport implements FromCollection, WithHeadings
             $data[$k]["status"]=Training::status($training->status);
             $data[$k]["created_by"]=Employee::login_user($training->created_by); 
 
-            
             $data[$k]["performance"]     = Employee::where('id', $training->employee)->pluck('name')->first();
             $performance     = $training->performance;
             if ($performance == 0) {

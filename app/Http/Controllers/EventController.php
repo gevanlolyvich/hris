@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
-use App\Models\Event as LocalEvent ;
+use App\Models\Event as LocalEvent;
 use App\Models\EventEmployee;
 use App\Models\Projects;
 use App\Models\Tasks;
@@ -26,21 +26,21 @@ class EventController extends Controller
             if (\Auth::user()->type != 'employee') {
                 $events    = !empty(\Auth::user()->branch_id) ? LocalEvent::where('branch_id', \Auth::user()->branch_id)->orderby('start_date', 'DESC')->get() : LocalEvent::orderby('start_date', 'DESC')->get();
 
-                $current_month_event = !empty(\Auth::user()->branch_id) ? LocalEvent::where('branch_id', \Auth::user()->branch_id)->select('id','start_date','end_date', 'title', 'created_at','color')
-                ->orderby('start_date', 'DESC')
-                ->whereNotNull(['start_date','end_date'])
-                ->Where(
-                    function ($q) use ($today_date) {
-                        $q->whereMonth('start_date',$today_date)
-                          ->orWhereMonth('end_date',$today_date);
-                    }
-                )->get() : LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
+                $current_month_event = !empty(\Auth::user()->branch_id) ? LocalEvent::where('branch_id', \Auth::user()->branch_id)->select('id', 'start_date', 'end_date', 'title', 'created_at', 'color')
                     ->orderby('start_date', 'DESC')
-                    ->whereNotNull(['start_date','end_date'])
+                    ->whereNotNull(['start_date', 'end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
-                            $q->whereMonth('start_date',$today_date)
-                              ->orWhereMonth('end_date',$today_date);
+                            $q->whereMonth('start_date', $today_date)
+                                ->orWhereMonth('end_date', $today_date);
+                        }
+                    )->get() : LocalEvent::select('id', 'start_date', 'end_date', 'title', 'created_at', 'color')
+                    ->orderby('start_date', 'DESC')
+                    ->whereNotNull(['start_date', 'end_date'])
+                    ->Where(
+                        function ($q) use ($today_date) {
+                            $q->whereMonth('start_date', $today_date)
+                                ->orWhereMonth('end_date', $today_date);
                         }
                     )->get();
 
@@ -66,30 +66,27 @@ class EventController extends Controller
             } else {
                 $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
                 $employee_id = null;
-                if (!empty($subordinate_ids))
-                {
+                if (!empty($subordinate_ids)) {
                     $employee_id = $subordinate_ids;
                     $employee_id[] = \Auth::user()->employee->id;
-                }
-                else 
-                {
+                } else {
                     $employee_id[] = \Auth::user()->employee->id;
                 }
 
-                $events    = LocalEvent::select('events.id', 'events.title', 'events.location', 'events.start_date','events.end_date', 'events.created_by', 'events.document', 'events.employee_id')
+                $events    = LocalEvent::select('events.id', 'events.title', 'events.location', 'events.start_date', 'events.end_date', 'events.created_by', 'events.document', 'events.employee_id')
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
                     ->whereIn('event_employees.employee_id', $employee_id)
                     ->whereOr('events.created_by', \Auth::user()->id)
                     ->orderby('events.start_date', 'DESC')->distinct()->get();
 
-                $current_month_event = LocalEvent::select('events.id','events.start_date','events.end_date', 'events.title', 'events.created_at','events.color')
+                $current_month_event = LocalEvent::select('events.id', 'events.start_date', 'events.end_date', 'events.title', 'events.created_at', 'events.color')
                     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
                     ->whereIn('event_employees.employee_id', $employee_id)
-                    ->whereNotNull(['start_date','end_date'])
+                    ->whereNotNull(['start_date', 'end_date'])
                     ->Where(
                         function ($q) use ($today_date) {
-                            $q->whereMonth('start_date',$today_date)
-                              ->orWhereMonth('end_date',$today_date);
+                            $q->whereMonth('start_date', $today_date)
+                                ->orWhereMonth('end_date', $today_date);
                         }
                     )->orderby('events.start_date', 'DESC')->distinct()->get();
             }
@@ -111,7 +108,7 @@ class EventController extends Controller
             // $arrEvents = str_replace('"[', '[', str_replace(']"', ']', json_encode($arrEvents)));
             $arrEvents =  json_encode($arrEvents);
 
-            return view('event.index', compact('arrEvents','current_month_event','events'));
+            return view('event.index', compact('arrEvents', 'current_month_event', 'events'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -120,15 +117,14 @@ class EventController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Assignment')) {
-            // $employees   = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+            // $employees   = Employee::orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch = null;
             if (\Auth::user()->type != 'employee') {
                 $branch      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get() : Branch::get();
-            }
-            else {
+            } else {
                 $branch      = Branch::where('id', \Auth::user()->employee->branch_id)->get();
             }
-            // $departments = Department::where('created_by', '=', \Auth::user()->creatorId())->get();
+            // $departments = Department::get();
 
             return view('event.create', compact('branch'));
         } else {
@@ -409,13 +405,12 @@ class EventController extends Controller
                 foreach ($subordinates as $subordinate) {
                     $employee_ids->push($subordinate->id);
                 }
-                
+
                 $employee_ids->push(\Auth::user()->employee->id);
 
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->whereIn('id', $employee_ids)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
-
+                $employees = Employee::whereIn('id', $employee_ids)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             } else {
-                $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+                $employees = Employee::where('id', \Auth::user()->employee->id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             }
         }
 
@@ -423,60 +418,53 @@ class EventController extends Controller
     }
 
     public function showData($id)
-    {   
-        $employees = Employee::where('created_by', '=', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
+    {
+        $employees = Employee::orderby('name', 'asc')->get()->pluck('name', 'id');
         $event = LocalEvent::find($id);
-            
-          return view('event.edit', compact('event', 'employees'));
+
+        return view('event.edit', compact('event', 'employees'));
     }
 
     public function get_event_data(Request $request)
-    {   
+    {
         $arrayJson = [];
-        if($request->get('calender_type') == 'google_calender')
-        {
-            $type ='event';
+        if ($request->get('calender_type') == 'google_calender') {
+            $type = 'event';
             $arrayJson =  Utility::getCalendarData($type);
-        }
-        else
-        {
+        } else {
             $data = null;
             if ($request->get('user_type') === 'employee' || \Auth::user()->type == 'employee') {
                 $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
                 $employee_id = null;
-                if (!empty($subordinate_ids))
-                {
+                if (!empty($subordinate_ids)) {
                     $employee_id = $subordinate_ids;
                     $employee_id[] = \Auth::user()->employee->id;
-                }
-                else 
-                {
+                } else {
                     $employee_id[] = \Auth::user()->employee->id;
                 }
 
                 $data = LocalEvent::leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                ->whereIn('event_employees.employee_id', $employee_id)
-                ->orWhere(
-                    function ($q) {
-                        $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
-                    }
-                )->groupBy('events.id')->get();
+                    ->whereIn('event_employees.employee_id', $employee_id)
+                    ->orWhere(
+                        function ($q) {
+                            $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
+                        }
+                    )->groupBy('events.id')->get();
             } else {
                 $data = LocalEvent::get();
             }
 
-            foreach($data as $val)
-            {
-                $end_date=date_create($val->end_date);
-                date_add($end_date,date_interval_create_from_date_string("1 days"));
+            foreach ($data as $val) {
+                $end_date = date_create($val->end_date);
+                date_add($end_date, date_interval_create_from_date_string("1 days"));
                 $arrayJson[] = [
-                    "id"=> $val->event_id ?? $val->id,
+                    "id" => $val->event_id ?? $val->id,
                     "title" => $val->title,
                     "start" => $val->start_date,
-                    "end" => date_format($end_date,"Y-m-d H:i:s"),
+                    "end" => date_format($end_date, "Y-m-d H:i:s"),
                     "className" => $val->color,
                     "allDay" => true,
-                    "url"=> route('event.show', $val['event_id'] ?? $val['id']),
+                    "url" => route('event.show', $val['event_id'] ?? $val['id']),
 
                 ];
             }
@@ -484,5 +472,4 @@ class EventController extends Controller
 
         return $arrayJson;
     }
-
 }

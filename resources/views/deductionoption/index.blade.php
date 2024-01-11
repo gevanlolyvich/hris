@@ -30,6 +30,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Deduction Option') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -37,6 +38,7 @@
                         <tbody>
                             @foreach ($deductionoptions as $deductionoption)
                                 <tr>
+                                    <td>{{ $deductionoption->id }}</td>
                                     <td>{{ $deductionoption->name }}</td>
                                     <td class="Action">
                                         <span>

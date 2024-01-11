@@ -30,6 +30,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th width="10px">ID</th>
                                 <th>{{ __('Department') }}</th>
                                 <th>{{ __('Designation') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -41,6 +42,7 @@
                                     $department = \App\Models\Department::where('id', $designation->department_id)->first();
                                 @endphp
                                 <tr>
+                                    <td>{{ $designation->id }}</td>
                                     <td>{{ !empty($department->name) ? $department->name : '' }}</td>
                                     <td>{{ $designation->name }}</td>
                                     <td class="Action">

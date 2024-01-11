@@ -10,18 +10,19 @@
                 {{ Form::label('employee_id', __('Ticket for Employee'), ['class' => 'col-form-label']) }}
                 {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2 employee_id','placeholder' => __('Select Employee')]) }}
             </div>
-        @endif
-
-        <div class="row">
-            <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
-                <div class="form-group">
+            @endif
+            
+            <div class="row">
+                <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">
+                    <div class="form-group">
                     {{ Form::label('priority', __('Priority'), ['class' => 'col-form-label']) }}
-                    <select name="priority" class="form-control select2" id="choices-multiple">
-                        <option value="low">{{ __('Low') }}</option>
+                    {{ Form::select('priority', ['low'=>'1. ' . __('Low'), 'medium'=>'2. ' . __('Medium'), 'high'=>'3. ' . __('High'), 'critical'=>'4. ' . __('Critical')], null, ['class' => 'form-control select2','placeholder' => __('Select Priority'), 'id'=>"choices-multiple"]) }}
+                    {{-- <select name="priority" class="form-control select2" id="choices-multiple"> --}}
+                        {{-- <option value="low">{{ __('Low') }} A</option>
                         <option value="medium">{{ __('Medium') }}</option>
                         <option value="high">{{ __('High') }}</option>
-                        <option value="critical">{{ __('critical') }}</option>
-                    </select>
+                        <option value="critical">{{ __('critical') }}</option> --}}
+                    {{-- </select> --}}
                 </div>
             </div>
             <div class="col-md-6 col-sm-12 col-lg-6 col-xl-6">

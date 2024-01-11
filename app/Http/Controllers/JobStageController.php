@@ -9,14 +9,11 @@ class JobStageController extends Controller
 {
     public function index()
     {
-        if(\Auth::user()->can('Manage Job Stage'))
-        {
-            $stages = JobStage::where('created_by', '=', \Auth::user()->creatorId())->orderBy('order', 'asc')->get();
+        if (\Auth::user()->can('Manage Job Stage')) {
+            $stages = JobStage::orderBy('order', 'asc')->get();
 
             return view('jobStage.index', compact('stages'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -30,17 +27,16 @@ class JobStageController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Job Stage'))
-        {
+        if (\Auth::user()->can('Create Job Stage')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'title' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'title' => 'required',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -52,9 +48,7 @@ class JobStageController extends Controller
             $jobStage->save();
 
             return redirect()->back()->with('success', __('Job stage  successfully created.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -74,17 +68,16 @@ class JobStageController extends Controller
 
     public function update(Request $request, JobStage $jobStage)
     {
-        if(\Auth::user()->can('Edit Job Stage'))
-        {
+        if (\Auth::user()->can('Edit Job Stage')) {
 
             $validator = \Validator::make(
-                $request->all(), [
-                                   'title' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'title' => 'required',
+                ]
             );
 
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -96,9 +89,7 @@ class JobStageController extends Controller
             $jobStage->save();
 
             return redirect()->back()->with('success', __('Job stage  successfully updated.'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -106,21 +97,15 @@ class JobStageController extends Controller
 
     public function destroy(JobStage $jobStage)
     {
-        if(\Auth::user()->can('Delete Job Stage'))
-        {
-            if($jobStage->created_by == \Auth::user()->creatorId())
-            {
+        if (\Auth::user()->can('Delete Job Stage')) {
+            if ($jobStage->created_by == \Auth::user()->creatorId()) {
                 $jobStage->delete();
 
                 return redirect()->back()->with('success', __('Job stage successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -128,8 +113,7 @@ class JobStageController extends Controller
     public function order(Request $request)
     {
         $post = $request->all();
-        foreach($post['order'] as $key => $item)
-        {
+        foreach ($post['order'] as $key => $item) {
             $stage        = JobStage::where('id', '=', $item)->first();
             $stage->order = $key;
             $stage->save();

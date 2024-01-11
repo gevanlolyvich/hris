@@ -220,7 +220,19 @@ Route::post('employee/json', [EmployeeController::class, 'json'])->name('employe
         'XSS',
     ]
 );
+Route::post('department/employee/json', [EmployeeController::class, 'departmentJson'])->name('department.employee.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])->name('branch.employee.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('direct/employee/json', [EmployeeController::class, 'directSpvJson'])->name('direct.employee.json')->middleware(
     [
         'auth',
         'XSS',
@@ -664,6 +676,18 @@ Route::resource('transfer', TransferController::class)->middleware(
         'XSS',
     ]
 );
+Route::get('transfer/{id}/action', [TransferController::class, 'action'])->name('transfer.action')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+// Route::post('leave/show', [LeaveController::class, 'show'])->name('leave.show')->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::resource('complaint', ComplaintController::class)->middleware(
     [
         'auth',
@@ -962,6 +986,8 @@ Route::post('change-password', [UserController::class, 'updatePassword'])->name(
 Route::post('update-bank', [UserController::class, 'updateBank'])->name('update.bank');
 
 Route::post('update-nationality', [UserController::class, 'updateNationality'])->name('update.nationality');
+
+Route::post('update-documents', [UserController::class, 'updateDocuments'])->name('update.documents');
 
 // Route::resource('coupons', CouponController::class)->middleware(
 //     [

@@ -21,6 +21,7 @@
                             <tr>
                                 <th>{{ __('Employee Id') }}</th>
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Employee Type') }}</th>
                                 <th>{{ __('Payroll Type') }}</th>
                                 <th>{{ __('Salary') }}</th>
                                 {{-- <th>{{ __('Net Salary') }}</th> --}}
@@ -37,6 +38,7 @@
                                         </a>
                                     </td>
                                     <td>{{ $employee->name }}</td>
+                                    <td>{{ ucwords($employee->type) }}</td>
                                     <td>{{ $employee->salary_type() }}</td>
                                     <td>{{ \Auth::user()->priceFormat($employee->salary) }}</td>
                                     {{-- <td>{{ !empty($employee->get_net_salary()) ? \Auth::user()->priceFormat($employee->get_net_salary()) : '' }} --}}

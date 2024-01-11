@@ -74,8 +74,9 @@ class AuthenticatedSessionController extends Controller
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 
-    public function showLoginForm($lang = '')
+    public function showLoginForm(Request $request)
     {
+        $lang = $request->query('lang', 'id');
         if($lang == '')
         {
             $lang = \App\Models\Utility::getValByName('default_language');
