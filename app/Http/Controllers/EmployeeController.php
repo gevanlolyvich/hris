@@ -612,8 +612,8 @@ class EmployeeController extends Controller
                 $user->assignRole('Employee');
 
                 $employeeData = new Employee();
-                $employeeData->employee_id      = $employee[7];
-                $employeeData->user_id          = $user->id;
+                $employeeData->employee_id         = $employee[7];
+                $employeeData->user_id             = $user->id;
                 $employeeData->name                = $employee[0];
                 $employeeData->dob                 = $employee[1];
                 $employeeData->gender              = $employee[2];
