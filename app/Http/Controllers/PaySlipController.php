@@ -548,14 +548,16 @@ class PaySlipController extends Controller
         }
 
         if (Hash::check($request->password, Auth::user()->password) && !empty($request->payslip_id)) {
-            $payslip  = PaySlip::find($request->payslip_id);
-            $employee = Employee::find($payslip->employee_id);
+            $payslip        = PaySlip::find($request->payslip_id);
+            $employee       = Employee::find($payslip->employee_id);
 
-            $payslipDetail = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
+            $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
 
-            $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+            $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
 
-            return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name'));
+            $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+            return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
         } else {
             return response()->json(['error' => __('Wrong Password')]);
         }
