@@ -33,7 +33,8 @@
                                 <th>{{ __('Title') }}</th>
                                 <th>{{ __('Start Date') }}</th>
                                 <th>{{ __('End Date') }}</th>
-                                <th>{{ __('description') }}</th>
+                                <th>{{ __('Description') }}</th>
+                                <th>{{ __('Document') }}</th>
                                 @if (Gate::check('Edit Announcement') || Gate::check('Delete Announcement'))
                                     <th width="200px">{{ __('Action') }}</th>
                                 @endif
@@ -46,6 +47,19 @@
                                     <td>{{ \Auth::user()->dateFormat($announcement->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($announcement->end_date) }}</td>
                                     <td>{{ $announcement->description }}</td>
+                                    <td>
+                                        @if ($announcement->document)
+                                            <div class="action-btn bg-info ms-2">
+                                                <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-original-title="{{ __('View Document') }}">
+                                                    <i class="ti ti-file text-white"></i>
+                                                </a>
+                                            </div>
+                                        @else
+                                        -
+                                        @endif
+                                    </td>
                                     <td class="Action">
                                         @if (Gate::check('Edit Announcement') || Gate::check('Delete Announcement'))
                                             <span>
@@ -120,6 +134,7 @@
                                             </select>`;
                     $('.department_div').html(emp_selct);
 
+                    $('.department_id').append('<option value="" disabled>{{__('Select Department')}}</option>');
                     $('.department_id').append('<option value="0"> {{ __('All') }} </option>');
                     $.each(data, function(key, value) {
                         $('.department_id').append('<option value="' + key + '">' + value +
@@ -168,6 +183,7 @@
                                             </select>`;
                     $('.employee_div').html(emp_selct);
 
+                    $('.employee_id').append('<option value="" disabled> {{ __('Select Employee') }} </option>');
                     $('.employee_id').append('<option value="0"> {{ __('All') }} </option>');
                     $.each(data, function(key, value) {
                         $('.employee_id').append('<option value="' + key + '">' + value +
@@ -179,5 +195,17 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="myDocument"]', function () {
+                console.log('document uploaded');
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
     </script>
 @endpush
