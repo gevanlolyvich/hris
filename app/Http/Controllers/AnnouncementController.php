@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\Utility;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use File;
 
 class AnnouncementController extends Controller
 {
@@ -27,13 +28,7 @@ class AnnouncementController extends Controller
                 )->get();
             } else {
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $announcements    = null;
-                if (!empty(\Auth::user()->branch_id)) {
-                    $announcements    = Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('start_date', 'DESC');
-                } else {
-                    $announcements    = Announcement::orderBy('start_date', 'DESC');
-                }
-                $announcements    = $announcements->get();
+                $announcements    = !empty(\Auth::user()->branch_id) ? Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('start_date', 'DESC')->get() : Announcement::orderBy('start_date', 'DESC')->get();
             }
 
             return view('announcement.index', compact('announcements', 'current_employee'));
@@ -86,17 +81,24 @@ class AnnouncementController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $announcement                = new Announcement();
-            $announcement->title         = $request->title;
-            $announcement->start_date    = $request->start_date;
-            $announcement->end_date      = $request->end_date;
-            $announcement->branch_id     = $request->branch_id;
-            $announcement->department_id = implode(",", $request->department_id);
-            $announcement->employee_id   = implode(",", $request->employee_id);
-            // $announcement->department_id = json_encode($request->department_id);
-            // $announcement->employee_id   = json_encode($request->employee_id);
-            $announcement->description   = $request->description;
-            $announcement->created_by    = \Auth::user()->id;
+            $document_path = null;
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/announcements', $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
+            }
+
+            $announcement                   = new Announcement();
+            $announcement->title            = $request->title;
+            $announcement->start_date       = $request->start_date;
+            $announcement->end_date         = $request->end_date;
+            $announcement->branch_id        = $request->branch_id;
+            $announcement->department_id    = implode(",", $request->department_id);
+            $announcement->employee_id      = implode(",", $request->employee_id);
+            $announcement->description      = $request->description;
+            $announcement->document         = $document_path;
+            $announcement->created_by       = \Auth::user()->id;
             $announcement->save();
 
 
@@ -162,14 +164,16 @@ class AnnouncementController extends Controller
             $announcement = Announcement::find($announcement);
             if ($announcement->created_by == Auth::user()->id || \Auth::user()->type == 'company') {
                 if (!empty(\Auth::user()->branch_id)) {
-                    $branch      = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
-                    $departments = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $branch         = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $departments    = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
                 } else {
-                    $branch      = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
-                    $departments = Department::orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $branch         = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $departments    = Department::orderby('name', 'ASC')->get()->pluck('name', 'id');
                 }
 
-                return view('announcement.edit', compact('announcement', 'branch', 'departments'));
+                $employees          = Employee::whereIn('department_id', explode(',', $announcement->department_id))->get()->pluck('name', 'id');
+
+                return view('announcement.edit', compact('announcement', 'branch', 'departments', 'employees'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -191,6 +195,7 @@ class AnnouncementController extends Controller
                         'end_date' => 'required',
                         'branch_id' => 'required',
                         'department_id' => 'required',
+                        'employee_id' => 'required',
                     ]
                 );
                 if ($validator->fails()) {
@@ -199,12 +204,40 @@ class AnnouncementController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $announcement->title         = $request->title;
-                $announcement->start_date    = $request->start_date;
-                $announcement->end_date      = $request->end_date;
-                $announcement->branch_id     = $request->branch_id;
-                $announcement->department_id = $request->department_id;
-                $announcement->description   = $request->description;
+                $document_path = null;
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
+                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $request->title) . "." . $docs->getClientOriginalExtension();
+                    $path = $docs->storeAs('uploads/announcements', $docName, 'public');
+                    $document_path = env('APP_URL') . '/storage/' . $path;
+
+                    $old_file_path = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $announcement->document);
+                    if (File::exists($old_file_path)) {
+                        File::delete($old_file_path);
+                    }
+                }
+
+                $old_employee_id                = explode(',', $announcement->employee_id);
+                $difference_to_delete           = array_diff($old_employee_id, $request->employee_id);
+                $difference_to_create           = array_diff($request->employee_id, $old_employee_id);
+
+                AnnouncementEmployee::whereIn('employee_id', $difference_to_delete)->where('announcement_id', $announcement->id)->delete();
+                foreach ($difference_to_create as $employee_id) {
+                    $announcementEmployee                  = new AnnouncementEmployee();
+                    $announcementEmployee->announcement_id = $announcement->id;
+                    $announcementEmployee->employee_id     = $employee_id;
+                    $announcementEmployee->created_by      = \Auth::user()->id;
+                    $announcementEmployee->save();
+                }
+
+                $announcement->title            = $request->title;
+                $announcement->start_date       = $request->start_date;
+                $announcement->end_date         = $request->end_date;
+                $announcement->branch_id        = $request->branch_id;
+                $announcement->department_id    = implode(",", $request->department_id);
+                $announcement->employee_id      = implode(",", $request->employee_id);
+                $announcement->description      = $request->description;
+                $announcement->document         = $document_path ? $document_path : $request->document;
                 $announcement->save();
 
                 return redirect()->route('announcement.index')->with('success', __('Announcement successfully updated.'));

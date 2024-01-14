@@ -633,7 +633,7 @@
   "Enable Skrill" : "Aktifkan Skrill",
   "Enable Stripe" : "Aktifkan Stripe",
   "End" : "Akhir",
-  "End Date" : "Tanggal Berakhir",
+  "End Date" : "Tanggal Akhir",
   "End Date   :" : "Tanggal Akhir:",
   "End Date : " : "Tanggal Akhir:  ",
   "End Month" : "Bulan Akhir",
@@ -916,7 +916,7 @@
   "Leave Date" : "Tanggal Cuti",
   "Leave Days" : "Hari Ini Cuti",
   "Leave email" : "Email Cuti",
-  "Leave End Date" : "Tanggal Berakhir Cuti",
+  "Leave End Date" : "Tanggal Akhir Cuti",
   "Leave Reason" : "Alasan Cuti",
   "Leave Remark" : "Pernyataan Cuti",
   "Leave Report" : "Laporan Cuti",
@@ -1718,7 +1718,7 @@
   "Select Location": "Pilih Lokasi",
   "Enter Location": "Masukkan Lokasi",
   "Select Start Date": "Pilih Tanggal Mulai",
-  "Select End Date": "Pilih Tanggal Berakhir",
+  "Select End Date": "Pilih Tanggal Akhir",
   "Data Doesn't Exist": "Tidak Ada Data",
   "Clock In Image Capture": "Foto Saat Jam Masuk",
   "Clock Out Image Capture": "Foto Saat Jam Keluar",
@@ -1789,5 +1789,7 @@
   "Employee Type": "Tipe Karyawan",
   "Select Employee Type": "Pilih Tipe Karyawan",
   "Valid Attendance": "Kehadiran Sah",
-  "Invalid Attendance": "Kehadiran Tidak Sah"
+  "Invalid Attendance": "Kehadiran Tidak Sah",
+  "View Document": "Lihat Dokumen",
+  "Old File : ": "File Lama : "
 }

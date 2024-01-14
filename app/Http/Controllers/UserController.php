@@ -255,7 +255,7 @@ class UserController extends Controller
             $fileNameToStore = $filename . '_' . time() . '.' . $extension;
 
 
-            $dir        = 'app/public/uploads/avatar';
+            $dir        = '../storage/app/public/uploads/avatar/';
 
             $image_path = $dir . $userDetail['avatar'];
             if (File::exists($image_path)) {
