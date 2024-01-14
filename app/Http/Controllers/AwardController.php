@@ -36,7 +36,7 @@ class AwardController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Award')) {
-            $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->pluck('name', 'id');
             $awardtypes = AwardType::get()->pluck('name', 'id');
 
             return view('award.create', compact('employees', 'awardtypes'));
@@ -137,7 +137,7 @@ class AwardController extends Controller
     {
         if (\Auth::user()->can('Edit Award')) {
             if ($award->created_by == \Auth::user()->creatorId()) {
-                $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->pluck('name', 'id');
                 $awardtypes = AwardType::get()->pluck('name', 'id');
 
                 return view('award.edit', compact('award', 'awardtypes', 'employees'));
