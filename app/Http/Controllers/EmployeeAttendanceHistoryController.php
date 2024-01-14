@@ -198,7 +198,7 @@ class EmployeeAttendanceHistoryController extends Controller
         $hours                  = floor($total_overtime / 3600);
         $mins                   = floor($total_overtime / 60 % 60);
         $total_overtime         = [ 'hours' => $hours, 'minutes' => $mins];
-        $max_overtime           = $employee->departments->overtime_limit;
+        $max_overtime           = $employee?->departments?->overtime_limit;
         $overtime_exceed_limit  = $hours >= $max_overtime && !empty($max_overtime);
 
         // Getting shift changes
