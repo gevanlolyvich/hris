@@ -393,7 +393,7 @@
                                 <tbody>
                                     @php
                                         $overall_total_hours = 0;
-                                        $maximum_hours       = $employee->departments->overtime_limit;
+                                        $maximum_hours       = $employee?->departments?->overtime_limit;
                                     @endphp
                                     @foreach ($overtimes as $overtime)
                                         @php
@@ -409,7 +409,7 @@
                                                 }
                                             }
                                         
-                                            if($maximum_hours) {
+                                            if(!empty($maximum_hours)) {
                                                 if ($overall_total_hours >= $maximum_hours) {
                                                     continue;
                                                 }
