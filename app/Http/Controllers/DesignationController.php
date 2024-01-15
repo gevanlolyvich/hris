@@ -72,7 +72,7 @@ class DesignationController extends Controller
     {
 
         if (\Auth::user()->can('Edit Designation')) {
-            if ($designation->created_by == \Auth::user()->creatorId()) {
+            if ($designation->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
 
                 $departments  = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
@@ -117,7 +117,7 @@ class DesignationController extends Controller
     public function destroy(Designation $designation)
     {
         if (\Auth::user()->can('Delete Designation')) {
-            if ($designation->created_by == \Auth::user()->creatorId()) {
+            if ($designation->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $designation->delete();
 
                 return redirect()->route('designation.index')->with('success', __('Designation successfully deleted.'));
