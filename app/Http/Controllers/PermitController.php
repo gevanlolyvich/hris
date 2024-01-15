@@ -156,7 +156,7 @@ class PermitController extends Controller
     {
         $permit = Permit::find($permit_id);
         if (\Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
                     [
