@@ -69,7 +69,7 @@ class DepartmentController extends Controller
     public function edit(Department $department)
     {
         if (\Auth::user()->can('Edit Department')) {
-            if ($department->created_by == \Auth::user()->creatorId()) {
+            if ($department->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
                 return view('department.edit', compact('department', 'branch'));
