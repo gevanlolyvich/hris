@@ -523,8 +523,8 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             <div class="modal-footer pr-0">
                                 {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
                             </div>
-                            {{ Form::close() }}
                             @endif
+                            {{ Form::close() }}
                             </div>
                         </div>
                     </div>
