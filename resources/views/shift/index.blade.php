@@ -10,7 +10,7 @@
 @endsection
 
 @section('action-button')
-    @can('Create Warning')
+    @can('Create Shift')
         <a href="#" data-url="{{ route('shift.create') }}" data-ajax-popup="true"
             data-title={{ __('Create New Shift') }} data-size="lg" data-bs-toggle="tooltip" title=""
             class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Create') }}">
