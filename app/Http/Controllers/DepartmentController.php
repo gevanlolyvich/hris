@@ -115,7 +115,7 @@ class DepartmentController extends Controller
     public function destroy(Department $department)
     {
         if (\Auth::user()->can('Delete Department')) {
-            if ($department->created_by == \Auth::user()->creatorId()) {
+            if ($department->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $employee     = Employee::where('department_id', $department->id)->get();
                 if (count($employee) == 0) {
                     Designation::where('department_id', $department->id)->delete();
