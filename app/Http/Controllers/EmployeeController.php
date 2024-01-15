@@ -590,11 +590,14 @@ class EmployeeController extends Controller
 
             $employee = $employees[$i];
 
-            $duplicatedEmployee = Employee::where('email', $employee[5])
-                ->where('employee_id', $employee[7])
-                ->where('phone', $employee[3])
+            $duplicatedEmployee = Employee::orWhere('email', $employee[5])
+                ->orWhere('name', $employee[0])
+                ->orWhere('employee_id', $employee[7])
+                ->orWhere('phone', $employee[3])
                 ->first();
-            $userByEmail = User::where('email', $employee[5])->first();
+            $userByEmail = User::orWhere('email', $employee[5])
+                ->orWhere('name', $employee[0])
+                ->first();
 
 
             if (!empty($duplicatedEmployee) && !empty($userByEmail)) {
