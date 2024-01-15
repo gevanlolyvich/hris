@@ -106,8 +106,8 @@ class PermitController extends Controller
             }
 
             $document_path = null;
-            if ($request->file('document')) {
-                $docs = $request->file('document');
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
                 $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                 $path = $docs->storeAs('uploads/permits', $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
@@ -139,10 +139,10 @@ class PermitController extends Controller
         $permit = Permit::find($id);
 
         if (\Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
                 $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
-
+                
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
@@ -197,8 +197,8 @@ class PermitController extends Controller
 
                 $date = date_create($request->date);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $permit->employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/permits', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
@@ -206,12 +206,12 @@ class PermitController extends Controller
 
                 //* Input Data
                 $form = [
-                    'employee_id'   => $request->employee_id,
-                    'start_date'    => $request->start_date,
-                    'end_date'      => $request->end_date,
+                    'employee_id'       => $request->employee_id,
+                    'start_date'        => $request->start_date,
+                    'end_date'          => $request->end_date,
                     'total_permit_days' => $total_permit_days + 1,
-                    'reason'        => $request->reason,
-                    'docs'          => $document_path ? $document_path : $permit->docs,
+                    'reason'            => $request->reason,
+                    'docs'              => $document_path ? $document_path : $permit->docs,
                 ];
 
                 //* Update Data
@@ -228,7 +228,7 @@ class PermitController extends Controller
     public function destroy(Permit $permit)
     {
         if (\Auth::user()->can('Delete Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
                 $permit->delete();
                 return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
