@@ -22,7 +22,7 @@
             </a>
         </div>
     @endcan
-    <div class="text-start mb-3">
+    {{-- <div class="text-start mb-3">
         <div class="row d-flex drp-languages">
             <ul class="list-unstyled col-5 col-sm-4 col-md-4 col-lg-4 mb-2 mt-3">
                 <li class="dropdown dash-h-item drp-language">
@@ -67,7 +67,7 @@
                 </li>
             </ul>
         </div>
-    </div>
+    </div> --}}
 @endsection
 
 @section('content')
