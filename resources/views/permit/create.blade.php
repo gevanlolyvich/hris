@@ -49,22 +49,18 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                {{-- {{ Form::label('document', __('Document'), ['class' => 'form-label']) }} --}}
-                <label for="document" class="form-label">
-                    {{ __('Attachment') }}
-                    {{-- <a href="{{ asset(Storage::url('uploads/sample')) . '/sample-doc-leave.docx' }}"
-                    class="btn btn-sm btn-primary rounded">
-                        <i class="ti ti-download"></i> {{ __('Sample') }}
-                    </a> --}}
-                </label>
-                <div class="choose-files ">
-                    <label for="document">
-                        <div class=" bg-primary document "> <i
+                {{ Form::label('document', __('Document'), ['class' => 'col-form-label pb-1 pt-3']) }}
+                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                <div>
+                    <label for="myDocument">
+                    <div class="btn btn-block btn-primary bg-primary document"> <i
                                 class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                         </div>
-                        <input style="margin-top: -50px" type="file" class="form-control file" name="document"  onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">
-                        <img id="blah" class="mt-3"  width="100" src="" />
+                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="myDocument">
                     </label>
+                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
+                        class="ti ti-file text-white"></i><p id="fileName"></p>
+                    </div>
                 </div>
             </div>
         </div>
