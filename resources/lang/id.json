@@ -1792,5 +1792,6 @@
   "Valid Attendance": "Kehadiran Sah",
   "Invalid Attendance": "Kehadiran Tidak Sah",
   "View Document": "Lihat Dokumen",
-  "Old File : ": "File Lama : "
+  "Old File : ": "File Lama : ",
+  "Hourly":"Perjam"
 }
