@@ -70,6 +70,7 @@ class EmployeeController extends Controller
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
             $emergency_contact_relations = [
                 'Parent' => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse' => __('Spouse'),
                 'Friend' => __('Friend'),
@@ -269,6 +270,7 @@ class EmployeeController extends Controller
             ];
             $emergency_contact_relations = [
                 'Parent'  => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse'  => __('Spouse'),
                 'Friend'  => __('Friend'),
@@ -484,6 +486,7 @@ class EmployeeController extends Controller
             $designations->prepend('All', '');
             $emergency_contact_relations = [
                 'Parent' => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse' => __('Spouse'),
                 'Friend' => __('Friend'),

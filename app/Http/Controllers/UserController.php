@@ -212,6 +212,7 @@ class UserController extends Controller
         $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
         $emergency_contact_relations = [
             'Parent' => __('Parent'),
+            'Children' => __('Children'),
             'Sibling' => __('Sibling'),
             'Spouse' => __('Spouse'),
             'Friend' => __('Friend'),
