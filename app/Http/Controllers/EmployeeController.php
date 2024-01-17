@@ -131,7 +131,8 @@ class EmployeeController extends Controller
                     'password' => Hash::make($request['password']),
                     'type' => 'employee',
                     'lang' => 'en',
-                    'created_by' => \Auth::user()->creatorId(),
+                    'created_by' => \Auth::user()->id,
+                    'branch_id' => $request['branch_id'],
                 ]
             );
             $user->save();
@@ -310,6 +311,7 @@ class EmployeeController extends Controller
             }
 
             $employee = Employee::where('is_active', 1)->find($id);
+            $user     = User::find($employee->user_id);
             if (empty($employee) || !$employee) {
                 return redirect()->back()->with('error', __('Inactive'));
             }
@@ -373,6 +375,7 @@ class EmployeeController extends Controller
             $input    = $request->all();
             // return $input;
             $employee->fill($input)->save();
+            $user->fill($input)->save();
             if ($request->salary) {
                 return redirect()->route('setsalary.index')->with('success', 'Employee successfully updated.');
             }
@@ -613,7 +616,8 @@ class EmployeeController extends Controller
                 $user->password = Hash::make($employee[6]);
                 $user->type = 'employee';
                 $user->lang = 'id';
-                $user->created_by = \Auth::user()->creatorId();
+                $user->created_by = \Auth::user()->id;
+                $user->branch_id = $employee[8];
                 $user->save();
                 $user->assignRole('Employee');
 
@@ -635,7 +639,7 @@ class EmployeeController extends Controller
                 $employeeData->identity_number     = $employee[12];
                 $employeeData->tax_payer_id        = $employee[13] ?? null;
                 $employeeData->shift_type_id       = $employee[14];
-                $employeeData->created_by          = \Auth::user()->creatorId();
+                $employeeData->created_by          = \Auth::user()->id;
                 $employeeData->save();
             }
 
