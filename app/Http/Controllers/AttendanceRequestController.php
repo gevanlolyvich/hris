@@ -22,21 +22,17 @@ class AttendanceRequestController extends Controller
 {
     public function index(Request $request)
     {
-        if (\Auth::user()->can('Manage Leave')) {
+        if (\Auth::user()->can('Manage Request Attendance')) {
             $is_approved = $request->query('is_approved', null);
-
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
 
                 $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
                 $employee_id = null;
-                if (!empty($subordinate_ids))
-                {
+                if (!empty($subordinate_ids)) {
                     $employee_id = $subordinate_ids;
                     $employee_id[] = \Auth::user()->employee->id;
-                }
-                else 
-                {
+                } else {
                     $employee_id[] = \Auth::user()->employee->id;
                 }
 
@@ -59,7 +55,7 @@ class AttendanceRequestController extends Controller
 
     public function create()
     {
-        if (\Auth::user()->can('Create Leave')) {
+        if (\Auth::user()->can('Create Request Attendance')) {
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
@@ -144,7 +140,7 @@ class AttendanceRequestController extends Controller
     {
         $attendance_request = AttendanceRequest::find($id);
 
-        if (\Auth::user()->can('Edit Leave')) {
+        if (\Auth::user()->can('Edit Request Attendance')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
@@ -160,7 +156,7 @@ class AttendanceRequestController extends Controller
     public function update(Request $request, $attendance_request_id)
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
-        if (\Auth::user()->can('Edit Leave')) {
+        if (\Auth::user()->can('Edit Request Attendance')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $validator = Validator::make(
                     $request->all(),
@@ -211,7 +207,7 @@ class AttendanceRequestController extends Controller
     public function destroy($attendance_request_id)
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
-        if (\Auth::user()->can('Delete Leave')) {
+        if (\Auth::user()->can('Delete Request Attendance')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()?->employee?->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $attendance_request->delete();
                 return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
@@ -275,15 +271,15 @@ class AttendanceRequestController extends Controller
             $mins                     = floor($totalWorkHoursSeconds / 60 % 60);
             $secs                     = floor($totalWorkHoursSeconds % 60);
             $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-            
+
             if ($shift_times->is_working) {
                 $shift_startTime = strtotime($shift_times->start_time);
                 $shift_endTime   = strtotime($shift_times->end_time);
 
                 if ($shift_startTime > $shift_endTime) {
                     $shift_endTime += 86400;
-                }                
-                
+                }
+
                 // late
                 if ($start_time_cal > ($shift_startTime + ((int)$settings['late_tolerance'] * 60))) {
                     $totalLateSeconds = $start_time_cal - ($shift_startTime + ((int)$settings['late_tolerance'] * 60));
