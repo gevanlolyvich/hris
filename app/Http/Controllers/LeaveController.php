@@ -19,10 +19,11 @@ use Spatie\GoogleCalendar\Event as GoogleEvent;
 
 class LeaveController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Leave')) {
-            $leaves = null;
+            $status = $request->query('status', null);
+
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
                 
@@ -41,6 +42,10 @@ class LeaveController extends Controller
                 $leaves   = LocalLeave::whereIn('employee_id', $employee_id);
             } else {
                 $leaves = !empty(\Auth::user()->branch_id) ? LocalLeave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : LocalLeave::orderBy('start_date', 'DESC');
+            }
+
+            if ($status != null && $status == 'Pending') {
+                $leaves->where('status', 'Pending');
             }
             $leaves = $leaves->orderBy('start_date', 'DESC')->get();
 

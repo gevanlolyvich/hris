@@ -20,10 +20,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Leave')) {
-            $attendance_requests = AttendanceRequest::where('created_by', '=', Auth::user()->created_by)->get();
+            $is_approved = $request->query('is_approved', null);
+
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
 
@@ -39,12 +40,17 @@ class AttendanceRequestController extends Controller
                     $employee_id[] = \Auth::user()->employee->id;
                 }
 
-                $attendance_requests   = AttendanceRequest::wherein('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
+                $attendance_requests   = AttendanceRequest::wherein('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
             } else {
                 $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
-                $attendance_requests = !empty(\Auth::user()?->branch_id) ? AttendanceRequest::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get() : AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC')->get();
+                $attendance_requests = !empty(\Auth::user()?->branch_id) ? AttendanceRequest::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC') : AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
             }
-            // return $attendance_requests;
+
+            if ($is_approved != null && $is_approved == '0') {
+                $attendance_requests->whereNull('is_approved');
+            }
+
+            $attendance_requests = $attendance_requests->get();
             return view('attendancerequest.index', compact('attendance_requests'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

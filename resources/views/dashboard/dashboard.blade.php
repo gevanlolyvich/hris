@@ -373,138 +373,150 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-primary">
-                                            <i class="ti ti-users"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Staff') }}</h6>
+                    <a href="{{ route('employee.index') }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-primary">
+                                                <i class="ti ti-users"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Staff') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-info">
-                                            <i class="ti ti-calendar"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 1]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-info">
+                                                <i class="ti ti-calendar"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-warning">
-                                            <i class="ti ti-calendar-off"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 0]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-warning">
+                                                <i class="ti ti-calendar-off"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-primary">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Jobs') }}</h6>
+            <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">      
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-primary">
+                                        <i class="ti ti-zoom-question"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Request Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-primary">{{ $activeJob + $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-primary">{{ $requestAttendanceCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-info">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Active Jobs') }}</h6>
+            <a href="{{ route('permit.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-info">
+                                        <i class="ti ti-license"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Permit Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-info"> {{ $activeJob }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-info"> {{ $permitCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-warning">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Inactive Jobs') }}</h6>
+            <a href="{{ route('leave.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-warning">
+                                        <i class="ti ti-plane"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Leave') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-warning">{{ $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-warning">{{ $leaveCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         {{-- </div> --}}

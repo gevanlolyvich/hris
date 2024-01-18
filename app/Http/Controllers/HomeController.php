@@ -12,8 +12,11 @@ use App\Models\Termination;
 use App\Models\LandingPageSection;
 use App\Models\Meeting;
 use App\Models\Job;
+use App\Models\Leave;
 use App\Models\Payees;
 use App\Models\Payer;
+use App\Models\Permit;
+use App\Models\AttendanceRequest;
 use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Ticket;
@@ -207,10 +210,6 @@ class HomeController extends Controller
                 $user      = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->where('type', '!=', 'employee')->get() : User::where('type', '!=', 'employee')->get();
                 $countUser = count($user);
 
-                $countTicket      = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->count() : Ticket::count();
-                $countOpenTicket  = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'open')->count() : Ticket::where('status', '=', 'open')->count();
-                $countCloseTicket = !empty(\Auth::user()->branch_id) ? Ticket::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', '=', 'close')->count() : Ticket::where('status', '=', 'close')->count();
-
                 $currentDate = date('Y-m-d');
 
                 $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
@@ -218,6 +217,10 @@ class HomeController extends Controller
                 $notClockIn         = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
                 $validAttendance    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
                 $invalidAttendance  = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
+
+                $requestAttendanceCount = !empty(\Auth::user()->branch_id) ? AttendanceRequest::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->whereNull('is_approved')->count() : AttendanceRequest::whereNull('is_approved')->count();
+                $permitCount            = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->whereNull('is_approved')->count() : Permit::whereNull('is_approved')->count();
+                $leaveCount             = !empty(\Auth::user()->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', 'Pending')->count() : Leave::where('status', 'Pending')->count();
 
                 $notClockIns    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
@@ -248,7 +251,7 @@ class HomeController extends Controller
 
                 $announcements = $announcements->sortByDesc('start_date');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'countTicket', 'countOpenTicket', 'countCloseTicket', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {
