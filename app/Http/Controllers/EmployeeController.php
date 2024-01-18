@@ -375,7 +375,7 @@ class EmployeeController extends Controller
             $input    = $request->all();
             // return $input;
             $employee->fill($input)->save();
-            $user->fill($input)->save();
+            $user->fill($request->except('type'))->save();
             if ($request->salary) {
                 return redirect()->route('setsalary.index')->with('success', 'Employee successfully updated.');
             }
