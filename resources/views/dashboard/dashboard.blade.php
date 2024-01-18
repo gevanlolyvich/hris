@@ -136,10 +136,10 @@
                     </p>
                     {{-- Condition for showing employee already clock in or not --}}
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
                     @elseif (empty($employeeAttendance))
                     @else
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
                     @endif
                 @else
                     <h6 class="text-muted pb-0-5">
@@ -373,138 +373,150 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-primary">
-                                            <i class="ti ti-users"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Staff') }}</h6>
+                    <a href="{{ route('employee.index') }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-primary">
+                                                <i class="ti ti-users"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Staff') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-info">
-                                            <i class="ti ti-calendar"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 1]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-info">
+                                                <i class="ti ti-calendar"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-warning">
-                                            <i class="ti ti-calendar-off"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 0]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-warning">
+                                                <i class="ti ti-calendar-off"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-primary">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Jobs') }}</h6>
+            <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">      
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-primary">
+                                        <i class="ti ti-zoom-question"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Request Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-primary">{{ $activeJob + $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-primary">{{ $requestAttendanceCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-info">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Active Jobs') }}</h6>
+            <a href="{{ route('permit.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-info">
+                                        <i class="ti ti-license"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Permit Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-info"> {{ $activeJob }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-info"> {{ $permitCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-warning">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Inactive Jobs') }}</h6>
+            <a href="{{ route('leave.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-warning">
+                                        <i class="ti ti-plane"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Leave') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-warning">{{ $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-warning">{{ $leaveCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         {{-- </div> --}}
@@ -703,6 +715,7 @@
     <script src="{{ asset('assets/js/plugins/main.min.js') }}"></script>
     <script>
         async function getLocation() {
+          let locationIcon = document.getElementById('location-permission');
           return new Promise((resolve, reject) => {
             if ("geolocation" in navigator) {
               navigator.geolocation.getCurrentPosition(
@@ -710,18 +723,22 @@
                   const latitude = position.coords.latitude;
                   const longitude = position.coords.longitude;
                   const accuracy = position.coords.accuracy;
+                  locationIcon.style.color = "Green";
                   resolve({ latitude, longitude, accuracy });
                 },
                 (error) => {
                   if (error.code === 1) {
+                    locationIcon.style.color = "Red";
                     reject(new Error("User denied Geolocation"));
                   } else {
+                    locationIcon.style.color = "Red";
                     reject(error);
                   }
                 }
               );
             } else {
-              reject(new Error("Geolocation is not supported by your browser."));
+                locationIcon.style.color = "Red";
+                reject(new Error("Geolocation is not supported by your browser."));
             }
           });
         }
@@ -958,6 +975,7 @@
             }
     
             function startup() {
+                let cameraIcon = document.getElementById('camera-permission');
                 video = document.getElementById('video');
                 canvas = document.getElementById('canvas');
                 photo = document.getElementById('photo');
@@ -977,8 +995,10 @@
                         closecamera.style.display = '';
                         video.srcObject = stream;
                         video.play();
+                        cameraIcon.style.color = 'Green';
                     })
                     .catch(function(err) {
+                        cameraIcon.style.color = 'Red';
                         alert("Please Allow Camera Access To Take Picture For Clock In / Out");
                         console.log("An error occurred: " + err);
                     });

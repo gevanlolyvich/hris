@@ -70,6 +70,7 @@ class EmployeeController extends Controller
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
             $emergency_contact_relations = [
                 'Parent' => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse' => __('Spouse'),
                 'Friend' => __('Friend'),
@@ -130,7 +131,8 @@ class EmployeeController extends Controller
                     'password' => Hash::make($request['password']),
                     'type' => 'employee',
                     'lang' => 'en',
-                    'created_by' => \Auth::user()->creatorId(),
+                    'created_by' => \Auth::user()->id,
+                    'branch_id' => $request['branch_id'],
                 ]
             );
             $user->save();
@@ -211,7 +213,7 @@ class EmployeeController extends Controller
                     }
                     $employee_document = EmployeeDocument::create(
                         [
-                            'employee_id' => $employee['employee_id'],
+                            'employee_id' => $employee['id'],
                             'document_id' => $key,
                             'document_value' => $fileNameToStore,
                             'created_by' => \Auth::user()->creatorId(),
@@ -269,6 +271,7 @@ class EmployeeController extends Controller
             ];
             $emergency_contact_relations = [
                 'Parent'  => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse'  => __('Spouse'),
                 'Friend'  => __('Friend'),
@@ -308,6 +311,7 @@ class EmployeeController extends Controller
             }
 
             $employee = Employee::where('is_active', 1)->find($id);
+            $user     = User::find($employee->user_id);
             if (empty($employee) || !$employee) {
                 return redirect()->back()->with('error', __('Inactive'));
             }
@@ -358,7 +362,7 @@ class EmployeeController extends Controller
                             $employee_document->save();
                         } else {
                             $employee_document                 = new EmployeeDocument();
-                            $employee_document->employee_id    = $employee->employee_id;
+                            $employee_document->employee_id    = $employee->id;
                             $employee_document->personel_id    = $employee->personel_id;
                             $employee_document->document_id    = $key;
                             $employee_document->document_value = $fileNameToStore;
@@ -371,6 +375,7 @@ class EmployeeController extends Controller
             $input    = $request->all();
             // return $input;
             $employee->fill($input)->save();
+            $user->fill($request->except('type'))->save();
             if ($request->salary) {
                 return redirect()->route('setsalary.index')->with('success', 'Employee successfully updated.');
             }
@@ -484,6 +489,7 @@ class EmployeeController extends Controller
             $designations->prepend('All', '');
             $emergency_contact_relations = [
                 'Parent' => __('Parent'),
+                'Children' => __('Children'),
                 'Sibling' => __('Sibling'),
                 'Spouse' => __('Spouse'),
                 'Friend' => __('Friend'),
@@ -610,7 +616,8 @@ class EmployeeController extends Controller
                 $user->password = Hash::make($employee[6]);
                 $user->type = 'employee';
                 $user->lang = 'id';
-                $user->created_by = \Auth::user()->creatorId();
+                $user->created_by = \Auth::user()->id;
+                $user->branch_id = $employee[8];
                 $user->save();
                 $user->assignRole('Employee');
 
@@ -632,7 +639,7 @@ class EmployeeController extends Controller
                 $employeeData->identity_number     = $employee[12];
                 $employeeData->tax_payer_id        = $employee[13] ?? null;
                 $employeeData->shift_type_id       = $employee[14];
-                $employeeData->created_by          = \Auth::user()->creatorId();
+                $employeeData->created_by          = \Auth::user()->id;
                 $employeeData->save();
             }
 

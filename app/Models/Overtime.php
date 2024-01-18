@@ -30,8 +30,8 @@ class Overtime extends Model
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 
-    public static $Overtimetype =[
-        'hourly'=>'Hourly',
-        'daily'=> 'Daily',
+    public static $Overtimetype = [
+        'hourly' => 'Hourly',
+        'daily' => 'Daily',
     ];
 }

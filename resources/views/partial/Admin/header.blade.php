@@ -16,7 +16,7 @@
                 <li class="dash-h-item mob-hamburger">
                     <a href="#!" class="dash-head-link" id="mobile-collapse">
                         <div class="hamburger hamburger--arrowturn">
-                            <div class="hamburger-box">
+                            <div clas`xs="hamburger-box">
                                 <div class="hamburger-inner"></div>
                             </div>
                         </div>
@@ -51,6 +51,12 @@
             </ul>
         </div>
         <div class="ms-auto">
+            <div class="dash-head-link">
+                <i class="ti ti-map-pin nocolor" style="color: rgb(64, 235, 64)" id="location-permission"></i>
+            </div>
+            <div class="dash-head-link">
+                <i class="ti ti-camera" style="color: grey" id="camera-permission"></i>
+            </div>
             <ul class="list-unstyled">
 
                 {{-- @php
@@ -187,5 +193,45 @@
                 },
             });
         })
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Location Notification
+            let locationIcon = document.getElementById('location-permission');
+            if (navigator.geolocation) {
+                navigator.permissions.query({ name: 'geolocation' }).then(permissionStatus => {
+                    if (permissionStatus.state === 'granted') {
+                        // User granted permission
+                        locationIcon.style.color = "Green";
+                    } else {
+                        // User did not grant permission
+                        locationIcon.style.color = "Red";
+                    }
+                });
+            } else {
+                // Geolocation is not supported
+                locationIcon.style.color = "Red";
+            }
+
+            // Camera Notification
+            let cameraIcon = document.getElementById('camera-permission');
+            if (navigator.permissions) {
+                console.log(navigator.permissions);
+                navigator.permissions.query({ name: 'camera' })
+                    .then(permissionStatus => {
+                        if (permissionStatus.state === 'granted') {
+                            cameraIcon.style.color = "Green";
+                        } else {
+                            cameraIcon.style.color = "Red";
+                        }
+                    })
+                    .catch(error => {
+                        cameraIcon.style.color = "Red";
+                    });
+            } else {
+                cameraIcon.style.color = "Red";
+            }
+        });
     </script>
 @endpush
