@@ -16,17 +16,24 @@ use Illuminate\Support\Facades\Log;
 
 class PermitController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->query('status', null);
+
         if (\Auth::user()->can('Manage Leave')) {
-            $permits = Permit::get();
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
                 $employee = Employee::where('user_id', '=', $user->id)->first();
-                $permits   = Permit::where('employee_id', '=', $employee->id)->get();
+                $permits   = Permit::where('employee_id', '=', $employee->id)->orderBy('start_date', 'DESC');
             } else {
-                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Permit::get();
+                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
             }
+
+            if ($status != null && $status == 'Pending') {
+                $permits->where('status', 'Pending');
+            }
+
+            $permits = $permits->get();
 
             return view('permit.index', compact('permits'));
         } else {

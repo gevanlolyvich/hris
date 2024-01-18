@@ -168,7 +168,7 @@ class Employee extends Model
 
     public function documents()
     {
-        return $this->hasMany('App\Models\EmployeeDocument', 'employee_id', 'employee_id')->get();
+        return $this->hasMany('App\Models\EmployeeDocument', 'employee_id', 'id')->get();
     }
 
     public function salary_type()
@@ -522,9 +522,9 @@ class Employee extends Model
         return $this->hasMany(EmployeeHomeHistory::class);
     }
 
-    public static $employeeTypes =[
-        'full time'=>'Full Time',
-        'daily worker'=> 'Daily Worker',
+    public static $employeeTypes = [
+        'full time' => 'Full Time',
+        'daily worker' => 'Daily Worker',
     ];
 
     public function getNameBranch()

@@ -31,6 +31,8 @@ class AttendanceEmployeeController extends Controller
             $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
+            $is_valid = $request->query('is_valid', null);
+
             if (\Auth::user()->type == 'employee') {
 
                 $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
@@ -74,7 +76,14 @@ class AttendanceEmployeeController extends Controller
                 } else {
                     $attendanceEmployee->where('date', date('Y-m-d'));
                 }
-                $attendanceEmployee = $attendanceEmployee->orderby('date', 'desc')->get();
+
+                if ($is_valid != null && $is_valid == '0') {
+                    $attendanceEmployee->whereNull('is_valid');
+                } else if ($is_valid != null && $is_valid == '1') {
+                    $attendanceEmployee->where('is_valid', 1);
+                }
+
+                $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             } else {
                 $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->select('id') : Employee::select('id');
                 if (!empty($request->branch)) {
@@ -96,9 +105,6 @@ class AttendanceEmployeeController extends Controller
                     $start_date = date($year . '-' . $month . '-01');
                     $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
-                    // old date
-                    // $end_date   = date($year . '-' . $month . '-t');
-
                     $attendanceEmployee->whereBetween(
                         'date',
                         [
@@ -106,13 +112,19 @@ class AttendanceEmployeeController extends Controller
                             $end_date,
                         ]
                     );
-                } elseif ($request->type == 'daily' && !empty($request->date)) {
+                } else if ($request->type == 'daily' && !empty($request->date)) {
                     $attendanceEmployee->where('date', $request->date);
                 } else {
                     $attendanceEmployee->where('date', date('Y-m-d'));
                 }
 
-                $attendanceEmployee = $attendanceEmployee->get();
+                if ($is_valid != null && $is_valid == '0') {
+                    $attendanceEmployee->whereNull('is_valid');
+                } else if ($is_valid != null && $is_valid == '1') {
+                    $attendanceEmployee->where('is_valid', true);
+                }
+
+                $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             }
 
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;

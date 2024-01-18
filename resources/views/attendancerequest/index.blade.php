@@ -22,7 +22,7 @@
         <i class="ti ti-calendar"></i>
     </a> --}}
 
-    @can('Create Leave')
+    @can('Create Request Attendance')
         <a href="#" data-url="{{ route('attendancerequest.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Request Attendance') }}"
             data-size="lg" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
@@ -97,7 +97,7 @@
                                                     </a>
                                                 </div>
                                                 @if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1)
-                                                    @can('Edit Leave')
+                                                    @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                                 data-size="lg"
@@ -107,6 +107,16 @@
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
+                                                        </div>
+                                                    @endcan
+                                                    @can('Delete Request Attendance')
+                                                        <div class="action-btn bg-danger ms-2">
+                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                                aria-label="Delete"><i
+                                                                    class="ti ti-trash text-white text-white"></i></a>
+                                                            </form>
                                                         </div>
                                                     @endcan
                                                 @endif
@@ -121,7 +131,7 @@
                                                     </a>
                                                 </div>
                                                 @if ($attendance_request->is_approved != 1)
-                                                    @can('Edit Leave')
+                                                    @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                                                 data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
@@ -132,7 +142,7 @@
                                                             </a>
                                                         </div>
                                                     @endcan
-                                                    @can('Delete Leave')
+                                                    @can('Delete Request Attendance')
                                                         <div class="action-btn bg-danger ms-2">
                                                             {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
@@ -183,7 +193,7 @@
 
                     $('#leave_type_id').empty();
                     $('#leave_type_id').append(
-                        '<option value="">{{ __('Select Leave Type') }}</option>');
+                        '<option value="">{{ __('Select Request Attendance Type') }}</option>');
 
                     $.each(data, function(key, value) {
 

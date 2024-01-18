@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class OvertimeController extends Controller
 {
-    public function index(Request $request) {   
+    public function index(Request $request)
+    {
         $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
         $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
@@ -32,14 +33,14 @@ class OvertimeController extends Controller
             $userId = \Auth::user()->employee->user_id;
             $subordinates = \Auth::user()->employee->subordinatesFlatten();
             $employees = collect();
-            
+
             // Check if employee managing other employee or not
             if ($subordinates->isNotEmpty()) {
                 foreach ($subordinates as $subordinate) {
                     $employees->push($subordinate->id);
                 }
             }
-            $employees->push($emp);            
+            $employees->push($emp);
 
             $overtimes = Overtime::whereIn('employee_id', $employees);
         } else {
@@ -93,22 +94,25 @@ class OvertimeController extends Controller
     public function create()
     {
         $employees = null;
-        $types = Overtime::$Overtimetype;
+        $types = [
+            'hourly' => __('Hourly'),
+            'daily' => __('Daily'),
+        ];;
 
         if (\Auth::user()->type == 'employee') {
             $subordinates = \Auth::user()->employee->subordinatesFlatten();
 
-                // Check if employee managing other employee or not
-                if ($subordinates->isNotEmpty()) {
-                    $employeesId = collect();
-                    foreach ($subordinates as $subordinate) {
-                        $employeesId->push($subordinate->id);
-                    }
-
-                    $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
-                } else {
-                    $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
+            // Check if employee managing other employee or not
+            if ($subordinates->isNotEmpty()) {
+                $employeesId = collect();
+                foreach ($subordinates as $subordinate) {
+                    $employeesId->push($subordinate->id);
                 }
+
+                $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
+            } else {
+                $employees = Employee::where('is_active', 1)->where('id', \Auth::user()->employee->id)->get()->pluck('name', 'id');
+            }
         } else {
             $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get()->pluck('name', 'id') : Employee::where('is_active', 1)->get()->pluck('name', 'id');
         }
@@ -124,19 +128,18 @@ class OvertimeController extends Controller
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Overtime'))
-        {
+        if (\Auth::user()->can('Create Overtime')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'employee_id' => 'required',
-                                   'title' => 'required',
-                                   'date' => 'required',
-                                   'type' => 'required',
-                                   'overtimeDocument' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'employee_id' => 'required',
+                    'title' => 'required',
+                    'date' => 'required',
+                    'type' => 'required',
+                    'overtimeDocument' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -145,7 +148,7 @@ class OvertimeController extends Controller
             // check duplicate date overtime
             $duplicate_overtime = Overtime::where('employee_id', $request->employee_id)->where('date', $request->date)->first();
             if (!empty($duplicate_overtime)) {
-                return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' '. $request->date);
+                return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' ' . $request->date);
             }
 
             $month = date('m', strtotime($request->date));
@@ -163,7 +166,7 @@ class OvertimeController extends Controller
             }, 0);
 
             if (!empty($employee->departments->overtime_limit) && $total_overtime >= $employee->departments->overtime_limit) {
-                return redirect()->back()->with('error', __('Overtime Exceeding The Overtime Limit Of') . ' ' . $employee->departments->overtime_limit . ' ' . __('Hours Per Month') );
+                return redirect()->back()->with('error', __('Overtime Exceeding The Overtime Limit Of') . ' ' . $employee->departments->overtime_limit . ' ' . __('Hours Per Month'));
             }
 
             // determine work day or not
@@ -190,9 +193,7 @@ class OvertimeController extends Controller
             $overtime->save();
 
             return redirect()->back()->with('success', __('Overtime successfully created'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -205,12 +206,13 @@ class OvertimeController extends Controller
     public function edit($overtime)
     {
         $overtime = Overtime::find($overtime);
-        $types = Overtime::$Overtimetype;
+        $types = [
+            'hourly' => __('Hourly'),
+            'daily' => __('Daily'),
+        ];
 
-        if(\Auth::user()->can('Edit Overtime'))
-        {
-            if($overtime->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
-            {
+        if (\Auth::user()->can('Edit Overtime')) {
+            if ($overtime->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $employees = null;
                 if (Auth::user()->type == 'employee') {
                     $subordinates = \Auth::user()->employee->subordinatesFlatten();
@@ -224,20 +226,16 @@ class OvertimeController extends Controller
 
                         $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
                     } else {
-                        $employees = Employee::where('is_active', 1)->where('id',\Auth::user()->employee->id)->get()->pluck('name', 'id');
+                        $employees = Employee::where('is_active', 1)->where('id', \Auth::user()->employee->id)->get()->pluck('name', 'id');
                     }
                 } else {
                     $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
                 return view('overtime.edit', compact('overtime', 'employees', 'types'));
-            }
-            else
-            {
+            } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
-        }
-        else
-        {
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
@@ -245,20 +243,18 @@ class OvertimeController extends Controller
     public function update(Request $request, $overtime)
     {
         $overtime = Overtime::find($overtime);
-        if(\Auth::user()->can('Edit Overtime'))
-        {
-            if($overtime->created_by == \Auth::user()->id || Auth::user()->type != 'employee')
-            {
+        if (\Auth::user()->can('Edit Overtime')) {
+            if ($overtime->created_by == \Auth::user()->id || Auth::user()->type != 'employee') {
                 $validator = \Validator::make(
-                    $request->all(), [
-                                        'employee_id' => 'required',
-                                        'title' => 'required',
-                                        'date' => 'required',
-                                        'type' => 'required',
-                                    ]
+                    $request->all(),
+                    [
+                        'employee_id' => 'required',
+                        'title' => 'required',
+                        'date' => 'required',
+                        'type' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -267,7 +263,7 @@ class OvertimeController extends Controller
                 // check duplicate date overtime
                 $duplicate_overtime = Overtime::where('id', '!=', $overtime->id)->where('employee_id', $request->employee_id)->where('date', $request->date)->first();
                 if (!empty($duplicate_overtime)) {
-                    return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' '. $request->date);
+                    return redirect()->back()->with('error', __('Overtime Already Exist For Date') . ' ' . $request->date);
                 }
 
                 $employee = Employee::find($request->employee_id);
@@ -284,7 +280,7 @@ class OvertimeController extends Controller
                 if ($overtime->document && $request->file('overtimeDocument')) {
                     $filepath_array = explode('/', $overtime->document);
                     $filename = array_pop($filepath_array);
-    
+
                     // Check if the file exists before attempting to delete
                     if (Storage::disk('public')->exists("uploads/overtimes/$filename")) {
                         Storage::disk('public')->delete("uploads/overtimes/$filename");
@@ -303,29 +299,23 @@ class OvertimeController extends Controller
                 $overtime->save();
 
                 return redirect()->back()->with('success', __('Overtime successfully updated.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function destroy(Overtime $overtime)
     {
-        if(\Auth::user()->can('Delete Overtime'))
-        {
-            if($overtime->created_by == \Auth::user()->id || Auth::user()->type != 'employee')
-            {
+        if (\Auth::user()->can('Delete Overtime')) {
+            if ($overtime->created_by == \Auth::user()->id || Auth::user()->type != 'employee') {
 
                 if ($overtime->document) {
                     $filepath_array = explode('/', $overtime->document);
                     $filename = array_pop($filepath_array);
-    
+
                     // Check if the file exists before attempting to delete
                     if (Storage::disk('public')->exists("uploads/overtimes/$filename")) {
                         Storage::disk('public')->delete("uploads/overtimes/$filename");
@@ -335,14 +325,10 @@ class OvertimeController extends Controller
                 $overtime->delete();
 
                 return redirect()->back()->with('success', __('Overtime successfully deleted.'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -377,7 +363,7 @@ class OvertimeController extends Controller
             if ($request->input('picture_out')) {
                 $base64ImageData = $request->input('picture_out');
                 $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
+                $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
                 Storage::disk('public')->put("uploads/overtimes/$overtime->id/attendance/clock_out/$pictureName", $imageData);
                 $picture_path = env('APP_URL') . "/storage/uploads/overtimes/$overtime->id/attendance/clock_out/$pictureName";
             }
@@ -407,7 +393,7 @@ class OvertimeController extends Controller
             if ($request->input('picture')) {
                 $base64ImageData = $request->input('picture');
                 $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
+                $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
                 Storage::disk('public')->put("uploads/overtimes/$overtime->id/attendance/clock_in/$pictureName", $imageData);
                 $picture_path = env('APP_URL') . "/storage/uploads/overtimes/$overtime->id/attendance/clock_in/$pictureName";
             }

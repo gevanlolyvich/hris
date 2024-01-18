@@ -749,6 +749,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('designation.index') }}">{{ __('Designation') }}</a>
                                 </li>
                             @endcan
+                            @if (Auth::user()->type=='company' || (Auth::user()->type=='hr' && !(Auth::user()->branch_id)))
+                                <li class="dash-item {{ request()->is('employeetype*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('employeetype.index') }}">{{ __('Employee Type') }}</a>
+                                </li>
+                            @endif
                             @can('Manage Leave Type')
                                 <li class="dash-item {{ request()->is('leavetype*') ? 'active' : '' }}">
                                     <a class="dash-link"
