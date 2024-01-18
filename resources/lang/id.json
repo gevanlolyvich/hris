@@ -24,6 +24,7 @@
   "Edit Shift" :"Rubah Shift",
   "Select Shift*" :"Pilih Shift*",
   "Shift Name" :"Nama Shift",
+  "Shift Type" :"Tipe Shift",
   "Work Days":"Hari Kerja",
   "Days":"Hari",
   "Work":"Kerja",
@@ -1788,10 +1789,19 @@
   "Overtime Attendance Successfully Added": "Kehadiran Lembur Berhasil Ditambahkan",
   "Select Priority": "Pilih Prioritas",
   "Employee Type": "Tipe Karyawan",
+  "Manage Employee Type": "Kelola Tipe Karyawan",
   "Select Employee Type": "Pilih Tipe Karyawan",
   "Valid Attendance": "Kehadiran Sah",
   "Invalid Attendance": "Kehadiran Tidak Sah",
   "View Document": "Lihat Dokumen",
   "Old File : ": "File Lama : ",
-  "Hourly":"Perjam"
+  "Hourly":"Perjam",
+  "Create Employee Type":"Buat Tipe Karyawan Baru",
+  "Fixed":"Tetap",
+  "Flexible":"Fleksibel",
+  "Employee Type successfully created":"Tipe Karyawan berhasil dibuat",
+  "Employee Type successfully updated":"Tipe Karyawan berhasil diperbarui",
+  "Employee Type successfully deleted":"Tipe Karyawan berhasil dihapus",
+  "Select Shift Type":"Pilih Tipe Shift"
+
 }

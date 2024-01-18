@@ -86,6 +86,7 @@ use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
+use App\Http\Controllers\EmployeeTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -300,6 +301,25 @@ Route::resource('designation', DesignationController::class)->middleware(
         'XSS',
     ]
 );
+Route::resource('employeetype', EmployeeTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('employeetype/{id}/edit', [EmployeeTypeController::class, 'edit'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('employeetype/{id}/destroy', [EmployeeTypeController::class, 'destroy'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 
 Route::resource('document', DocumentController::class)->middleware(
     [
