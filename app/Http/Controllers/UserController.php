@@ -224,6 +224,7 @@ class UserController extends Controller
         ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
         $documents        = Document::get();
+        // return $documents;
 
         return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents'));
     }
@@ -420,14 +421,13 @@ class UserController extends Controller
                 }
 
                 $form = [
-                    'employee_id' => $employee['employee_id'],
+                    'employee_id' => $employee['id'],
                     'document_id' => $key,
                     'document_value' => $fileNameToStore,
                     'created_by' => \Auth::user()->creatorId(),
                 ];
                 $employee_document = EmployeeDocument::create($form);
                 $employee_document->save();
-                Log::info($form);
             }
         }
         // return $employee;

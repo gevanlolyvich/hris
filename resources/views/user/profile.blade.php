@@ -453,7 +453,8 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 {{ Form::model($userDetail, ['route' => ['update.documents', $userDetail->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
 
                                 @php
-                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value', __('document_id'));
+                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value','document_id');
+                                    // echo $employeedoc;
                                 @endphp
                                 @foreach ($documents as $key => $document)
                                 <div class="row">
@@ -498,17 +499,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 {{-- <img id="{{'blah'.$key}}" src=""  width="75%" /> --}}
 
                                             </div>
-
-                                            
-                                            {{-- @foreach ($documents as $key => $document)
-                                                <div class="col-md-12">
-                                                    <div class="info">
-                                                        <strong>{{ $document->name }}</strong>
-                                                        <span><a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
-                                                                target="_blank">{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}</a></span>
-                                                    </div>
-                                                </div>
-                                            @endforeach --}}
                                         </div>
 
                                     </div>

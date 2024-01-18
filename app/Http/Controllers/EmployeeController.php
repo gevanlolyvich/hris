@@ -213,7 +213,7 @@ class EmployeeController extends Controller
                     }
                     $employee_document = EmployeeDocument::create(
                         [
-                            'employee_id' => $employee['employee_id'],
+                            'employee_id' => $employee['id'],
                             'document_id' => $key,
                             'document_value' => $fileNameToStore,
                             'created_by' => \Auth::user()->creatorId(),
@@ -362,7 +362,7 @@ class EmployeeController extends Controller
                             $employee_document->save();
                         } else {
                             $employee_document                 = new EmployeeDocument();
-                            $employee_document->employee_id    = $employee->employee_id;
+                            $employee_document->employee_id    = $employee->id;
                             $employee_document->personel_id    = $employee->personel_id;
                             $employee_document->document_id    = $key;
                             $employee_document->document_value = $fileNameToStore;
