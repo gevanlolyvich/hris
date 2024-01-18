@@ -150,7 +150,7 @@
                     {{-- Show form for attendance type and notes --}}                      
                     {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
                     {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
-                    @if ($settings['late_tolerance'] == 'Required')
+                    @if ($settings['photo_on_clock'] == 'Required')
                         <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                     @endif
                     <div class="col-md-6 col-lg-12 text-center mx-auto">
@@ -261,14 +261,14 @@
                     <hr>
                     <div class="text-center">
                         @if ($overtime->type != 'daily')
-                            <button class="btn btn-primary btn-xl clock-input mx-3" data-bs-toggle="tooltip"
+                            <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3" data-bs-toggle="tooltip"
                                 data-overtime-id="{{ $overtime->id }}"
                                 data-clock-in="{{ $overtime->clock_in }}"
                                 data-bs-original-title="{{ __('Clock In / Clock Out') }}">
                                 <i class="fa fa-solid fa-clock"></i>
                             </button>
                         @endif
-                        <button class="btn btn-primary btn-xxl report-input" data-bs-toggle="tooltip"
+                        <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input" data-bs-toggle="tooltip"
                             data-overtime-id="{{ $overtime->id }}"
                             data-document="{{ $overtime->report_document }}"
                             data-note="{{ $overtime->report_note }}"

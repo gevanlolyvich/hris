@@ -805,14 +805,14 @@
                                 <td>
                                     @if ($overtime->employee_id == \Auth::user()?->employee?->id)
                                         @if ($overtime->type != 'daily')
-                                            <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
+                                            <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-sm clock-input" data-bs-toggle="tooltip"
                                                 data-overtime-id="{{ $overtime->id }}"
                                                 data-clock-in="{{ $overtime->clock_in }}"
                                                 data-bs-original-title="{{ __('Clock In / Clock Out') }}">
                                                 <i class="fa fa-solid fa-clock"></i>
                                             </button>
                                         @endif
-                                        <button class="btn btn-primary btn-sm report-input" data-bs-toggle="tooltip"
+                                        <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-sm report-input" data-bs-toggle="tooltip"
                                             data-overtime-id="{{ $overtime->id }}"
                                             data-document="{{ $overtime->report_document }}"
                                             data-note="{{ $overtime->report_note }}"
