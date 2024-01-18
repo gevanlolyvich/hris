@@ -715,6 +715,7 @@
     <script src="{{ asset('assets/js/plugins/main.min.js') }}"></script>
     <script>
         async function getLocation() {
+          let locationIcon = document.getElementById('location-permission');
           return new Promise((resolve, reject) => {
             if ("geolocation" in navigator) {
               navigator.geolocation.getCurrentPosition(
@@ -722,18 +723,22 @@
                   const latitude = position.coords.latitude;
                   const longitude = position.coords.longitude;
                   const accuracy = position.coords.accuracy;
+                  locationIcon.style.color = "Green";
                   resolve({ latitude, longitude, accuracy });
                 },
                 (error) => {
                   if (error.code === 1) {
+                    locationIcon.style.color = "Red";
                     reject(new Error("User denied Geolocation"));
                   } else {
+                    locationIcon.style.color = "Red";
                     reject(error);
                   }
                 }
               );
             } else {
-              reject(new Error("Geolocation is not supported by your browser."));
+                locationIcon.style.color = "Red";
+                reject(new Error("Geolocation is not supported by your browser."));
             }
           });
         }
@@ -970,6 +975,7 @@
             }
     
             function startup() {
+                let cameraIcon = document.getElementById('camera-permission');
                 video = document.getElementById('video');
                 canvas = document.getElementById('canvas');
                 photo = document.getElementById('photo');
@@ -989,8 +995,10 @@
                         closecamera.style.display = '';
                         video.srcObject = stream;
                         video.play();
+                        cameraIcon.style.color = 'Green';
                     })
                     .catch(function(err) {
+                        cameraIcon.style.color = 'Red';
                         alert("Please Allow Camera Access To Take Picture For Clock In / Out");
                         console.log("An error occurred: " + err);
                     });
