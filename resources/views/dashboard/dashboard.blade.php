@@ -136,10 +136,10 @@
                     </p>
                     {{-- Condition for showing employee already clock in or not --}}
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
                     @elseif (empty($employeeAttendance))
                     @else
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
                     @endif
                 @else
                     <h6 class="text-muted pb-0-5">

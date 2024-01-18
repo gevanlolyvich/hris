@@ -1794,5 +1794,6 @@
     "Invalid Attendance": "Invalid Attendance",
     "View Document": "View Document",
     "Old File : ": "Old File : ",
-    "Hourly":"Hourly"
+    "Hourly":"Hourly",
+    "Already Clock In At": "Already Clock In At"
 }
