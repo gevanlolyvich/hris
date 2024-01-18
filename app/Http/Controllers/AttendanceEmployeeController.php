@@ -83,7 +83,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->where('is_valid', 1);
                 }
 
-                $attendanceEmployee = $attendanceEmployee->orderby('date', 'desc')->get();
+                $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             } else {
                 $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->select('id') : Employee::select('id');
                 if (!empty($request->branch)) {
@@ -124,7 +124,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->where('is_valid', true);
                 }
 
-                $attendanceEmployee = $attendanceEmployee->orderby('date', 'desc')->get();
+                $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             }
 
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
