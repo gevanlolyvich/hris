@@ -1803,6 +1803,7 @@
     "Employee Type successfully created":"Employee Type successfully created",
     "Employee Type successfully updated":"Employee Type successfully updated",
     "Employee Type successfully deleted":"Employee Type successfully deleted",
-    "Select Type":"Select Type"
+    "Select Type":"Select Type",
+    "Already Clock In At": "Already Clock In At"
 
 }

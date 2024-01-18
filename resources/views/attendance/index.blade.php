@@ -42,10 +42,12 @@
     <script>
         $(document).ready(function() {
             var map = null;
-            var imageSrc = null
+            var imageSrc = null;
+            var notes = null;
 
             $('body').on('click', '.map-link', function() {
                 var coordinates = $(this).data('coordinates').split(', ');
+                notes = $(this).data('note');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -64,6 +66,13 @@
             
                 // Initialize the map after the modal is fully shown
                 $('#openStreetMapModal').on('shown.bs.modal', function () {
+                    if (notes) {
+                        document.getElementById('modal-note').style.display = '';
+                        document.getElementById('note-value').value = notes;
+                    } else {
+                        document.getElementById('modal-note').style.display = 'none';
+                        document.getElementById('note-value').value = '';
+                    }
                     // If a map already exists, remove it
                     if (map !== null) {
                         map.remove();
@@ -132,11 +141,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding-top: 0.35rem">
+                <div style="display: none;" id="modal-note">
+                    <div class="text-center mx-auto">
+                        <strong>{{__('Notes')}}</strong>
+                        <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                    </div>
+                </div>
                 <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
                     <div class="text-center mx-auto">
                         <strong>{{__('Clock In / Out Image Capture')}}</strong>
                         <br>
-                        <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-2 mt-1">
+                        <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-3 mt-1">
                         <br>
                     </div>
                 </div>
@@ -249,7 +264,7 @@
                                     <!-- Modify Clock In and Clock Out columns in your table -->
                                     <td>
                                         @if ($attendance->coord_in)
-                                            <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}">
+                                            <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}" data-note="{{ $attendance->note }}">
                                                 <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                             </a>
                                         @else

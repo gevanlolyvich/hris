@@ -1136,7 +1136,7 @@
   "NOC" : "NOC",
   "NOC successfully saved." : "NOC berhasil disimpan.",
   "Not Required" : "Tidak Diperlukan",
-  "Note" : "Catatan:",
+  "Note" : "Catatan",
   "Note successfully deleted!" : "Catatan berhasil dihapus!",
   "Note successfully saved." : "Catatan berhasil disimpan.",
   "Note: \"-1\" for Unlimited" : "Catatan: \"-1\" untuk Unlimited",
@@ -1144,7 +1144,7 @@
   "Note: Add currency code as per three-letter ISO code." : "Catatan: Tambahkan kode mata uang sesuai dengan kode ISO tiga huruf.",
   "Note: Discount in Percentage" : "Catatan: Diskon dalam Persentase",
   "Note: This detail will use for make checkout of plan." : "Catatan: Detail ini akan digunakan untuk membuat checkout dari rencana.",
-  "Notes" : "Catatan:",
+  "Notes" : "Catatan",
   "Notice Date" : "Pemberitahuan Tanggal",
   "Notifications" : "Pemberitahuan",
   "Number of days" : "Jumlah hari",
@@ -1802,6 +1802,7 @@
   "Employee Type successfully created":"Tipe Karyawan berhasil dibuat",
   "Employee Type successfully updated":"Tipe Karyawan berhasil diperbarui",
   "Employee Type successfully deleted":"Tipe Karyawan berhasil dihapus",
-  "Select Shift Type":"Pilih Tipe Shift"
+  "Select Shift Type":"Pilih Tipe Shift",
+  "Already Clock In At": "Sudah Absen Masuk Pada"
 
 }
