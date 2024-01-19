@@ -250,7 +250,7 @@ class HomeController extends Controller
 
                 $announcements = $announcements->sortByDesc('start_date');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount', 'settings'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {
