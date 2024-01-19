@@ -20,7 +20,7 @@ class Employee extends Model
         'shift_type_id',
         'managed_by',
         'name',
-        'type',
+        'type_id',
         'dob',
         'gender',
         'phone',
