@@ -135,6 +135,9 @@ class Utility extends Model
             "google_clender_id" => "",
             "google_calender_json_file" => "",
             "is_enabled" => "on",
+            "late_tolerance" => "",
+            "photo_on_clock" => "",
+            "map_tile_url" => "",
         ];
 
         foreach ($data as $row) {
