@@ -109,6 +109,7 @@ class OvertimeController extends Controller
                     $employeesId->push($subordinate->id);
                 }
 
+                $employeesId->push(\Auth::user()->employee->id);
                 $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
             } else {
                 $employees = Employee::where('is_active', 1)->where('id', \Auth::user()->employee->id)->get()->pluck('name', 'id');
