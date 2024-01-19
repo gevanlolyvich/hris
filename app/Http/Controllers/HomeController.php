@@ -49,9 +49,8 @@ class HomeController extends Controller
             $user = Auth::user();
             // Get today's date
             $today = Carbon::today()->toDateString();
+            $settings       = Utility::settings();
             if ($user->type == 'employee') {
-                $settings       = Utility::settings();
-
                 $emp            = Employee::where('user_id', $user->id)->first();
 
                 $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
