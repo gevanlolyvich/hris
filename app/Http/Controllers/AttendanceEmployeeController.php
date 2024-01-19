@@ -671,7 +671,7 @@ class AttendanceEmployeeController extends Controller
                 'latitude' => 'required',
                 'longitude' => 'required',
                 'accuracy' => 'required',
-                'picture' => $settings['late_tolerance'] == 'Required' ? 'required' : 'nullable',
+                'picture' => $settings['photo_on_clock'] == 'Required' ? 'required' : 'nullable',
             ]
         );
         if ($validator->fails()) {
