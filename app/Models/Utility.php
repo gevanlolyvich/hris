@@ -52,14 +52,14 @@ class Utility extends Model
 
     public static function settings()
     {
-        $data = DB::table('settings');
-        if (\Auth::check()) {
-            $userId = \Auth::user()->creatorId();
-            $data   = $data->where('created_by', '=', $userId);
-        } else {
-            $data = $data->where('created_by', '=', 1);
-        }
-        $data = $data->get();
+        $data = DB::table('settings')->get();
+        // if (\Auth::check()) {
+        //     $userId = \Auth::user()->creatorId();
+        //     $data   = $data->where('created_by', '=', $userId);
+        // } else {
+        //     $data = $data->where('created_by', '=', 1);
+        // }
+        // $data = $data->get();
 
 
 
