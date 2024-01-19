@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Imports\EmployeesImport;
 use App\Exports\EmployeesExport;
+use App\Models\EmployeeType;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\NOC;
 use App\Models\Termination;
@@ -81,7 +82,8 @@ class EmployeeController extends Controller
                 'Widowed' => __('Widowed'),
             ];
 
-            $employeeTypes = Employee::$employeeTypes;
+            // $employeeTypes = Employee::$employeeTypes;
+            $employeeTypes = EmployeeType::get()->pluck('name', 'id');
 
             return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses', 'employeeTypes'));
         } else {
@@ -153,7 +155,7 @@ class EmployeeController extends Controller
                     'shift_type_id' => $request['shift_type_id'],
                     'managed_by' => $request['managed_by'],
                     'name' => $request['name'],
-                    'type' => $request['type'],
+                    'type_id' => $request['type'],
                     'dob' => $request['dob'],
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
@@ -277,7 +279,8 @@ class EmployeeController extends Controller
                 'Friend'  => __('Friend'),
             ];
 
-            $employeeTypes = Employee::$employeeTypes;
+            // $employeeTypes = Employee::$employeeTypes;
+            $employeeTypes = EmployeeType::get()->pluck('name', 'id');
             // return $employee->bank_id;
 
             // return $employee;

@@ -239,6 +239,7 @@
                     <thead>
                         <tr>
                             <th>{{ __('Employee') }}</th>
+                            <th>{{ __('Branch') }}</th>
                             <th>{{ __('Shift') }}</th>
                             <th>{{ __('Date') }}</th>
                             <th>{{ __('Status') }}</th>
@@ -258,6 +259,7 @@
                             @if ((session('employee') && session('employee')->name == (!empty($attendance->employee) ? $attendance->employee->name : '')) || empty(session('employee')))
                                 <tr>
                                     <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
+                                    <td>{{ !empty($attendance->employee) ? $attendance->employee?->branch?->name : '' }}</td>
                                     <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                     <td>{{ $attendance->status }}</td>

@@ -217,7 +217,6 @@
             // Camera Notification
             let cameraIcon = document.getElementById('camera-permission');
             if (navigator.permissions) {
-                console.log(navigator.permissions);
                 navigator.permissions.query({ name: 'camera' })
                     .then(permissionStatus => {
                         if (permissionStatus.state === 'granted') {
