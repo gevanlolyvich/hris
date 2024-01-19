@@ -109,6 +109,7 @@ class OvertimeController extends Controller
                     $employeesId->push($subordinate->id);
                 }
 
+                $employeesId->push(\Auth::user()->employee->id);
                 $employees = Employee::where('is_active', 1)->whereIn('id', $employeesId)->get()->pluck('name', 'id');
             } else {
                 $employees = Employee::where('is_active', 1)->where('id', \Auth::user()->employee->id)->get()->pluck('name', 'id');
@@ -437,8 +438,14 @@ class OvertimeController extends Controller
                 $document_path = env('APP_URL') . '/storage/' . $path;
             }
 
-            $overtime->report_note     = $request->note;
-            $overtime->report_document = $document_path;
+            if (!empty($request->start_time)) {
+                $overtime->clock_in     = date('Y-m-d H:i:s', strtotime("$overtime->date $request->start_time"));    
+            }
+            if (!empty($request->end_time)) {
+                $overtime->clock_out    = date('Y-m-d H:i:s', strtotime("$overtime->date $request->end_time"));    
+            }
+            $overtime->report_note      = $request->note;
+            $overtime->report_document  = $document_path;
             $overtime->save();
             return redirect()->back()->with('success', __('Overtime Report Successfully Added'));
         } else {

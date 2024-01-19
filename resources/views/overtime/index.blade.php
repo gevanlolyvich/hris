@@ -105,6 +105,7 @@
           let coordOut = null;
           let pictureIn = null;
           let pictureOut = null;
+          let overtimeDate = null;
 
           $('body').on('click', '.clock-input', async function() {
               try {
@@ -173,6 +174,10 @@
               // Set the modal's data attributes
               // Get the values from the clicked button
               let overtimeId = $(this).data('overtime-id');
+              overtimeDate = $(this).data('overtime-date');
+              clockIn = $(this).data('clock-in');
+              clockOut = $(this).data('clock-out');
+
               document.getElementById('overtimeIdReportInput').value = overtimeId;
 
               let documentFile = $(this).data('document');
@@ -298,6 +303,14 @@
               })
           })
 
+          $('#reportInputModal').on('shown.bs.modal', function () {
+              if (new Date(overtimeDate) < new Date() && (!clockIn || !clockOut)) {
+                  document.getElementById('time-input').style.display = '';
+              } else {
+                  document.getElementById('time-input').style.display = 'none';
+              }
+          });
+          
           $('#reportInputModal').on('hidden.bs.modal', function () {
               let file = document.getElementById('uploadFile');
               if (file) {
@@ -592,6 +605,16 @@
                           </a>
                       </div>
                   </div>
+                  <div class="row" id="time-input" style="display: none;">
+                    <div class="form-group col-6">
+                        {{ Form::label('start_time', __('Start Time'), ['class' => 'col-form-label']) }}
+                        {{ Form::time('start_time', null, ['class' => 'form-control timepicker_format']) }}
+                    </div>
+                    <div class="form-group col-6">
+                        {{ Form::label('end_time', __('End Time'), ['class' => 'col-form-label']) }}
+                        {{ Form::time('end_time', null, ['class' => 'form-control timepicker_format']) }}
+                    </div>
+                </div>
                   <div class="form-group">
                       {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
                       {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
@@ -805,17 +828,20 @@
                                 <td>
                                     @if ($overtime->employee_id == \Auth::user()?->employee?->id)
                                         @if ($overtime->type != 'daily')
-                                            <button class="btn btn-primary btn-sm clock-input" data-bs-toggle="tooltip"
+                                            <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-sm clock-input" data-bs-toggle="tooltip"
                                                 data-overtime-id="{{ $overtime->id }}"
                                                 data-clock-in="{{ $overtime->clock_in }}"
-                                                data-bs-original-title="{{ __('Clock In / Clock Out') }}">
+                                                data-bs-original-title="{{ __('Clock In / Clock Out') }}" @if (strtotime(date('Y-m-d')) > strtotime($overtime->date)) disabled @endif>
                                                 <i class="fa fa-solid fa-clock"></i>
                                             </button>
                                         @endif
-                                        <button class="btn btn-primary btn-sm report-input" data-bs-toggle="tooltip"
+                                        <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-sm report-input" data-bs-toggle="tooltip"
                                             data-overtime-id="{{ $overtime->id }}"
+                                            data-overtime-date="{{ $overtime->date }}"
                                             data-document="{{ $overtime->report_document }}"
                                             data-note="{{ $overtime->report_note }}"
+                                            data-clock-in="{{ $overtime->clock_in }}"
+                                            data-clock-out="{{ $overtime->clock_out }}"
                                             data-bs-original-title="{{ __('Report Document') }}">
                                             <i class="fa fa-solid fa-file-import"></i>
                                         </button>
