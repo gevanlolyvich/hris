@@ -150,7 +150,7 @@
                     {{-- Show form for attendance type and notes --}}                      
                     {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
                     {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
-                    @if ($settings?->photo_on_clock == 'Required')
+                    @if ($settings['photo_on_clock'] == 'Required')
                         <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                     @endif
                     <div class="col-md-6 col-lg-12 text-center mx-auto">
