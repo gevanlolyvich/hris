@@ -31,6 +31,45 @@
 @endsection
 
 @section('content')
+    <div class="col-sm-12">
+        <div class=" mt-2 " id="multiCollapseExample1">
+            <div class="card">
+                <div class="card-body">
+                    {{ Form::open(array('route' => array('employee.index'),'method'=>'get','id'=>'employeeattendancehistory_filter')) }}
+                    <div class="row align-items-center justify-content-end">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}
+                                    {{ Form::select('branch_id', $branch, isset($_GET['branch_id'])?$_GET['branch_id']:null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                </div>
+                                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+                                    <div class="department_div btn-box">
+                                        {{ Form::select('department_id', !empty($department) ? $department : [], isset($_GET['department_id'])?$_GET['department_id']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto mt-4">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                                    </a>
+                                    <a href="{{route('employee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{ Form::close() }}
+            </div>
+        </div>
+    </div>
+
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header card-body table-border-style">
@@ -116,7 +155,6 @@
         </div>
     </div>
 
-
     {{-- <div class="row"> --}}
         {{-- <div class="col-12">
             <div class="card">
@@ -195,3 +233,44 @@
         </div>
     </div> --}}
 @endsection
+
+@push('script-page')
+<script>
+    function getDepartment(branch_id) {
+        $.ajax({
+            url: '{{ route('department.employee.json') }}',
+            type: 'POST',
+            data: {
+                "branch_id": branch_id,
+                "_token": "{{ csrf_token() }}",
+            },
+            success: function(data) {
+                $('.designation_id').empty();
+                $('.department_id').empty();
+                var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
+                                        placeholder="Select Department" >
+                                        </select>`;
+                $('.department_div').html(emp_selct);
+
+                $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                $.each(data, function(key, value) {
+                    $('.department_id').append('<option value="' + key + '">' + value +
+                        '</option>');
+                });
+                new Choices('#choices-multiple', {
+                    removeItemButton: true,
+                });
+
+
+            }
+        });
+    }
+
+    $(document).on('change', 'select[name=branch_id]', function() {
+        var branch_id = $(this).val();
+        // console.log({branch_id})
+        // $('.designation_id').empty();
+        getDepartment(branch_id);
+    });
+</script>
+@endpush

@@ -39,17 +39,29 @@ class EmployeeController extends Controller
      *
     //  * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-
         if (\Auth::user()->can('Manage Employee')) {
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = collect();
+
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get();
+                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc');
             } else {
-                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
+                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
             }
 
-            return view('employee.index', compact('employees'));
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $employees      = $employees->where('branch_id', $request->branch_id);
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $employees      = $employees->where('department_id', $request->department_id);
+            }
+            $employees      = $employees->get();
+
+            return view('employee.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
