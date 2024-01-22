@@ -132,19 +132,12 @@
                                     {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
                                 </div>
                                 <div class="form-group col-md-12">
-                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
-                                    {{-- {{ Form::select('company_doj', null, ['class' => 'form-control ', 'required' => 'required', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }} --}}
-                                </div>
-
-                                <div class="form-group col-md-12">
                                     {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
                                     <div class="form-icon-user">
                                         {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
                                     </div>
                                 </div>
-
-
+                                
                                 <div class="form-group col-md-12">
                                     {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
 
@@ -183,8 +176,24 @@
                                         </div>
                                     </div>
                                 </div>
+                                {{-- <div class="form-group col-md-12">
+                                    {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                    {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
+                                </div> --}}
                                 
-                                
+                                <div class="form-group col-md-12">
+                                    {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}
+
+                                    <div class="form-icon-user">
+                                        <div class="shift_type_id_div">
+                                            <select class="form-control select2  shift_type_id" name="shift_type_id"
+                                                 placeholder="Select Shift">
+                                                 <option value="" disabled selected>{{ __('Select Shift') }}</option>
+                                                 
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -294,34 +303,6 @@
             // console.log({department_id})
             getDesignation(department_id);
         });
-
-        // function getDesignation(did) {
-
-        //     $.ajax({
-        //         url: '{{ route('employee.json') }}',
-        //         type: 'POST',
-        //         data: {
-        //             "department_id": did,
-        //             "_token": "{{ csrf_token() }}",
-        //         },
-        //         success: function(data) {
-        //             console.log(data);
-        //             $('.designation_id').empty();
-        //             var emp_selct = ` <select class="form-control select2  designation_id" name="designation_id"
-        //                                     placeholder="Select Designation" >
-        //                                     </select>`;
-        //             $('.designation_div').html(emp_selct);
-
-        //             $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
-        //             $.each(data, function(key, value) {
-        //                 $('.designation_id').append('<option value="' + key + '">' + value +
-        //                     '</option>');
-        //             });
-
-
-        //         }
-        //     });
-        // }
         
         $(document).on('change', 'select[name=branch_id]', function() {
             var branch_id = $(this).val();
@@ -329,6 +310,7 @@
             // $('.designation_id').empty();
             getDepartment(branch_id);
             getEmployeeBranch(branch_id);
+            getBranchShift(branch_id);
         });
 
         function getDepartment(branch_id) {
@@ -386,6 +368,38 @@
                             '</option>');
                     });
                     new Choices('#choices-multiple2', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+        
+        function getBranchShift(branch_id) {
+            // console.log({branch_id})
+            console.log({loc:'branchshift'})
+            $.ajax({
+                url: '{{ route('branch.shift.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    // console.log(data);
+                    $('.shift_type_id').empty();
+                    var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
+                                            placeholder={{ __('Select Shift') }} >
+                                            </select>`;
+                    $('.shift_type_id_div').html(emp_selct);
+
+                    $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.shift_type_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple5', {
                         removeItemButton: true,
                     });
 

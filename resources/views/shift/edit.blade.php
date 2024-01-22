@@ -7,6 +7,12 @@
                 {{ Form::text('shift_name', $shift_type->name, ['class' => 'form-control' ,'required' => 'required']) }}
             </div>
         @endif
+        <div class="form-group col-md-12">
+            {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
+            <div class="form-icon-user">
+                {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table" id="pc-dt-simple">
                 <thead>
