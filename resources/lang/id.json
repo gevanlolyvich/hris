@@ -1803,6 +1803,6 @@
   "Employee Type successfully updated":"Tipe Karyawan berhasil diperbarui",
   "Employee Type successfully deleted":"Tipe Karyawan berhasil dihapus",
   "Select Shift Type":"Pilih Tipe Shift",
-  "Already Clock In At": "Sudah Absen Masuk Pada"
-
+  "Already Clock In At": "Sudah Absen Masuk Pada",
+  "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada"
 }

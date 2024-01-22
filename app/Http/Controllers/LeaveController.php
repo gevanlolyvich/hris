@@ -55,7 +55,6 @@ class LeaveController extends Controller
             if (!empty($request->branch_id)) {
                 $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
                 $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
-                // $employees      = $employees->where('branch_id', $request->branch_id);
             }
             if (!empty($request->department_id)) {
                 $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;

@@ -1804,6 +1804,6 @@
     "Employee Type successfully updated":"Employee Type successfully updated",
     "Employee Type successfully deleted":"Employee Type successfully deleted",
     "Select Type":"Select Type",
-    "Already Clock In At": "Already Clock In At"
-
+    "Already Clock In At": "Already Clock In At",
+    "Duplicate Request Attendance": "Duplicate Request Attendance"
 }
