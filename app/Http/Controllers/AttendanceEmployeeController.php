@@ -247,8 +247,9 @@ class AttendanceEmployeeController extends Controller
         }
     }
 
-    public function update(Request $request, $id)   
+    public function update(Request $request, $id)
     {
+        // return $request;
         // Retrieve the latitude and longitude from the request
 
         $picture_path = null;
@@ -258,9 +259,9 @@ class AttendanceEmployeeController extends Controller
         if ($request->input('picture_out')) {
             $base64ImageData = $request->input('picture_out');
             $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-            $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee->name).'.png';
-            Storage::disk('public')->put('uploads/attendance/'.$pictureName, $imageData);
-            $picture_path = env('APP_URL') . '/storage/uploads/attendance/'. $pictureName;
+            $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
+            Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
         } else {
             return redirect()->back()->with('error', __('The picture field is required.'));
         }
@@ -272,7 +273,10 @@ class AttendanceEmployeeController extends Controller
         $coord_out = "$latitude, $longitude, $accuracy";
 
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
-        $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
+        $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)
+            ->where('date', date('Y-m-d'))
+            ->where('shift_type_id', $request->shift_type_id)
+            ->first();
 
         $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
             ->where('days', date('l'))
@@ -378,7 +382,7 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with([
@@ -454,7 +458,7 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with([
@@ -480,7 +484,8 @@ class AttendanceEmployeeController extends Controller
                     return redirect()->route('attendanceemployee.index')->with('success', __('Employee attendance successfully updated.'));
                 }
             }
-        } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
+            // } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
+        } elseif ($todayAttendance || ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
             if ($shift_times->is_working) {
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
@@ -538,7 +543,7 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with([
@@ -615,7 +620,7 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
 
                     return redirect()->route('attendanceemployee.index')->with([
@@ -642,7 +647,7 @@ class AttendanceEmployeeController extends Controller
             }
         } elseif ((!$todayAttendance && !$yesterday_cross_day) || (!$yesterdayAttendance && $yesterday_cross_day)) {
             return redirect()->back()->with('error', __('Employee are not allow to clock out with out clock in first'));
-        } else  {
+        } else {
             return redirect()->back()->with('error', __('Clock Out Data Invalid'));
         }
     }
@@ -662,6 +667,7 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
+        // return $request;
         $settings = Utility::settings();
 
         $validator = \Validator::make(
@@ -688,22 +694,22 @@ class AttendanceEmployeeController extends Controller
             if ($request->input('picture')) {
                 $base64ImageData = $request->input('picture');
                 $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                $pictureName = 'attendance_'.time().'_'.date('Y-m-d').'_'.preg_replace('/\s+/', '', $employee?->name).'.png';
-                Storage::disk('public')->put('uploads/attendance/'.$pictureName, $imageData);
-                $picture_path = env('APP_URL') . '/storage/uploads/attendance/'. $pictureName;
+                $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee?->name) . '.png';
+                Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+                $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
             }
-    
+
             // Retrieve the latitude and longitude from the request
             $latitude   = $request->input('latitude');
             $longitude  = $request->input('longitude');
             $accuracy   = $request->input('accuracy');
             $coord_in   = "$latitude, $longitude, $accuracy";
             $coord_out  = "$latitude, $longitude, $accuracy";
-    
+
             // Retrieve the additional information
             $note               = $request->input('notes');
             $attendance_type    = $request->input('attendance_type');
-    
+
             if ($settings['ip_restrict'] == 'on') {
                 $userIp = request()->ip();
                 $ip     = IpRestrict::where('created_by', \Auth::user()->creatorId())->whereIn('ip', [$userIp])->first();
@@ -711,54 +717,67 @@ class AttendanceEmployeeController extends Controller
                     return redirect()->back()->with('error', __('this ip is not allowed to clock in & clock out.'));
                 }
             }
-    
-            $is_valid = null;
+
+
+
+
+            $is_valid_shift     = $employee->shift_type_id == $request->shift_type_id ? true : null;
+            $is_valid_location  = null;
             if ($attendance_type == '1') {
                 // check employee clock in location with branch to validate attendance
-    
+
                 $branch_data = Branch::where('id', \Auth::user()->employee->branch_id)->first();
                 $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
-    
-                $is_valid = ($accuracy + (float)$branch_data['tolerance']) >= $distance ? true : null;
+
+                $is_valid_location = ($accuracy + (float)$branch_data['tolerance']) >= $distance ? true : null;
             } else if ($attendance_type == '3' && !empty($employee->coordinate)) {
                 $home_coordinate = explode(', ', $employee->coordinate);
                 $home_latitude = $home_coordinate[0];
                 $home_longitude = $home_coordinate[1];
                 $home_tolerance = $home_coordinate[2];
                 $distance = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$home_latitude, (float)$home_longitude);
-    
-                $is_valid = ($accuracy + (float)$home_tolerance) >= $distance ? true : null;
+
+                $is_valid_location = ($accuracy + (float)$home_tolerance) >= $distance ? true : null;
             }
-    
+
+            $is_valid           = $is_valid_shift && $is_valid_location ? true : null;
+
             $date = date("Y-m-d");
             $time = date("H:i:s");
-    
+
             $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
-            $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d'))->first();
+            $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)
+                ->where('date', date('Y-m-d'))
+                ->where('shift_type_id', $request->shift_type_id)
+                ->first();
+            if ($todayAttendance) {
+                return redirect()->back()->with('error', __('Today you have clocked in and clocked out.'));
+            }
+
             $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
                 ->where('days', date('l'))
                 ->first();
             $cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
-    
+
             // calculate default clock out for cross day shift
             $clockoutSeconds              = strtotime($shift_times->end_time) - strtotime($date) - 3600;
             $hours                        = floor($clockoutSeconds / 3600);
             $mins                         = floor($clockoutSeconds / 60 % 60);
             $secs                         = floor($clockoutSeconds % 60);
             $default_clock_out_cross_day  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-    
+
             // Check clock in if today is shift in cross day mode
             if ($shift_times->is_working) {
-                if (empty($todayAttendance) ) {
-    
+                if (empty($todayAttendance)) {
+
                     // $startTime = Utility::getValByName('company_start_time');
                     // $endTime   = Utility::getValByName('company_end_time');
                     $startTime = $shift_times->start_time;
                     $endTime = $shift_times->end_time;
-    
-    
+
+
                     $attendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', $employeeId)->where('clock_out', '=', '00:00:00')->first();
-    
+
                     if ($attendance != null) {
                         $attendance            = AttendanceEmployee::find($attendance->id);
                         $attendance->clock_out = $endTime;
@@ -766,7 +785,7 @@ class AttendanceEmployeeController extends Controller
                         $attendance->note      = $note;
                         $attendance->save();
                     }
-    
+
                     //late
                     if (time() > (strtotime($date . $startTime) + ((int)$settings['late_tolerance'] * 60))) {
                         $totalLateSeconds = time() - (strtotime($date . $startTime) + ((int)$settings['late_tolerance'] * 60));
@@ -777,9 +796,9 @@ class AttendanceEmployeeController extends Controller
                     } else {
                         $late             = '00:00:00';
                     }
-    
+
                     $presentStatus = AttendanceStatus::where('id', 1)->first();
-    
+
                     $employeeAttendance                         = new AttendanceEmployee();
                     $employeeAttendance->employee_id            = $employeeId;
                     $employeeAttendance->date                   = $date;
@@ -799,9 +818,9 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
-                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                    $employeeAttendance->shift_type_id          = $request->shift_type_id;
                     $employeeAttendance->save();
-    
+
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
                         'date'          => $date,
@@ -809,9 +828,9 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $time,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
-    
+
                     return redirect()->route('attendanceemployee.index')->with([
                         'success' => __('Employee Successfully Clock In.'),
                         'employee' => $employee,
@@ -840,7 +859,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
                     $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
-    
+
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
                         'date'          => $date,
@@ -848,11 +867,11 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $time,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
-    
+
                     $employeeAttendance->save();
-                    
+
                     return redirect()->route('attendanceemployee.index')->with([
                         'success' => __('Employee Successfully Clock In.'),
                         'employee' => $employee,
@@ -877,9 +896,9 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
                     $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
-    
+
                     $employeeAttendance->save();
-    
+
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
                         'date'          => $date,
@@ -887,9 +906,9 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $time,
                         'max'           => $time,
                     ];
-    
+
                     LogAttendance::create($logForm);
-    
+
                     return redirect()->route('attendanceemployee.index')->with([
                         'success' => __('Employee Successfully Clock In.'),
                         'employee' => $employee,
@@ -992,7 +1011,7 @@ class AttendanceEmployeeController extends Controller
                         } else {
                             $overtime = '00:00:00';
                         }
-                        
+
                         $totalWorkSeconds   = $out_cal - $in_cal;
                         $hours              = floor($totalWorkSeconds / 3600);
                         $mins               = floor($totalWorkSeconds / 60 % 60);
@@ -1023,7 +1042,7 @@ class AttendanceEmployeeController extends Controller
                         $employeeAttendance->attendance_status_id    = $presentStatus->id;
                         $employeeAttendance->shift_type_id           = $employee_data->shift_type_id;
                         $employeeAttendance->save();
-                    } 
+                    }
                     // else {
                     //     $attendance = AttendanceEmployee::where('employee_id', '=', $employee)->where('date', '=', $request->date)->first();
 

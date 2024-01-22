@@ -55,12 +55,14 @@ class HomeController extends Controller
 
                 $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
 
+                $shift_types    = ShiftType::where('branch_id', $emp->branch_id)->get()->pluck('name', 'id');
+
                 $subordinates   = \Auth::user()->employee->subordinatesFlatten();
 
                 $employees_id   = collect();
                 // Check if employee managing other employee or not
                 if ($subordinates->isNotEmpty()) {
-                    
+
                     foreach ($subordinates as $subordinate) {
                         $employees_id->push($subordinate->id);
                     }
@@ -75,7 +77,7 @@ class HomeController extends Controller
 
                 $terminations = Termination::whereIn('employee_id', $employees_id)->where('notice_date', '<=', $today)->where('termination_date', '>=', $today)->get();
 
-                foreach($terminations as $termination) {
+                foreach ($terminations as $termination) {
 
                     // Create a new "Announcement-like" structure for the termination
                     $terminationAsAnnouncement = new Announcement([
@@ -101,34 +103,12 @@ class HomeController extends Controller
                     }
                 )->get();
 
-                // $events    = Event::select('events.*', 'events.id as event_id_pk', 'event_employees.*')
-                //     ->leftjoin('event_employees', 'events.id', '=', 'event_employees.event_id')
-                //     ->where('event_employees.employee_id', '=', $emp->id)
-                //     ->orWhere(
-                //         function ($q) {
-                //             $q->where('events.department_id', '["0"]')->where('events.employee_id', '["0"]');
-                //         }
-                //     )->get();
-
-                // $arrEvents = [];
-                // foreach ($events as $event) {
-
-                //     $arr['id']              = $event['id'];
-                //     $arr['title']           = $event['title'];
-                //     $arr['start']           = $event['start_date'];
-                //     $arr['end']             = $event['end_date'];
-                //     $arr['className']       = $event['color'];
-                //     // $arr['borderColor']     = "#fff";
-                //     $arr['url']             = route('eventsshow', (!empty($event['event_id_pk'])) ? $event['event_id_pk'] : '');
-                //     // $arr['textColor']       = "white";
-
-                //     $arrEvents[] = $arr;
-                // }
 
                 $date               = date("Y-m-d");
                 $dateYesterday      = date("Y-m-d", strtotime('yesterday'));
                 $time               = date("H:i:s");
                 $employeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $date)->first();
+                // return $employeeAttendance;
                 $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $dateYesterday)->first();
 
                 $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
@@ -176,33 +156,17 @@ class HomeController extends Controller
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime', 'shift_types'));
             } else {
-                // $events    = Event::get();
-                // $arrEvents = [];
-
-                // foreach ($events as $event) {
-                //     $arr['id']    = $event['id'];
-                //     $arr['title'] = $event['title'];
-                //     $arr['start'] = $event['start_date'];
-                //     $arr['end']   = $event['end_date'];
-
-                //     $arr['className'] = $event['color'];
-                //     // $arr['borderColor']     = "#fff";
-                //     // $arr['textColor']       = "white";
-                //     $arr['url']             = route('event.edit', $event['id']);
-
-                //     $arrEvents[] = $arr;
-                // }
 
                 $announcements = !empty(\Auth::user()->branch_id) ? Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('announcements.id', 'desc')->take(5)->get() : Announcement::orderBy('announcements.id', 'desc')->take(5)->get();
 
                 $emp           = !empty(\Auth::user()->branch_id) ? User::whereHas('employee', function ($query) {
-                        $query->where('branch_id', \Auth::user()->branch_id);
-                    })
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })
                     ->where('type', '=', 'employee')
                     ->get()
-                : User::where('type', '=', 'employee')
+                    : User::where('type', '=', 'employee')
                     ->get();
                 $countEmployee = count($emp);
 
@@ -213,13 +177,25 @@ class HomeController extends Controller
 
                 $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->get() : Employee::where('is_active', 1)->get();
                 $countEmployee      = count($employees);
-                $notClockIn         = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
-                $validAttendance    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
-                $invalidAttendance  = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
+                $notClockIn         = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->where('date', '=', $currentDate)->get()->pluck('employee_id') : AttendanceEmployee::where('date', '=', $currentDate)->get()->pluck('employee_id');
+                $validAttendance    = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
+                $invalidAttendance  = !empty(\Auth::user()->branch_id) ? AttendanceEmployee::whereHas('employee', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
 
-                $requestAttendanceCount = !empty(\Auth::user()->branch_id) ? AttendanceRequest::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->whereNull('is_approved')->count() : AttendanceRequest::whereNull('is_approved')->count();
-                $permitCount            = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->whereNull('is_approved')->count() : Permit::whereNull('is_approved')->count();
-                $leaveCount             = !empty(\Auth::user()->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('status', 'Pending')->count() : Leave::where('status', 'Pending')->count();
+                $requestAttendanceCount = !empty(\Auth::user()->branch_id) ? AttendanceRequest::whereHas('employee', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->whereNull('is_approved')->count() : AttendanceRequest::whereNull('is_approved')->count();
+                $permitCount            = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->whereNull('is_approved')->count() : Permit::whereNull('is_approved')->count();
+                $leaveCount             = !empty(\Auth::user()->branch_id) ? Leave::whereHas('employees', function ($query) {
+                    $query->where('branch_id', \Auth::user()->branch_id);
+                })->where('status', 'Pending')->count() : Leave::where('status', 'Pending')->count();
 
                 $notClockIns    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
@@ -232,10 +208,10 @@ class HomeController extends Controller
 
                 $meetings = !empty(\Auth::user()->branch_id) ? Meeting::where('branch_id', \Auth::user()->branch_id)->orderby('start_time', 'DESC')->limit(5)->get() : Meeting::orderby('start_time', 'DESC')->limit(5)->get();
 
-                $employees_id = $employees->pluck('id');    
+                $employees_id = $employees->pluck('id');
                 $terminations = Termination::whereIn('employee_id', $employees_id)->where('notice_date', '<=', $today)->where('termination_date', '>=', $today)->get();
 
-                foreach($terminations as $termination) {
+                foreach ($terminations as $termination) {
 
                     // Create a new "Announcement-like" structure for the termination
                     $terminationAsAnnouncement = new Announcement([

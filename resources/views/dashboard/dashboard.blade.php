@@ -182,6 +182,11 @@
                     </div>
                     <div class="col-md-12" id="other-form" style="display: none;">
                         <div class="form-group mb-1">
+                            {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p> 
+                            {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose Shift']) }}
+                        </div>
+                        <div class="form-group mb-1">
                             {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
                             <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                             {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
@@ -193,22 +198,27 @@
                         <input type="hidden" name="latitude" id="latitude" value="0">
                         <input type="hidden" name="longitude" id="longitude" value="0">
                         <input type="hidden" name="accuracy" id="accuracy" value="0">
-                        <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}">
+                        {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                     </div>
                     <div class="col-md-6 text-center mx-auto mt-1">
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
                         @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" >{{ __('CLOCK INA') }}</button>
                         @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out'])))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK INB') }}</button>
                         @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK INC') }}</button>
+                        {{-- @elseif (!empty($employeeAttendance) && (($employeeAttendance->clock_out != '00:00:00') && ($employeeAttendance->clock_out != $employeeAttendance->clock_in ))) --}}
+                        @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
+                            {{-- {{ $employeeAttendance }} --}}
+                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" >{{ __('CLOCK IND') }}</button>
                         @else
                             <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK INE') }}</button>
                         @endif
                         {{ Form::close() }}
                     </div>                                                    
@@ -223,7 +233,8 @@
                             <input type="hidden" name="picture_out" id="picture_out">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        @elseif ($employeeAttendance)
+                        {{-- @elseif ($employeeAttendance) --}}
+                        @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
@@ -748,11 +759,13 @@
           try {
             const { latitude, longitude, accuracy } = await getLocation();
 
+            console.log({ latitude, longitude, accuracy });
+
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
-            const clockInData = document.getElementById("clockInData");
+            // const clockInData = document.getElementById("clockInData");
 
-            if (latitude !== 0 && longitude !== 0 && clockInButton && !clockInData.value) {
+            if (latitude !== 0 && longitude !== 0 && clockInButton) {
                 const latElement = document.getElementById("latitude");
                 const longElement = document.getElementById("longitude");
                 const accElement = document.getElementById("accuracy");
