@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\LeaveExport;
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
 use App\Models\Leave as LocalLeave;
 use App\Models\LeaveType;
 use App\Mail\LeaveActionSend;
@@ -23,6 +25,8 @@ class LeaveController extends Controller
     {
         if (\Auth::user()->can('Manage Leave')) {
             $status = $request->query('status', null);
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = collect();
 
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
@@ -47,9 +51,20 @@ class LeaveController extends Controller
             if ($status != null && $status == 'Pending') {
                 $leaves->where('status', 'Pending');
             }
+
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
+                // $employees      = $employees->where('branch_id', $request->branch_id);
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
+            }
+
             $leaves = $leaves->orderBy('start_date', 'DESC')->get();
 
-            return view('leave.index', compact('leaves'));
+            return view('leave.index', compact('leaves', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

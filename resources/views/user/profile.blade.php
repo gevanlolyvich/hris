@@ -32,40 +32,40 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
         }
 
         function mapShow() {
-                mapOpened = mapOpened ? false : true;
-                if (mapOpened) {
-                    document.getElementById('map-box').style.display = '';
+            mapOpened = mapOpened ? false : true;
+            if (mapOpened) {
+                document.getElementById('map-box').style.display = '';
 
-                    if (map !== null) {
-                        map?.remove();
-                    }
-
-                    let latitude = document.getElementById("latitude").value;
-                    let longitude = document.getElementById("longitude").value;
-
-                    map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
-                        
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
-                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
-                    }).addTo(map);
-                        
-                    if(map.hasLayer(layer)){
-                        layer.clearLayers();
-                    }
-
-                    if (Number(latitude) != 0 && Number(longitude) != 0) {
-                        let marker = L.marker([latitude, longitude]).addTo(map);
-                        layer.addLayer(marker);
-                        map.addLayer(layer);
-                    }
-                        
-                    map.on('click', function (e) {
-                        onMapClick(e, map)
-                    });
+                if (map !== null) {
+                    map?.remove();
                 }
+
+                let latitude = document.getElementById("latitude").value;
+                let longitude = document.getElementById("longitude").value;
+
+                map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
+                    
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
+                    ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
+                }).addTo(map);
+                    
+                if(map.hasLayer(layer)){
+                    layer.clearLayers();
+                }
+
+                if (Number(latitude) != 0 && Number(longitude) != 0) {
+                    let marker = L.marker([latitude, longitude]).addTo(map);
+                    layer.addLayer(marker);
+                    map.addLayer(layer);
+                }
+                    
+                map.on('click', function (e) {
+                    onMapClick(e, map)
+                });
             }
+        }
 
         function mapOpenClose() {
             mapOpened = mapOpened ? false : true;
@@ -266,7 +266,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                             <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
                                             {{ Form::textarea('address', $userDetail?->employee?->address, [
                                                     'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
-                                                    'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
+                                                    'name' => 'address', 'required'=>'required', 'autocomplete'=>'address'
                                                 ])
                                             }}
                                             @error('address')
