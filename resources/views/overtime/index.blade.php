@@ -872,7 +872,7 @@
                                 </td>
                                 <td class="Action">
                                     <span>
-                                        @if ((Gate::check('Edit Overtime') && $overtime->created_by == \Auth::user()->id) || \Auth::user()->type != 'employee')
+                                        @if (((Gate::check('Edit Overtime') && $overtime->created_by == \Auth::user()->id) || \Auth::user()->type != 'employee') && (empty($overtime->report_document) && empty($overtime->report_note)))
                                             <div class="action-btn bg-info ms-2">
                                                 <a href="#" class="mx-3 btn btn-sm align-items-center edit-event" data-size="xl"
                                                     data-url="{{ URL::to('overtime/' . $overtime->id . '/edit') }}"
@@ -883,7 +883,7 @@
                                                 </a>
                                             </div>
                                         @endif
-                                        @if ((Gate::check('Delete Overtime') && $overtime->created_by !== \Auth::user()?->employee?->id) || \Auth::user()->type != 'employee')
+                                        @if (((Gate::check('Delete Overtime') && $overtime->created_by !== \Auth::user()?->employee?->id) || \Auth::user()->type != 'employee') && (empty($overtime->report_document) && empty($overtime->report_note)))
                                             <div class="action-btn bg-danger ms-2">
                                                 {!! Form::open(['method' => 'DELETE', 'route' => ['overtime.destroy', $overtime->id], 'id' => 'delete-form-' . $overtime->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
