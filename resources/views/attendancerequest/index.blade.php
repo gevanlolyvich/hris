@@ -81,9 +81,10 @@
                             <tr>
                                 <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Date') }}</th>
+                                <th>{{ __('Shift') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
-                                <th>{{ __('Reason') }}</th>
+                                {{-- <th>{{ __('Reason') }}</th> --}}
                                 <th>{{ __('Document') }}</th>
                                 {{-- <th>{{ __('Leave Reason') }}</th> --}}
                                 <th>{{ __('status') }}</th>
@@ -95,9 +96,10 @@
                                 <tr>
                                     <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}</td>
                                     <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
+                                    <td>{{ $attendance_request?->shift?->name ?? '-' }}</td>
                                     <td>{{ $attendance_request->start_time }}</td>
                                     <td>{{ $attendance_request->end_time }}</td>
-                                    <td>{{ $attendance_request->reason }}</td>                                   
+                                    {{-- <td>{{ $attendance_request->reason }}</td>                                    --}}
                                     <td>
                                         @if ($attendance_request->docs)
                                             <div class="action-btn bg-info ms-2">
@@ -287,17 +289,55 @@
                     new Choices('#choices-multiple', {
                         removeItemButton: true,
                     });
-
-
                 }
             });
         }
 
         $(document).on('change', 'select[name=branch_id]', function() {
             var branch_id = $(this).val();
-            // console.log({branch_id})
-            // $('.designation_id').empty();
             getDepartment(branch_id);
+        });
+    </script>
+
+    <script>
+        function getShift(employee_id, date) {
+            $.ajax({
+                url: '{{ route('attendancerequest.getshift') }}',
+                type: 'POST',
+                data: {
+                    "employee_id": employee_id,
+                    "date": date,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.shift_id').empty();
+                    var shift_select = ` <select class="form-control select2 shift_id" name="shift_id" id="choices-multiple"
+                                            placeholder="Select Shift" >
+                                            </select>`;
+                    $('.shift_div').html(shift_select);
+
+                    $('.shift_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.shift_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+
+        $(document).on('change', '#employee_id', function() {
+            var employee_id = $(this).val();
+            var date = document.getElementById('date').value;
+            getShift(employee_id, date);
+        });
+
+        $(document).on('change', '#date', function() {
+            var date = $(this).val();
+            var employee_id = document.getElementById('employee_id').value;
+            getShift(employee_id, date);
         });
     </script>
 @endpush

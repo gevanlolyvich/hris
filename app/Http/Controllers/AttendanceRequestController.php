@@ -93,6 +93,7 @@ class AttendanceRequestController extends Controller
                 'end_time' => 'required',
                 'reason' => 'required',
                 'myDocument' => 'required',
+                'shift_id' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -131,6 +132,7 @@ class AttendanceRequestController extends Controller
         //* Input Data
         $form = [
             'employee_id'   => $employee->id,
+            'shift_id'      => $request->shift_id,
             'date'          => date_format($date, "Y-m-d"),
             'start_time'    => $request->start_time,
             'end_time'      => $request->end_time,
@@ -140,7 +142,7 @@ class AttendanceRequestController extends Controller
         ];
 
         //* Input to DB
-        $attendanceRequest = AttendanceRequest::create($form);
+        AttendanceRequest::create($form);
         return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Created'));
     }
 
@@ -156,8 +158,15 @@ class AttendanceRequestController extends Controller
         if (\Auth::user()->can('Edit Request Attendance')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $shifts    = ShiftType::where('branch_id', $attendance_request->employee->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
-                return view('attendancerequest.edit', compact('employees', 'attendance_request'));
+                foreach ($shifts as $key => $shift) {
+                    $times = ShiftTime::where('shift_type_id', $key)->where('days', date('l', strtotime($attendance_request->date ? $attendance_request->date : date('Y-m-d'))))->select('start_time', 'end_time')->first();
+                    $formated_times = !empty($times->start_time) || !empty($times->end_time) ? substr($times->start_time, 0, 5) . ' - ' . substr($times->end_time, 0, 5) : __('Holidays');
+                    $shifts[$key] = $formated_times.  ' | ' . $shift;
+                }
+
+                return view('attendancerequest.edit', compact('employees', 'attendance_request', 'shifts'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -247,10 +256,15 @@ class AttendanceRequestController extends Controller
     {
         // return $id;
         $attendance_request     = AttendanceRequest::find($id);
-        $employee  = Employee::find($attendance_request->employee_id);
+        $employee               = Employee::find($attendance_request->employee_id);
+        $shiftTimes             = $attendance_request->shift_id ? ShiftTime::where('shift_type_id', $attendance_request->shift_id)->where('days', date('l', strtotime($attendance_request->date)))->select('start_time', 'end_time')->first() : null;
+
+        if ($shiftTimes) {
+            $shiftTimes         = !empty($shiftTimes->start_time) || !empty($shiftTimes->end_time) ? substr($shiftTimes->start_time, 0, 5) . ' - ' . substr($shiftTimes->end_time, 0, 5) : __('Holidays');
+        }
         // $leavetype = LeaveType::find($leave->leave_type_id);
 
-        return view('attendancerequest.action', compact('employee', 'attendance_request'));
+        return view('attendancerequest.action', compact('employee', 'attendance_request', 'shiftTimes'));
     }
 
     public function changeaction(Request $request)
@@ -401,5 +415,19 @@ class AttendanceRequestController extends Controller
         $data = Excel::download(new LeaveExport(), $name . '.xlsx');
 
         return $data;
+    }
+
+    public function getShift(Request $request)
+    {
+        $employee   = Employee::find($request->employee_id);
+        $shifts     = ShiftType::where('branch_id', $employee->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+        
+        foreach ($shifts as $key => $shift) {
+            $times = ShiftTime::where('shift_type_id', $key)->where('days', date('l', strtotime($request->date ? $request->date : date('Y-m-d'))))->select('start_time', 'end_time')->first();
+            $formated_times = !empty($times->start_time) || !empty($times->end_time) ? substr($times->start_time, 0, 5) . ' - ' . substr($times->end_time, 0, 5) : __('Holidays');
+            $shifts[$key] = $formated_times.  ' | ' . $shift;
+        }
+
+        return response()->json($shifts);
     }
 }

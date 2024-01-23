@@ -910,6 +910,12 @@ Route::post('attendancerequest/changeaction', [AttendanceRequestController::clas
         'XSS',
     ]
 );
+Route::post('attendancerequest/getshift', [AttendanceRequestController::class, 'getShift'])->name('attendancerequest.getshift')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 Route::resource('timesheet', TimeSheetController::class)->middleware(
     [

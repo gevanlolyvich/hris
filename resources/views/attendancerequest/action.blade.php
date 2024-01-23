@@ -12,6 +12,10 @@
                         <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
                     </tr>
                     <tr>
+                        <th>{{ __('Shift') }}</th>
+                        <td>{{ !empty($shiftTimes) ? $shiftTimes . ' | ' . $attendance_request->shift->name : '-'  }}</td>
+                    </tr>
+                    <tr>
                         <th>{{ __('Start Time') }}</th>
                         <td>{{ $attendance_request->start_time }}</td>
                     </tr>
