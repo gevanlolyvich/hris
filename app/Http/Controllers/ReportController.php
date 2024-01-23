@@ -20,6 +20,7 @@ use App\Models\TimeSheet;
 use App\Models\ShiftTime;
 use App\Models\Overtime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -520,16 +521,18 @@ class ReportController extends Controller
                 // $employees->where('branch_id', $request->branch);
                 $showed_branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->find($request->branch) : Branch::find($request->branch);
                 if (!empty($showed_branch)) {
+                    $employees      = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
                 }
             }
 
             if (!empty($request->department)) {
                 // $employees->where('department_id', $request->department);
-                $showed_branch = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->find($request->department) : Department::find($request->department);
+                $showed_department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->find($request->department) : Department::find($request->department);
 
-                if (!empty($showed_branch)) {
-                    $data['department'] = $showed_branch->name;
+                if (!empty($showed_department)) {
+                    $employees          = $employees->where('department_id', $showed_department->id);
+                    $data['department'] = $showed_department->name;
                 }
             }
 
@@ -546,90 +549,61 @@ class ReportController extends Controller
                 $curMonth = date('M-Y', strtotime($year . '-' . $month));
             }
 
-            //            $num_of_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
             $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
             for ($i = 1; $i <= $num_of_days; $i++) {
                 $dates[] = str_pad($i, 2, '0', STR_PAD_LEFT);
+                $formated_dates[] = $year . '-' . $month . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
             }
 
-            $employeesAttendance    = [];
-            $totalPresent           = $totalLeave = $totalEarlyLeave = 0;
-            $totalOvertime          = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
+            $employeesAttendance        = [];
+            $totalPresent               = $totalLeave = $totalEarlyLeave = 0;
+            $totalOvertime              = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
             foreach ($employees as $employee) {
-                $attendances['name'] = $employee->name;
-                $total_work_hours    = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-                
+                $attendances['name']    = $employee->name;
+
+                $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
+                $employee_overtimes     = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in')->get();
+                $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+
+                foreach ($employee_overtimes as $overtime) {
+                    $total_hours        = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                    $totalOvertime      += $total_hours;
+                }
+
+                foreach ($employee_attendances as $attendance) {
+                    if ($attendance->early_leaving > 0) {
+                        $earlyleaveHours += date('h', strtotime($attendance->early_leaving));
+                        $earlyleaveMins  += date('i', strtotime($attendance->early_leaving));
+                    }
+
+                    if ($attendance->late > 0) {
+                        $lateHours += date('h', strtotime($attendance->late));
+                        $lateMins  += date('i', strtotime($attendance->late));
+                    }
+                }
+
                 foreach ($dates as $date) {
                     $dateFormat = $year . '-' . $month . '-' . $date;
 
                     if ($dateFormat <= date('Y-m-d')) {
-                        $shift              = ShiftTime::where('shift_type_id', $employee->shift_type->id)->where('days', date('l', strtotime($dateFormat)))->select('is_working', 'days')->first();
-                        $employeeAttendance = AttendanceEmployee::where('employee_id', $employee->id)->where('date', $dateFormat)->first();
-                        $overtimes          = Overtime::where('employee_id', $employee->id)->where('date', $dateFormat)->whereNotNull(['report_document', 'clock_in', 'clock_out'])->get();
-
-                        foreach ($overtimes as $overtime) {
-                            $month              = date('m', strtotime($overtime->date));
-                            $year               = date('Y', strtotime($overtime->date));
-
-                            $total_hours        = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
-                            $totalOvertime      += $total_hours;
-                        }
-
-                        if (($employeeAttendance)) {
-                            if ($employeeAttendance->status == 'Present') {
+                        if (isset($employee_attendances[$dateFormat])) {
+                            if ($employee_attendances[$dateFormat]->status == 'Present') {
                                 $attendanceStatus[$date] = 'H';
                                 $totalPresent            += 1;
-
-                                if ($employeeAttendance->early_leaving > 0) {
-                                    $earlyleaveHours += date('h', strtotime($employeeAttendance->early_leaving));
-                                    $earlyleaveMins  += date('i', strtotime($employeeAttendance->early_leaving));
-                                }
-
-                                if ($employeeAttendance->late > 0) {
-                                    $lateHours += date('h', strtotime($employeeAttendance->late));
-                                    $lateMins  += date('i', strtotime($employeeAttendance->late));
-                                }
-                            } elseif ($employeeAttendance->status == 'Leave') {
+                            } elseif ($employee_attendances[$dateFormat]->status == 'Leave') {
                                 $attendanceStatus[$date] = 'C';
                                 $totalLeave              += 1;
-                            } elseif ($employeeAttendance->status == 'Permission') {
+                            } elseif ($employee_attendances[$dateFormat]->status == 'Permission') {
                                 $attendanceStatus[$date] = 'I';
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
-                        } elseif (!$shift->is_working) {
+                        } elseif (!$shift[date('l', strtotime($dateFormat))]) {
                             $attendanceStatus[$date] = 'L';
                         }
                          else {
                             $attendanceStatus[$date] = 'A';
                         }
-
-                        // if (!empty($employeeAttendance) && $employeeAttendance->attendanceStatus->id == 1) //* Present
-                        // {
-                        //     $attendanceStatus[$date] = $employeeAttendance->attendanceStatus->label;
-                        //     $totalPresent            += 1;
-
-                        //     if ($employeeAttendance->overtime > 0) {
-                        //         $ovetimeHours += date('h', strtotime($employeeAttendance->overtime));
-                        //         $overtimeMins += date('i', strtotime($employeeAttendance->overtime));
-                        //     }
-
-                        //     if ($employeeAttendance->early_leaving > 0) {
-                        //         $earlyleaveHours += date('h', strtotime($employeeAttendance->early_leaving));
-                        //         $earlyleaveMins  += date('i', strtotime($employeeAttendance->early_leaving));
-                        //     }
-
-                        //     if ($employeeAttendance->late > 0) {
-                        //         $lateHours += date('h', strtotime($employeeAttendance->late));
-                        //         $lateMins  += date('i', strtotime($employeeAttendance->late));
-                        //     }
-                        // } elseif (!empty($employeeAttendance) && $employeeAttendance->attendanceStatus->id == 4) //* Leave
-                        // {
-                        //     $attendanceStatus[$date] = $employeeAttendance->attendanceStatus->label;
-                        //     $totalLeave              += 1;
-                        // } else {
-                        //     $attendanceStatus[$date] = 'A';
-                        // }
                     } else {
                         $attendanceStatus[$date] = '';
                     }

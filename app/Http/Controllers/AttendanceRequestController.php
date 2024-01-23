@@ -7,6 +7,8 @@ use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
 use App\Models\AttendanceStatus;
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
 use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Utility;
@@ -24,6 +26,9 @@ class AttendanceRequestController extends Controller
     {
         if (\Auth::user()->can('Manage Request Attendance')) {
             $is_approved = $request->query('is_approved', null);
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = collect();
+
             if (Auth::user()->type == 'employee') {
                 $user     = Auth::user();
 
@@ -46,8 +51,17 @@ class AttendanceRequestController extends Controller
                 $attendance_requests->whereNull('is_approved');
             }
 
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $attendance_requests         = $attendance_requests->whereHas('employee', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $attendance_requests         = $attendance_requests->whereHas('employee', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
+            }
+
             $attendance_requests = $attendance_requests->get();
-            return view('attendancerequest.index', compact('attendance_requests'));
+            return view('attendancerequest.index', compact('attendance_requests', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -86,27 +100,26 @@ class AttendanceRequestController extends Controller
 
             return redirect()->back()->with('error', $messages->first());
         }
-
+    
         $date = date_create($request->date);
         //* Role Validation
-        $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
+        $employee = Employee::where('is_active', 1)->where('id', $request->employee_id)->first();
         if (empty($employee) || !$employee) {
             return redirect()->back()->with('error', __('Inactive'));
         }
 
-        if (Auth::user()->type == 'employee') {
-            $employee_id = $employee->id;
-        } else {
-            $employee_id = $request->employee_id;
-        }
-
-        $attendance = AttendanceEmployee::where('employee_id', $employee_id)->where('date', $date)->first();
+        $attendance = AttendanceEmployee::where('employee_id', $employee->id)->where('date', $date)->first();
         if ($attendance) {
             return redirect()->back()->with('error', __('You were present on that date already'));
         }
 
+        $duplicate_request = AttendanceRequest::where('employee_id', $employee->id)->where('date', $date)->first();
+        if ($duplicate_request) {
+            return redirect()->back()->with('error', __('Duplicate Request Attendance'));
+        }
+
         //* Custom Form data
-        $employee = Employee::where('is_active', 1)->find($employee_id);
+        $employee = Employee::where('is_active', 1)->find($employee->id);
         $document_path = null;
         if ($request->file('myDocument')) {
             $docs = $request->file('myDocument');
@@ -117,7 +130,7 @@ class AttendanceRequestController extends Controller
 
         //* Input Data
         $form = [
-            'employee_id'   => $employee_id,
+            'employee_id'   => $employee->id,
             'date'          => date_format($date, "Y-m-d"),
             'start_time'    => $request->start_time,
             'end_time'      => $request->end_time,
@@ -209,6 +222,17 @@ class AttendanceRequestController extends Controller
         $attendance_request = AttendanceRequest::find($attendance_request_id);
         if (\Auth::user()->can('Delete Request Attendance')) {
             if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()?->employee?->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
+
+                if ($attendance_request->docs) {
+                    $filepath_array = explode('/', $attendance_request->docs);
+                    $filename = array_pop($filepath_array);
+
+                    // Check if the file exists before attempting to delete
+                    if (Storage::disk('public')->exists("uploads/attendance_requests/$filename")) {
+                        Storage::disk('public')->delete("uploads/attendance_requests/$filename");
+                    }
+                }
+
                 $attendance_request->delete();
                 return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
             } else {

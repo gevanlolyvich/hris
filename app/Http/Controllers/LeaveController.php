@@ -16,6 +16,7 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
 
@@ -55,7 +56,6 @@ class LeaveController extends Controller
             if (!empty($request->branch_id)) {
                 $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
                 $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
-                // $employees      = $employees->where('branch_id', $request->branch_id);
             }
             if (!empty($request->department_id)) {
                 $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
@@ -321,6 +321,17 @@ class LeaveController extends Controller
     {
         if (\Auth::user()->can('Delete Leave')) {
             if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
+
+                if ($leave->document_path) {
+                    $filepath_array = explode('/', $leave->document_path);
+                    $filename = array_pop($filepath_array);
+
+                    // Check if the file exists before attempting to delete
+                    if (Storage::disk('public')->exists("uploads/leaves/$filename")) {
+                        Storage::disk('public')->delete("uploads/leaves/$filename");
+                    }
+                }
+
                 $leave->delete();
 
                 return redirect()->route('leave.index')->with('success', __('Leave successfully deleted.'));

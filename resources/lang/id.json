@@ -1546,7 +1546,7 @@
   "Total Days" : "Total Hari",
   "Total Debit" : "Total debit",
   "Total Deduction" : "Total Deduksi",
-  "Total early leave in hours" : "Total cuti awal dalam beberapa jam",
+  "Total early leave in hours" : "Total pulang lebih awal dalam jam",
   "Total Earning" : "Total Pendapatan",
   "Total Expense" : "Total Pengeluaran",
   "Total Income" : "Total Pendapatan",
@@ -1560,7 +1560,7 @@
   "Total Overtime" : "Total Lembur",
   "Total overtime in hours" : "Total lembur dalam jam",
   "Total Plan" : "Total Rencana",
-  "Total present" : "Total hadiah",
+  "Total present" : "Total kehadiran",
   "Total Saturation Deduction" : "Total Deduksi Saturasi",
   "Total Ticket" : "Total Tiket",
   "Total Unpaid Employee" : "Total Karyawan Tidak Dibayar",
@@ -1805,6 +1805,6 @@
   "Employee Type successfully updated":"Tipe Karyawan berhasil diperbarui",
   "Employee Type successfully deleted":"Tipe Karyawan berhasil dihapus",
   "Select Shift Type":"Pilih Tipe Shift",
-  "Already Clock In At": "Sudah Absen Masuk Pada"
-
+  "Already Clock In At": "Sudah Absen Masuk Pada",
+  "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada"
 }
