@@ -114,7 +114,7 @@ class AttendanceRequestController extends Controller
             return redirect()->back()->with('error', __('You were present on that date already'));
         }
 
-        $duplicate_request = AttendanceRequest::where('employee_id', $employee->id)->where('date', $date)->first();
+        $duplicate_request = AttendanceRequest::where('employee_id', $employee->id)->where('date', $date)->where('shift_id', $request->shift_id)->first();
         if ($duplicate_request) {
             return redirect()->back()->with('error', __('Duplicate Request Attendance'));
         }
@@ -184,6 +184,8 @@ class AttendanceRequestController extends Controller
                     $request->all(),
                     [
                         'date' => 'required|before:today',
+                        'employee_id' => 'required',
+                        'shift_id' => 'required',
                         'start_time' => 'required',
                         'end_time' => 'required',
                         'reason' => 'required',
@@ -197,6 +199,12 @@ class AttendanceRequestController extends Controller
 
                 //* Custom Form
                 $date = date_create($request->date);
+
+                $duplicate_request = AttendanceRequest::whereNot('id', $attendance_request_id)->where('employee_id', $request->employee_id)->where('date', $date)->where('shift_id', $request->shift_id)->first();
+                if ($duplicate_request) {
+                    return redirect()->back()->with('error', __('Duplicate Request Attendance'));
+                }
+
                 $document_path = null;
                 if ($request->file('myDocument')) {
                     $docs = $request->file('myDocument');
@@ -208,6 +216,8 @@ class AttendanceRequestController extends Controller
                 //* Input Data
                 $form = [
                     'date'          => date_format($date, "Y-m-d"),
+                    'employee_id'   => $request->employee_id,
+                    'shift_id'      => $request->shift_id,
                     'start_time'    => $request->start_time,
                     'end_time'      => $request->end_time,
                     'reason'        => $request->reason,
