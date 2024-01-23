@@ -204,7 +204,7 @@
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
                         @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" >{{ __('CLOCK INA') }}</button>
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK INA') }}</button>
                         @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out'])))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
                                 class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK INB') }}</button>
@@ -215,7 +215,7 @@
                         @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
                             {{-- {{ $employeeAttendance }} --}}
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" >{{ __('CLOCK IND') }}</button>
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IND') }}</button>
                         @else
                             <button type="submit" value="0" name="in" id="clock_in"
                                 class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK INE') }}</button>
@@ -231,6 +231,7 @@
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <input type="hidden" name="picture_out" id="picture_out">
+                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         {{-- @elseif ($employeeAttendance) --}}
@@ -240,6 +241,7 @@
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <input type="hidden" name="picture_out" id="picture_out">
+                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
@@ -814,12 +816,16 @@
             }
           } finally  {
             const otherForm = document.getElementById('other-form');
+            const clockOutButton = document.getElementById("clock_out");
             const clockInButton = document.getElementById("clock_in");
-            if (!clockInButton.disabled) {
+            // console.log(clockOutButton);
+            if (!clockOutButton.value) {
+                console.log('A');
                 if (otherForm) {
                     otherForm.style.display = ''
                 }
             } else {
+                console.log('B');
                 otherForm.style.display = 'none';
             }
           }
