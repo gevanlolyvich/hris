@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendanceExport;
+use App\Models\ShiftHistory;
 
 class AttendanceEmployeeController extends Controller
 {
@@ -718,9 +719,6 @@ class AttendanceEmployeeController extends Controller
                 }
             }
 
-
-
-
             $is_valid_shift     = $employee->shift_type_id == $request->shift_type_id ? true : null;
             $is_valid_location  = null;
             if ($attendance_type == '1') {
@@ -828,6 +826,13 @@ class AttendanceEmployeeController extends Controller
                         'min'           => $time,
                         'max'           => $time,
                     ];
+
+                    //* Shift History
+                    $last_shift_history = ShiftHistory::where('employee_id', $employeeId)->orderBy('id', 'desc')->first();
+                    if (empty($last_shift_history) || $last_shift_history->shift_type_id != $request->shift_type_id) {
+                        ShiftHistory::create(['employee_id' => $employeeId, 'shift_type_id' => $request->shift_type_id]);
+                    }
+                    // return $last_shift_history;
 
                     LogAttendance::create($logForm);
 

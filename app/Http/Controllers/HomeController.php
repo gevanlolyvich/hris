@@ -58,16 +58,22 @@ class HomeController extends Controller
                 $shift_types    = ShiftType::where('branch_id', $emp->branch_id)->get()->pluck('name', 'id');
                 $shift_types    = ShiftType::where('branch_id', $emp->branch_id)
                     ->with(['shiftTimes' => function ($query) {
-                        $query->where('days', date('l'))->where('is_working', 1);
+                        $query->where('days', date('l'));
                     }])
                     ->whereHas('shiftTimes', function ($q) {
-                        $q->where('days', date('l'))->where('is_working', 1);
+                        $q->where('days', date('l'));
                     })->get();
+
+                // return $shift_types;
                 for ($i = 0; $i < count($shift_types); $i++) {
                     $today_shift_times = ShiftTime::where('shift_type_id', $shift_types[$i]->id)
-                        ->where('days', date('l'))
-                        ->where('is_working', 1)->first();
-                    $shift_types[$i]['name'] = substr($today_shift_times['start_time'], 0, 5) . '-' . substr($today_shift_times['end_time'], 0, 5) . ' | ' . $shift_types[$i]['name'];
+                        ->where('days', date('l'))->first();
+
+                    if ($today_shift_times->is_working) {
+                        $shift_types[$i]['name'] = substr($today_shift_times['start_time'], 0, 5) . '-' . substr($today_shift_times['end_time'], 0, 5) . ' | ' . $shift_types[$i]['name'];
+                    } else {
+                        $shift_types[$i]['name'] = __('Holidays') . ' | ' . $shift_types[$i]['name'];
+                    }
                 }
                 // return $shift_types;
                 $shift_types = $shift_types->pluck('name', 'id')->toArray();
