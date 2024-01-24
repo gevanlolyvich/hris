@@ -334,7 +334,7 @@ class LeaveController extends Controller
 
                 $leave->delete();
 
-                return redirect()->route('leave.index')->with('success', __('Leave successfully deleted.'));
+                return redirect()->back()->with('success', __('Leave successfully deleted.'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
