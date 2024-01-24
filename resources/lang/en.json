@@ -25,6 +25,7 @@
     "Create New Shift":"Create New Shift",
     "Edit Shift" :"Edit Shift",
     "Select Shift*" :"Select Shift*",
+    "Select Shift" :"Select Shift",
     "Shift Name" :"Shift Name",
     "Shift Type" :"Shift Type",
     "Work Days":"Work Days",
@@ -1499,6 +1500,7 @@
     "This candidate stage successfully changed.": "This candidate stage successfully changed.",
     "This detail will use for make purchase of plan.": "This detail will use for make purchase of plan.",
     "this ip is not allowed to clock in & clock out.": "this ip is not allowed to clock in & clock out.",
+    "Today you have clocked in and clocked out.": "Today you have clocked in and clocked out.",
     "This Month Total Contracts": "This Month Total Contracts",
     "This operation is not perform due to demo mode.": "This operation is not perform due to demo mode.",
     "This Week Total Contracts": "This Week Total Contracts",
@@ -1804,6 +1806,6 @@
     "Employee Type successfully updated":"Employee Type successfully updated",
     "Employee Type successfully deleted":"Employee Type successfully deleted",
     "Select Type":"Select Type",
-    "Already Clock In At": "Already Clock In At"
-
+    "Already Clock In At": "Already Clock In At",
+    "Duplicate Request Attendance": "Duplicate Request Attendance"
 }

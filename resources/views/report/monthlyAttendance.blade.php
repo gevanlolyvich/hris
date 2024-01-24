@@ -244,7 +244,7 @@
                                     <i class="ti ti-info-circle"></i>
                                 </div>
                                 <div class="ms-3">
-                                    <h5 class="mb-0">{{ __('Early leave') }}</h5>
+                                    <h5 class="mb-0">{{ __('Early Leaving') }}</h5>
                                     <p class="text-muted text-sm mb-0">{{ __('Total early leave in hours') }}:
                                         {{ number_format($data['totalEarlyLeave'], 2) }}</p>
                                 </div>
@@ -274,50 +274,48 @@
                 </div>
             </div>
         </div>
-    </div>
 
-
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-body table-border-style">
-                    <div class="table-responsive py-4 attendance-table-responsive">
-                        <table class="table ">
-                            <thead>
-                                <tr>
-                                    <th class="active">{{ __('Name') }}</th>
-                                    @foreach ($dates as $date)
-                                        <th>{{ $date }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($employeesAttendance as $attendance)
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body table-border-style">
+                        <div class="table-responsive py-4 attendance-table-responsive">
+                            <table class="table ">
+                                <thead>
                                     <tr>
-                                        <td>{{ $attendance['name'] }}</td>
-                                        @foreach ($attendance['status'] as $status)
-                                            <td>
-                                                @if ($status == 'H')
-                                                    <i class="badge bg-success p-2  rounded">{{ $status }}</i>
-                                                @elseif($status == 'A')
-                                                    <i class="badge bg-danger p-2  rounded">{{ $status }}</i>
-                                                @elseif($status == 'I')
-                                                    <i class="badge bg-info p-2  rounded">{{ $status }}</i>
-                                                @elseif($status == 'C')
-                                                    <i class="badge bg-warning p-2  rounded">{{ $status }}</i>
-                                                @elseif($status == 'L')
-                                                    <i class="badge bg-primary p-2  rounded">{{ $status }}</i>
-                                                @endif
-                                            </td>
+                                        <th class="active">{{ __('Name') }}</th>
+                                        @foreach ($dates as $date)
+                                            <th>{{ $date }}</th>
                                         @endforeach
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($employeesAttendance as $attendance)
+                                        <tr>
+                                            <td>{{ $attendance['name'] }}</td>
+                                            @foreach ($attendance['status'] as $status)
+                                                <td>
+                                                    @if ($status == 'H')
+                                                        <i class="badge bg-success p-2  rounded">{{ $status }}</i>
+                                                    @elseif($status == 'A')
+                                                        <i class="badge bg-danger p-2  rounded">{{ $status }}</i>
+                                                    @elseif($status == 'I')
+                                                        <i class="badge bg-info p-2  rounded">{{ $status }}</i>
+                                                    @elseif($status == 'C')
+                                                        <i class="badge bg-warning p-2  rounded">{{ $status }}</i>
+                                                    @elseif($status == 'L')
+                                                        <i class="badge bg-primary p-2  rounded">{{ $status }}</i>
+                                                    @endif
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 @endsection

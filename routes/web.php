@@ -233,6 +233,12 @@ Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])
         'XSS',
     ]
 );
+Route::post('branch/shift/json', [EmployeeController::class, 'branchShiftJson'])->name('branch.shift.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::post('direct/employee/json', [EmployeeController::class, 'directSpvJson'])->name('direct.employee.json')->middleware(
     [
         'auth',
@@ -899,6 +905,12 @@ Route::get('attendancerequest/{id}/action', [AttendanceRequestController::class,
 );
 
 Route::post('attendancerequest/changeaction', [AttendanceRequestController::class, 'changeaction'])->name('attendancerequest.changeaction')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('attendancerequest/getshift', [AttendanceRequestController::class, 'getShift'])->name('attendancerequest.getshift')->middleware(
     [
         'auth',
         'XSS',

@@ -13,6 +13,7 @@ class AttendanceRequest extends Model
 
     protected $fillable = [
         'employee_id',
+        'shift_id',
         'date',
         'start_time',
         'end_time',
@@ -26,6 +27,11 @@ class AttendanceRequest extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(ShiftType::class, 'shift_id', 'id');
     }
 
     public function approvedBy()
