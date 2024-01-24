@@ -86,6 +86,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                     $attendance->shift_type?->name ?? $attendance?->employee?->shift_type?->name,
                     $attendance->date,
                     $attendance->status,
+                    $attendance->is_valid ? __('Valid Attendance') : __('Invalid Attendance'),
                     $attendance->clock_in,
                     $attendance->clock_out,
                     $attendance->late,
@@ -112,6 +113,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
             "Shift",
             "Date",
             "Status",
+            "Is Valid",
             "Clock In",
             "Clock Out",
             "Late",
@@ -131,22 +133,10 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                 $sheet = $event->sheet;
 
                 foreach ($sheet->getRowIterator(2) as $row) {
-                    $cellValue = $sheet->getCell('K' . $row->getRowIndex())->getValue();
-
                     // Check if 'late' is not '00:00:00'
+                    $cellValue = $sheet->getCell('L' . $row->getRowIndex())->getValue();
+
                     if ($cellValue !== '00:00:00') {
-                        $sheet->getStyle('K' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
-                    }
-
-                    $earlyCell = $sheet->getCell('L' . $row->getRowIndex())->getValue();
-
-                    // Check if 'early leaving' is not '00:00:00'
-                    if ($earlyCell !== '00:00:00') {
                         $sheet->getStyle('L' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -155,11 +145,35 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                         ]);
                     }
 
-                    $workHourCell = $sheet->getCell('M' . $row->getRowIndex())->getValue();
+                    // Check if 'early leaving' is not '00:00:00'
+                    $earlyCell = $sheet->getCell('M' . $row->getRowIndex())->getValue();
+
+                    if ($earlyCell !== '00:00:00') {
+                        $sheet->getStyle('M' . $row->getRowIndex())->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FF0000'],
+                            ],
+                        ]);
+                    }
 
                     // Check if 'work hours' is under '09:00:00'
+                    $workHourCell = $sheet->getCell('N' . $row->getRowIndex())->getValue();
+
                     if (strtotime('08:00:00') > strtotime($workHourCell)) {
-                        $sheet->getStyle('M' . $row->getRowIndex())->applyFromArray([
+                        $sheet->getStyle('N' . $row->getRowIndex())->applyFromArray([
+                            'fill' => [
+                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => 'FF0000'],
+                            ],
+                        ]);
+                    }
+
+                    // Check if attendance is valid
+                    $validCell = $sheet->getCell('I' . $row->getRowIndex())->getValue();
+
+                    if ($validCell !== __('Valid Attendance')) {
+                        $sheet->getStyle('I' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
                                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],

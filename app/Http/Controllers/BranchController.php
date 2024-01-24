@@ -123,8 +123,10 @@ class BranchController extends Controller
                 $employee     = Employee::where('branch_id', $branch->id)->get();
                 if (count($employee) == 0) {
                     $department = Department::where('branch_id', $branch->id)->first();
-                    Designation::where('department_id', $department->branch_id)->delete();
-                    $department->delete();
+                    if (!empty($department)) {
+                        Designation::where('department_id', $department->branch_id)->delete();
+                        $department->delete();
+                    }
                     $branch->delete();
                 } else {
                     return redirect()->route('branch.index')->with('error', __('This branch has employees. Please remove the employee from this branch.'));

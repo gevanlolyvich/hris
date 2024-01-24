@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Warning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ShiftController extends Controller
@@ -15,7 +17,7 @@ class ShiftController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Shift')) {
-            $shifts = ShiftType::all();
+            $shifts = !empty(\Auth::user()->branch_id) ? ShiftType::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get() : ShiftType::orderBy('name', 'ASC')->get();
 
             return view('shift.index', compact('shifts'));
         } else {
@@ -26,17 +28,9 @@ class ShiftController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Shift')) {
-            // if (Auth::user()->type == 'employee') {
-            //     $user             = Auth::user();
-            //     $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-            //     $employees        = Employee::where('is_active', 1)->where('user_id', '!=', $user->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
-            // } else {
-            //     $user             = Auth::user();
-            //     $current_employee = Employee::where('is_active', 1)->where('user_id', $user->id)->get()->pluck('name', 'id');
-            //     $employees        = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
-            // }
+            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-            return view('shift.create');
+            return view('shift.create', compact('branches'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -44,12 +38,14 @@ class ShiftController extends Controller
 
     public function store(Request $request)
     {
+        // return $request;
         if (\Auth::user()->can('Create Shift')) {
 
             $validator = Validator::make(
                 $request->all(),
                 [
                     'shift_name' => 'required',
+                    "branch_id"  => 'required'
                 ]
             );
 
@@ -67,7 +63,10 @@ class ShiftController extends Controller
             $status['status6'] = isset($request->status6) ? true : false;
             $status['status7'] = isset($request->status7) ? true : false;
 
-            $shift_type = ShiftType::create(['name' => $request->shift_name]);
+            $shift_type = ShiftType::create([
+                'name' => $request->shift_name,
+                'branch_id' => $request->branch_id
+            ]);
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
             for ($i = 0; $i < count($days); $i++) {
@@ -94,8 +93,10 @@ class ShiftController extends Controller
     {
         // return $shift;
         if (\Auth::user()->can('Edit Shift')) {
-            $shift_type = ShiftType::where('id', $shift->id)->first();
-            return view('shift.edit', compact('shift', 'shift_type'));
+            $shift_type = ShiftType::find($shift->id);
+            $branches = Branch::get()->pluck('name', "id");
+
+            return view('shift.edit', compact('shift', 'shift_type', 'branches'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -109,6 +110,7 @@ class ShiftController extends Controller
                     $request->all(),
                     [
                         'shift_name' => 'required',
+                        "branch_id"  => 'required'
                     ]
                 );
             }
@@ -120,7 +122,8 @@ class ShiftController extends Controller
             }
 
             //* Update Shift Type
-            $shift->name = $request->shift_name;
+            $shift->name        = $request->shift_name;
+            $shift->branch_id   = $request->branch_id;
             $shift->save();
 
             //* Update Shift Times

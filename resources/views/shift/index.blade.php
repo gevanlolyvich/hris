@@ -29,6 +29,7 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Shift Name') }}</th>
+                                <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Work Days') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
@@ -43,6 +44,7 @@
                             @foreach ($shifts as $shift)
                                 <tr>
                                     <td>{{ $shift->name }}
+                                    <td>{{ $shift->branch?->name  }}
                                     </td>
                                     <td>
                                         @foreach ($shift->shiftTimes as $shiftTimes)

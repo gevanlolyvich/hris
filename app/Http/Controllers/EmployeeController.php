@@ -39,17 +39,29 @@ class EmployeeController extends Controller
      *
     //  * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-
         if (\Auth::user()->can('Manage Employee')) {
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = collect();
+
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get();
+                $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc');
             } else {
-                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get() : Employee::orderby('name', 'asc')->get();
+                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
             }
 
-            return view('employee.index', compact('employees'));
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $employees      = $employees->where('branch_id', $request->branch_id);
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $employees      = $employees->where('department_id', $request->department_id);
+            }
+            $employees      = $employees->get();
+
+            return view('employee.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -65,7 +77,8 @@ class EmployeeController extends Controller
             $department_id    = $departments->pluck('id')->toArray();
             $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-            $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $shift_types      = !empty(\Auth::user()->branch_id) ? ShiftType::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            // $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
@@ -262,7 +275,8 @@ class EmployeeController extends Controller
             $documents        = Document::where('created_by', \Auth::user()->creatorId())->get();
             $employee         = Employee::find($id);
             $employeesId      = ($employee->employee_id);
-            $shift_types      = ShiftType::get()->pluck('name', 'id');
+            // $shift_types      = ShiftType::get()->pluck('name', 'id');
+            $shift_types      = !empty(\Auth::user()->branch_id) ? ShiftType::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
             $banks            = Bank::orderBy('name')->get()->pluck('name', 'id');
@@ -570,6 +584,12 @@ class EmployeeController extends Controller
         $employees = $employees->pluck('name', 'id')->toArray();
         // Log::info($employees);
         return response()->json($employees);
+    }
+
+    public function branchShiftJson(Request $request)
+    {
+        $shift_types      = !empty($request->branch_id) ? ShiftType::where('branch_id', $request->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+        return response()->json($shift_types);
     }
     public function importFile()
     {
