@@ -24,7 +24,7 @@
             <div class="form-group">
                 {{ Form::label('shift_id', __('Shift'), ['class' => 'col-form-label']) }}
                 <div class="shift_div btn-box">
-                    {{ Form::select('shift_id', [], null, ['class' => 'form-control select2 shift_id', 'placeholder' => __('Select Shift')]) }}
+                    {{ Form::select('shift_id', $shifts, null, ['class' => 'form-control select2 shift_id', 'placeholder' => __('Select Shift')]) }}
                 </div>
             </div>
         </div>

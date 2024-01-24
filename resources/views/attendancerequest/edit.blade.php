@@ -14,7 +14,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'required' => 'required',  'placeholder' => __('Select Date')]) }}
+                {{ Form::date('date', null, ['class' => 'form-control', 'autocomplete' => 'off', 'required' => 'required', 'id' => 'date', 'placeholder' => __('Select Date')]) }}
             </div>
         </div>
         <div class="col-md-6">
