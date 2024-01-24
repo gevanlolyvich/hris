@@ -679,6 +679,7 @@ class AttendanceEmployeeController extends Controller
                 'longitude' => 'required',
                 'accuracy' => 'required',
                 'picture' => $settings['photo_on_clock'] == 'Required' ? 'required' : 'nullable',
+                'shift_type_id' => 'required',
             ]
         );
         if ($validator->fails()) {

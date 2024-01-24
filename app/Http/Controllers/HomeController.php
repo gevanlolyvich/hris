@@ -128,9 +128,9 @@ class HomeController extends Controller
                 $date               = date("Y-m-d");
                 $dateYesterday      = date("Y-m-d", strtotime('yesterday'));
                 $time               = date("H:i:s");
-                $employeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $date)->first();
+                $employeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', $date)->first();
                 // return $employeeAttendance;
-                $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', '=', $dateYesterday)->first();
+                $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', $dateYesterday)->first();
 
                 $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
                     ->where('days', date('l'))

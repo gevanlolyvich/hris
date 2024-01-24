@@ -231,7 +231,7 @@
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <input type="hidden" name="picture_out" id="picture_out">
-                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
+                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         {{-- @elseif ($employeeAttendance) --}}
