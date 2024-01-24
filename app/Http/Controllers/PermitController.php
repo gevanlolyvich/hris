@@ -262,7 +262,7 @@ class PermitController extends Controller
                 }
 
                 $permit->delete();
-                return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Deleted'));
+                return redirect()->back()->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }

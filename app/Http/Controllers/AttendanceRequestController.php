@@ -253,7 +253,7 @@ class AttendanceRequestController extends Controller
                 }
 
                 $attendance_request->delete();
-                return redirect()->route('attendancerequest.index')->with('success', __('Attendance Request Successfully Deleted'));
+                return redirect()->back()->with('success', __('Attendance Request Successfully Deleted'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
