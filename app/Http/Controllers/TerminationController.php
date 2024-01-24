@@ -173,7 +173,7 @@ class TerminationController extends Controller
                 Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
                 $termination->delete();
 
-                return redirect()->route('termination.index')->with('success', __('Termination successfully deleted.'));
+                return redirect()->back()->with('success', __('Termination successfully deleted.'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
