@@ -70,13 +70,21 @@ class AttendanceRequestController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Request Attendance')) {
+            $shifts = [];
             if (Auth::user()->type == 'employee') {
-                $employees = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+
+                $shifts     = ShiftType::where('branch_id', Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                foreach ($shifts as $key => $shift) {
+                    $times = ShiftTime::where('shift_type_id', $key)->where('days', date('l'))->select('start_time', 'end_time')->first();
+                    $formated_times = !empty($times->start_time) || !empty($times->end_time) ? substr($times->start_time, 0, 5) . ' - ' . substr($times->end_time, 0, 5) : __('Holidays');
+                    $shifts[$key] = $formated_times.  ' | ' . $shift;
+                }
             } else {
-                $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees  = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
-            return view('attendancerequest.create', compact('employees'));
+            return view('attendancerequest.create', compact('employees', 'shifts'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -104,7 +112,7 @@ class AttendanceRequestController extends Controller
     
         $date = date_create($request->date);
         //* Role Validation
-        $employee = Employee::where('is_active', 1)->where('id', $request->employee_id)->first();
+        $employee = Employee::where('is_active', 1)->where('id', $request->employee_id ?? \Auth::user()?->employee->id)->first();
         if (empty($employee) || !$employee) {
             return redirect()->back()->with('error', __('Inactive'));
         }
@@ -184,7 +192,6 @@ class AttendanceRequestController extends Controller
                     $request->all(),
                     [
                         'date' => 'required|before:today',
-                        'employee_id' => 'required',
                         'shift_id' => 'required',
                         'start_time' => 'required',
                         'end_time' => 'required',
@@ -216,7 +223,7 @@ class AttendanceRequestController extends Controller
                 //* Input Data
                 $form = [
                     'date'          => date_format($date, "Y-m-d"),
-                    'employee_id'   => $request->employee_id,
+                    'employee_id'   => \Auth::user()->type != 'employee' ? $request->employee_id ?? $attendance_request->employee_id : \Auth::user()?->employee?->id,
                     'shift_id'      => $request->shift_id,
                     'start_time'    => $request->start_time,
                     'end_time'      => $request->end_time,

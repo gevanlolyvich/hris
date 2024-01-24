@@ -336,7 +336,7 @@
 
         $(document).on('change', '#date', function() {
             var date = $(this).val();
-            var employee_id = document.getElementById('employee_id').value;
+            var employee_id = document.getElementById('employee_id')?.value || @json(Auth::user()?->employee?->id);
             getShift(employee_id, date);
         });
     </script>
