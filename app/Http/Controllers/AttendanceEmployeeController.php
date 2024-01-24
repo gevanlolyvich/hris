@@ -668,7 +668,6 @@ class AttendanceEmployeeController extends Controller
 
     public function attendance(Request $request)
     {
-        // return $request;
         $settings = Utility::settings();
 
         $validator = \Validator::make(
@@ -864,7 +863,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
-                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                    $employeeAttendance->shift_type_id          = $request->shift_type_id;
 
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
@@ -901,7 +900,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_type_id     = $attendance_type;
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
-                    $employeeAttendance->shift_type_id          = \Auth::user()->employee->shift_type_id;
+                    $employeeAttendance->shift_type_id          = $request->shift_type_id;
 
                     $employeeAttendance->save();
 
