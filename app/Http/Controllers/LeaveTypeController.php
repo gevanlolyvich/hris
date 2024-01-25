@@ -51,7 +51,8 @@ class LeaveTypeController extends Controller
             $leavetype             = new LeaveType();
             $leavetype->title      = $request->title;
             $leavetype->days       = $request->days;
-            $leavetype->created_by = \Auth::user()->creatorId();
+            $leavetype->is_active  = 1;
+            $leavetype->created_by = \Auth::user()->id;
             $leavetype->save();
 
             return redirect()->route('leavetype.index')->with('success', __('LeaveType  successfully created.'));
@@ -68,7 +69,7 @@ class LeaveTypeController extends Controller
     public function edit(LeaveType $leavetype)
     {
         if (\Auth::user()->can('Edit Leave Type')) {
-            if ($leavetype->created_by == \Auth::user()->creatorId()) {
+            if ($leavetype->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
 
                 return view('leavetype.edit', compact('leavetype'));
             } else {
@@ -82,7 +83,7 @@ class LeaveTypeController extends Controller
     public function update(Request $request, LeaveType $leavetype)
     {
         if (\Auth::user()->can('Edit Leave Type')) {
-            if ($leavetype->created_by == \Auth::user()->creatorId()) {
+            if ($leavetype->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -97,8 +98,9 @@ class LeaveTypeController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $leavetype->title = $request->title;
-                $leavetype->days  = $request->days;
+                $leavetype->title       = $request->title;
+                $leavetype->is_active   = $request->is_active;
+                $leavetype->days        = $request->days;
                 $leavetype->save();
 
                 return redirect()->route('leavetype.index')->with('success', __('LeaveType successfully updated.'));
@@ -113,10 +115,11 @@ class LeaveTypeController extends Controller
     public function destroy(LeaveType $leavetype)
     {
         if (\Auth::user()->can('Delete Leave Type')) {
-            if ($leavetype->created_by == \Auth::user()->creatorId()) {
+            if ($leavetype->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 $leave     = Leave::where('leave_type_id', $leavetype->id)->get();
                 if (count($leave) == 0) {
-                    $leavetype->delete();
+                    $leavetype->is_active   = 0;
+                    $leavetype->save();
                 } else {
                     return redirect()->route('leavetype.index')->with('error', __('This leavetype has leave. Please remove the leave from this leavetype.'));
                 }

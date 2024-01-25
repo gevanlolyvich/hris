@@ -117,7 +117,8 @@ class LeaveController extends Controller
             $endDate = new \DateTime($request->end_date);
             $start_date = date($request->start_date);
             $end_date   = date($request->end_date);
-            $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
+            $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 1;
+            $total_leave_days += 1;
             // return $total_leave_days;
             if ($leave_type->days >= $total_leave_days) {
                 $leave    = new LocalLeave();
@@ -160,13 +161,13 @@ class LeaveController extends Controller
                 $leave->applied_on       = date('Y-m-d');
                 $leave->start_date       = $request->start_date;
                 $leave->end_date         = $request->end_date;
-                $leave->total_leave_days = $total_leave_days + 1;
+                $leave->total_leave_days = $total_leave_days;
                 $leave->leave_reason     = $request->leave_reason;
                 $leave->remark           = $request->remark;
                 $leave->location         = $request->location;
                 $leave->document_path    = $document_path;
                 $leave->status           = 'Pending';
-                $leave->created_by       = \Auth::user()->creatorId();
+                $leave->created_by       = \Auth::user()->id;
 
                 $leave->save();
 
@@ -198,8 +199,6 @@ class LeaveController extends Controller
 
     public function edit(LocalLeave $leave)
     {
-
-        // return $leave;
         if (\Auth::user()->can('Edit Leave')) {
             if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $employees = null;
@@ -213,6 +212,7 @@ class LeaveController extends Controller
                     $join->on('leaves.leave_type_id', '=', 'leave_types.id');
                     $join->where('leaves.employee_id', '=', $leave->employee_id);
                 })
+                ->where('leave_types.is_active', 1)
                 ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
                 ->get();
 
@@ -301,8 +301,9 @@ class LeaveController extends Controller
                 
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
-                $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
-                if ($total_days <= $leave_type->days && ($total_days + $total_leave_days) <= $leave_type->days) {
+                $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 1;
+                $total_leave_days += 1;
+                if ($total_days <= $leave_type->days && ($total_days + $total_leave_days + 1) <= $leave_type->days) {
                     $document_path = null;
                     if ($request->file('myDocument')) {
                         $docs = $request->file('myDocument');
@@ -314,7 +315,7 @@ class LeaveController extends Controller
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
-                    $leave->total_leave_days = $total_leave_days + 1;
+                    $leave->total_leave_days = $total_leave_days;
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
                     $leave->location         = $request->location;
@@ -375,6 +376,10 @@ class LeaveController extends Controller
         // return $request;
         $dates = [];
         $leave = LocalLeave::find($request->leave_id);
+        $leaveType = LeaveType::find($leave?->leave_type_id);
+        if (empty($leaveType) || !$leaveType?->is_active) {
+            return redirect()->back()->with('error', __('Leave Type Is Inactive'));
+        }
 
         $leave->status = $request->status;
         $leave->note = $request->note;
@@ -474,19 +479,14 @@ class LeaveController extends Controller
 
     public function jsoncount(Request $request)
     {
-        //        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days),0) AS total_leave, leave_types.title, leave_types.days,leave_types.id'))->leftjoin(
-        //            'leaves', function ($join) use ($request){
-        //            $join->on('leaves.leave_type_id', '=', 'leave_types.id');
-        //            $join->where('leaves.employee_id', '=', $request->employee_id);
-        //        }
-        //        )->groupBy('leaves.leave_type_id')->get();
-
-        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.title, leave_types.days, leave_types.id'))
+        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.id, leave_types.title, leave_types.days'))
             ->leftJoin('leaves', function ($join) use ($request) {
                 $join->on('leaves.leave_type_id', '=', 'leave_types.id');
                 $join->where('leaves.employee_id', '=', $request->employee_id);
             })
+            ->where('leave_types.is_active', 1)
             ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
+            ->orderBy('leave_types.title', 'ASC')
             ->get();
 
         return $leave_counts;
