@@ -54,6 +54,7 @@ class HomeController extends Controller
                 $emp            = Employee::where('user_id', $user->id)->first();
 
                 $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
+                $attendances    = AttendanceEmployee::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->orderBy('id', 'ASC')->get();
 
                 $shift_types    = ShiftType::where('branch_id', $emp->branch_id)->get()->pluck('name', 'id');
                 $shift_types    = ShiftType::where('branch_id', $emp->branch_id)
@@ -177,7 +178,7 @@ class HomeController extends Controller
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime', 'shift_types'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime', 'shift_types', 'attendances'));
             } else {
 
                 $announcements = !empty(\Auth::user()->branch_id) ? Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('announcements.id', 'desc')->take(5)->get() : Announcement::orderBy('announcements.id', 'desc')->take(5)->get();

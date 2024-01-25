@@ -22,107 +22,141 @@
 
     @if (\Auth::user()->type == 'employee')
     {{-- Modal --}}
-    <div class="modal fade" id="clockInOutInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding-top: 0.35rem">
-                    <div class="row d-flex flex-column align-items-center">
-                        {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                        <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
-                            <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
-                                class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
-                            </button>
-                            <div id="camera-overtime" style="display: none; position: relative" class="col-12">
-                                <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
-                                <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
-                                    class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
-                                </button>
-                            </div>
-                            <canvas id="canvas-overtime" style="display: none;"></canvas>
-                            <div id="output-overtime" style="display: none;">
-                                <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
-                            </div>
-                            <label for="picture-overtime">
-                                <input type="hidden" name="picture" id="picture-overtime">
-                            </label>      
-                        </div>
-                        <hr>
-                        <input type="hidden" name="latitude" id="latitude-overtime" value="0">
-                        <input type="hidden" name="longitude" id="longitude-overtime" value="0">
-                        <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
-                        <input type="hidden" name="overtimeId" id="overtimeId" value="">
-                        <div class="col-md-6 text-center mx-auto mt-3">
-                            <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
-                            {{ Form::close() }}
-                        </div>                                                    
-                        <div class="col-md-6 text-center mx-auto mt-3">
+
+    @if (Auth::user()->type == 'employee')
+        <div class="modal fade" id="clockInOutInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        <div class="row d-flex flex-column align-items-center">
                             {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                                <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
-                                <input type="hidden" name="picture_out" id="picture_out-overtime">
-                                <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
-                                <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
-                            {{ Form::close() }}
+                            <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
+                                <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
+                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                </button>
+                                <div id="camera-overtime" style="display: none; position: relative" class="col-12">
+                                    <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                                    <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
+                                        class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                    </button>
+                                </div>
+                                <canvas id="canvas-overtime" style="display: none;"></canvas>
+                                <div id="output-overtime" style="display: none;">
+                                    <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                                </div>
+                                <label for="picture-overtime">
+                                    <input type="hidden" name="picture" id="picture-overtime">
+                                </label>      
+                            </div>
+                            <hr>
+                            <input type="hidden" name="latitude" id="latitude-overtime" value="0">
+                            <input type="hidden" name="longitude" id="longitude-overtime" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
+                            <input type="hidden" name="overtimeId" id="overtimeId" value="">
+                            <div class="col-md-6 text-center mx-auto mt-3">
+                                <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
+                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
+                                {{ Form::close() }}
+                            </div>                                                    
+                            <div class="col-md-6 text-center mx-auto mt-3">
+                                {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                                    <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
+                                    <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
+                                    <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
+                                    <input type="hidden" name="picture_out" id="picture_out-overtime">
+                                    <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
+                                    <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
+                                        class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
+                                {{ Form::close() }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding-top: 0.35rem">
-                    {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                        <div class="form-group" style="margin-bottom: 0px">
-                            {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
-                            <div class="row">
-                                <label for="myDocument" class="col-6">
-                                <div class="btn btn-block btn-primary bg-primary document"> <i
-                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+        <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                            <div class="form-group" style="margin-bottom: 0px">
+                                {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
+                                <div class="row">
+                                    <label for="myDocument" class="col-6">
+                                    <div class="btn btn-block btn-primary bg-primary document"> <i
+                                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                        </div>
+                                        <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
+                                    </label>
+                                    <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
+                                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
                                     </div>
-                                    <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
-                                </label>
-                                <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
-                                    class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                </div>
+                                <div class="col-md-6" id="exist-document-class" style="display: none;">
+                                    {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
+                                    <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                                        data-bs-toggle="tooltip" id="exist-document-view"
+                                        data-bs-original-title="{{ __('View') }}">
+                                        <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                                    </a>
                                 </div>
                             </div>
-                            <div class="col-md-6" id="exist-document-class" style="display: none;">
-                                {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
-                                <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
-                                    data-bs-toggle="tooltip" id="exist-document-view"
-                                    data-bs-original-title="{{ __('View') }}">
-                                    <i class="ti ti-file text-white" style="font-size: 15px"></i>
-                                </a>
+                            <div class="form-group">
+                                {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
+                                {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
                             </div>
+                            <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
                         </div>
-                        <div class="form-group">
-                            {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
-                            {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
+                        <div class="modal-footer">
+                            <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                            <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
                         </div>
-                        <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                        <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
-                    </div>
-                {{ Form::close() }}
+                    {{ Form::close() }}
+                </div>
             </div>
         </div>
-    </div>
-    
+        
+        <div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Out Data')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        <div style="display: none;" id="modal-note">
+                            <div class="text-center mx-auto">
+                                <strong>{{__('Notes')}}</strong>
+                                <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                            </div>
+                        </div>
+                        <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
+                            <div class="text-center mx-auto">
+                                <strong>{{__('Clock In / Out Image Capture')}}</strong>
+                                <br>
+                                <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-3 mt-1">
+                                <br>
+                            </div>
+                        </div>
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Clock In / Out Location')}}</strong>
+                            <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%" class="mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="col-xxl-5">
         <div class="card">
             <div class="card-header">
@@ -138,6 +172,7 @@
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
                         <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
                     @elseif (empty($employeeAttendance))
+                        {{-- DO Nothing --}}
                     @else
                         <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
                     @endif
@@ -260,6 +295,55 @@
                 </div>
             </div>
         </div>
+        @if (!$attendances->isEmpty())
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ __("Today Attendance History") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table text-center">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Shift') }}</th>
+                                    <th>{{ __('Clock In') }}</th>
+                                    <th>{{ __('Clock Out') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @foreach ($attendances as $attendanceData)
+                                    <tr>
+                                        <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($attendanceData->coord_in)
+                                                <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                </a>
+                                            @else
+                                                <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                </a>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($attendanceData->coord_out)
+                                                <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                </a>
+                                            @else
+                                                <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
         @if (!empty($overtime))
             <div class="card">
                 <div class="card-header card-body table-border-style">
@@ -947,6 +1031,65 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            var map = null;
+            var imageSrc = null;
+            var notes = null;
+
+            $('body').on('click', '.map-link', function() {
+                var coordinates = $(this).data('coordinates').split(', ');
+                notes = $(this).data('note');
+
+                imageSrc = $(this).data('image');
+                if (imageSrc.length) {
+                    $('#clockImage').attr('src', imageSrc)
+                    document.getElementById('photos').style.display = '';
+                } else {
+                    document.getElementById('photos').style.display = 'none';
+                }
+            
+                // Convert the radius string to a number
+                var radius = parseFloat(coordinates[2]);
+
+            
+                // Open the modal
+                $('#openStreetMapModal').modal('show');
+            
+                // Initialize the map after the modal is fully shown
+                $('#openStreetMapModal').on('shown.bs.modal', function () {
+                    if (notes) {
+                        document.getElementById('modal-note').style.display = '';
+                        document.getElementById('note-value').value = notes;
+                    } else {
+                        document.getElementById('modal-note').style.display = 'none';
+                        document.getElementById('note-value').value = '';
+                    }
+                    // If a map already exists, remove it
+                    if (map !== null) {
+                        map.remove();
+                    }
+
+                    map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                
+                    // Add a marker for the location
+                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+                
+                    // Add a circle with the converted radius
+                    var circle = L.circle([coordinates[0], coordinates[1]], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: radius,
+                    }).addTo(map);
+                });
+            });
+        });
     </script>
     @endif
 
