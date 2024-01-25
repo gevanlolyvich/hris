@@ -27,9 +27,18 @@ class PermitController extends Controller
 
         if (\Auth::user()->can('Manage Leave')) {
             if (Auth::user()->type == 'employee') {
-                $user     = Auth::user();
-                $employee = Employee::where('user_id', '=', $user->id)->first();
-                $permits   = Permit::where('employee_id', '=', $employee->id)->orderBy('start_date', 'DESC');
+                $subordinates = \Auth::user()->employee->subordinatesFlatten();
+                $employees = collect();
+
+                // Check if employee managing other employee or not
+                if ($subordinates->isNotEmpty()) {
+                    foreach ($subordinates as $subordinate) {
+                        $employees->push($subordinate->id);
+                    }
+                }
+                $employees->push(\Auth::user()->employee->id);
+
+                $permits   = Permit::whereIn('employee_id', $employees)->orderBy('start_date', 'DESC');
             } else {
                 $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
             }
