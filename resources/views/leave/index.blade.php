@@ -228,21 +228,27 @@
                 },
                 success: function(data) {
                     $('#leave_type_id').empty();
-                    $('#leave_type_id').append(
-                        '<option value="">{{ __('Select Leave Type') }}</option>');
+                    // $('#leave_type_id').append(
+                    //     '<option value="">{{ __('Select Leave Type') }}</option>');
+                    var leave_selct = ` <select class="form-control select2  leave_type_id" name="leave_type_id" id="choices-multiple"
+                                            placeholder="Select Leave Type" >
+                                            </select>`;
+                    $('.leave_type_div').html(leave_selct);
 
+                    $('.leave_type_id').append('<option value="" disabled selected>{{ __('Select Leave Type') }}</option>');
                     $.each(data, function(key, value) {
                         if (value.total_leave == value.days) {
-                            $('#leave_type_id').append('<option value="' + value.id +
-                                '" disabled>' + value.title + '&nbsp(' + value.total_leave +
-                                '/' + value.days + ')</option>');
+                            $('.leave_type_id').append('<option value="' + value.id +
+                                '" disabled>' + `( ${value.total_leave} / ${value.days} ) | ${value.title}` + '</option>');
                         } else {
-                            $('#leave_type_id').append('<option value="' + value.id + '">' +
-                                value.title + '&nbsp(' + value.total_leave + '/' + value
-                                .days + ')</option>');
+                            $('.leave_type_id').append('<option value="' + value.id + '">' +
+                                `( ${value.total_leave} / ${value.days} ) | ${value.title}` + '</option>');
                         }
                     });
 
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
                 }
             });
         });
@@ -292,8 +298,6 @@
 
         $(document).on('change', 'select[name=branch_id]', function() {
             var branch_id = $(this).val();
-            // console.log({branch_id})
-            // $('.designation_id').empty();
             getDepartment(branch_id);
         });
     </script>

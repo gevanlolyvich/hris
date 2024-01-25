@@ -15,13 +15,16 @@
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                <select name="leave_type_id" id="leave_type_id" class="form-control select">
+                <div class="leave_type_div btn-box">
+                    {{ Form::select('leave_type_id', [], null, ['class' => 'form-control select2 leave_type_id', 'placeholder' => __('Select Leave Type')]) }}
+                </div>
+                {{-- <select name="leave_type_id" id="leave_type_id" class="form-control select2">
                     <option selected disabled>{{__('Select Leave Type')}}</option>
                     @foreach ($leavetypes as $leave)
                         <option value="{{ $leave->id }}">{{ $leave->title }} (<p class="float-right pr-5">
                                 {{ $leave->days }}</p>)</option>
                     @endforeach
-                </select>
+                </select> --}}
             </div>
         </div>
     </div>

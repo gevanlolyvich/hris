@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
 
@@ -207,7 +208,19 @@ class LeaveController extends Controller
                 } else {
                     $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
-                $leavetypes = LeaveType::get();
+                $leavetypes = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.title, leave_types.days, leave_types.id'))
+                ->leftJoin('leaves', function ($join) use ($leave) {
+                    $join->on('leaves.leave_type_id', '=', 'leave_types.id');
+                    $join->where('leaves.employee_id', '=', $leave->employee_id);
+                })
+                ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
+                ->get();
+
+                foreach ($leavetypes as $type) {
+                    $type->title    = '( ' . $type->total_leave . ' / ' . $type->days . ' ) | ' . $type->title;
+                }
+                
+                $leavetypes         = $leavetypes->pluck('title', 'id');
 
                 return view('leave.edit', compact('leave', 'employees', 'leavetypes'));
             } else {
@@ -280,19 +293,24 @@ class LeaveController extends Controller
                 if (!empty($duplicate_leave)) {
                     return redirect()->back()->with('error', __('Leave Already Exist In That Date Range'));
                 }
-                
-                $document_path = null;
-                if ($request->file('myDocument')) {
-                    $docs = $request->file('myDocument');
-                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
-                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
-                    $document_path = env('APP_URL') . '/storage/' . $path;
-                }
 
+                $leaves_same_type = LocalLeave::whereNot('id', $leave->id)->where('employee_id', $leave->employee_id)->where('leave_type_id', $leave->leave_type_id)->get();
+                $total_days = $leaves_same_type->sum(function ($leaveData) {
+                    return (float) $leaveData->total_leave_days;
+                });
+                
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
                 $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
-                if ($leave_type->days >= $total_leave_days) {
+                if ($total_days <= $leave_type->days && ($total_days + $total_leave_days) <= $leave_type->days) {
+                    $document_path = null;
+                    if ($request->file('myDocument')) {
+                        $docs = $request->file('myDocument');
+                        $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                        $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                        $document_path = env('APP_URL') . '/storage/' . $path;
+                    }
+
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
@@ -463,14 +481,13 @@ class LeaveController extends Controller
         //        }
         //        )->groupBy('leaves.leave_type_id')->get();
 
-        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days),0) AS total_leave, leave_types.title, leave_types.days,leave_types.id'))
-            ->leftjoin(
-                'leaves',
-                function ($join) use ($request) {
-                    $join->on('leaves.leave_type_id', '=', 'leave_types.id');
-                    $join->where('leaves.employee_id', '=', $request->employee_id);
-                }
-            )->groupBy('leaves.leave_type_id')->get();
+        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.title, leave_types.days, leave_types.id'))
+            ->leftJoin('leaves', function ($join) use ($request) {
+                $join->on('leaves.leave_type_id', '=', 'leave_types.id');
+                $join->where('leaves.employee_id', '=', $request->employee_id);
+            })
+            ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
+            ->get();
 
         return $leave_counts;
     }
