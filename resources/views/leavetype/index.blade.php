@@ -31,6 +31,7 @@
                             <tr>
                                 <th width="10px">ID</th>
                                 <th>{{ __('Leave Type') }}</th>
+                                <th>{{ __('Active') }}</th>
                                 <th>{{ __('Days / Year') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -40,6 +41,7 @@
                                 <tr>
                                     <td>{{ $leavetype->id }}</td>
                                     <td>{{ $leavetype->title }}</td>
+                                    <td>{{ $leavetype->is_active ? __('Active') : __('Inactive')}}</td>
                                     <td>{{ $leavetype->days }}</td>
                                     <td class="Action">
                                         <span>
