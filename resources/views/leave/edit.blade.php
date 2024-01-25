@@ -12,7 +12,10 @@
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('leave_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                <select name="leave_type_id" id="leave_type_id" class="form-control select">
+                <div class="leave_type_div btn-box">
+                    {{ Form::select('leave_type_id', $leavetypes, null, ['class' => 'form-control select2 leave_type_id', 'placeholder' => __('Select Leave Type')]) }}
+                </div>
+                {{-- <select name="leave_type_id" id="leave_type_id" class="form-control select">
                     @foreach ($leavetypes as $leavee)
                         @if ($leave->leave_type_id == $leavee->id)
                             <option value="{{ $leavee->id }}" selected>{{ $leavee->title }} (<p class="float-right pr-5">
@@ -22,7 +25,7 @@
                                     {{ $leavee->days }}</p>)</option>
                         @endif
                     @endforeach
-                </select>
+                </select> --}}
             </div>
         </div>
     </div>

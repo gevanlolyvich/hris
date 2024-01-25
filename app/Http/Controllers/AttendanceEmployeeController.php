@@ -279,7 +279,7 @@ class AttendanceEmployeeController extends Controller
             ->where('shift_type_id', $request->shift_type_id)
             ->first();
 
-        $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+        $shift_times = ShiftTime::where('shift_type_id', $todayAttendance->shift_type_id)
             ->where('days', date('l'))
             ->first();
         $date           = date("Y-m-d");
@@ -291,10 +291,10 @@ class AttendanceEmployeeController extends Controller
         $settings = Utility::settings();
 
         // yesterday shift and attendance for cross day attendance operation
-        $yesterday_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
+        $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance->shift_type_id)
             ->where('days', date('l', strtotime('yesterday')))
             ->first();
-        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
 
         // tomorrow shift
         $tomorrow_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
@@ -752,7 +752,7 @@ class AttendanceEmployeeController extends Controller
                 return redirect()->back()->with('error', __('Today you have clocked in and clocked out.'));
             }
 
-            $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+            $shift_times = ShiftTime::where('shift_type_id', $request->shift_type_id)
                 ->where('days', date('l'))
                 ->first();
             $cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
@@ -778,7 +778,7 @@ class AttendanceEmployeeController extends Controller
 
                     if ($attendance != null) {
                         $attendance            = AttendanceEmployee::find($attendance->id);
-                        $attendance->clock_out = $endTime;
+                        $attendance->clock_out = $time;
                         $attendance->coord_out = $coord_out;
                         $attendance->note      = $note;
                         $attendance->save();
@@ -803,7 +803,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->attendance_status_id   = $presentStatus->id;
                     $employeeAttendance->status                 = $presentStatus->name;
                     $employeeAttendance->clock_in               = $time;
-                    $employeeAttendance->clock_out              = $cross_day ? $default_clock_out_cross_day : '00:00:00';
+                    $employeeAttendance->clock_out              = $time;
                     $employeeAttendance->late                   = $late;
                     $employeeAttendance->early_leaving          = '00:00:00';
                     $employeeAttendance->overtime               = '00:00:00';
@@ -851,7 +851,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->date                   = $date;
                     $employeeAttendance->status                 = 'No Working Hour';
                     $employeeAttendance->clock_in               = $time;
-                    $employeeAttendance->clock_out              = '00:00:00';
+                    $employeeAttendance->clock_out              = $time;
                     $employeeAttendance->late                   = '00:00:00';
                     $employeeAttendance->early_leaving          = '00:00:00';
                     $employeeAttendance->overtime               = '00:00:00';
@@ -888,7 +888,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->date                   = $date;
                     $employeeAttendance->status                 = 'No Working Hour';
                     $employeeAttendance->clock_in               = $time;
-                    $employeeAttendance->clock_out              = '00:00:00';
+                    $employeeAttendance->clock_out              = $time;
                     $employeeAttendance->late                   = '00:00:00';
                     $employeeAttendance->early_leaving          = '00:00:00';
                     $employeeAttendance->overtime               = '00:00:00';

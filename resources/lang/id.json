@@ -1806,5 +1806,6 @@
   "Employee Type successfully deleted":"Tipe Karyawan berhasil dihapus",
   "Select Shift Type":"Pilih Tipe Shift",
   "Already Clock In At": "Sudah Absen Masuk Pada",
-  "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada"
+  "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada",
+  "Today Attendance History": "Riwayat Kehadiran Hari Ini"
 }

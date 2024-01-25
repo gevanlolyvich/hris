@@ -79,9 +79,9 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                @if (\Auth::user()->type != 'employee')
-                                    <th>{{ __('Employee') }}</th>
-                                @endif
+                                {{-- @if (\Auth::user()->type != 'employee') --}}
+                                <th>{{ __('Employee') }}</th>
+                                {{-- @endif --}}
                                 <th>{{ __('Permit Type') }}</th>
                                 <th>{{ __('Start Date') }}</th>
                                 <th>{{ __('End Date') }}</th>
@@ -95,12 +95,8 @@
                         <tbody>
                             @foreach ($permits as $permit)
                                 <tr>
-                                    @if (\Auth::user()->type != 'employee')
-                                        <td>{{ !empty(\Auth::user()->getEmployee($permit->employee_id)) ? \Auth::user()->getEmployee($permit->employee_id)->name : '' }}
-                                        </td>
-                                    @endif
-                                    <td>{{ $permit->permitType->name }}
-                                    </td>
+                                    <td>{{ $permit->employee->name }}</td>
+                                    <td>{{ $permit->permitType->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->end_date) }}</td>
                                     <td>{{ $permit->total_permit_days }}</td>
