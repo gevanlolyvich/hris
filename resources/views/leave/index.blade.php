@@ -228,8 +228,6 @@
                 },
                 success: function(data) {
                     $('#leave_type_id').empty();
-                    // $('#leave_type_id').append(
-                    //     '<option value="">{{ __('Select Leave Type') }}</option>');
                     var leave_selct = ` <select class="form-control select2  leave_type_id" name="leave_type_id" id="choices-multiple"
                                             placeholder="Select Leave Type" >
                                             </select>`;

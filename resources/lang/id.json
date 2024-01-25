@@ -1807,5 +1807,6 @@
   "Select Shift Type":"Pilih Tipe Shift",
   "Already Clock In At": "Sudah Absen Masuk Pada",
   "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada",
-  "Today Attendance History": "Riwayat Kehadiran Hari Ini"
+  "Today Attendance History": "Riwayat Kehadiran Hari Ini",
+  "Leave Type Is Inactive": "Tipe Cuti Tidak Aktif"
 }

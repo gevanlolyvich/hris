@@ -18,7 +18,6 @@
             </div>
         </div>
 
-
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
                 {{ Form::label('days', __('Days Per Year'), ['class' => 'form-label']) }}

@@ -279,7 +279,7 @@ class AttendanceEmployeeController extends Controller
             ->where('shift_type_id', $request->shift_type_id)
             ->first();
 
-        $shift_times = ShiftTime::where('shift_type_id', $todayAttendance->shift_type_id)
+        $shift_times = ShiftTime::where('shift_type_id', $todayAttendance?->shift_type_id)
             ->where('days', date('l'))
             ->first();
         $date           = date("Y-m-d");
@@ -292,7 +292,7 @@ class AttendanceEmployeeController extends Controller
 
         // yesterday shift and attendance for cross day attendance operation
         $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
-        $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance->shift_type_id)
+        $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance?->shift_type_id)
             ->where('days', date('l', strtotime('yesterday')))
             ->first();
 
@@ -302,14 +302,14 @@ class AttendanceEmployeeController extends Controller
             ->first();
 
         // calculate default clock out for cross day shift
-        $today_clock_in_second       = strtotime($shift_times->start_time) - strtotime($date) - 3600;
+        $today_clock_in_second       = strtotime($shift_times?->start_time) - strtotime($date) - 3600;
         $today_hours                  = floor($today_clock_in_second / 3600);
         $today_mins                   = floor($today_clock_in_second / 60 % 60);
         $today_secs                   = floor($today_clock_in_second % 60);
         // $default_clock_out            = sprintf('%02d:%02d:%02d', $today_hours, $today_mins, $today_secs);
 
         // calculate default clock out for cross day shift
-        $clockoutSeconds              = strtotime($yesterday_shift_times->end_time) - strtotime($date);
+        $clockoutSeconds              = strtotime($yesterday_shift_times?->end_time) - strtotime($date);
         $hours                        = floor($clockoutSeconds / 3600);
         $mins                         = floor($clockoutSeconds / 60 % 60);
         $secs                         = floor($clockoutSeconds % 60);
@@ -327,13 +327,13 @@ class AttendanceEmployeeController extends Controller
         $tomorrow_secs                = floor($tomorrow_clock_in_second % 60);
         $tomorrow_absolute_in         = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
 
-        $today_cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
-        $yesterday_cross_day = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
+        $today_cross_day = $shift_times?->start_time > $shift_times?->end_time ? true : false;
+        $yesterday_cross_day = $yesterday_shift_times?->start_time > $yesterday_shift_times?->end_time ? true : false;
 
         if ($yesterdayAttendance && !$todayAttendance && ($timestamp <= $today_absolute_in || $yesterday_cross_day || !$today_absolute_in)) {
-            if ($yesterday_shift_times->is_working) {
-                $startTime = $yesterday_shift_times->start_time;
-                $endTime = $yesterday_shift_times->end_time;
+            if ($yesterday_shift_times?->is_working) {
+                $startTime = $yesterday_shift_times?->start_time;
+                $endTime = $yesterday_shift_times?->end_time;
 
                 if (Auth::user()->type == 'employee') {
                     //early Leaving
@@ -487,9 +487,9 @@ class AttendanceEmployeeController extends Controller
             }
             // } elseif ($todayAttendance && ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
         } elseif ($todayAttendance || ($timestamp <= $tomorrow_absolute_in || $today_cross_day || !$tomorrow_absolute_in)) {
-            if ($shift_times->is_working) {
-                $startTime = $shift_times->start_time;
-                $endTime = $shift_times->end_time;
+            if ($shift_times?->is_working) {
+                $startTime = $shift_times?->start_time;
+                $endTime = $shift_times?->end_time;
 
                 if (Auth::user()->type == 'employee') {
                     //early Leaving
