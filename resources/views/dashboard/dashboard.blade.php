@@ -237,7 +237,7 @@
                     </div>
                     <div class="col-md-6 text-center mx-auto mt-1">
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in"
                                 class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                         {{-- @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out']))) --}}
@@ -262,7 +262,7 @@
                         {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                         {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
                         {{-- @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out']) --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance))
+                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
@@ -847,8 +847,6 @@
           try {
             const { latitude, longitude, accuracy } = await getLocation();
 
-            console.log({ latitude, longitude, accuracy });
-
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
             // const clockInData = document.getElementById("clockInData");
@@ -904,15 +902,12 @@
             const otherForm = document.getElementById('other-form');
             const clockOutButton = document.getElementById("clock_out");
             const clockInButton = document.getElementById("clock_in");
-            // console.log(Boolean(Number(clockOutButton.value)));
-            // console.log(clockOutButton.value);
+
             if (!Boolean(Number(clockOutButton.value))) {
-                console.log('A');
                 if (otherForm) {
                     otherForm.style.display = ''
                 }
             } else {
-                console.log('B');
                 otherForm.style.display = 'none';
             }
           }

@@ -156,14 +156,14 @@ class HomeController extends Controller
                 $officeTime['absolute_out']               = strtotime("$date $today_absolute_out_time");
 
                 // create shift and office time for yesterday
-                $yesterday_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+                $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayEmployeeAttendance?->shift_type_id)
                     ->where('days', date('l', strtotime('yesterday')))
                     ->first();
 
-                $yesterdayOfficeTime['startTime']    = $yesterday_shift_times->start_time;
-                $yesterdayOfficeTime['endTime']      = $yesterday_shift_times->end_time;
-                $yesterdayOfficeTime['is_working']   = $yesterday_shift_times->is_working;
-                $yesterdayOfficeTime['is_cross_day'] = $yesterday_shift_times->start_time > $yesterday_shift_times->end_time ? true : false;
+                $yesterdayOfficeTime['startTime']    = $yesterday_shift_times?->start_time;
+                $yesterdayOfficeTime['endTime']      = $yesterday_shift_times?->end_time;
+                $yesterdayOfficeTime['is_working']   = $yesterday_shift_times?->is_working;
+                $yesterdayOfficeTime['is_cross_day'] = $yesterday_shift_times?->start_time > $yesterday_shift_times?->end_time ? true : false;
 
                 // calculate default clock out for yesterday cross day shift
                 $clockoutSeconds                          = strtotime($yesterday_shift_times->end_time) - strtotime($date);
