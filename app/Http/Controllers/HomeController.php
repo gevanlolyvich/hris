@@ -166,7 +166,7 @@ class HomeController extends Controller
                 $yesterdayOfficeTime['is_cross_day'] = $yesterday_shift_times?->start_time > $yesterday_shift_times?->end_time ? true : false;
 
                 // calculate default clock out for yesterday cross day shift
-                $clockoutSeconds                          = strtotime($yesterday_shift_times->end_time) - strtotime($date);
+                $clockoutSeconds                          = strtotime($yesterday_shift_times?->end_time) - strtotime($date);
                 $hours                                    = floor($clockoutSeconds / 3600);
                 $mins                                     = floor($clockoutSeconds / 60 % 60);
                 $secs                                     = floor($clockoutSeconds % 60);
