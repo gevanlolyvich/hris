@@ -378,7 +378,7 @@ class AttendanceEmployeeController extends Controller
 
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
-                        'date'          => $date,
+                        'date'          => $attendanceEmployee->date,
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
@@ -386,7 +386,7 @@ class AttendanceEmployeeController extends Controller
 
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with([
+                    return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $attendanceEmployee->date])->with([
                         'success' => __('Employee successfully Clock Out.'),
                         'employee' => $employee,
                     ]);
@@ -454,7 +454,7 @@ class AttendanceEmployeeController extends Controller
 
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
-                        'date'          => $date,
+                        'date'          => $attendanceEmployee->date,
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
@@ -462,7 +462,7 @@ class AttendanceEmployeeController extends Controller
 
                     LogAttendance::create($logForm);
 
-                    return redirect()->route('attendanceemployee.index')->with([
+                    return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $attendanceEmployee->date])->with([
                         'success' => __('Employee successfully Clock Out.'),
                         'employee' => $employee,
                     ]);
