@@ -110,13 +110,6 @@ if (!empty($mode_setting['theme_color'])) {
             </div>
             <div class="auth-footer">
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-6">
-                            {{ __('Copyright') }} &copy;
-                            {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'LeadGo') }}
-                            {{ date('Y') }}
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

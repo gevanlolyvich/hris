@@ -204,11 +204,11 @@ $company_logo = Utility::getValByName('company_logo');
     <div class="footer-dark">
         <div class="container">
             <div class="row align-items-center justify-content-md-between py-4 mt-4 delimiter-top">
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                     <div class="copyright text-sm font-weight-bold text-center text-md-left">
                         {{!empty($companySettings['footer_text']) ? $companySettings['footer_text']->value : ''}}
                     </div>
-                </div>
+                </div> --}}
                 <div class="col-md-6">
                     <ul class="nav justify-content-center justify-content-md-end mt-3 mt-md-0">
                         <li class="nav-item">
