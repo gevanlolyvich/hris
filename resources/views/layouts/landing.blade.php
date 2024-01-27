@@ -730,9 +730,9 @@ if (!empty($mode_setting['theme_color'])) {
                     {{-- <p class="text-body"> {{ __('Copyright') }} &copy;
                         {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'LeadGo') }}
                         {{ date('Y') }} </p> --}}
-                    <p class="text-body"> {{ __('Copyright') }}
+                    {{-- <p class="text-body"> {{ __('Copyright') }}
                         {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'Company SaaS') }}
-                        {{ date('Y') }} | Design By Company </p>
+                        {{ date('Y') }} | Design By Company </p> --}}
                 </div>
             </div>
         </div>
