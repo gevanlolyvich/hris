@@ -138,16 +138,13 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('type', __('Employee Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {!! Form::select('type', $employeeTypes, null, ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
+                                        {!! Form::select('type', $employeeTypes, $employee->type_id, ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                         {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2', 'required' => 'required']) !!}
                                     </div>
-                                    <div class="form-group col-md-12">
-                                        {!! Form::label('shift_type_id', __('Select Shift*'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
-                                    </div>
+                                    
                                     
                                     <div class="form-group col-md-12">
                                         {{ Form::label('branch_id', __('Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
@@ -193,6 +190,20 @@
                                                      @if ($employee->managed_by)
                                                         <option value="{{ $employee->managed_by }}">{{ $employee->direct_spv->name }}</option>
                                                      @endif
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}
+    
+                                        <div class="form-icon-user">
+                                            <div class="shift_type_id_div">
+                                                <select class="form-control select2  shift_type_id" name="shift_type_id"
+                                                     placeholder="Select Shift">
+                                                     <option value="" disabled selected>{{ __('Select Shift') }}</option>
+                                                     
                                                 </select>
                                             </div>
                                         </div>
@@ -441,6 +452,7 @@
         // console.log({branch_id});
         getDepartment(branch_id);
         getEmployeeBranch(branch_id);
+        getBranchShift(branch_id);
     });
     
     function getDepartment(branch_id) {
@@ -453,7 +465,7 @@
                 "_token": "{{ csrf_token() }}",
             },
             success: function(data) {
-                console.log(data);
+                // console.log(data);
                 $('.department_id').empty();
                 var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
                                         placeholder="Select Department" >
@@ -484,7 +496,7 @@
                 "_token": "{{ csrf_token() }}",
             },
             success: function(data) {
-                console.log(data);
+                // console.log(data);
                 $('.managed_by').empty();
                 var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
                                         placeholder={{ __('Select Direct Supervisor') }} >
@@ -504,6 +516,38 @@
             }
         });
     }
+
+    function getBranchShift(branch_id) {
+            // console.log({branch_id})
+            console.log({loc:'branchshift'})
+            $.ajax({
+                url: '{{ route('branch.shift.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    // console.log(data);
+                    $('.shift_type_id').empty();
+                    var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
+                                            placeholder={{ __('Select Shift') }} >
+                                            </select>`;
+                    $('.shift_type_id_div').html(emp_selct);
+
+                    $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.shift_type_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple5', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
 
     function getDesignation(did) {
 

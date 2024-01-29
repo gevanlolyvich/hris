@@ -10,7 +10,7 @@
 @endsection
 
 @section('action-button')
-    @can('Create Warning')
+    @can('Create Shift')
         <a href="#" data-url="{{ route('shift.create') }}" data-ajax-popup="true"
             data-title={{ __('Create New Shift') }} data-size="lg" data-bs-toggle="tooltip" title=""
             class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Create') }}">
@@ -29,6 +29,7 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Shift Name') }}</th>
+                                <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Work Days') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
@@ -43,6 +44,7 @@
                             @foreach ($shifts as $shift)
                                 <tr>
                                     <td>{{ $shift->name }}
+                                    <td>{{ $shift->branch?->name  }}
                                     </td>
                                     <td>
                                         @foreach ($shift->shiftTimes as $shiftTimes)

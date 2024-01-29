@@ -9,4 +9,9 @@ class Designation extends Model
     protected $fillable = [
         'department_id','name','created_by'
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
 }

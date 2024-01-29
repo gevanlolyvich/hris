@@ -32,40 +32,40 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
         }
 
         function mapShow() {
-                mapOpened = mapOpened ? false : true;
-                if (mapOpened) {
-                    document.getElementById('map-box').style.display = '';
+            mapOpened = mapOpened ? false : true;
+            if (mapOpened) {
+                document.getElementById('map-box').style.display = '';
 
-                    if (map !== null) {
-                        map?.remove();
-                    }
-
-                    let latitude = document.getElementById("latitude").value;
-                    let longitude = document.getElementById("longitude").value;
-
-                    map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
-                        
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
-                        ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
-                    }).addTo(map);
-                        
-                    if(map.hasLayer(layer)){
-                        layer.clearLayers();
-                    }
-
-                    if (Number(latitude) != 0 && Number(longitude) != 0) {
-                        let marker = L.marker([latitude, longitude]).addTo(map);
-                        layer.addLayer(marker);
-                        map.addLayer(layer);
-                    }
-                        
-                    map.on('click', function (e) {
-                        onMapClick(e, map)
-                    });
+                if (map !== null) {
+                    map?.remove();
                 }
+
+                let latitude = document.getElementById("latitude").value;
+                let longitude = document.getElementById("longitude").value;
+
+                map = L.map('openStreetMapContainer').setView([Number(latitude) != 0 ? latitude : -6.17436, Number(longitude) != 0 ? longitude : 106.82596], 15);
+                    
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> ||' + 
+                    ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
+                }).addTo(map);
+                    
+                if(map.hasLayer(layer)){
+                    layer.clearLayers();
+                }
+
+                if (Number(latitude) != 0 && Number(longitude) != 0) {
+                    let marker = L.marker([latitude, longitude]).addTo(map);
+                    layer.addLayer(marker);
+                    map.addLayer(layer);
+                }
+                    
+                map.on('click', function (e) {
+                    onMapClick(e, map)
+                });
             }
+        }
 
         function mapOpenClose() {
             mapOpened = mapOpened ? false : true;
@@ -266,7 +266,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                             <label for="address" class="col-form-label text-dark">{{ __('Address') }}</label>
                                             {{ Form::textarea('address', $userDetail?->employee?->address, [
                                                     'class' => "form-control", 'rows' => '3', 'placeholder'=>__('Enter Your Address'),
-                                                    'name' => 'address', 'required'=>'required', 'id'=>'location-input', 'autocomplete'=>'address'
+                                                    'name' => 'address', 'required'=>'required', 'autocomplete'=>'address'
                                                 ])
                                             }}
                                             @error('address')
@@ -453,7 +453,8 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 {{ Form::model($userDetail, ['route' => ['update.documents', $userDetail->id], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
 
                                 @php
-                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value', __('document_id'));
+                                    $employeedoc = $userDetail->employee?->documents()->pluck('document_value','document_id');
+                                    // echo $employeedoc;
                                 @endphp
                                 @foreach ($documents as $key => $document)
                                 <div class="row">
@@ -498,17 +499,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 {{-- <img id="{{'blah'.$key}}" src=""  width="75%" /> --}}
 
                                             </div>
-
-                                            
-                                            {{-- @foreach ($documents as $key => $document)
-                                                <div class="col-md-12">
-                                                    <div class="info">
-                                                        <strong>{{ $document->name }}</strong>
-                                                        <span><a href="{{ !empty($employeedoc[$document->id]) ? asset(Storage::url('uploads/document')) . '/' . $employeedoc[$document->id] : '' }}"
-                                                                target="_blank">{{ !empty($employeedoc[$document->id]) ? $employeedoc[$document->id] : '' }}</a></span>
-                                                    </div>
-                                                </div>
-                                            @endforeach --}}
                                         </div>
 
                                     </div>
@@ -523,8 +513,8 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             <div class="modal-footer pr-0">
                                 {{ Form::submit(__('Save Changes'), ['class' => 'btn  btn-primary']) }}
                             </div>
-                            {{ Form::close() }}
                             @endif
+                            {{ Form::close() }}
                             </div>
                         </div>
                     </div>

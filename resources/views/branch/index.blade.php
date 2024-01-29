@@ -78,6 +78,28 @@
     <script>
         let map = null;
         let layer = L.layerGroup();
+        let circleLayer = L.layerGroup();
+
+        function onMapDraw(e, map) {
+            const latitude = document.getElementById("latitude");
+            const longitude = document.getElementById("longitude");
+            const tolerance = document.getElementById("tolerance");
+
+            if (latitude.value && longitude.value) {
+                if (circleLayer !== null && circleLayer.getLayers().length > 0) {
+                    circleLayer.clearLayers();
+                }
+            
+                var circle = L.circle([latitude.value, longitude.value], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: tolerance?.value || 0,
+                    }).addTo(map);
+                circleLayer.addLayer(circle);
+                map.addLayer(circleLayer);
+            }
+        }
 
         function onMapClick(e, map) {
             const latitude = document.getElementById("latitude");
@@ -88,10 +110,37 @@
             if (layer !== null && layer.getLayers().length > 0) {
                 layer.clearLayers();
             }
+            if (circleLayer !== null && circleLayer.getLayers().length > 0) {
+                circleLayer.clearLayers();
+            }
         
             let marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
             layer.addLayer(marker);
             map.addLayer(layer);
+            map.setView([e.latlng.lat, e.latlng.lng], map.getZoom());
+
+            onMapDraw(e, map);
+        }
+
+        function onMapPin(e, map) {
+            const latitude = document.getElementById("latitude");
+            const longitude = document.getElementById("longitude");
+                
+            if (latitude.value && longitude.value) {
+                if (layer !== null && layer.getLayers().length > 0) {
+                    layer.clearLayers();
+                }
+                if (circleLayer !== null && circleLayer.getLayers().length > 0) {
+                    circleLayer.clearLayers();
+                }
+            
+                let marker = L.marker([latitude.value, longitude.value]).addTo(map);
+                layer.addLayer(marker);
+                map.addLayer(layer);
+                map.setView([latitude.value, longitude.value], map.getZoom());
+
+                onMapDraw(e, map);
+            }
         }
 
         $(document).ready(function () {
@@ -117,6 +166,18 @@
                     map.on('click', function (e) {
                         onMapClick(e, map)
                     });
+                    
+                    $('#latitude').on('change', function(e) {
+                        onMapPin(e, map);
+                    });
+
+                    $('#longitude').on('change', function(e) {
+                        onMapPin(e, map);
+                    });
+
+                    $('#tolerance').on('change', function(e) {
+                        onMapDraw(e, map);
+                    });
                 })
             })
 
@@ -129,6 +190,7 @@
     
                     let latitude = document.getElementById("latitude").value;
                     let longitude = document.getElementById("longitude").value;
+                    let tolerance = document.getElementById("longitude").value;
 
                     map = L.map('openStreetMapContainer').setView([latitude || '-6.17436', longitude || '106.82596'], 15);
     
@@ -138,6 +200,7 @@
                         ' <a href="https://www.openstreetmap.org/fixthemap">Report Missing / Broken Map Data To Open Street Map</a>',
                     }).addTo(map);
 
+                    // Pin marker
                     if(map.hasLayer(layer)){
                         layer.clearLayers();
                     }
@@ -146,8 +209,34 @@
                     layer.addLayer(marker);
                     map.addLayer(layer);
 
+                    // Circle Radius
+                    if (map.hasLayer(circleLayer)) {
+                        circleLayer.clearLayers();
+                    }
+            
+                    var circle = L.circle([latitude, longitude], {
+                            color: 'blue',
+                            fillColor: '#f0023',
+                            fillOpacity: 0.2,
+                            radius: tolerance || 0,
+                        }).addTo(map);
+                    circleLayer.addLayer(circle);
+                    map.addLayer(circleLayer);
+
                     map.on('click', function (e) {
                         onMapClick(e, map)
+                    });
+
+                    $('#latitude').on('change', function(e) {
+                        onMapPin(e, map);
+                    });
+
+                    $('#longitude').on('change', function(e) {
+                        onMapPin(e, map);
+                    });
+
+                    $('#tolerance').on('change', function(e) {
+                        onMapDraw(e, map);
                     });
                 })
             })

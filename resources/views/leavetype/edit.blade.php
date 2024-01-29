@@ -17,7 +17,15 @@
                 @enderror
             </div>
         </div>
-
+    
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+                {{ Form::label('is_active', __('Active'), ['class' => 'form-label']) }}
+                <div class="form-icon-user">
+                    {{ Form::select('is_active', [0=>__('Inactive'), 1=>__('Active')], $leavetype->is_active, ['class' => 'form-control select2']) }}
+                </div>
+            </div>
+        </div>
 
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">

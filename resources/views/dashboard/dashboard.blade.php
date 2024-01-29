@@ -22,107 +22,141 @@
 
     @if (\Auth::user()->type == 'employee')
     {{-- Modal --}}
-    <div class="modal fade" id="clockInOutInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding-top: 0.35rem">
-                    <div class="row d-flex flex-column align-items-center">
-                        {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                        <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
-                            <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
-                                class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
-                            </button>
-                            <div id="camera-overtime" style="display: none; position: relative" class="col-12">
-                                <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
-                                <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
-                                    class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
-                                </button>
-                            </div>
-                            <canvas id="canvas-overtime" style="display: none;"></canvas>
-                            <div id="output-overtime" style="display: none;">
-                                <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
-                            </div>
-                            <label for="picture-overtime">
-                                <input type="hidden" name="picture" id="picture-overtime">
-                            </label>      
-                        </div>
-                        <hr>
-                        <input type="hidden" name="latitude" id="latitude-overtime" value="0">
-                        <input type="hidden" name="longitude" id="longitude-overtime" value="0">
-                        <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
-                        <input type="hidden" name="overtimeId" id="overtimeId" value="">
-                        <div class="col-md-6 text-center mx-auto mt-3">
-                            <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
-                            {{ Form::close() }}
-                        </div>                                                    
-                        <div class="col-md-6 text-center mx-auto mt-3">
+
+    @if (Auth::user()->type == 'employee')
+        <div class="modal fade" id="clockInOutInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        <div class="row d-flex flex-column align-items-center">
                             {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                                <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
-                                <input type="hidden" name="picture_out" id="picture_out-overtime">
-                                <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
-                                <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
-                            {{ Form::close() }}
+                            <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
+                                <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
+                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                </button>
+                                <div id="camera-overtime" style="display: none; position: relative" class="col-12">
+                                    <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                                    <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
+                                        class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                    </button>
+                                </div>
+                                <canvas id="canvas-overtime" style="display: none;"></canvas>
+                                <div id="output-overtime" style="display: none;">
+                                    <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                                </div>
+                                <label for="picture-overtime">
+                                    <input type="hidden" name="picture" id="picture-overtime">
+                                </label>      
+                            </div>
+                            <hr>
+                            <input type="hidden" name="latitude" id="latitude-overtime" value="0">
+                            <input type="hidden" name="longitude" id="longitude-overtime" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
+                            <input type="hidden" name="overtimeId" id="overtimeId" value="">
+                            <div class="col-md-6 text-center mx-auto mt-3">
+                                <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
+                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
+                                {{ Form::close() }}
+                            </div>                                                    
+                            <div class="col-md-6 text-center mx-auto mt-3">
+                                {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                                    <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
+                                    <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
+                                    <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
+                                    <input type="hidden" name="picture_out" id="picture_out-overtime">
+                                    <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
+                                    <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
+                                        class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
+                                {{ Form::close() }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding-top: 0.35rem">
-                    {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                        <div class="form-group" style="margin-bottom: 0px">
-                            {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
-                            <div class="row">
-                                <label for="myDocument" class="col-6">
-                                <div class="btn btn-block btn-primary bg-primary document"> <i
-                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+        <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
+                            <div class="form-group" style="margin-bottom: 0px">
+                                {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
+                                <div class="row">
+                                    <label for="myDocument" class="col-6">
+                                    <div class="btn btn-block btn-primary bg-primary document"> <i
+                                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                        </div>
+                                        <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
+                                    </label>
+                                    <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
+                                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
                                     </div>
-                                    <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
-                                </label>
-                                <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
-                                    class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                </div>
+                                <div class="col-md-6" id="exist-document-class" style="display: none;">
+                                    {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
+                                    <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                                        data-bs-toggle="tooltip" id="exist-document-view"
+                                        data-bs-original-title="{{ __('View') }}">
+                                        <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                                    </a>
                                 </div>
                             </div>
-                            <div class="col-md-6" id="exist-document-class" style="display: none;">
-                                {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
-                                <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
-                                    data-bs-toggle="tooltip" id="exist-document-view"
-                                    data-bs-original-title="{{ __('View') }}">
-                                    <i class="ti ti-file text-white" style="font-size: 15px"></i>
-                                </a>
+                            <div class="form-group">
+                                {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
+                                {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
                             </div>
+                            <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
                         </div>
-                        <div class="form-group">
-                            {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
-                            {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
+                        <div class="modal-footer">
+                            <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                            <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
                         </div>
-                        <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                        <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
-                    </div>
-                {{ Form::close() }}
+                    {{ Form::close() }}
+                </div>
             </div>
         </div>
-    </div>
-    
+        
+        <div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Out Data')}}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding-top: 0.35rem">
+                        <div style="display: none;" id="modal-note">
+                            <div class="text-center mx-auto">
+                                <strong>{{__('Notes')}}</strong>
+                                <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                            </div>
+                        </div>
+                        <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
+                            <div class="text-center mx-auto">
+                                <strong>{{__('Clock In / Out Image Capture')}}</strong>
+                                <br>
+                                <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-3 mt-1">
+                                <br>
+                            </div>
+                        </div>
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Clock In / Out Location')}}</strong>
+                            <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%" class="mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="col-xxl-5">
         <div class="card">
             <div class="card-header">
@@ -136,10 +170,11 @@
                     </p>
                     {{-- Condition for showing employee already clock in or not --}}
                     @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$yesterdayEmployeeAttendance->date} {$yesterdayEmployeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
                     @elseif (empty($employeeAttendance))
+                        {{-- DO Nothing --}}
                     @else
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At {$employeeAttendance->date} {$employeeAttendance->clock_in} WIB")}}</h5>
+                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
                     @endif
                 @else
                     <h6 class="text-muted pb-0-5">
@@ -150,7 +185,7 @@
                     {{-- Show form for attendance type and notes --}}                      
                     {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
                     {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
-                    @if ($settings['late_tolerance'] == 'Required')
+                    @if ($settings['photo_on_clock'] == 'Required')
                         <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                     @endif
                     <div class="col-md-6 col-lg-12 text-center mx-auto">
@@ -182,6 +217,11 @@
                     </div>
                     <div class="col-md-12" id="other-form" style="display: none;">
                         <div class="form-group mb-1">
+                            {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p> 
+                            {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose Shift']) }}
+                        </div>
+                        <div class="form-group mb-1">
                             {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
                             <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                             {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
@@ -193,42 +233,52 @@
                         <input type="hidden" name="latitude" id="latitude" value="0">
                         <input type="hidden" name="longitude" id="longitude" value="0">
                         <input type="hidden" name="accuracy" id="accuracy" value="0">
-                        <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}">
+                        {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                     </div>
                     <div class="col-md-6 text-center mx-auto mt-1">
                         {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in"
                                 class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                        @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out'])))
+                        {{-- @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out']))) --}}
+                        @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
                         @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                             <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                        {{-- @elseif (!empty($employeeAttendance) && (($employeeAttendance->clock_out != '00:00:00') && ($employeeAttendance->clock_out != $employeeAttendance->clock_in ))) --}}
+                        @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
+                            {{-- {{ $employeeAttendance }} --}}
+                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                         @else
                             <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
                         @endif
                         {{ Form::close() }}
                     </div>                                                    
                     <div class="col-md-6 text-center mx-auto mt-3">
                         {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
                         {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out'])
+                        {{-- @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out']) --}}
+                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <input type="hidden" name="picture_out" id="picture_out">
+                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        @elseif ($employeeAttendance)
+                        {{-- @elseif ($employeeAttendance) --}}
+                        @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
                             {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
                             <input type="hidden" name="latitude" id="latitude_out" value="0">
                             <input type="hidden" name="longitude" id="longitude_out" value="0">
                             <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                             <input type="hidden" name="picture_out" id="picture_out">
+                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                         {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
@@ -239,7 +289,7 @@
                             <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
                                 class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button> --}}
                         @else
-                            <button type="submit" value="1" name="out" id="clock_out"
+                            <button type="submit" value="0" name="out" id="clock_out"
                                 class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
                         @endif
                         {{ Form::close() }}
@@ -247,6 +297,55 @@
                 </div>
             </div>
         </div>
+        @if (!$attendances->isEmpty())
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ __("Today Attendance History") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table text-center">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Shift') }}</th>
+                                    <th>{{ __('Clock In') }}</th>
+                                    <th>{{ __('Clock Out') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                                @foreach ($attendances as $attendanceData)
+                                    <tr>
+                                        <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
+                                        <td>
+                                            @if ($attendanceData->coord_in)
+                                                <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                </a>
+                                            @else
+                                                <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                </a>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($attendanceData->coord_out)
+                                                <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                </a>
+                                            @else
+                                                <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
         @if (!empty($overtime))
             <div class="card">
                 <div class="card-header card-body table-border-style">
@@ -261,14 +360,14 @@
                     <hr>
                     <div class="text-center">
                         @if ($overtime->type != 'daily')
-                            <button class="btn btn-primary btn-xl clock-input mx-3" data-bs-toggle="tooltip"
+                            <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3" data-bs-toggle="tooltip"
                                 data-overtime-id="{{ $overtime->id }}"
                                 data-clock-in="{{ $overtime->clock_in }}"
                                 data-bs-original-title="{{ __('Clock In / Clock Out') }}">
                                 <i class="fa fa-solid fa-clock"></i>
                             </button>
                         @endif
-                        <button class="btn btn-primary btn-xxl report-input" data-bs-toggle="tooltip"
+                        <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input" data-bs-toggle="tooltip"
                             data-overtime-id="{{ $overtime->id }}"
                             data-document="{{ $overtime->report_document }}"
                             data-note="{{ $overtime->report_note }}"
@@ -373,138 +472,150 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-primary">
-                                            <i class="ti ti-users"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Staff') }}</h6>
+                    <a href="{{ route('employee.index') }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-primary">
+                                                <i class="ti ti-users"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Staff') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-info">
-                                            <i class="ti ti-calendar-event"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 1]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-info">
+                                                <i class="ti ti-calendar"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Valid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                                <div class="col-auto mb-3 mb-sm-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="theme-avtar bg-warning">
-                                            <i class="ti ti-calendar-off"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <small class="text-muted">{{ __('Total') }}</small>
-                                            <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                    <a href="{{ route('attendanceemployee.index', ['is_valid' => 0]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-warning">
+                                                <i class="ti ti-calendar-off"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Invalid Attendance') }}</h6>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-primary">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Jobs') }}</h6>
+            <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">      
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-primary">
+                                        <i class="ti ti-zoom-question"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Request Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-primary">{{ $activeJob + $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-primary">{{ $requestAttendanceCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-info">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Active Jobs') }}</h6>
+            <a href="{{ route('permit.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-info">
+                                        <i class="ti ti-license"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Permit Attendance') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-info"> {{ $activeJob }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-info"> {{ $permitCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-lg-4 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center justify-content-between">
-                        <div class="col-auto mb-3 mb-sm-0">
-                            <div class="d-flex align-items-center">
-                                <div class="theme-avtar bg-warning">
-                                    <i class="ti ti-cast"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <small class="text-muted">{{ __('Total') }}</small>
-                                    <h6 class="m-0">{{ __('Inactive Jobs') }}</h6>
+            <a href="{{ route('leave.index', ['status' => 'Pending']) }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-auto mb-3 mb-sm-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="theme-avtar bg-warning">
+                                        <i class="ti ti-plane"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <small class="text-muted">{{ __('Total') }}</small>
+                                        <h6 class="m-0">{{ __('Leave') }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-auto text-end">
-                            <h4 class="m-0 text-warning">{{ $inActiveJOb }}</h4>
+                            <div class="col-auto text-end">
+                                <h4 class="m-0 text-warning">{{ $leaveCount }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         {{-- </div> --}}
@@ -622,6 +733,7 @@
                                     <th>{{ __('Start Date') }}</th>
                                     <th>{{ __('End Date') }}</th>
                                     <th>{{ __('Description') }}</th>
+                                    <th>{{ __('Document') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -631,6 +743,19 @@
                                         <td>{{ \Auth::user()->dateFormat($announcement->start_date) }}</td>
                                         <td>{{ \Auth::user()->dateFormat($announcement->end_date) }}</td>
                                         <td>{{ $announcement->description }}</td>
+                                        <td>
+                                            @if ($announcement->document)
+                                                <div class="action-btn bg-info ms-2">
+                                                    <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-original-title="{{ __('View Document') }}">
+                                                        <i class="ti ti-file text-white"></i>
+                                                    </a>
+                                                </div>
+                                            @else
+                                            -
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -689,6 +814,7 @@
     <script src="{{ asset('assets/js/plugins/main.min.js') }}"></script>
     <script>
         async function getLocation() {
+          let locationIcon = document.getElementById('location-permission');
           return new Promise((resolve, reject) => {
             if ("geolocation" in navigator) {
               navigator.geolocation.getCurrentPosition(
@@ -696,18 +822,22 @@
                   const latitude = position.coords.latitude;
                   const longitude = position.coords.longitude;
                   const accuracy = position.coords.accuracy;
+                  locationIcon.style.color = "Green";
                   resolve({ latitude, longitude, accuracy });
                 },
                 (error) => {
                   if (error.code === 1) {
+                    locationIcon.style.color = "Red";
                     reject(new Error("User denied Geolocation"));
                   } else {
+                    locationIcon.style.color = "Red";
                     reject(error);
                   }
                 }
               );
             } else {
-              reject(new Error("Geolocation is not supported by your browser."));
+                locationIcon.style.color = "Red";
+                reject(new Error("Geolocation is not supported by your browser."));
             }
           });
         }
@@ -719,9 +849,9 @@
 
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
-            const clockInData = document.getElementById("clockInData");
+            // const clockInData = document.getElementById("clockInData");
 
-            if (latitude !== 0 && longitude !== 0 && clockInButton && !clockInData.value) {
+            if (latitude !== 0 && longitude !== 0 && clockInButton) {
                 const latElement = document.getElementById("latitude");
                 const longElement = document.getElementById("longitude");
                 const accElement = document.getElementById("accuracy");
@@ -770,8 +900,10 @@
             }
           } finally  {
             const otherForm = document.getElementById('other-form');
+            const clockOutButton = document.getElementById("clock_out");
             const clockInButton = document.getElementById("clock_in");
-            if (!clockInButton.disabled) {
+
+            if (!Boolean(Number(clockOutButton.value))) {
                 if (otherForm) {
                     otherForm.style.display = ''
                 }
@@ -897,6 +1029,65 @@
             });
         }
     </script>
+
+    <script>
+        $(document).ready(function() {
+            var map = null;
+            var imageSrc = null;
+            var notes = null;
+
+            $('body').on('click', '.map-link', function() {
+                var coordinates = $(this).data('coordinates').split(', ');
+                notes = $(this).data('note');
+
+                imageSrc = $(this).data('image');
+                if (imageSrc.length) {
+                    $('#clockImage').attr('src', imageSrc)
+                    document.getElementById('photos').style.display = '';
+                } else {
+                    document.getElementById('photos').style.display = 'none';
+                }
+            
+                // Convert the radius string to a number
+                var radius = parseFloat(coordinates[2]);
+
+            
+                // Open the modal
+                $('#openStreetMapModal').modal('show');
+            
+                // Initialize the map after the modal is fully shown
+                $('#openStreetMapModal').on('shown.bs.modal', function () {
+                    if (notes) {
+                        document.getElementById('modal-note').style.display = '';
+                        document.getElementById('note-value').value = notes;
+                    } else {
+                        document.getElementById('modal-note').style.display = 'none';
+                        document.getElementById('note-value').value = '';
+                    }
+                    // If a map already exists, remove it
+                    if (map !== null) {
+                        map.remove();
+                    }
+
+                    map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                
+                    // Add a marker for the location
+                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+                
+                    // Add a circle with the converted radius
+                    var circle = L.circle([coordinates[0], coordinates[1]], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: radius,
+                    }).addTo(map);
+                });
+            });
+        });
+    </script>
     @endif
 
     <script>
@@ -944,6 +1135,7 @@
             }
     
             function startup() {
+                let cameraIcon = document.getElementById('camera-permission');
                 video = document.getElementById('video');
                 canvas = document.getElementById('canvas');
                 photo = document.getElementById('photo');
@@ -963,8 +1155,10 @@
                         closecamera.style.display = '';
                         video.srcObject = stream;
                         video.play();
+                        cameraIcon.style.color = 'Green';
                     })
                     .catch(function(err) {
+                        cameraIcon.style.color = 'Red';
                         alert("Please Allow Camera Access To Take Picture For Clock In / Out");
                         console.log("An error occurred: " + err);
                     });

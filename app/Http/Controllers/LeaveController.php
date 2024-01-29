@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\LeaveExport;
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
 use App\Models\Leave as LocalLeave;
 use App\Models\LeaveType;
 use App\Mail\LeaveActionSend;
@@ -14,15 +16,20 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
 
 class LeaveController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Leave')) {
-            $leaves = null;
+            $status = $request->query('status', null);
+            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = collect();
+
             if (\Auth::user()->type == 'employee') {
                 $user     = \Auth::user();
                 
@@ -42,9 +49,23 @@ class LeaveController extends Controller
             } else {
                 $leaves = !empty(\Auth::user()->branch_id) ? LocalLeave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : LocalLeave::orderBy('start_date', 'DESC');
             }
+
+            if ($status != null && $status == 'Pending') {
+                $leaves->where('status', 'Pending');
+            }
+
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $leaves         = $leaves->whereHas('employees', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
+            }
+
             $leaves = $leaves->orderBy('start_date', 'DESC')->get();
 
-            return view('leave.index', compact('leaves'));
+            return view('leave.index', compact('leaves', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -96,7 +117,8 @@ class LeaveController extends Controller
             $endDate = new \DateTime($request->end_date);
             $start_date = date($request->start_date);
             $end_date   = date($request->end_date);
-            $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
+            $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 1;
+            $total_leave_days += 1;
             // return $total_leave_days;
             if ($leave_type->days >= $total_leave_days) {
                 $leave    = new LocalLeave();
@@ -139,13 +161,13 @@ class LeaveController extends Controller
                 $leave->applied_on       = date('Y-m-d');
                 $leave->start_date       = $request->start_date;
                 $leave->end_date         = $request->end_date;
-                $leave->total_leave_days = $total_leave_days + 1;
+                $leave->total_leave_days = $total_leave_days;
                 $leave->leave_reason     = $request->leave_reason;
                 $leave->remark           = $request->remark;
                 $leave->location         = $request->location;
                 $leave->document_path    = $document_path;
                 $leave->status           = 'Pending';
-                $leave->created_by       = \Auth::user()->creatorId();
+                $leave->created_by       = \Auth::user()->id;
 
                 $leave->save();
 
@@ -177,8 +199,6 @@ class LeaveController extends Controller
 
     public function edit(LocalLeave $leave)
     {
-
-        // return $leave;
         if (\Auth::user()->can('Edit Leave')) {
             if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
                 $employees = null;
@@ -187,7 +207,20 @@ class LeaveController extends Controller
                 } else {
                     $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
-                $leavetypes = LeaveType::get();
+                $leavetypes = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.title, leave_types.days, leave_types.id'))
+                ->leftJoin('leaves', function ($join) use ($leave) {
+                    $join->on('leaves.leave_type_id', '=', 'leave_types.id');
+                    $join->where('leaves.employee_id', '=', $leave->employee_id);
+                })
+                ->where('leave_types.is_active', 1)
+                ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
+                ->get();
+
+                foreach ($leavetypes as $type) {
+                    $type->title    = '( ' . $type->total_leave . ' / ' . $type->days . ' ) | ' . $type->title;
+                }
+                
+                $leavetypes         = $leavetypes->pluck('title', 'id');
 
                 return view('leave.edit', compact('leave', 'employees', 'leavetypes'));
             } else {
@@ -260,23 +293,29 @@ class LeaveController extends Controller
                 if (!empty($duplicate_leave)) {
                     return redirect()->back()->with('error', __('Leave Already Exist In That Date Range'));
                 }
-                
-                $document_path = null;
-                if ($request->file('myDocument')) {
-                    $docs = $request->file('myDocument');
-                    $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
-                    $path = $docs->storeAs('uploads/leaves', $docName, 'public');
-                    $document_path = env('APP_URL') . '/storage/' . $path;
-                }
 
+                $leaves_same_type = LocalLeave::whereNot('id', $leave->id)->where('employee_id', $leave->employee_id)->where('leave_type_id', $leave->leave_type_id)->get();
+                $total_days = $leaves_same_type->sum(function ($leaveData) {
+                    return (float) $leaveData->total_leave_days;
+                });
+                
                 $startDate = new \DateTime($request->start_date);
                 $endDate = new \DateTime($request->end_date);
-                $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 0;
-                if ($leave_type->days >= $total_leave_days) {
+                $total_leave_days = !empty($startDate->diff($endDate)) ? $startDate->diff($endDate)->days : 1;
+                $total_leave_days += 1;
+                if ($total_days <= $leave_type->days && ($total_days + $total_leave_days + 1) <= $leave_type->days) {
+                    $document_path = null;
+                    if ($request->file('myDocument')) {
+                        $docs = $request->file('myDocument');
+                        $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                        $path = $docs->storeAs('uploads/leaves', $docName, 'public');
+                        $document_path = env('APP_URL') . '/storage/' . $path;
+                    }
+
                     $leave->leave_type_id    = $request->leave_type_id;
                     $leave->start_date       = $request->start_date;
                     $leave->end_date         = $request->end_date;
-                    $leave->total_leave_days = $total_leave_days + 1;
+                    $leave->total_leave_days = $total_leave_days;
                     $leave->leave_reason     = $request->leave_reason;
                     $leave->remark           = $request->remark;
                     $leave->location         = $request->location;
@@ -301,9 +340,20 @@ class LeaveController extends Controller
     {
         if (\Auth::user()->can('Delete Leave')) {
             if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
+
+                if ($leave->document_path) {
+                    $filepath_array = explode('/', $leave->document_path);
+                    $filename = array_pop($filepath_array);
+
+                    // Check if the file exists before attempting to delete
+                    if (Storage::disk('public')->exists("uploads/leaves/$filename")) {
+                        Storage::disk('public')->delete("uploads/leaves/$filename");
+                    }
+                }
+
                 $leave->delete();
 
-                return redirect()->route('leave.index')->with('success', __('Leave successfully deleted.'));
+                return redirect()->back()->with('success', __('Leave successfully deleted.'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
@@ -326,6 +376,10 @@ class LeaveController extends Controller
         // return $request;
         $dates = [];
         $leave = LocalLeave::find($request->leave_id);
+        $leaveType = LeaveType::find($leave?->leave_type_id);
+        if (empty($leaveType) || !$leaveType?->is_active) {
+            return redirect()->back()->with('error', __('Leave Type Is Inactive'));
+        }
 
         $leave->status = $request->status;
         $leave->note = $request->note;
@@ -425,21 +479,15 @@ class LeaveController extends Controller
 
     public function jsoncount(Request $request)
     {
-        //        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days),0) AS total_leave, leave_types.title, leave_types.days,leave_types.id'))->leftjoin(
-        //            'leaves', function ($join) use ($request){
-        //            $join->on('leaves.leave_type_id', '=', 'leave_types.id');
-        //            $join->where('leaves.employee_id', '=', $request->employee_id);
-        //        }
-        //        )->groupBy('leaves.leave_type_id')->get();
-
-        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days),0) AS total_leave, leave_types.title, leave_types.days,leave_types.id'))
-            ->leftjoin(
-                'leaves',
-                function ($join) use ($request) {
-                    $join->on('leaves.leave_type_id', '=', 'leave_types.id');
-                    $join->where('leaves.employee_id', '=', $request->employee_id);
-                }
-            )->groupBy('leaves.leave_type_id')->get();
+        $leave_counts = LeaveType::select(\DB::raw('COALESCE(SUM(leaves.total_leave_days), 0) AS total_leave, leave_types.id, leave_types.title, leave_types.days'))
+            ->leftJoin('leaves', function ($join) use ($request) {
+                $join->on('leaves.leave_type_id', '=', 'leave_types.id');
+                $join->where('leaves.employee_id', '=', $request->employee_id);
+            })
+            ->where('leave_types.is_active', 1)
+            ->groupBy('leave_types.id', 'leave_types.title', 'leave_types.days')
+            ->orderBy('leave_types.title', 'ASC')
+            ->get();
 
         return $leave_counts;
     }

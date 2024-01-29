@@ -5,30 +5,60 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
 use App\Models\Employee;
+use App\Models\Branch;
+use App\Models\Department;
 use App\Models\Permit;
 use App\Models\PermitType;
 use App\Models\ShiftTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
 class PermitController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->query('status', null);
+        $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+        $department = collect();
+
         if (\Auth::user()->can('Manage Leave')) {
-            $permits = Permit::get();
             if (Auth::user()->type == 'employee') {
-                $user     = Auth::user();
-                $employee = Employee::where('user_id', '=', $user->id)->first();
-                $permits   = Permit::where('employee_id', '=', $employee->id)->get();
+                $subordinates = \Auth::user()->employee->subordinatesFlatten();
+                $employees = collect();
+
+                // Check if employee managing other employee or not
+                if ($subordinates->isNotEmpty()) {
+                    foreach ($subordinates as $subordinate) {
+                        $employees->push($subordinate->id);
+                    }
+                }
+                $employees->push(\Auth::user()->employee->id);
+
+                $permits   = Permit::whereIn('employee_id', $employees)->orderBy('start_date', 'DESC');
             } else {
-                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Permit::get();
+                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
             }
 
-            return view('permit.index', compact('permits'));
+            if ($status != null && $status == 'Pending') {
+                $permits->where('status', 'Pending');
+            }
+
+            if (!empty($request->branch_id)) {
+                $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
+                $permits        = $permits->whereHas('employee', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
+            }
+            if (!empty($request->department_id)) {
+                $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
+                $permits        = $permits->whereHas('employee', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
+            }
+
+            $permits = $permits->get();
+
+            return view('permit.index', compact('permits', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -106,8 +136,8 @@ class PermitController extends Controller
             }
 
             $document_path = null;
-            if ($request->file('document')) {
-                $docs = $request->file('document');
+            if ($request->file('myDocument')) {
+                $docs = $request->file('myDocument');
                 $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                 $path = $docs->storeAs('uploads/permits', $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
@@ -139,10 +169,10 @@ class PermitController extends Controller
         $permit = Permit::find($id);
 
         if (\Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
                 $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
-
+                
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
@@ -156,7 +186,7 @@ class PermitController extends Controller
     {
         $permit = Permit::find($permit_id);
         if (\Auth::user()->can('Edit Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
                 $validator = Validator::make(
                     $request->all(),
                     [
@@ -197,8 +227,8 @@ class PermitController extends Controller
 
                 $date = date_create($request->date);
                 $document_path = null;
-                if ($request->file('document')) {
-                    $docs = $request->file('document');
+                if ($request->file('myDocument')) {
+                    $docs = $request->file('myDocument');
                     $docName = time() . "_" . date_format($date, "Y-m-d") . "_" . preg_replace('/\s+/', '', $permit->employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/permits', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
@@ -206,12 +236,12 @@ class PermitController extends Controller
 
                 //* Input Data
                 $form = [
-                    'employee_id'   => $request->employee_id,
-                    'start_date'    => $request->start_date,
-                    'end_date'      => $request->end_date,
+                    'employee_id'       => $request->employee_id,
+                    'start_date'        => $request->start_date,
+                    'end_date'          => $request->end_date,
                     'total_permit_days' => $total_permit_days + 1,
-                    'reason'        => $request->reason,
-                    'docs'          => $document_path ? $document_path : $permit->docs,
+                    'reason'            => $request->reason,
+                    'docs'              => $document_path ? $document_path : $permit->docs,
                 ];
 
                 //* Update Data
@@ -228,9 +258,20 @@ class PermitController extends Controller
     public function destroy(Permit $permit)
     {
         if (\Auth::user()->can('Delete Leave')) {
-            if ($permit->created_by == Auth::user()->id || \Auth::user()->type != 'employee') {
+            if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
+
+                if ($permit->docs) {
+                    $filepath_array = explode('/', $permit->docs);
+                    $filename = array_pop($filepath_array);
+
+                    // Check if the file exists before attempting to delete
+                    if (Storage::disk('public')->exists("uploads/permits/$filename")) {
+                        Storage::disk('public')->delete("uploads/permits/$filename");
+                    }
+                }
+
                 $permit->delete();
-                return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Deleted'));
+                return redirect()->back()->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }

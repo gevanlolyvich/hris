@@ -212,6 +212,7 @@ class UserController extends Controller
         $identity_types = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
         $emergency_contact_relations = [
             'Parent' => __('Parent'),
+            'Children' => __('Children'),
             'Sibling' => __('Sibling'),
             'Spouse' => __('Spouse'),
             'Friend' => __('Friend'),
@@ -223,6 +224,7 @@ class UserController extends Controller
         ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
         $documents        = Document::get();
+        // return $documents;
 
         return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents'));
     }
@@ -255,7 +257,7 @@ class UserController extends Controller
             $fileNameToStore = $filename . '_' . time() . '.' . $extension;
 
 
-            $dir        = 'app/public/uploads/avatar';
+            $dir        = '../storage/app/public/uploads/avatar/';
 
             $image_path = $dir . $userDetail['avatar'];
             if (File::exists($image_path)) {
@@ -419,14 +421,13 @@ class UserController extends Controller
                 }
 
                 $form = [
-                    'employee_id' => $employee['employee_id'],
+                    'employee_id' => $employee['id'],
                     'document_id' => $key,
                     'document_value' => $fileNameToStore,
                     'created_by' => \Auth::user()->creatorId(),
                 ];
                 $employee_document = EmployeeDocument::create($form);
                 $employee_document->save();
-                Log::info($form);
             }
         }
         // return $employee;

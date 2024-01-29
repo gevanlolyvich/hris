@@ -86,6 +86,7 @@ use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
+use App\Http\Controllers\EmployeeTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -232,6 +233,12 @@ Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])
         'XSS',
     ]
 );
+Route::post('branch/shift/json', [EmployeeController::class, 'branchShiftJson'])->name('branch.shift.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::post('direct/employee/json', [EmployeeController::class, 'directSpvJson'])->name('direct.employee.json')->middleware(
     [
         'auth',
@@ -300,6 +307,25 @@ Route::resource('designation', DesignationController::class)->middleware(
         'XSS',
     ]
 );
+Route::resource('employeetype', EmployeeTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('employeetype/{id}/edit', [EmployeeTypeController::class, 'edit'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('employeetype/{id}/destroy', [EmployeeTypeController::class, 'destroy'])->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 
 Route::resource('document', DocumentController::class)->middleware(
     [
@@ -879,6 +905,12 @@ Route::get('attendancerequest/{id}/action', [AttendanceRequestController::class,
 );
 
 Route::post('attendancerequest/changeaction', [AttendanceRequestController::class, 'changeaction'])->name('attendancerequest.changeaction')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('attendancerequest/getshift', [AttendanceRequestController::class, 'getShift'])->name('attendancerequest.getshift')->middleware(
     [
         'auth',
         'XSS',

@@ -52,14 +52,14 @@ class Utility extends Model
 
     public static function settings()
     {
-        $data = DB::table('settings');
-        if (\Auth::check()) {
-            $userId = \Auth::user()->creatorId();
-            $data   = $data->where('created_by', '=', $userId);
-        } else {
-            $data = $data->where('created_by', '=', 1);
-        }
-        $data = $data->get();
+        $data = DB::table('settings')->get();
+        // if (\Auth::check()) {
+        //     $userId = \Auth::user()->creatorId();
+        //     $data   = $data->where('created_by', '=', $userId);
+        // } else {
+        //     $data = $data->where('created_by', '=', 1);
+        // }
+        // $data = $data->get();
 
 
 
@@ -135,6 +135,9 @@ class Utility extends Model
             "google_clender_id" => "",
             "google_calender_json_file" => "",
             "is_enabled" => "on",
+            "late_tolerance" => "",
+            "photo_on_clock" => "",
+            "map_tile_url" => "",
         ];
 
         foreach ($data as $row) {

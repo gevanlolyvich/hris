@@ -13,6 +13,12 @@ class Announcement extends Model
         'branch_id',
         'department_id',
         'description',
+        'document',
         'created_by',
     ];
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
+    }
 }

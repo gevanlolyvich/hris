@@ -22,7 +22,7 @@
         <i class="ti ti-calendar"></i>
     </a> --}}
 
-    @can('Create Leave')
+    @can('Create Request Attendance')
         <a href="#" data-url="{{ route('attendancerequest.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Request Attendance') }}"
             data-size="lg" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
@@ -32,6 +32,45 @@
 @endsection
 
 @section('content')
+    <div class="col-sm-12">
+        <div class=" mt-2 " id="multiCollapseExample1">
+            <div class="card">
+                <div class="card-body">
+                    {{ Form::open(array('route' => array('attendancerequest.index'),'method'=>'get','id'=>'employeeattendancehistory_filter')) }}
+                    <div class="row align-items-center justify-content-end">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}
+                                    {{ Form::select('branch_id', $branch, isset($_GET['branch_id'])?$_GET['branch_id']:null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                </div>
+                                <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+                                    <div class="department_div btn-box">
+                                        {{ Form::select('department_id', !empty($department) ? $department : [], isset($_GET['department_id'])?$_GET['department_id']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto mt-4">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                                    </a>
+                                    <a href="{{route('attendancerequest.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{ Form::close() }}
+            </div>
+        </div>
+    </div>
+
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header card-body table-border-style">
@@ -42,9 +81,10 @@
                             <tr>
                                 <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Date') }}</th>
+                                <th>{{ __('Shift') }}</th>
                                 <th>{{ __('Start Time') }}</th>
                                 <th>{{ __('End Time') }}</th>
-                                <th>{{ __('Reason') }}</th>
+                                {{-- <th>{{ __('Reason') }}</th> --}}
                                 <th>{{ __('Document') }}</th>
                                 {{-- <th>{{ __('Leave Reason') }}</th> --}}
                                 <th>{{ __('status') }}</th>
@@ -56,9 +96,10 @@
                                 <tr>
                                     <td>{{ !empty(\Auth::user()->getEmployee($attendance_request->employee_id)) ? \Auth::user()->getEmployee($attendance_request->employee_id)->name : '' }}</td>
                                     <td>{{ date('d M Y', strtotime($attendance_request->date)) }}</td>
+                                    <td>{{ $attendance_request?->shift?->name ?? '-' }}</td>
                                     <td>{{ $attendance_request->start_time }}</td>
                                     <td>{{ $attendance_request->end_time }}</td>
-                                    <td>{{ $attendance_request->reason }}</td>                                   
+                                    {{-- <td>{{ $attendance_request->reason }}</td>                                    --}}
                                     <td>
                                         @if ($attendance_request->docs)
                                             <div class="action-btn bg-info ms-2">
@@ -97,7 +138,7 @@
                                                     </a>
                                                 </div>
                                                 @if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1)
-                                                    @can('Edit Leave')
+                                                    @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
                                                                 data-size="lg"
@@ -107,6 +148,16 @@
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
+                                                        </div>
+                                                    @endcan
+                                                    @can('Delete Request Attendance')
+                                                        <div class="action-btn bg-danger ms-2">
+                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                                aria-label="Delete"><i
+                                                                    class="ti ti-trash text-white text-white"></i></a>
+                                                            </form>
                                                         </div>
                                                     @endcan
                                                 @endif
@@ -121,7 +172,7 @@
                                                     </a>
                                                 </div>
                                                 @if ($attendance_request->is_approved != 1)
-                                                    @can('Edit Leave')
+                                                    @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                                                 data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
@@ -132,7 +183,7 @@
                                                             </a>
                                                         </div>
                                                     @endcan
-                                                    @can('Delete Leave')
+                                                    @can('Delete Request Attendance')
                                                         <div class="action-btn bg-danger ms-2">
                                                             {!! Form::open(['method' => 'DELETE', 'route' => ['attendancerequest.destroy', $attendance_request->id], 'id' => 'delete-form-' . $attendance_request->id]) !!}
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
@@ -153,7 +204,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 @endsection
 
@@ -183,7 +233,7 @@
 
                     $('#leave_type_id').empty();
                     $('#leave_type_id').append(
-                        '<option value="">{{ __('Select Leave Type') }}</option>');
+                        '<option value="">{{ __('Select Request Attendance Type') }}</option>');
 
                     $.each(data, function(key, value) {
 
@@ -212,6 +262,83 @@
                 document.getElementById('fileName').textContent = this.files[0].name;
             });
         })
+    </script>
+
+    <script>
+        function getDepartment(branch_id) {
+            $.ajax({
+                url: '{{ route('department.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.designation_id').empty();
+                    $('.department_id').empty();
+                    var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
+                                            placeholder="Select Department" >
+                                            </select>`;
+                    $('.department_div').html(emp_selct);
+
+                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.department_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+
+        $(document).on('change', 'select[name=branch_id]', function() {
+            var branch_id = $(this).val();
+            getDepartment(branch_id);
+        });
+    </script>
+
+    <script>
+        function getShift(employee_id, date) {
+            $.ajax({
+                url: '{{ route('attendancerequest.getshift') }}',
+                type: 'POST',
+                data: {
+                    "employee_id": employee_id,
+                    "date": date,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.shift_id').empty();
+                    var shift_select = ` <select class="form-control select2 shift_id" name="shift_id" id="choices-multiple"
+                                            placeholder="Select Shift" >
+                                            </select>`;
+                    $('.shift_div').html(shift_select);
+
+                    $('.shift_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.shift_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+
+        $(document).on('change', '#employee_id', function() {
+            var employee_id = $(this).val();
+            var date = document.getElementById('date').value;
+            getShift(employee_id, date);
+        });
+
+        $(document).on('change', '#date', function() {
+            var date = $(this).val();
+            var employee_id = document.getElementById('employee_id')?.value || @json(Auth::user()?->employee?->id);
+            getShift(employee_id, date);
+        });
     </script>
 @endpush
 

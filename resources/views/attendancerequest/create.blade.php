@@ -14,19 +14,27 @@
         </div>
     @endif
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'required' => 'required',  'placeholder' => __('Select Date')]) }}
+                {{ Form::date('date', null, ['class' => 'form-control', 'autocomplete' => 'off', 'required' => 'required', 'id' => 'date', 'placeholder' => __('Select Date')]) }}
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ Form::label('shift_id', __('Shift'), ['class' => 'col-form-label']) }}
+                <div class="shift_div btn-box">
+                    {{ Form::select('shift_id', $shifts, null, ['class' => 'form-control select2 shift_id', 'placeholder' => __('Select Shift')]) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('start_time', __('Start Time'), ['class' => 'col-form-label']) }}
                 {{ Form::time('start_time', null, ['class' => 'form-control timepicker_format', 'required' => 'required']) }}
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('end_time', __('End Time'), ['class' => 'col-form-label']) }}
                 {{ Form::time('end_time', null, ['class' => 'form-control timepicker_format','required' => 'required']) }}

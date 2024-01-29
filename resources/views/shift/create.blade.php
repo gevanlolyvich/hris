@@ -6,6 +6,16 @@
                 {{ Form::label('shift_name',  __('Shift Name'), ['class' => 'col-form-label']) }}
                 {{ Form::text('shift_name', null, ['class' => 'form-control' ,'required' => 'required']) }}
             </div>
+            {{-- <div class="form-group col-md-12 col-lg-12">
+                {{ Form::label('branch_id',  __('Branch'), ['class' => 'col-form-label']) }}
+                {{ Form::select('branch_id', $branch, ['class' => 'form-control select2' ,'required' => 'required','id' => 'branch_id']) }}
+            </div> --}}
+            <div class="form-group col-md-12">
+                {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
+                <div class="form-icon-user">
+                    {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
+                </div>
+            </div>
         @endif
         <div class="table-responsive">
             <table class="table" id="pc-dt-simple">

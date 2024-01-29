@@ -226,11 +226,6 @@ if (!empty($mode_setting['theme_color'])) {
     <!-- [ Main Content ] end -->
     <footer class="dash-footer">
         <div class="footer-wrapper">
-            <div class="py-1">
-                <span class="text-muted">{{ __('Copyright') }} &copy;
-                    {{ App\Models\Utility::getValByName('footer_text') ? App\Models\Utility::getValByName('footer_text') : config('app.name', 'COMPANY') }}
-                    {{ date('Y') }}</span>
-            </div>
         </div>
     </footer>
     
