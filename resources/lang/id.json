@@ -348,7 +348,7 @@
   "Create New Deduction Option" : "Buat Opsi Deduksi Baru",
   "Create New Department" : "Buat Departemen Baru",
   "Create New Deposit" : "Buat Deposit Baru",
-  "Create New Designation" : "Buat Penandaan Baru",
+  "Create New Designation" : "Buat Jabatan Baru",
   "Create New Employee" : "Buat Karyawan Baru",
   "Create New Event" : "Buat Penugasan Baru",
   "Create New Expense" : "Buat Pengeluaran Baru",
@@ -1064,7 +1064,7 @@
   "MB" : "MB",
   "Emergency Contact Number":"Nomor Kontak Darurat",
   "Enter Emergency Contact Number":"Masukkan Nomor Kontak",
-  "Emergency Contact Relation":"Hubungan Dg Kontak Darurat",
+  "Emergency Contact Relation":"Hubungan Dengan Kontak Darurat",
   "Select Emergency Contact Relation":"Pilih Hubungan",
   "Medium" : "Sedang",
   "Meeting" : "Rapat",
@@ -1808,5 +1808,9 @@
   "Already Clock In At": "Sudah Absen Masuk Pada",
   "Duplicate Request Attendance": "Data Lupa Absen Sudah Ada",
   "Today Attendance History": "Riwayat Kehadiran Hari Ini",
-  "Leave Type Is Inactive": "Tipe Cuti Tidak Aktif"
+  "Leave Type Is Inactive": "Tipe Cuti Tidak Aktif",
+  "Emergency Contact Photo": "Foto Kontak Darurat",
+  "Supervisor": "Supervisor",
+  "Upload Profile Photo": "Unggah Foto Profil",
+  "Upload Emergency Contact Photo": "Unggah Foto Kontak Darurat"
 }
