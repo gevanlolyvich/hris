@@ -31,6 +31,7 @@
                         <thead>
                             <tr>
                                 <th width="10px">ID</th>
+                                <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
                                 <th>{{ __('Designation') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
@@ -38,12 +39,10 @@
                         </thead>
                         <tbody>
                             @foreach ($designations as $designation)
-                                @php
-                                    $department = \App\Models\Department::where('id', $designation->department_id)->first();
-                                @endphp
                                 <tr>
                                     <td>{{ $designation->id }}</td>
-                                    <td>{{ !empty($department->name) ? $department->name : '' }}</td>
+                                    <td>{{ $designation?->department?->branch?->name ?? '-' }}</td>
+                                    <td>{{ $designation?->department?->name ?? '-' }}</td>
                                     <td>{{ $designation->name }}</td>
                                     <td class="Action">
                                         <span>
