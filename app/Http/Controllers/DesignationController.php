@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Models\Designation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DesignationController extends Controller
 {
@@ -25,7 +26,13 @@ class DesignationController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Designation')) {
-            $departments  = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $departments = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get() : Department::orderBy('name', 'ASC')->get();
+
+            foreach ($departments as $key => $department) {
+                $department->name = $department->name . ' | ' . $department->branch->name;
+            }
+
+            $departments = $departments->pluck('name', 'id');
 
             return view('designation.create', compact('departments'));
         } else {
@@ -74,7 +81,13 @@ class DesignationController extends Controller
         if (\Auth::user()->can('Edit Designation')) {
             if ($designation->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
 
-                $departments  = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+                $departments  = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get() : Department::orderBy('name', 'ASC')->get();
+
+                foreach ($departments as $key => $department) {
+                    $department->name = $department->name . ' | ' . $department->branch->name;
+                }
+    
+                $departments = $departments->pluck('name', 'id');
 
                 return view('designation.edit', compact('designation', 'departments'));
             } else {

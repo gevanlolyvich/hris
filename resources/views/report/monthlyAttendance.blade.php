@@ -27,21 +27,25 @@
 
         function saveAsPDF() {
             var element = document.getElementById('printableArea');
+            // element.style.width = `${element.scrollWidth.toString()} px`;
+            // console.log(element.scrollWidth);
             var opt = {
-                margin: 0.3,
+                margin: 2,
                 filename: filename,
                 image: {
                     type: 'jpeg',
                     quality: 1
                 },
                 html2canvas: {
-                    scale: 4,
-                    dpi: 72,
-                    letterRendering: true
+                    scale: 2,
+                    dpi: 70,
+                    letterRendering: true,
+                    with: element.scrollWidth
                 },
                 jsPDF: {
-                    unit: 'in',
-                    format: 'A2'
+                    // unit: 'mm',
+                    format: 'A2',
+                    orientation: 'l'
                 }
             };
             html2pdf().set(opt).from(element).save();
@@ -280,7 +284,7 @@
                 <div class="card">
                     <div class="card-body table-border-style">
                         <div class="table-responsive py-4 attendance-table-responsive">
-                            <table class="table ">
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th class="active">{{ __('Name') }}</th>

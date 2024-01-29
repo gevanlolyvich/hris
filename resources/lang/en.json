@@ -1809,5 +1809,9 @@
     "Already Clock In At": "Already Clock In At",
     "Duplicate Request Attendance": "Duplicate Request Attendance",
     "Today Attendance History": "Today Attendance History",
-    "Leave Type Is Inactive": "Leave Type Is Inactive"
+    "Leave Type Is Inactive": "Leave Type Is Inactive",
+    "Emergency Contact Photo": "Emergency Contact Photo",
+    "Supervisor": "Supervisor",
+    "Upload Profile Photo": "Upload Profile Photo",
+    "Upload Emergency Contact Photo": "Upload Emergency Contact Photo"
 }
