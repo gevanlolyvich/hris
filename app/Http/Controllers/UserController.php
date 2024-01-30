@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -241,6 +242,8 @@ class UserController extends Controller
             [
                 'name' => 'required|max:120',
                 'email' => 'required|email|unique:users,email,' . $userDetail['id'],
+                'profile' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
+                'emergency_contact_photo' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
             ]
         );
         if ($validator->fails()) {
@@ -281,9 +284,27 @@ class UserController extends Controller
         $user->save();
 
         if (\Auth::user()->type == 'employee') {
-            $coordinate = "$request->latitude, $request->longitude, 50";
+            $coordinate     = "$request->latitude, $request->longitude, 50";
 
-            $employee             = Employee::where('user_id', $user->id)->first();
+            $employee       = Employee::where('user_id', $user->id)->first();
+
+            $document_path  = $employee->emergency_contact_photo;
+            if ($request->file('emergency_contact_photo')) {
+                $docs = $request->file('emergency_contact_photo');
+                $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
+                $path = $docs->storeAs('uploads/employees/'. preg_replace('/\s+/', '', $employee->name), $docName, 'public');
+                $document_path = env('APP_URL') . '/storage/' . $path;
+    
+                // Check if the file exists before attempting to delete
+                if ($employee->emergency_contact_photo) {
+                    $filepath_array = explode('/', $employee->emergency_contact_photo);
+                    $filename = array_pop($filepath_array);
+    
+                    if (Storage::disk('public')->exists("uploads/employees/" . preg_replace('/\s+/', '', $employee->name). '/' . $filename)) {
+                        Storage::disk('public')->delete("uploads/employees/" . preg_replace('/\s+/', '', $employee->name). '/' . $filename);
+                    }
+                }
+            }
 
             if ($employee->coordinate != $coordinate || $employee->address != $request->address) {
                 EmployeeHomeHistory::create([
@@ -292,16 +313,17 @@ class UserController extends Controller
                     'address' => $request->address,
                 ]);
             }
-            $employee->name       = $request->name;
-            $employee->email      = $request->email;
-            $employee->coordinate = $coordinate;
-            $employee->address    = $request->address;
-            $employee->dob        = $request->birthdate;
-            $employee->phone      = $request->phone;
-            $employee->marital_status                   = $request->marital_status;
-            $employee->domicile_address                 = $request->domicile_address;
-            $employee->emergency_contact_number         = $request->emergency_contact_number;
-            $employee->emergency_contact_relation       = $request->emergency_contact_relation;
+            $employee->name                         = $request->name;
+            $employee->email                        = $request->email;
+            $employee->coordinate                   = $coordinate;
+            $employee->address                      = $request->address;
+            $employee->dob                          = $request->birthdate;
+            $employee->phone                        = $request->phone;
+            $employee->marital_status               = $request->marital_status;
+            $employee->domicile_address             = $request->domicile_address;
+            $employee->emergency_contact_number     = $request->emergency_contact_number;
+            $employee->emergency_contact_relation   = $request->emergency_contact_relation;
+            $employee->emergency_contact_photo      = $document_path;
             $employee->save();
         }
 

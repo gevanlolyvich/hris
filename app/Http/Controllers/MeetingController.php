@@ -28,6 +28,10 @@ class MeetingController extends Controller
                         $q->where('meetings.department_id', '["0"]')
                             ->where('meetings.employee_id', '["0"]');
                     })->get();
+                
+                foreach ($meetings as $meeting) {
+                    $meeting->id =  $meeting->meeting_id;
+                }
             } else {
                 $meetings = !empty(\Auth::user()->branch_id) ? LocalMeeting::where('branch_id', \Auth::user()->branch_id)->get() : LocalMeeting::get();
             }
@@ -50,8 +54,6 @@ class MeetingController extends Controller
 
 
                 $meeting_types = ['Offline'=>'Offline', 'Online'=>'Online', 'Hybrid'=>'Hybrid'];
-                // Log::info(json_encode($branch, JSON_PRETTY_PRINT));
-                // Log::info(json_encode($employees, JSON_PRETTY_PRINT));
             }
 
             return view('meeting.create', compact('employees', 'departments', 'branch', 'meeting_types'));
@@ -154,7 +156,6 @@ class MeetingController extends Controller
         $employees = Employee::whereIn('id', json_decode($meetings->employee_id))->get()->pluck('name')->toArray();
         $departments = Department::whereIn('id', json_decode($meetings->department_id))->get()->pluck('name')->toArray();
         return view('meeting.show', compact('meetings', 'employees', 'departments', 'branch'));
-        // return redirect()->route('meeting.index');
     }
 
     public function edit($meeting)

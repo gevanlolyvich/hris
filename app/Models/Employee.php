@@ -29,6 +29,7 @@ class Employee extends Model
         'marital_status',
         'emergency_contact_number',
         'emergency_contact_relation',
+        'emergency_contact_photo',
         'email',
         'password',
         'employee_id',
