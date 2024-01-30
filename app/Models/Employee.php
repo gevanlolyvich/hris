@@ -465,12 +465,12 @@ class Employee extends Model
     {
         return $this->belongsTo(self::class, 'managed_by', 'id');
     }
-
+    
     public function recursiveManager(): BelongsTo
     {
         return $this->manager()->with('recursiveManager');
     }
-
+    
     public function managersFlatten()
     {
         $result = collect();
@@ -479,10 +479,10 @@ class Employee extends Model
             $result->push($item);
             $result = $result->merge($item->managersFlatten());
         }
-
+        
         return $result;
     }
-
+    
     public function subordinate(): HasMany
     {
         return $this->hasMany(self::class, 'managed_by');
@@ -492,22 +492,22 @@ class Employee extends Model
     {
         return $this->subordinate()->with('subordinateRecursive');
     }
-
+    
     public function subordinatesFlatten()
     {
         $result = collect();
         $subordinates = $this->subordinateRecursive;
-
+        
         foreach ($subordinates as $subordinate) {
             if ($subordinate instanceof Employee) {
                 $result->push($subordinate);
                 $result = $result->merge($subordinate->subordinatesFlatten());
             }
         }
-
+        
         return $result;
     }
-
+    
     public function shift_histories(): HasMany
     {
         return $this->hasMany(ShiftHistory::class);
@@ -517,12 +517,12 @@ class Employee extends Model
     {
         return $this->hasMany(EventEmployee::class, 'employee_id');
     }
-
+    
     public function home_histories(): HasMany
     {
         return $this->hasMany(EmployeeHomeHistory::class);
     }
-
+    
     public static $employeeTypes = [
         'full time' => 'Full Time',
         'daily worker' => 'Daily Worker',
@@ -531,5 +531,10 @@ class Employee extends Model
     public function getNameBranch()
     {
         return $this->name . '|' . $this->branch->name;
+    }
+
+    public function employeeType(): BelongsTo
+    {
+        return $this->belongsTo(employeeType::class, 'type_id', 'id');
     }
 }

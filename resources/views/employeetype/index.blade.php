@@ -30,7 +30,7 @@
                             <tr>
                                 <th width="10px">ID</th>
                                 <th>{{ __('Name') }}</th>
-                                <th>{{ __('Shift Type') }}</th>
+                                <th>{{ __('Salary Type') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
