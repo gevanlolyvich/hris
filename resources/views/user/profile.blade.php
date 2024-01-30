@@ -187,7 +187,6 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                 </div>
             </div>
 
-
             <div class="col-xl-9">
                 <div id="useradd-1">
                     <div class="card">
@@ -313,10 +312,10 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                 <div class="col-lg-6 col-md-6">
                                     <div class="form-group">
                                         {{ Form::label('profile', __('Avatar'), ['class' => 'col-form-label']) }}
-                                        <div class="choose-files ">
+                                        <div class="">
                                             <label for="profile">
-                                                <div class=" bg-primary profile "> <i
-                                                        class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                                <div class="btn btn-md bg-primary profile "> <i
+                                                        class="ti ti-upload px-1"></i>{{ __('Upload Profile Photo') }}
                                                 </div>
                                                 <input type="file" class="form-control file" name="profile" id="profile" onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">
                                                 <span class="theme-avtar" style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%;">
@@ -327,8 +326,31 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                                 </span>   
                                             </label>
                                         </div>
-                                        <span
-                                        class="text-xs text-muted">{{ __('Please upload a valid image file. Size of image should not be more than 2MB.') }}</span>
+                                        <span class="text-xs text-muted">{{ __('Please upload a valid image file. Size of image should not be more than 2MB.') }}</span>
+                                    @error('profile')
+                                        <span class="invalid-feedback text-danger text-xs"
+                                            role="alert">{{ $message }}</span>
+                                    @enderror
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="form-group">
+                                        {{ Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'col-form-label']) }}
+                                        <div class="">
+                                            <label for="emergency_contact_photo">
+                                                <div class="btn btn-md bg-primary emergency_contact_photo"> <i
+                                                        class="ti ti-upload px-1"></i>{{ __('Upload Emergency Contact Photo') }}
+                                                </div>
+                                                <input type="file" class="form-control file" name="emergency_contact_photo" id="emergency_contact_photo" onchange="document.getElementById('blah2').src = window.URL.createObjectURL(this.files[0])">
+                                                <span class="theme-avtar" style="width: 150px; height: 150px; overflow: hidden; border-radius: 50%;">
+                                                    <img alt="#" id="blah2"
+                                                        src="{{ !empty($userDetail->employee->emergency_contact_photo) ? $userDetail->employee->emergency_contact_photo : $profile . '/avatar.png' }}"
+                                                        class="header-avtar" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    {{-- <img id="blah"  width="100" src="{{ !empty($userDetail->avatar) ? $profile . $userDetail->avatar : $profile . '/avatar.png' }}" /> --}}
+                                                </span>   
+                                            </label>
+                                        </div>
+                                        <span class="text-xs text-muted">{{ __('Please upload a valid image file. Size of image should not be more than 2MB.') }}</span>
                                     @error('profile')
                                         <span class="invalid-feedback text-danger text-xs"
                                             role="alert">{{ $message }}</span>
