@@ -103,7 +103,7 @@
                             <div class="project-info d-flex text-md">
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Required Days') }} </b>
-                                    <div class="project-amnt ">{{ $employee->type == 'full time' ? $total_work_days : '-' }}</div>
+                                    <div class="project-amnt ">{{ $employee->employeeType->type == 'Fixed' ? $total_work_days : '-' }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Valid Days') }} </b>
@@ -111,7 +111,7 @@
                                 </div>
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Total Main Salary') }} </b>
-                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($employee->type == 'full time' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}</div>
+                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($employee->employeeType->type == 'Fixed' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}</div>
                                 </div>
                             </div>
                         </div>
