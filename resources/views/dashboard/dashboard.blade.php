@@ -20,7 +20,7 @@
         </div>
     @endif
 
-    @if (\Auth::user()->type == 'employee')
+    {{-- @if (\Auth::user()->type == 'employee') --}}
     {{-- Modal --}}
 
     @if (Auth::user()->type == 'employee')
@@ -155,189 +155,250 @@
                 </div>
             </div>
         </div>
-    @endif
 
-    <div class="col-xxl-5">
-        <div class="card">
-            <div class="card-header">
-                <h5>{{ __('Mark Attandance') }}</h5>
-            </div>               
-            <div class="card-body">
-                @if ($officeTime['is_working'])
-                    <h6>{{ __($officeTime['name'])}}</h6>
-                    <p class="text-muted pb-0-5">
-                        {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ')}} {{ $officeTime['endTime'] }} WIB
-                    </p>
-                    {{-- Condition for showing employee already clock in or not --}}
-                    @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
-                    @elseif (empty($employeeAttendance))
-                        {{-- DO Nothing --}}
+        <div class="col-xxl-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ __('Mark Attandance') }}</h5>
+                </div>               
+                <div class="card-body">
+                    @if ($officeTime['is_working'])
+                        <h6>{{ __($officeTime['name'])}}</h6>
+                        <p class="text-muted pb-0-5">
+                            {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ')}} {{ $officeTime['endTime'] }} WIB
+                        </p>
+                        {{-- Condition for showing employee already clock in or not --}}
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
+                        @elseif (empty($employeeAttendance))
+                            {{-- DO Nothing --}}
+                        @else
+                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
+                        @endif
                     @else
-                        <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
+                        <h6 class="text-muted pb-0-5">
+                            {{ __('No Working Hour') }}
+                        </h6>
                     @endif
-                @else
-                    <h6 class="text-muted pb-0-5">
-                        {{ __('No Working Hour') }}
-                    </h6>
-                @endif
-                <div class="row d-flex flex-column align-items-center">
-                    {{-- Show form for attendance type and notes --}}                      
-                    {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
-                    {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
-                    @if ($settings['photo_on_clock'] == 'Required')
-                        <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
-                    @endif
-                    <div class="col-md-6 col-lg-12 text-center mx-auto">
-                        <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load"><i
-                            class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
-                        </button>
-                        <div id="camera" style="display: none; position: relative" class="col-12">
-                            <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
-                            <div class="row allign-center text-center">
-                                <div class="col-6">
-                                    <button type="button" class="btn btn-info btn-md custBtn1" id="takepic" style="display: none;">
-                                        <i class="fa fa-solid fa-camera"></i>
-                                    </button>
-                                </div>
-                                <div class="col-6">
-                                    <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera" style="display: none;">
-                                        <i class="fa fa-solid fa-window-close"></i>
-                                    </button>
+                    <div class="row d-flex flex-column align-items-center">
+                        {{-- Show form for attendance type and notes --}}                      
+                        {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
+                        {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
+                        @if ($settings['photo_on_clock'] == 'Required')
+                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                        @endif
+                        <div class="col-md-6 col-lg-12 text-center mx-auto">
+                            <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load"><i
+                                class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                            </button>
+                            <div id="camera" style="display: none; position: relative" class="col-12">
+                                <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                                <div class="row allign-center text-center">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-info btn-md custBtn1" id="takepic" style="display: none;">
+                                            <i class="fa fa-solid fa-camera"></i>
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera" style="display: none;">
+                                            <i class="fa fa-solid fa-window-close"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                            <div id="output" style="display: none;">
+                                <img id="photo" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                            </div>
+                            <label for="picture">
+                                <input type="hidden" name="picture" id="picture">
+                            </label>      
                         </div>
-                        <canvas id="canvas" style="display: none;"></canvas>
-                        <div id="output" style="display: none;">
-                            <img id="photo" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                        <div class="col-md-12" id="other-form" style="display: none;">
+                            <div class="form-group mb-1">
+                                {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p> 
+                                {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose Shift']) }}
+                            </div>
+                            <div class="form-group mb-1">
+                                {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                                {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
+                            </div>
+                            <div class="form-group">
+                                {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
+                                {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=> __('Enter notes for clock in') ]) !!}
+                            </div>
+                            <input type="hidden" name="latitude" id="latitude" value="0">
+                            <input type="hidden" name="longitude" id="longitude" value="0">
+                            <input type="hidden" name="accuracy" id="accuracy" value="0">
+                            {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                         </div>
-                        <label for="picture">
-                            <input type="hidden" name="picture" id="picture">
-                        </label>      
-                    </div>
-                    <div class="col-md-12" id="other-form" style="display: none;">
-                        <div class="form-group mb-1">
-                            {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
-                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p> 
-                            {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose Shift']) }}
+                        <div class="col-md-6 text-center mx-auto mt-1">
+                            {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
+                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                                <button type="submit" value="0" name="in" id="clock_in"
+                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                            {{-- @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out']))) --}}
+                            @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
+                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                            @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                            {{-- @elseif (!empty($employeeAttendance) && (($employeeAttendance->clock_out != '00:00:00') && ($employeeAttendance->clock_out != $employeeAttendance->clock_in ))) --}}
+                            @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
+                                {{-- {{ $employeeAttendance }} --}}
+                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                            @else
+                                <button type="submit" value="0" name="in" id="clock_in"
+                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                            @endif
+                            {{ Form::close() }}
+                        </div>                                                    
+                        <div class="col-md-6 text-center mx-auto mt-3">
+                            {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
+                            {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
+                            {{-- @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out']) --}}
+                            @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                                <input type="hidden" name="picture_out" id="picture_out">
+                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                            {{-- @elseif ($employeeAttendance) --}}
+                            @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                                <input type="hidden" name="picture_out" id="picture_out">
+                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                            {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button> --}}
+                            @else
+                                <button type="submit" value="0" name="out" id="clock_out"
+                                    class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
+                            @endif
+                            {{ Form::close() }}
                         </div>
-                        <div class="form-group mb-1">
-                            {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
-                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
-                            {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
-                        </div>
-                        <div class="form-group">
-                            {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
-                            {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=> __('Enter notes for clock in') ]) !!}
-                        </div>
-                        <input type="hidden" name="latitude" id="latitude" value="0">
-                        <input type="hidden" name="longitude" id="longitude" value="0">
-                        <input type="hidden" name="accuracy" id="accuracy" value="0">
-                        {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
-                    </div>
-                    <div class="col-md-6 text-center mx-auto mt-1">
-                        {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
-                            <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                        {{-- @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out']))) --}}
-                        @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
-                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                        @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
-                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                        {{-- @elseif (!empty($employeeAttendance) && (($employeeAttendance->clock_out != '00:00:00') && ($employeeAttendance->clock_out != $employeeAttendance->clock_in ))) --}}
-                        @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
-                            {{-- {{ $employeeAttendance }} --}}
-                            <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                        @else
-                            <button type="submit" value="0" name="in" id="clock_in"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                        @endif
-                        {{ Form::close() }}
-                    </div>                                                    
-                    <div class="col-md-6 text-center mx-auto mt-3">
-                        {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
-                        {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
-                        {{-- @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out']) --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
-                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
-                            <input type="hidden" name="latitude" id="latitude_out" value="0">
-                            <input type="hidden" name="longitude" id="longitude_out" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                            <input type="hidden" name="picture_out" id="picture_out">
-                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
-                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        {{-- @elseif ($employeeAttendance) --}}
-                        @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
-                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
-                            <input type="hidden" name="latitude" id="latitude_out" value="0">
-                            <input type="hidden" name="longitude" id="longitude_out" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                            <input type="hidden" name="picture_out" id="picture_out">
-                            <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
-                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                        {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
-                            {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                            <input type="hidden" name="latitude" id="latitude_out" value="0">
-                            <input type="hidden" name="longitude" id="longitude_out" value="0">
-                            <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                            <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button> --}}
-                        @else
-                            <button type="submit" value="0" name="out" id="clock_out"
-                                class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
-                        @endif
-                        {{ Form::close() }}
                     </div>
                 </div>
             </div>
-        </div>
-        @if (!$attendances->isEmpty())
+            @if (!$attendances->isEmpty())
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ __("Today Attendance History") }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table text-center">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('Shift') }}</th>
+                                        <th>{{ __('Clock In') }}</th>
+                                        <th>{{ __('Clock Out') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="list">
+                                    @foreach ($attendances as $attendanceData)
+                                        <tr>
+                                            <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
+                                            <td>
+                                                @if ($attendanceData->coord_in)
+                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                    </a>
+                                                @else
+                                                    <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                    </a>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($attendanceData->coord_out)
+                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                    </a>
+                                                @else
+                                                    <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                    </a>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if (!empty($overtime))
+                <div class="card">
+                    <div class="card-header card-body table-border-style">
+                        <h5>{{ __('Overtime') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>{{ __('Title')}} :</h6>
+                        <p class="text-muted pb-0-5">{{ $overtime->title}}</p>
+                        <h6>{{ __('Description')}} :</h6>
+                        <p class="text-muted pb-0-5">{{ $overtime->description}}</p>
+                        <hr>
+                        <hr>
+                        <div class="text-center">
+                            @if ($overtime->type != 'daily')
+                                <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3" data-bs-toggle="tooltip"
+                                    data-overtime-id="{{ $overtime->id }}"
+                                    data-clock-in="{{ $overtime->clock_in }}"
+                                    data-bs-original-title="{{ __('Clock In / Clock Out') }}">
+                                    <i class="fa fa-solid fa-clock"></i>
+                                </button>
+                            @endif
+                            <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input" data-bs-toggle="tooltip"
+                                data-overtime-id="{{ $overtime->id }}"
+                                data-document="{{ $overtime->report_document }}"
+                                data-note="{{ $overtime->report_note }}"
+                                data-bs-original-title="{{ __('Report Document') }}">
+                                <i class="fa fa-solid fa-file-import"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
             <div class="card">
-                <div class="card-header">
-                    <h5>{{ __("Today Attendance History") }}</h5>
+                <div class="card-header card-body table-border-style">
+                    <h5>{{ __('Meeting schedule') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table text-center">
+                        <table class="table">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Shift') }}</th>
-                                    <th>{{ __('Clock In') }}</th>
-                                    <th>{{ __('Clock Out') }}</th>
+                                    <th>{{ __('Meeting title') }}</th>
+                                    <th>{{ __('Type') }}</th>
+                                    <th>{{ __("Start Date") }}</th>
+                                    <th>{{ __('End Date') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
-                                @foreach ($attendances as $attendanceData)
+                                @foreach ($meetings as $meeting)
                                     <tr>
-                                        <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
-                                        <td>
-                                            @if ($attendanceData->coord_in)
-                                                <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
-                                                </a>
-                                            @else
-                                                <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
-                                                </a>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($attendanceData->coord_out)
-                                                <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
-                                                </a>
-                                            @else
-                                                <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
-                                                </a>
-                                            @endif
-                                        </td>
+                                        <td>{{ $meeting->title }}</td>
+                                        <td>{{ $meeting->meeting_type }}</td>
+                                        <td>{{ $meeting->start_time }}</td>
+                                        <td>{{ $meeting->end_time }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -345,97 +406,37 @@
                     </div>
                 </div>
             </div>
-        @endif
-        @if (!empty($overtime))
-            <div class="card">
-                <div class="card-header card-body table-border-style">
-                    <h5>{{ __('Overtime') }}</h5>
-                </div>
-                <div class="card-body">
-                    <h6>{{ __('Title')}} :</h6>
-                    <p class="text-muted pb-0-5">{{ $overtime->title}}</p>
-                    <h6>{{ __('Description')}} :</h6>
-                    <p class="text-muted pb-0-5">{{ $overtime->description}}</p>
-                    <hr>
-                    <hr>
-                    <div class="text-center">
-                        @if ($overtime->type != 'daily')
-                            <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3" data-bs-toggle="tooltip"
-                                data-overtime-id="{{ $overtime->id }}"
-                                data-clock-in="{{ $overtime->clock_in }}"
-                                data-bs-original-title="{{ __('Clock In / Clock Out') }}">
-                                <i class="fa fa-solid fa-clock"></i>
-                            </button>
-                        @endif
-                        <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input" data-bs-toggle="tooltip"
-                            data-overtime-id="{{ $overtime->id }}"
-                            data-document="{{ $overtime->report_document }}"
-                            data-note="{{ $overtime->report_note }}"
-                            data-bs-original-title="{{ __('Report Document') }}">
-                            <i class="fa fa-solid fa-file-import"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        @endif
-        <div class="card">
-            <div class="card-header card-body table-border-style">
-                <h5>{{ __('Meeting schedule') }}</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>{{ __('Meeting title') }}</th>
-                                <th>{{ __('Type') }}</th>
-                                <th>{{ __("Start Date") }}</th>
-                                <th>{{ __('End Date') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="list">
-                            @foreach ($meetings as $meeting)
-                                <tr>
-                                    <td>{{ $meeting->title }}</td>
-                                    <td>{{ $meeting->meeting_type }}</td>
-                                    <td>{{ $meeting->start_time }}</td>
-                                    <td>{{ $meeting->end_time }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
-    </div>
-    <div class="col-xxl-7">
-        <div class="card">
-            <div class="card-header">
-                <div class="row">
-                    <div class="col-9">
-                        <h5>{{ __('Calendar') }}</h5>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group">
-                            <label for=""></label>
-                            @if (isset($setting['is_enabled']) && $setting['is_enabled'] == 'on')
-                                <select class="form-control" name="calender_type" id="calender_type"
-                                    onchange="get_data()">
-                                    <option value="google_calender">{{ __('Google Calender') }}</option>
-                                    <option value="local_calender" selected="true">
-                                        {{ __('Local Calender') }}</option>
-                                </select>
-                            @endif
-                            <input type="hidden" id="path_admin" value="{{ url('/') }}">
+
+        <div class="col-xxl-7">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-9">
+                            <h5>{{ __('Calendar') }}</h5>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for=""></label>
+                                @if (isset($setting['is_enabled']) && $setting['is_enabled'] == 'on')
+                                    <select class="form-control" name="calender_type" id="calender_type"
+                                        onchange="get_data()">
+                                        <option value="google_calender">{{ __('Google Calender') }}</option>
+                                        <option value="local_calender" selected="true">
+                                            {{ __('Local Calender') }}</option>
+                                    </select>
+                                @endif
+                                <input type="hidden" id="path_admin" value="{{ url('/') }}">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card-body">
-                <div id='event_calendar' class='calendar'></div>
+                <div class="card-body">
+                    <div id='event_calendar' class='calendar'></div>
+                </div>
             </div>
         </div>
-    </div>
+
         <div class="col-xl-12 col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-body table-border-style">
@@ -450,6 +451,7 @@
                                     <th>{{ __('Start Date') }}</th>
                                     <th>{{ __('End Date') }}</th>
                                     <th>{{ __('Description') }}</th>
+                                    <th>{{ __('Document') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -459,6 +461,19 @@
                                         <td>{{ \Auth::user()->dateFormat($announcement->start_date) }}</td>
                                         <td>{{ \Auth::user()->dateFormat($announcement->end_date) }}</td>
                                         <td>{{ $announcement->description }}</td>
+                                        <td>
+                                            @if ($announcement->document)
+                                                <div class="action-btn bg-info ms-2">
+                                                    <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-original-title="{{ __('View Document') }}">
+                                                        <i class="ti ti-file text-white"></i>
+                                                    </a>
+                                                </div>
+                                            @else
+                                            -
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -545,6 +560,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-lg-4 col-md-6">
             <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">      
                 <div class="card">
@@ -569,6 +585,7 @@
                 </div>
             </a>
         </div>
+
         <div class="col-lg-4 col-md-6">
             <a href="{{ route('permit.index', ['status' => 'Pending']) }}">
                 <div class="card">
@@ -593,6 +610,7 @@
                 </div>
             </a>
         </div>
+
         <div class="col-lg-4 col-md-6">
             <a href="{{ route('leave.index', ['status' => 'Pending']) }}">
                 <div class="card">
@@ -763,8 +781,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
         </div>
     @endif
 @endsection
