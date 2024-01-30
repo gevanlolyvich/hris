@@ -38,7 +38,7 @@
                                         </a>
                                     </td>
                                     <td>{{ $employee->name }}</td>
-                                    <td>{{ ucwords($employee->type) }}</td>
+                                    <td>{{ ucwords($employee?->employeeType?->name . ' | ' . $employee?->employeeType?->type) }}</td>
                                     <td>{{ $employee->salary_type() }}</td>
                                     <td>{{ \Auth::user()->priceFormat($employee->salary) }}</td>
                                     {{-- <td>{{ !empty($employee->get_net_salary()) ? \Auth::user()->priceFormat($employee->get_net_salary()) : '' }} --}}

@@ -106,12 +106,38 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                            {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}
                             {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Employee Address')]) !!}
                         </div>
                         <div class="form-group">
                             {!! Form::label('domicile_address', __('Domicile Address'), ['class' => 'form-label']) !!}
                             {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
+                        </div>
+                        <div class="form-group col-md-12">
+                            <div class="row">
+                                <div class="col-9">
+                                    {{ Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'col-form-label']) }}
+                                    <br>
+                                    <div class="btn btn-block btn-primary bg-primary document"> <i
+                                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                        </div>
+                                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="emergency_contact_photo">
+                                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
+                                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                    </div>
+                                </div>
+                                @if (!empty($employee->emergency_contact_photo))
+                                    <div class="col-md-3">
+                                        {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
+                                        <br>
+                                        <a href="{{ asset($employee->emergency_contact_photo) }}" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-original-title="{{ __('View') }}">
+                                            <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                             @if (\Auth::user()->type == 'employee')
                                 {!! Form::submit('Update', ['class' => 'btn-create btn-xs badge-blue radius-10px float-right']) !!}
@@ -151,7 +177,7 @@
                                         {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required','style'=>'font-weight:bold;', 'placeholder' => 'Select Branch']) }}
                                     </div>
                                     <div class="form-group col-md-12">
-                                        {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+                                        {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
     
                                         <div class="form-icon-user">
                                             <div class="department_div">
@@ -166,7 +192,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-md-12">
-                                        {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
+                                        {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                         <div class="form-icon-user">
                                             <div class="designation_div">
@@ -202,8 +228,9 @@
                                             <div class="shift_type_id_div">
                                                 <select class="form-control select2  shift_type_id" name="shift_type_id"
                                                      placeholder="Select Shift">
-                                                     <option value="" disabled selected>{{ __('Select Shift') }}</option>
-                                                     
+                                                     @if ($employee->shift_type_id)
+                                                        <option value="{{ $employee->shift_type_id }}">{{ $employee->shift_type->name }}</option>
+                                                     @endif
                                                 </select>
                                             </div>
                                         </div>
@@ -439,89 +466,25 @@
 @endsection
 
 @push('script-page')
-
-<script>
-    $(document).on('change', 'select[name=department_id]', function() {
-        var department_id = $(this).val();
-        // console.log({department_id});
-        getDesignation(department_id);
-    });
-    
-    $(document).on('change', 'select[name=branch_id]', function() {
-        var branch_id = $(this).val();
-        // console.log({branch_id});
-        getDepartment(branch_id);
-        getEmployeeBranch(branch_id);
-        getBranchShift(branch_id);
-    });
-    
-    function getDepartment(branch_id) {
-        $('.designation_id').empty();
-        $.ajax({
-            url: '{{ route('department.employee.json') }}',
-            type: 'POST',
-            data: {
-                "branch_id": branch_id,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                // console.log(data);
-                $('.department_id').empty();
-                var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
-                                        placeholder="Select Department" >
-                                        </select>`;
-                $('.department_div').html(emp_selct);
-
-                $('.department_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.department_id').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple', {
-                    removeItemButton: true,
-                });
-
-
-            }
+    <script>
+        $(document).on('change', 'select[name=department_id]', function() {
+            var department_id = $(this).val();
+            // console.log({department_id});
+            getDesignation(department_id);
         });
-    }
-
-    function getEmployeeBranch(branch_id) {
-        console.log({branch_id})
-        $.ajax({
-            url: '{{ route('branch.employee.json') }}',
-            type: 'POST',
-            data: {
-                "branch_id": branch_id,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                // console.log(data);
-                $('.managed_by').empty();
-                var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
-                                        placeholder={{ __('Select Direct Supervisor') }} >
-                                        </select>`;
-                $('.managed_by_div').html(emp_selct);
-
-                $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.managed_by').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple2', {
-                    removeItemButton: true,
-                });
-
-
-            }
+        
+        $(document).on('change', 'select[name=branch_id]', function() {
+            var branch_id = $(this).val();
+            // console.log({branch_id});
+            getDepartment(branch_id);
+            getEmployeeBranch(branch_id);
+            getBranchShift(branch_id);
         });
-    }
-
-    function getBranchShift(branch_id) {
-            // console.log({branch_id})
-            console.log({loc:'branchshift'})
+        
+        function getDepartment(branch_id) {
+            $('.designation_id').empty();
             $.ajax({
-                url: '{{ route('branch.shift.json') }}',
+                url: '{{ route('department.employee.json') }}',
                 type: 'POST',
                 data: {
                     "branch_id": branch_id,
@@ -529,18 +492,18 @@
                 },
                 success: function(data) {
                     // console.log(data);
-                    $('.shift_type_id').empty();
-                    var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
-                                            placeholder={{ __('Select Shift') }} >
+                    $('.department_id').empty();
+                    var emp_selct = ` <select class="form-control select2  department_id" name="department_id" id="choices-multiple"
+                                            placeholder="Select Department" >
                                             </select>`;
-                    $('.shift_type_id_div').html(emp_selct);
+                    $('.department_div').html(emp_selct);
 
-                    $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
                     $.each(data, function(key, value) {
-                        $('.shift_type_id').append('<option value="' + key + '">' + value +
+                        $('.department_id').append('<option value="' + key + '">' + value +
                             '</option>');
                     });
-                    new Choices('#choices-multiple5', {
+                    new Choices('#choices-multiple', {
                         removeItemButton: true,
                     });
 
@@ -549,33 +512,107 @@
             });
         }
 
-    function getDesignation(did) {
+        function getEmployeeBranch(branch_id) {
+            console.log({branch_id})
+            $.ajax({
+                url: '{{ route('branch.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    // console.log(data);
+                    $('.managed_by').empty();
+                    var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
+                                            placeholder={{ __('Select Direct Supervisor') }} >
+                                            </select>`;
+                    $('.managed_by_div').html(emp_selct);
 
-        $.ajax({
-            url: '{{ route('employee.json') }}',
-            type: 'POST',
-            data: {
-                "department_id": did,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
+                    $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.managed_by').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple2', {
+                        removeItemButton: true,
+                    });
 
-                $('.designation_id').empty();
-                var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple3"
-                                        placeholder="Select Designation" >
-                                        </select>`;
-                $('.designation_div').html(emp_selct);
 
-                $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
-                $.each(data, function(key, value) {
-                    $('.designation_id').append('<option value="' + key + '">' + value +
-                        '</option>');
-                });
-                new Choices('#choices-multiple3', {
-                    removeItemButton: true,
+                }
+            });
+        }
+
+        function getBranchShift(branch_id) {
+                // console.log({branch_id})
+                console.log({loc:'branchshift'})
+                $.ajax({
+                    url: '{{ route('branch.shift.json') }}',
+                    type: 'POST',
+                    data: {
+                        "branch_id": branch_id,
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    success: function(data) {
+                        // console.log(data);
+                        $('.shift_type_id').empty();
+                        var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
+                                                placeholder={{ __('Select Shift') }} >
+                                                </select>`;
+                        $('.shift_type_id_div').html(emp_selct);
+
+                        $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.shift_type_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#choices-multiple5', {
+                            removeItemButton: true,
+                        });
+
+
+                    }
                 });
             }
-        });
-    }
-</script>
+
+        function getDesignation(did) {
+
+            $.ajax({
+                url: '{{ route('employee.json') }}',
+                type: 'POST',
+                data: {
+                    "department_id": did,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+
+                    $('.designation_id').empty();
+                    var emp_selct = ` <select class="form-control  designation_id" name="designation_id" id="choices-multiple3"
+                                            placeholder="Select Designation" >
+                                            </select>`;
+                    $('.designation_div').html(emp_selct);
+
+                    $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.designation_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple3', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="emergency_contact_photo"]', function () {
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
+    </script>
 @endpush

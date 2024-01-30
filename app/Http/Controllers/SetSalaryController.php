@@ -74,7 +74,7 @@ class SetSalaryController extends Controller
         return $totalWorkingHours;
     }
 
-    function getPresentDays($attendanceData, $shiftTimes, $type = 'full time') {
+    function getPresentDays($attendanceData, $shiftTimes, $type = 'Fixed') {
         // Initialize the present days count
         $presentDaysCount = 0;
 
@@ -86,7 +86,7 @@ class SetSalaryController extends Controller
             // Check if the attendance date is a workday based on shift times
             $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
     
-            if ($shift && $shift['is_working'] && $type == 'full time') {
+            if ($shift && $shift['is_working'] && $type == 'Fixed') {
                 // Calculate required work hours based on shift
 
                 $startShift = strtotime($shift['start_time']);
@@ -112,7 +112,7 @@ class SetSalaryController extends Controller
                     $attendanceWorkHours = 0;
                 }
                 
-                if ($attendanceWorkHours >= $requiredWorkHours || $type != 'full time') {
+                if ($attendanceWorkHours >= $requiredWorkHours || $type != 'Fixed') {
                     // Increment the present days count
                     $presentDaysCount++;
                 }
@@ -212,7 +212,7 @@ class SetSalaryController extends Controller
 
         $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
         $total_work_hours     = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-        $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->type);
+        $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
 
         foreach ( $allowances as  $value) {
             if($value->type == 'percentage' )

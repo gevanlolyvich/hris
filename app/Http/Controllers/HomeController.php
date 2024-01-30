@@ -125,6 +125,9 @@ class HomeController extends Controller
                     }
                 )->get();
 
+                foreach ($meetings as $meeting) {
+                    $meeting->id =  $meeting->meeting_id;
+                }
 
                 $date               = date("Y-m-d");
                 $dateYesterday      = date("Y-m-d", strtotime('yesterday'));

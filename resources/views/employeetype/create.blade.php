@@ -21,7 +21,7 @@
             <div class="form-group">
                 {{ Form::label('type', __('Type'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
-                    {{ Form::select('type', $types, null, ['class' => 'form-control select2 ','placeholder' => __('Select Shift Type')]) }}
+                    {{ Form::select('type', $types, null, ['class' => 'form-control select2 ','placeholder' => __('Select Salary Type')]) }}
                 </div>
             </div>
         </div>

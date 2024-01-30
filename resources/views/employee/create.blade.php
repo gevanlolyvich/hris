@@ -71,7 +71,6 @@
                                 <div class="form-group col-md-6">
                                     {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
-                                    {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
@@ -81,8 +80,7 @@
                                     {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::select('marital_status', $marital_statuses, old('marital_status'), ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
                                 </div>
-                                
-                                
+
                                 <div class="form-group col-md-6">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::select('nationality', $nationalities, old('nationality'), ['class' => 'form-control', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
@@ -103,6 +101,22 @@
                             <div class="form-group">
                                 {!! Form::label('domicile_address', __('Domicile Address'), ['class' => 'form-label']) !!}
                                 {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
+                            </div>
+                            <div class="form-group col-md-12">
+                                {!! Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'form-label']) !!}
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="btn btn-block btn-primary bg-primary document"> <i
+                                                    class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                                        </div>
+                                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="emergency_contact_photo">
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
+                                            class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -139,7 +153,7 @@
                                 </div>
                                 
                                 <div class="form-group col-md-12">
-                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+                                    {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                     <div class="form-icon-user">
                                         <div class="department_div">
@@ -152,7 +166,7 @@
                                 </div>
 
                                 <div class="form-group col-md-12">
-                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
+                                    {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                     <div class="form-icon-user">
                                         <div class="designation_div">
@@ -182,7 +196,7 @@
                                 </div> --}}
                                 
                                 <div class="form-group col-md-12">
-                                    {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}
+                                    {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                     <div class="form-icon-user">
                                         <div class="shift_type_id_div">
@@ -291,30 +305,37 @@
             $('.'+file_name).append(file);
         });
     </script>
+
+<script>
+    $(document).ready(() => {
+        $(document).on('change', '[name="emergency_contact_photo"]', function () {
+            const file = document.getElementById('uploadFile');
+            file.style.display = '';
+            file.style['max-width'] = '';
+            document.getElementById('fileName').textContent = this.files[0].name;
+        });
+    })
+</script>
+
     <script>
         $(document).ready(function() {
             var d_id = $('.department_id').val();
-            // console.log(d_id);
             getDesignation(d_id);
         });
 
         $(document).on('change', 'select[name=department_id]', function() {
             var department_id = $(this).val();
-            // console.log({department_id})
             getDesignation(department_id);
         });
         
         $(document).on('change', 'select[name=branch_id]', function() {
             var branch_id = $(this).val();
-            // console.log({branch_id})
-            // $('.designation_id').empty();
             getDepartment(branch_id);
             getEmployeeBranch(branch_id);
             getBranchShift(branch_id);
         });
 
         function getDepartment(branch_id) {
-            console.log({loc:'departement'})
             $.ajax({
                 url: '{{ route('department.employee.json') }}',
                 type: 'POST',
@@ -345,8 +366,6 @@
         }
 
         function getEmployeeBranch(branch_id) {
-            // console.log({branch_id})
-            console.log({loc:'empbranch'})
             $.ajax({
                 url: '{{ route('branch.employee.json') }}',
                 type: 'POST',
@@ -355,7 +374,6 @@
                     "_token": "{{ csrf_token() }}",
                 },
                 success: function(data) {
-                    // console.log(data);
                     $('.managed_by').empty();
                     var emp_selct = ` <select class="form-control select2  managed_by" name="managed_by" id="choices-multiple2"
                                             placeholder={{ __('Select Direct Supervisor') }} >
@@ -377,8 +395,6 @@
         }
         
         function getBranchShift(branch_id) {
-            // console.log({branch_id})
-            console.log({loc:'branchshift'})
             $.ajax({
                 url: '{{ route('branch.shift.json') }}',
                 type: 'POST',
@@ -387,7 +403,6 @@
                     "_token": "{{ csrf_token() }}",
                 },
                 success: function(data) {
-                    // console.log(data);
                     $('.shift_type_id').empty();
                     var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
                                             placeholder={{ __('Select Shift') }} >
@@ -409,8 +424,6 @@
         }
 
         function getDesignation(did) {
-            console.log({loc:'designation'})
-
             $.ajax({
                 url: '{{ route('employee.json') }}',
                 type: 'POST',
