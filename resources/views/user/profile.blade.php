@@ -314,7 +314,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         {{ Form::label('profile', __('Avatar'), ['class' => 'col-form-label']) }}
                                         <div class="">
                                             <label for="profile">
-                                                <div class="btn btn-md bg-primary profile "> <i
+                                                <div class="btn btn-md bg-primary profile text-white"> <i
                                                         class="ti ti-upload px-1"></i>{{ __('Upload Profile Photo') }}
                                                 </div>
                                                 <input type="file" class="form-control file" name="profile" id="profile" onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])">
@@ -338,7 +338,7 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                                         {{ Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'col-form-label']) }}
                                         <div class="">
                                             <label for="emergency_contact_photo">
-                                                <div class="btn btn-md bg-primary emergency_contact_photo"> <i
+                                                <div class="btn btn-md bg-primary emergency_contact_photo text-white"> <i
                                                         class="ti ti-upload px-1"></i>{{ __('Upload Emergency Contact Photo') }}
                                                 </div>
                                                 <input type="file" class="form-control file" name="emergency_contact_photo" id="emergency_contact_photo" onchange="document.getElementById('blah2').src = window.URL.createObjectURL(this.files[0])">
