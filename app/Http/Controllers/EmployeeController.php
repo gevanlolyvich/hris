@@ -112,8 +112,8 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'employee_id' => 'required|unique:employees',
-                    'personel_id' => 'nullable|unique:employees',
+                    'employee_id' => 'required|unique:employees,employee_id,NULL,NULL,deleted_at,NULL',
+                    'personel_id' => 'nullable|unique:employees,personel_id,NULL,NULL,deleted_at,NULL',
                     'shift_type_id' => 'required',
                     'name' => 'required',
                     'type' => 'required',
@@ -121,8 +121,8 @@ class EmployeeController extends Controller
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
-                    'emergency_contact_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
-                    'emergency_contact_relation' => 'required',
+                    'emergency_contact_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
+                    'emergency_contact_relation' => 'nullable',
                     'emergency_contact_photo' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
                     'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
@@ -243,7 +243,7 @@ class EmployeeController extends Controller
             if ($request->file('emergency_contact_photo')) {
                 $docs = $request->file('emergency_contact_photo');
                 $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
-                $path = $docs->storeAs('uploads/employees/'. preg_replace('/\s+/', '', $employee->name), $docName, 'public');
+                $path = $docs->storeAs('uploads/employees/' . preg_replace('/\s+/', '', $employee->name), $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
 
                 $employee->emergency_contact_photo = $document_path;
@@ -322,7 +322,7 @@ class EmployeeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'employee_id' => 'required|unique:employees,employee_id,' . $id,
+                    'employee_id' => 'required|unique:employees,employee_id,' . $id . ',NULL,deleted_at,NULL',
                     'shift_type_id' => 'required',
                     // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
@@ -331,8 +331,8 @@ class EmployeeController extends Controller
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'address' => 'required',
-                    'emergency_contact_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
-                    'emergency_contact_relation' => 'required',
+                    'emergency_contact_number' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
+                    'emergency_contact_relation' => 'nullable',
                     'emergency_contact_photo' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
                     'department_id' => 'required',
                     'designation_id' => 'required',
@@ -415,7 +415,7 @@ class EmployeeController extends Controller
             if ($request->file('emergency_contact_photo')) {
                 $docs = $request->file('emergency_contact_photo');
                 $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
-                $path = $docs->storeAs('uploads/employees/'. preg_replace('/\s+/', '', $employee->name), $docName, 'public');
+                $path = $docs->storeAs('uploads/employees/' . preg_replace('/\s+/', '', $employee->name), $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
 
                 // Check if the file exists before attempting to delete
@@ -423,8 +423,8 @@ class EmployeeController extends Controller
                     $filepath_array = explode('/', $employee->emergency_contact_photo);
                     $filename = array_pop($filepath_array);
 
-                    if (Storage::disk('public')->exists("uploads/employees/" . preg_replace('/\s+/', '', $employee->name). '/' . $filename)) {
-                        Storage::disk('public')->delete("uploads/employees/" . preg_replace('/\s+/', '', $employee->name). '/' . $filename);
+                    if (Storage::disk('public')->exists("uploads/employees/" . preg_replace('/\s+/', '', $employee->name) . '/' . $filename)) {
+                        Storage::disk('public')->delete("uploads/employees/" . preg_replace('/\s+/', '', $employee->name) . '/' . $filename);
                     }
                 }
             }
