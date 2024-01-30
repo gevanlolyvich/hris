@@ -390,6 +390,7 @@
                                     <th>{{ __('Type') }}</th>
                                     <th>{{ __("Start Date") }}</th>
                                     <th>{{ __('End Date') }}</th>
+                                    <th>{{ __('Detail') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="list">
@@ -399,6 +400,19 @@
                                         <td>{{ $meeting->meeting_type }}</td>
                                         <td>{{ $meeting->start_time }}</td>
                                         <td>{{ $meeting->end_time }}</td>
+                                        <td class="Action">
+                                            <span>
+                                                <div class="action-btn bg-success ms-2">
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                        data-url="{{ URL::to('meeting/' . $meeting->id) }}"
+                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                        title="" data-title="{{ __('Meeting') }}"
+                                                        data-bs-original-title="{{ __('Meeting') }}">
+                                                        <i class="ti ti-caret-right text-white"></i>
+                                                    </a>
+                                                </div>
+                                            </span>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -656,6 +670,7 @@
                                             <th>{{ __('Type') }}</th>
                                             <th>{{ __("Start Date") }}</th>
                                             <th>{{ __('End Date') }}</th>
+                                            <th>{{ __('Detail') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="list">
@@ -665,6 +680,19 @@
                                                 <td>{{ $meeting->meeting_type }}</td>
                                                 <td>{{ $meeting->start_time }}</td>
                                                 <td>{{ $meeting->end_time }}</td>
+                                                <td class="Action">
+                                                    <span>
+                                                        <div class="action-btn bg-success ms-2">
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                                data-url="{{ URL::to('meeting/' . $meeting->id) }}"
+                                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                                title="" data-title="{{ __('Meeting') }}"
+                                                                data-bs-original-title="{{ __('Meeting') }}">
+                                                                <i class="ti ti-caret-right text-white"></i>
+                                                            </a>
+                                                        </div>
+                                                    </span>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
