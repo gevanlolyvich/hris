@@ -284,11 +284,12 @@ class AnnouncementController extends Controller
 
     public function getemployee(Request $request)
     {
+        $employees = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1) : Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id);
         if ($request->department_id) {
-            $employees = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
-        } else {
-            $employees = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+            $employees = $employees->whereIn('department_id', $request->department_id);
         }
+
+        $employees = $employees->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
         return response()->json($employees);
     }
 }
