@@ -242,6 +242,8 @@ class UserController extends Controller
             [
                 'name' => 'required|max:120',
                 'email' => 'required|email|unique:users,email,' . $userDetail['id'],
+                'profile' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
+                'emergency_contact_photo' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
             ]
         );
         if ($validator->fails()) {
