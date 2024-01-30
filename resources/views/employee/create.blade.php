@@ -103,7 +103,7 @@
                                 {!! Form::textarea('domicile_address', old('domicile_address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Domicile Address')]) !!}
                             </div>
                             <div class="form-group col-md-12">
-                                {!! Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                {!! Form::label('emergency_contact_photo', __('Emergency Contact Photo'), ['class' => 'form-label']) !!}
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="btn btn-block btn-primary bg-primary document"> <i
