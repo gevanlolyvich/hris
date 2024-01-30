@@ -123,7 +123,7 @@ class EmployeeController extends Controller
                     'address' => 'required',
                     'emergency_contact_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
                     'emergency_contact_relation' => 'required',
-                    'emergency_contact_photo' => 'required|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
+                    'emergency_contact_photo' => 'nullable|mimes:jpg,png,jpeg,JPG,PNG,JPEG|image|max:2048',
                     'email' => 'required|unique:users,email,NULL,NULL,deleted_at,NULL',
                     'password' => 'required',
                     'department_id' => 'required',
