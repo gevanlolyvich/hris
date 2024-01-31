@@ -45,9 +45,25 @@
             var imageSrc = null;
             var notes = null;
 
+            let customIcon = L.icon({
+                iconUrl: 'https://cdn4.iconfinder.com/data/icons/leto-most-searched-mix-8/64/__business_office_building-256.png',
+                // shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png',
+                
+                iconSize:     [40, 40], // size of the icon
+                // shadowSize:   [50, 64], // size of the shadow
+                iconAnchor:   [36, 17], // point of the icon which will correspond to marker's location
+                // shadowAnchor: [4, 62],  // the same for the shadow
+                // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+            });
+
             $('body').on('click', '.map-link', function() {
                 var coordinates = $(this).data('coordinates').split(', ');
+                var nearCoordinate = $(this).data('near-coordinate').split(', ');
+                var nearName = $(this).data('near-name');
+                var nearRadius = $(this).data('near-radius');
+                var employeeName = $(this).data('employee');
                 notes = $(this).data('note');
+                var attendanceType = $(this).data('type');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -73,6 +89,15 @@
                         document.getElementById('modal-note').style.display = 'none';
                         document.getElementById('note-value').value = '';
                     }
+
+                    if (attendanceType) {
+                        document.getElementById('modal-type').style.display = '';
+                        document.getElementById('type-value').value = attendanceType;
+                    } else {
+                        document.getElementById('modal-type').style.display = 'none';
+                        document.getElementById('type-value').value = '';
+                    }
+
                     // If a map already exists, remove it
                     if (map !== null) {
                         map.remove();
@@ -85,6 +110,7 @@
                 
                     // Add a marker for the location
                     var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+                    marker.bindTooltip(employeeName, { permanent: true, direction: 'top', offset: [-15, -15] }).openTooltip();
                 
                     // Add a circle with the converted radius
                     var circle = L.circle([coordinates[0], coordinates[1]], {
@@ -93,6 +119,17 @@
                         fillOpacity: 0.2,
                         radius: radius,
                     }).addTo(map);
+                    
+                    if (nearCoordinate.length > 1) {
+                        var marker2 = L.marker([nearCoordinate[0], nearCoordinate[1]], {icon: customIcon}).addTo(map);
+                        marker2.bindTooltip(nearName, { permanent: true, direction: 'top', offset: [-15, -15] }).openTooltip();
+                        var circle2 = L.circle([nearCoordinate[0], nearCoordinate[1]], {
+                            color: 'red',
+                            fillColor: '#f0023',
+                            fillOpacity: 0.5,
+                            radius: nearRadius,
+                        }).addTo(map);
+                    }
                 });
             });
         });
@@ -141,10 +178,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding-top: 0.35rem">
-                <div style="display: none;" id="modal-note">
-                    <div class="text-center mx-auto">
-                        <strong>{{__('Notes')}}</strong>
-                        <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                <div class="row text-center mx-auto">
+                    <div class="col" style="display: none;" id="modal-note">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Notes')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="col" style="display: none;" id="modal-type">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Type')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
@@ -266,7 +311,15 @@
                                     <!-- Modify Clock In and Clock Out columns in your table -->
                                     <td>
                                         @if ($attendance->coord_in)
-                                            <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendance->coord_in }}" data-image="{{ $attendance->picture_in }}" data-note="{{ $attendance->note }}">
+                                            <a href="#" class="btn btn-primary btn-sm map-link"
+                                                data-employee="{{ $attendance->employee->name }}"
+                                                data-coordinates="{{ $attendance->coord_in }}"
+                                                data-image="{{ $attendance->picture_in }}"
+                                                data-type="{{ $attendance->attendance_type?->name ?? '-' }}"
+                                                data-near-coordinate="{{ $attendance->location_in_coordinate }}"
+                                                data-near-name="{{ $attendance->location_in_address }}"
+                                                data-near-radius="{{ $attendance->location_in_radius }}"
+                                                data-note="{{ $attendance->note }}">
                                                 <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                             </a>
                                         @else
@@ -277,7 +330,13 @@
                                     </td>
                                     <td>
                                         @if ($attendance->coord_out)
-                                            <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendance->coord_out }}" data-image="{{ $attendance->picture_out }}">
+                                            <a href="#" class="btn btn-info btn-sm map-link"
+                                                data-employee="{{ $attendance->employee->name }}"
+                                                data-coordinates="{{ $attendance->coord_out }}"
+                                                data-near-coordinate="{{ $attendance->location_out_coordinate }}"
+                                                data-near-name="{{ $attendance->location_out_address }}"
+                                                data-near-radius="{{ $attendance->location_out_radius }}"
+                                                data-image="{{ $attendance->picture_out }}">
                                                 <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
                                             </a>
                                         @else
