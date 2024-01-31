@@ -129,12 +129,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                             href="{{ route('roles.index') }}">{{ __('Role') }}</a>
                                     </li>
                                 @endcan
-                                @can('Manage Employee Profile')
+                                {{-- @can('Manage Employee Profile')
                                     <li class="dash-item">
                                         <a class="dash-link"
                                             href="{{ route('employee.profile') }}">{{ __('Employee Profile') }}</a>
                                     </li>
-                                @endcan
+                                @endcan --}}
                                 @can('Manage Employee Last Login')
                                     <li class="dash-item">
                                         <a class="dash-link"
