@@ -78,17 +78,16 @@
                                 {!! Form::textarea('address', null, ['class' => 'form-control', 'rows' => 2]) !!}
                             </div> --}}
                             <div class="form-group col-md-6">
-                                {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=>__('Enter Emergency Contact Number')]) !!}
-                                {{-- {!! Form::text('emergency_contact_number', old('emergency_contact_number'), null, ['class' => 'form-control', 'id' => 'emergency_contact_number', 'required' => 'required','placeholder' =>  __('Enter Emergency Contact Number')]) !!} --}}
+                                {!! Form::label('emergency_contact_number', __('Emergency Contact Number'), ['class' => 'form-label']) !!}
+                                {!! Form::text('emergency_contact_number', old('emergency_contact_number'), ['class' => 'form-control','placeholder'=>__('Enter Emergency Contact Number')]) !!}
                             </div>
                             <div class="form-group col-md-6">
-                                {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                {!! Form::select('emergency_contact_relation', $emergency_contact_relations, old('emergency_contact_relation'), ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'required' => 'required','placeholder' =>  __('Select Emergency Contact Relation')]) !!}
+                                {!! Form::label('emergency_contact_relation', __('Emergency Contact Relation'), ['class' => 'form-label']) !!}
+                                {!! Form::select('emergency_contact_relation', $emergency_contact_relations, old('emergency_contact_relation'), ['class' => 'form-control', 'id' => 'emergency_contact_relation', 'placeholder' =>  __('Select Emergency Contact Relation')]) !!}
                             </div>
                             <div class="form-group col-md-6">
-                                {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                {!! Form::select('marital_status', $marital_status, null, ['class' => 'form-control', 'id' => 'marital_status', 'required' => 'required','placeholder' =>  __('Select Marital Status')]) !!}
+                                {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}
+                                {!! Form::select('marital_status', $marital_status, null, ['class' => 'form-control', 'id' => 'marital_status','placeholder' =>  __('Select Marital Status')]) !!}
                             </div>
                             
                             
@@ -106,7 +105,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}
+                            {!! Form::label('address', __('Address'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                             {!! Form::textarea('address', old('address'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Employee Address')]) !!}
                         </div>
                         <div class="form-group">
@@ -168,7 +167,7 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2', 'required' => 'required']) !!}
+                                        {!! Form::date('company_doj', null, ['class' => 'form-control ', 'id' => 'data_picker2']) !!}
                                     </div>
                                     
                                     
@@ -222,7 +221,7 @@
                                     </div>
 
                                     <div class="form-group col-md-12">
-                                        {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}
+                                        {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
     
                                         <div class="form-icon-user">
                                             <div class="shift_type_id_div">

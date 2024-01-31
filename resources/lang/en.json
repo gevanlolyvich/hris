@@ -1816,5 +1816,6 @@
     "Upload Emergency Contact Photo": "Upload Emergency Contact Photo",
     "Map": "Map",
     "Detail": "Detail",
-    "Select Salary Type": "Select Salary Type"
+    "Select Salary Type": "Select Salary Type",
+    "Invalid GPS Data": "Invalid GPS Data"
 }
