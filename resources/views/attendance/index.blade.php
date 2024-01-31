@@ -63,6 +63,7 @@
                 var nearRadius = $(this).data('near-radius');
                 var employeeName = $(this).data('employee');
                 notes = $(this).data('note');
+                var attendanceType = $(this).data('type');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -88,6 +89,15 @@
                         document.getElementById('modal-note').style.display = 'none';
                         document.getElementById('note-value').value = '';
                     }
+
+                    if (attendanceType) {
+                        document.getElementById('modal-type').style.display = '';
+                        document.getElementById('type-value').value = attendanceType;
+                    } else {
+                        document.getElementById('modal-type').style.display = 'none';
+                        document.getElementById('type-value').value = '';
+                    }
+
                     // If a map already exists, remove it
                     if (map !== null) {
                         map.remove();
@@ -168,10 +178,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="padding-top: 0.35rem">
-                <div style="display: none;" id="modal-note">
-                    <div class="text-center mx-auto">
-                        <strong>{{__('Notes')}}</strong>
-                        <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                <div class="row text-center mx-auto">
+                    <div class="col" style="display: none;" id="modal-note">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Notes')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="col" style="display: none;" id="modal-type">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Type')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
