@@ -47,4 +47,9 @@ class AttendanceEmployee extends Model
     {
         return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
     }
+
+    public function attendance_type()
+    {
+        return $this->belongsTo(AttendanceType::class, 'attendance_type_id', 'id');
+    }
 }

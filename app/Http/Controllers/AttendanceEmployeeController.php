@@ -128,6 +128,56 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             }
 
+            $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
+
+            foreach($attendanceEmployee as $attendance) {
+                if ($attendance->coord_in || $attendance->coord_out) {
+                    $nearest_in         = null;
+                    $nearest_in_coord   = null;
+                    $near_in_name       = null;
+                    $near_in_radius     = null;
+                    $nearest_out        = null;
+                    $nearest_out_coord  = null;
+                    $near_out_name      = null;
+                    $near_out_radius    = null;
+    
+                    $attendance_in      = explode(', ', $attendance->coord_in);
+                    $attendance_out     = explode(', ', $attendance->coord_out);
+
+                    foreach ($branchCoordinates as $coordinate) {
+                        if (sizeof($attendance_in) > 1) {
+                            $distance_in       = DistanceCalculator::haversineDistance($attendance_in[0], $attendance_in[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                            if ($nearest_in > $distance_in || $nearest_in == null) {
+                                $nearest_in         = $distance_in;
+                                $nearest_in_coord   = $coordinate->latitude . ', ' . $coordinate->longitude;
+                                $near_in_name       = $coordinate->name;
+                                $near_in_radius     = $coordinate->tolerance;
+                            }
+                        }
+
+                        if (sizeof($attendance_out) > 1) {
+                            $distance_out       = DistanceCalculator::haversineDistance($attendance_out[0], $attendance_out[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                            if ($nearest_out > $distance_out || $nearest_out == null) {
+                                $nearest_out        = $distance_out;
+                                $nearest_out_coord  = $coordinate->latitude . ', ' . $coordinate->longitude;
+                                $near_out_name      = $coordinate->name;
+                                $near_out_radius    = $coordinate->tolerance;
+                            }
+                        }
+                    }
+
+                    $attendance['location_in_coordinate']   = $nearest_in_coord;
+                    $attendance['location_in_address']      = $near_in_name;
+                    $attendance['location_in_radius']       = $near_in_radius;
+                    $attendance['location_out_coordinate']  = $nearest_out_coord;
+                    $attendance['location_out_address']     = $near_out_name;
+                    $attendance['location_out_radius']      = $near_out_radius;
+                }
+
+            }
+
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
 
             return view('attendance.index', compact('attendanceEmployee', 'branch', 'department', 'emp'));
