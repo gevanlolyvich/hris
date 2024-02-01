@@ -310,9 +310,9 @@ class AttendanceEmployeeController extends Controller
         $longitude  = $request->input('longitude');
         $accuracy   = $request->input('accuracy');
 
-        if ($latitude == '0' && $longitude == '0' && $accuracy == '0') {
-            return redirect()->back()->with('error', __('Invalid GPS Data'));
-        }
+        // if ($latitude == '0' && $longitude == '0' && $accuracy == '0') {
+        //     return redirect()->back()->with('error', __('Invalid GPS Data'));
+        // }
 
         $coord_in = "$latitude, $longitude, $accuracy";
         $coord_out = "$latitude, $longitude, $accuracy";
@@ -742,9 +742,9 @@ class AttendanceEmployeeController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
-        if ($request->latitude == '0' && $request->longitude == '0' && $request->accuracy == '0') {
-            return redirect()->back()->with('error', __('Invalid GPS Data'));
-        }
+        // if ($request->latitude == '0' && $request->longitude == '0' && $request->accuracy == '0') {
+        //     return redirect()->back()->with('error', __('Invalid GPS Data'));
+        // }
 
         $picture_path = null;
         $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
