@@ -50,7 +50,9 @@ $profile = asset(Storage::url('uploads/avatar/'));
                                 <i class="feather icon-more-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
-                                {{-- <a href="#" class="dropdown-item" data-url="{{ route('user.edit', $user->id) }}" data-ajax-popup="true" data-title="{{ __('Update User') }}"><i class="ti ti-edit "></i><span class="ms-2">{{ __('Edit') }}</span></a> --}}
+                                @if ($user->type != 'employee' && Auth::user()->id != $user->id)
+                                    <a href="#" class="dropdown-item" data-url="{{ route('user.edit', $user->id) }}" data-ajax-popup="true" data-title="{{ __('Update User') }}"><i class="ti ti-edit "></i><span class="ms-2">{{ __('Edit') }}</span></a>
+                                @endif
                                 <a href="#" class="dropdown-item" data-ajax-popup="true" data-title="{{ __('Change Password') }}" data-url="{{ route('user.reset', ['id'=>\Crypt::encrypt($user->id)]) }}"><i class="ti ti-key"></i>
                                     <span class="ms-1">{{ __('Reset Password') }}</span></a>
                                 {!! Form::open(['method' => 'DELETE', 'route' => ['user.destroy', $user->id], 'id' => 'delete-form-' . $user->id]) !!}
