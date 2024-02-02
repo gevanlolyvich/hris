@@ -155,7 +155,7 @@
                         <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
                     </div>
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee->type) }}</h6>
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
                     </div>
                     <div class="col">
                         <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
@@ -442,7 +442,7 @@
                                     @foreach ($shift_changes as $shiftChange)
                                         <tr>
                                             <td>{{ \Auth::user()->dateFormat($shiftChange->created_at) }}</td>
-                                            <td>{{ $shiftChange->shiftType->name }}</td>
+                                            <td>{{ $shiftChange?->shiftType?->name ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
