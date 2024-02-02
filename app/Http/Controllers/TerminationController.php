@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Mail\TerminationSend;
 use App\Models\Termination;
@@ -21,7 +22,20 @@ class TerminationController extends Controller
                 $emp          = Employee::where('user_id', '=', \Auth::user()->id)->first();
                 $terminations = Termination::where('employee_id', '=', $emp->id)->orderBy('termination_date', 'DESC')->get();
             } else {
-                $terminations = !empty(\Auth::user()->branch_id) ? Termination::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('termination_date', 'DESC')->get() : Termination::orderBy('termination_date', 'DESC')->get();
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $terminations = $branch_id?->isNotEmpty() ? Termination::whereHas('employee', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->orderBy('termination_date', 'DESC')->get() : Termination::orderBy('termination_date', 'DESC')->get();
             }
 
             return view('termination.index', compact('terminations'));
@@ -33,7 +47,20 @@ class TerminationController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Termination')) {
-            $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $employees        = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $terminationtypes = TerminationType::get()->pluck('name', 'id');
 
             return view('termination.create', compact('employees', 'terminationtypes'));
@@ -102,16 +129,29 @@ class TerminationController extends Controller
     public function edit(Termination $termination)
     {
         if (\Auth::user()->can('Edit Termination')) {
-            $employees = Employee::where(function ($query) {
-                // Get all active employees
-                $query->where('created_by', \Auth::user()->creatorId())
-                    ->where('is_active', 1);
-            })->orWhere(function ($query) use ($termination) {
-                // Get the current employee from termination data
-                $query->where('id', $termination->employee_id);
-            })->orderby('name', 'asc');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
 
-            $employees        = !empty(\Auth::user()->branch_id) ? $employees->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : $employees->get()->pluck('name', 'id');
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            // $employees = Employee::where(function ($query) {
+            //     // Get all active employees
+            //     $query->where('is_active', 1);
+            // })->orWhere(function ($query) use ($termination) {
+            //     // Get the current employee from termination data
+            //     $query->where('id', $termination->employee_id);
+            // })->orderby('name', 'asc');
+
+            $employees        = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->orWhere('id', $termination->employee_id) : Employee::where('is_active', 1)->orWhere('id', $termination->employee_id);
+            $employees        = $employees->orderBy('name', 'asc')->get()->pluck('name', 'id');
 
             $terminationtypes = TerminationType::get()->pluck('name', 'id');
 

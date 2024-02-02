@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\Trainer;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -14,7 +15,20 @@ class TrainerExport implements FromCollection,WithHeadings
     */
     public function collection()
     {
-        $data = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get() : Trainer::get();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $data = $branch_id?->isNotEmpty() ? Trainer::whereIn('branch', $branch_id)->get() : Trainer::get();
         foreach($data as $k=>$trainer)
         {
             $data[$k]["branch"]=!empty($trainer->branches)?$trainer->branches->name:'';
@@ -26,15 +40,15 @@ class TrainerExport implements FromCollection,WithHeadings
     public function headings(): array
     {
         return [
-            "ID",
-            "Branch Name",
-            "First Name",
-            "Last Name",
-            "Contact",
-            "Email ID",
-            "Address",
-            "Expeience",
-            "Created By"
+            __("ID"),
+            __("Branch Name"),
+            __("First Name"),
+            __("Last Name"),
+            __("Contact"),
+            __("Email ID"),
+            __("Address"),
+            __("Expeience"),
+            __("Created By"),
         ];
     }
 }

@@ -17,7 +17,20 @@ class EmployeesExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->get() : Employee::get();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->get() : Employee::get();
         $data = collect();
         foreach($employees as $employee)
         {

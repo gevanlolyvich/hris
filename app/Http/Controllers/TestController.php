@@ -44,6 +44,7 @@ class TestController extends Controller
 
             if (!empty($responses)) {
                 $parsed_responses = $responses->json();
+                Log::info($parsed_responses);
                 $attendances = $parsed_responses['attendances'];
     
                 $massAssign = array_map(function ($data) use ($parsed_responses, $default_coordinate, $employees, $attendances){

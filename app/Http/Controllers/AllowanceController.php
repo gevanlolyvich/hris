@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Allowance;
 use App\Models\AllowanceOption;
+use App\Models\Branch;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 
@@ -11,21 +12,27 @@ class AllowanceController extends Controller
 {
     public function allowanceCreate($id)
     {
-
-        $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        if (!empty(\Auth::user()->branch_id)) {
-            $employee          = Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->find($id);
-        } else {
-            $employee          = Employee::where('is_active', 1)->find($id);
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
         }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $allowance_options = AllowanceOption::get()->pluck('name', 'id');
+        $employee          = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->find($id) : Employee::where('is_active', 1)->find($id);
 
         return view('allowance.create', compact('employee', 'allowance_options'));
     }
 
     public function store(Request $request)
     {
-
-
         if(\Auth::user()->can('Create Allowance'))
         {
             $validator = \Validator::make(

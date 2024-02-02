@@ -12,48 +12,65 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Maatwebsite\Excel\Facades\Excel;
 
-class TrainingController extends Controller
-{
+class TrainingController extends Controller {
 
-    public function index()
-    {
-        if(\Auth::user()->can('Manage Training'))
-        {
-            $trainings = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->get() : Training::get();
+    public function index() {
+        if(\Auth::user()->can('Manage Training')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $trainings = $branch_id?->isNotEmpty() ? Training::whereIn('branch', $branch_id)->get() : Training::get();
             $status    = Training::$Status;
 
             return view('training.index', compact('trainings', 'status'));
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
 
-    public function create()
-    {
-        if(\Auth::user()->can('Create Training'))
-        {
-            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+    public function create() {
+        if(\Auth::user()->can('Create Training')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches      = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $trainingTypes = TrainingType::get()->pluck('name', 'id');
-            $trainers      = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
-            $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $trainers      = $branch_id?->isNotEmpty() ? Trainer::whereIn('branch', $branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
+            $employees     = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.create', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options'));
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
 
-    public function store(Request $request)
-    {
-        if(\Auth::user()->can('Create Training'))
-        {
+    public function store(Request $request) {
+        if(\Auth::user()->can('Create Training')) {
 
             $validator = \Validator::make(
                 $request->all(), [
@@ -65,8 +82,7 @@ class TrainingController extends Controller
                                    'end_date' => 'required',
                                ]
             );
-            if($validator->fails())
-            {
+            if($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -82,22 +98,34 @@ class TrainingController extends Controller
             $training->start_date     = $request->start_date;
             $training->end_date       = $request->end_date;
             $training->description    = $request->description;
-            $training->created_by     = \Auth::user()->creatorId();
+            $training->created_by     = \Auth::user()->id;
             $training->save();
 
             return redirect()->route('training.index')->with('success', __('Training successfully created.'));
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
 
-    public function show($id)
-    {
+    public function show($id) {
         $traId       = Crypt::decrypt($id);
-        $training    = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->find($traId) : Training::find($traId);
+
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $training    = $branch_id?->isNotEmpty() ? Training::whereIn('branch', $branch_id)->find($traId) : Training::find($traId);
 
         if (empty($training)) {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -110,29 +138,37 @@ class TrainingController extends Controller
     }
 
 
-    public function edit(Training $training)
-    {
-        if(\Auth::user()->can('Create Training'))
-        {
-            $branches      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+    public function edit(Training $training) {
+        if(\Auth::user()->can('Create Training')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches      = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $trainingTypes = TrainingType::get()->pluck('name', 'id');
-            $trainers      = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
-            $employees     = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $trainers      = $branch_id?->isNotEmpty() ? Trainer::whereIn('branch', $branch_id)->get()->pluck('firstname', 'id') : Trainer::get()->pluck('firstname', 'id');
+            $employees     = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $options       = Training::$options;
 
             return view('training.edit', compact('branches', 'trainingTypes', 'trainers', 'employees', 'options', 'training'));
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
 
-    public function update(Request $request, Training $training)
-    {
-        if(\Auth::user()->can('Edit Training'))
-        {
+    public function update(Request $request, Training $training) {
+        if(\Auth::user()->can('Edit Training')) {
 
             $validator = \Validator::make(
                 $request->all(), [
@@ -144,8 +180,7 @@ class TrainingController extends Controller
                                    'end_date' => 'required',
                                ]
             );
-            if($validator->fails())
-            {
+            if($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -164,8 +199,7 @@ class TrainingController extends Controller
 
             return redirect()->route('training.index')->with('success', __('Training successfully updated.'));
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -173,27 +207,22 @@ class TrainingController extends Controller
 
     public function destroy(Training $training)
     {
-        if(\Auth::user()->can('Delete Training'))
-        {
-            if($training->created_by == \Auth::user()->creatorId())
-            {
+        if(\Auth::user()->can('Delete Training')) {
+            if($training->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $training->delete();
 
                 return redirect()->route('training.index')->with('success', __('Training successfully deleted.'));
             }
-            else
-            {
+            else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
         }
-        else
-        {
+        else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
-    public function updateStatus(Request $request)
-    {
+    public function updateStatus(Request $request) {
         $training              = Training::find($request->id);
         $training->performance = $request->performance;
         $training->status      = $request->status;
@@ -203,12 +232,10 @@ class TrainingController extends Controller
         return redirect()->route('training.index')->with('success', __('Training status successfully updated.'));
     }
 
-    public function export()
-    {
+    public function export() {
         $name = 'training_' . date('Y-m-d i:h:s');
         $data = Excel::download(new TrainingExport(), $name . '.xlsx');
         
-
         return $data;
     }
 }

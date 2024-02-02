@@ -1573,7 +1573,7 @@
   "Trainer Details*" : "Rincian Pelatih *",
   "Trainer Option" : "Opsi Pelatih",
   "Trainer successfully deleted." : "Pelatih berhasil dihapus.",
-  "Trainig Details" : "Rincian trainig",
+  "Trainig Details" : "Rincian Pelatihan",
   "Training" : "Pelatihan",
   "Training Cost" : "Biaya Pelatihan",
   "Training Duration" : "Durasi Pelatihan",
@@ -1816,5 +1816,15 @@
   "Map": "Peta",
   "Detail": "Detail",
   "Select Salary Type": "Pilih Tipe Penggajian",
-  "Invalid GPS Data": "Data GPS Tidak Valid"
+  "Invalid GPS Data": "Data GPS Tidak Valid",
+  "Main Branch": "Cabang Induk",
+  "Select Main Branch": "Pilih Cabang Induk",
+  "Select Termination Type": "Pilih Tipe Pemberhentian",
+  "Total Leaves Days": "Total Hari Cuti",
+  "Enter First Name": "Masukkan Nama Depan",
+  "Enter Last Name": "Masukkan Nama Belakang",
+  "Select Training Option": "Pilih Jenis Pelatihan",
+  "Select Trainer": "Pilih Pelatih",
+  "Select Trainer Type": "Pilih Tipe Pelatih",
+  "Enter Cost": "Masukkan Biaya"
 }
