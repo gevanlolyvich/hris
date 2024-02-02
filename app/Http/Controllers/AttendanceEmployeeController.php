@@ -128,6 +128,56 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             }
 
+            $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
+
+            foreach($attendanceEmployee as $attendance) {
+                if ($attendance->coord_in || $attendance->coord_out) {
+                    $nearest_in         = null;
+                    $nearest_in_coord   = null;
+                    $near_in_name       = null;
+                    $near_in_radius     = null;
+                    $nearest_out        = null;
+                    $nearest_out_coord  = null;
+                    $near_out_name      = null;
+                    $near_out_radius    = null;
+    
+                    $attendance_in      = explode(', ', $attendance->coord_in);
+                    $attendance_out     = explode(', ', $attendance->coord_out);
+
+                    foreach ($branchCoordinates as $coordinate) {
+                        if (sizeof($attendance_in) > 1) {
+                            $distance_in       = DistanceCalculator::haversineDistance($attendance_in[0], $attendance_in[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                            if ($nearest_in > $distance_in || $nearest_in == null) {
+                                $nearest_in         = $distance_in;
+                                $nearest_in_coord   = $coordinate->latitude . ', ' . $coordinate->longitude;
+                                $near_in_name       = $coordinate->name;
+                                $near_in_radius     = $coordinate->tolerance;
+                            }
+                        }
+
+                        if (sizeof($attendance_out) > 1) {
+                            $distance_out       = DistanceCalculator::haversineDistance($attendance_out[0], $attendance_out[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                            if ($nearest_out > $distance_out || $nearest_out == null) {
+                                $nearest_out        = $distance_out;
+                                $nearest_out_coord  = $coordinate->latitude . ', ' . $coordinate->longitude;
+                                $near_out_name      = $coordinate->name;
+                                $near_out_radius    = $coordinate->tolerance;
+                            }
+                        }
+                    }
+
+                    $attendance['location_in_coordinate']   = $nearest_in_coord;
+                    $attendance['location_in_address']      = $near_in_name;
+                    $attendance['location_in_radius']       = $near_in_radius;
+                    $attendance['location_out_coordinate']  = $nearest_out_coord;
+                    $attendance['location_out_address']     = $near_out_name;
+                    $attendance['location_out_radius']      = $near_out_radius;
+                }
+
+            }
+
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
 
             return view('attendance.index', compact('attendanceEmployee', 'branch', 'department', 'emp'));
@@ -256,6 +306,17 @@ class AttendanceEmployeeController extends Controller
         $picture_path = null;
         $employee = Employee::where('user_id', Auth::user()->id)->first();
 
+        $latitude   = $request->input('latitude');
+        $longitude  = $request->input('longitude');
+        $accuracy   = $request->input('accuracy');
+
+        // if ($latitude == '0' && $longitude == '0' && $accuracy == '0') {
+        //     return redirect()->back()->with('error', __('Invalid GPS Data'));
+        // }
+
+        $coord_in = "$latitude, $longitude, $accuracy";
+        $coord_out = "$latitude, $longitude, $accuracy";
+
         // process image file
         if ($request->input('picture_out')) {
             $base64ImageData = $request->input('picture_out');
@@ -266,12 +327,6 @@ class AttendanceEmployeeController extends Controller
         } else {
             return redirect()->back()->with('error', __('The picture field is required.'));
         }
-
-        $latitude   = $request->input('latitude');
-        $longitude  = $request->input('longitude');
-        $accuracy  = $request->input('accuracy');
-        $coord_in = "$latitude, $longitude, $accuracy";
-        $coord_out = "$latitude, $longitude, $accuracy";
 
         $employeeId      = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
         $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)
@@ -679,7 +734,7 @@ class AttendanceEmployeeController extends Controller
                 'accuracy' => 'required',
                 'picture' => $settings['photo_on_clock'] == 'Required' ? 'required' : 'nullable',
                 'shift_type_id' => 'required',
-            ]
+            ]   
         );
         if ($validator->fails()) {
             $messages = $validator->getMessageBag();
@@ -687,17 +742,20 @@ class AttendanceEmployeeController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
+        // if ($request->latitude == '0' && $request->longitude == '0' && $request->accuracy == '0') {
+        //     return redirect()->back()->with('error', __('Invalid GPS Data'));
+        // }
+
         $picture_path = null;
         $employee = Employee::where('is_active', 1)->where('user_id', Auth::user()->id)->first();
 
         if (!empty($employee)) {
-            // process image file
-            if ($request->input('picture')) {
-                $base64ImageData = $request->input('picture');
-                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee?->name) . '.png';
-                Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
-                $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+            if ($settings['ip_restrict'] == 'on') {
+                $userIp = request()->ip();
+                $ip     = IpRestrict::where('created_by', \Auth::user()->creatorId())->whereIn('ip', [$userIp])->first();
+                if (!empty($ip)) {
+                    return redirect()->back()->with('error', __('this ip is not allowed to clock in & clock out.'));
+                }
             }
 
             // Retrieve the latitude and longitude from the request
@@ -711,16 +769,9 @@ class AttendanceEmployeeController extends Controller
             $note               = $request->input('notes');
             $attendance_type    = $request->input('attendance_type');
 
-            if ($settings['ip_restrict'] == 'on') {
-                $userIp = request()->ip();
-                $ip     = IpRestrict::where('created_by', \Auth::user()->creatorId())->whereIn('ip', [$userIp])->first();
-                if (!empty($ip)) {
-                    return redirect()->back()->with('error', __('this ip is not allowed to clock in & clock out.'));
-                }
-            }
-
             $is_valid_shift     = $employee->shift_type_id == $request->shift_type_id ? true : null;
             $is_valid_location  = null;
+
             if ($attendance_type == '1') {
                 // check employee clock in location with branch to validate attendance
 
@@ -763,6 +814,15 @@ class AttendanceEmployeeController extends Controller
             $mins                         = floor($clockoutSeconds / 60 % 60);
             $secs                         = floor($clockoutSeconds % 60);
             $default_clock_out_cross_day  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+            // process image file
+            if ($request->input('picture')) {
+                $base64ImageData = $request->input('picture');
+                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+                $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee?->name) . '.png';
+                Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+                $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+            }
 
             // Check clock in if today is shift in cross day mode
             if ($shift_times->is_working) {
