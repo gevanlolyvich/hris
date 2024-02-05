@@ -225,7 +225,7 @@
                                     <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
                                 </div>
                                     <div class="form-check form-check-inline form-group">
-                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':'checked'}}>
+                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':''}}>
                                         <label class="form-check-label" for="daily">{{__('Daily')}}</label>
                                     </div>
                             </div>
