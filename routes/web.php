@@ -1510,3 +1510,4 @@ Route::post('overtime/attendance', [OvertimeController::class, 'attendance'])->n
 Route::post('overtime/report', [OvertimeController::class, 'report'])->name('overtime.report')->middleware(['auth', 'XSS']);
 
 Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export');
+Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNotClockIn'])->name('attendanceemployee.exportNotClockIn');

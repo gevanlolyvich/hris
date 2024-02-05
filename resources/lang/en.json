@@ -1827,5 +1827,8 @@
     "Select Training Option": "Select Training Option",
     "Select Trainer": "Select Trainer",
     "Select Trainer Type": "Select Trainer Type",
-    "Enter Cost": "Enter Cost"
+    "Enter Cost": "Enter Cost",
+    "Export At": "Export At",
+    "Data Date": "Data Date",
+    "Total Not Clock In": "Total Not Clock In"
 }

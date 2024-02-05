@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AttendanceExport;
+use App\Exports\NotClockInExport;
 use App\Models\ShiftHistory;
 
 class AttendanceEmployeeController extends Controller
@@ -1221,6 +1222,15 @@ class AttendanceEmployeeController extends Controller
 
         $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
         $data = Excel::download(new AttendanceExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
+    }
+
+    public function exportNotClockIn(Request $request) {
+        $date = $request->date ?? date('Y-m-d');
+
+        $name = 'Not-Clock-In_Employee' . date('Y-m-d H:i:s');
+        $data = Excel::download(new NotClockInExport($date), $name . '.xlsx');
 
         return $data;
     }
