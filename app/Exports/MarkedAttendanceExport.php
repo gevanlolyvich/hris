@@ -14,15 +14,16 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Conditional;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class AttendanceExport implements FromCollection, WithHeadings, WithEvents, ShouldAutoSize
+class MarkedAttendanceExport implements FromCollection, WithHeadings, WithEvents, ShouldAutoSize, WithTitle
 {
-    private $urlParameters;
+    private $query;
 
     // Modify the constructor to accept parameters
-    public function __construct($urlParameters)
+    public function __construct($query)
     {
-        $this->urlParameters = $urlParameters;
+        $this->query = $query;
     }
 
     /**
@@ -30,7 +31,6 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
      */
     public function collection()
     {
-        $query = json_decode($this->urlParameters);
         $data = collect();
         $attendances = null;
         if (\Auth::user()->type == 'employee')
@@ -65,10 +65,10 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
             $attendances = $branch_id?->isNotEmpty() ? AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC') : AttendanceEmployee::orderBy('date', 'DESC');
         }
 
-        if (!empty($query)) {
-            if ($query->type == 'monthly' && !empty($query->month)) {
-                $month = date('m', strtotime($query->month));
-                $year  = date('Y', strtotime($query->month));
+        if (!empty($this->query)) {
+            if ($this->query->type == 'monthly' && !empty($this->query->month)) {
+                $month = date('m', strtotime($this->query->month));
+                $year  = date('Y', strtotime($this->query->month));
     
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
@@ -80,14 +80,16 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                         $end_date,
                     ]
                 );
-            } else if ($query->type == 'daily' && !empty($query->date)) {
-                $attendances->where('date', $query->date);
+            } else if ($this->query->type == 'daily' && !empty($this->query->date)) {
+                $attendances->where('date', $this->query->date);
             }
         }  else  {
             $attendances->where('date', date('Y-m-d'));
         }
 
-        $attendances = $attendances->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
+        $attendances = $attendances->withAggregate('employee', 'name')->orderBy('employee_name', 'ASC')->get();
+
+        Log::info(json_encode($attendances, JSON_PRETTY_PRINT));
 
         foreach($attendances as $attendance)
             {    
@@ -114,6 +116,11 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
             }
 
         return $data;
+    }
+
+    public function title(): string
+    {
+        return __('Marked Attendance');
     }
 
     public function headings(): array
@@ -146,6 +153,27 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
 
+                $sheet->getStyle('A1:R1')->applyFromArray([
+                    'font' => [
+                        'bold' => true
+                    ],
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                        ]
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_GRADIENT_LINEAR,
+                        'rotation' => 90,
+                        'startColor' => [
+                            'argb' => 'B7BCEE',
+                        ],
+                        'endColor' => [
+                            'argb' => 'CCCDDA',
+                        ],
+                    ],
+                ]);
+
                 foreach ($sheet->getRowIterator(2) as $row) {
                     // Check if 'late' is not '00:00:00'
                     $cellValue = $sheet->getCell('L' . $row->getRowIndex())->getValue();
@@ -153,7 +181,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                     if ($cellValue !== '00:00:00') {
                         $sheet->getStyle('L' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],
                             ],
                         ]);
@@ -165,7 +193,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                     if ($earlyCell !== '00:00:00') {
                         $sheet->getStyle('M' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],
                             ],
                         ]);
@@ -177,7 +205,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                     if (strtotime('08:00:00') > strtotime($workHourCell)) {
                         $sheet->getStyle('N' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],
                             ],
                         ]);
@@ -189,7 +217,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
                     if ($validCell !== __('Valid Attendance')) {
                         $sheet->getStyle('I' . $row->getRowIndex())->applyFromArray([
                             'fill' => [
-                                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                'fillType' => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => 'FF0000'],
                             ],
                         ]);
