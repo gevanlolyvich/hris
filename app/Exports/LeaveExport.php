@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\LeaveType;
@@ -16,7 +17,21 @@ class LeaveExport implements FromCollection, WithHeadings
     public function collection()
     {
         $user       = \Auth::user();
-        $data       = !empty(\Auth::user()?->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->get() : Leave::get();
+
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $data       = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->get() : Leave::get();
             if (\Auth::user()->type == 'employee')
             {
                  $employee = Employee::where('user_id', '=', $user->id)->first();
@@ -35,15 +50,15 @@ class LeaveExport implements FromCollection, WithHeadings
                 
             }
             else{  
-                $employee_id    = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
-                $data           = !empty(\Auth::user()?->branch_id) ? Leave::whereIn('employee_id', $employee_id)->get() : Leave::get();
+                $employee_id    = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
+                $data           = $branch_id?->isNotEmpty() ? Leave::whereIn('employee_id', $employee_id)->get() : Leave::get();
                 foreach($data as $k=>$leave)
                 {    
                     
                     
-                    $data[$k]["employee_id"]=Employee::employee_name($leave->employee_id);
-                    $data[$k]["leave_type_id"]= !empty(\Auth::user()->getLeaveType($leave->leave_type_id))?\Auth::user()->getLeaveType($leave->leave_type_id)->title:'';
-                    $data[$k]["created_by"]=Employee::login_user($leave->created_by);
+                    $data[$k]["employee_id"]    = Employee::employee_name($leave->employee_id);
+                    $data[$k]["leave_type_id"]  = !empty(\Auth::user()->getLeaveType($leave->leave_type_id))?\Auth::user()->getLeaveType($leave->leave_type_id)->title:'';
+                    $data[$k]["created_by"]     = Employee::login_user($leave->created_by);
                     unset($leave->created_at,$leave->updated_at);
                 }
                 return $data;
@@ -56,20 +71,20 @@ class LeaveExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            "ID",
-            "Employee Name",
-            "Leave Type ",
-            "Applied On",
-            "Start Date",
-            "End Date",
-            "Total Leaves Days",
-            "Leave Reason",
-            "Remark",
-            "Location",
-            "Document",
-            "Note",
-            "Status",
-            "Created By"
+            __("ID"),
+            __("Employee Name"),
+            __("Leave Type "),
+            __("Applied On"),
+            __("Start Date"),
+            __("End Date"),
+            __("Total Leaves Days"),
+            __("Leave Reason"),
+            __("Remark"),
+            __("Location"),
+            __("Document"),
+            __("Note"),
+            __("Status"),
+            __("Created By")
         ];
     }
 }

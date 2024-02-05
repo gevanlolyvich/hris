@@ -27,10 +27,23 @@ class EmployeeAttendanceHistoryController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('All', '');
 
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
             $employees = null;
@@ -58,7 +71,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
                 $employees = $employees->orderby('name', 'asc')->get();
             } else {
-                $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
+                $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
                 if (!empty($request->branch)) {
                     $employee->where('branch_id', $request->branch);
                 }

@@ -1817,5 +1817,15 @@
     "Map": "Map",
     "Detail": "Detail",
     "Select Salary Type": "Select Salary Type",
-    "Invalid GPS Data": "Invalid GPS Data"
+    "Invalid GPS Data": "Invalid GPS Data",
+    "Main Branch": "Main Branch",
+    "Select Main Branch": "Select Main Branch",
+    "Select Termination Type": "Select Termination Type",
+    "Total Leaves Days": "Total Leaves Days",
+    "Enter First Name": "Enter First Name",
+    "Enter Last Name": "Enter Last Name",
+    "Select Training Option": "Select Training Option",
+    "Select Trainer": "Select Trainer",
+    "Select Trainer Type": "Select Trainer Type",
+    "Enter Cost": "Enter Cost"
 }
