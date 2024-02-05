@@ -45,9 +45,19 @@ class Training extends Model
         return $this->hasOne('App\Models\Branch', 'id', 'branch');
     }
 
+    public function branch_ref()
+    {
+        return $this->belongsTo(Branch::class, 'branch', 'id');
+    }
+
     public function types()
     {
         return $this->hasOne('App\Models\TrainingType', 'id', 'training_type');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(TrainingType::class, 'training_type', 'id');
     }
 
     public function employees()
@@ -55,10 +65,21 @@ class Training extends Model
         return $this->hasOne('App\Models\Employee', 'id', 'employee');
     }
 
+    public function employee_ref()
+    {
+        return $this->belongsTo(Employee::class, 'employee', 'id');
+    }
+
     public function trainers()
     {
         return $this->hasOne('App\Models\Trainer', 'id', 'trainer');
     }
+
+    public function trainer_ref()
+    {
+        return $this->belongsTo(Trainer::class, 'trainer', 'id');
+    }
+
     public static function status($status)
     {
         if($status=='0')
@@ -76,6 +97,27 @@ class Training extends Model
         if($status=="3")
         {
             return "Terminated";
+        }
+
+    }
+
+    public static function performance($performance)
+    {
+        if($performance == '0')
+        {
+            return 'Not Concluded';
+        } else if($performance == '1')
+        {
+            return 'Satisfactory';
+        } else if($performance == "2")
+        {
+            return "Average";
+        } else if($performance == "3")
+        {
+            return "Poor";
+        } else if($performance == "4")
+        {
+            return "Excellent";
         }
 
     }

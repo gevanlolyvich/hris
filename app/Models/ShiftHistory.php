@@ -16,11 +16,11 @@ class ShiftHistory extends Model
 
     public function shiftType()
     {
-        return $this->belongsTo(ShiftType::class);
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
     }
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\DeductionOption;
 use App\Models\Employee;
 use App\Models\SaturationDeduction;
@@ -11,7 +12,20 @@ class SaturationDeductionController extends Controller
 {
     public function saturationdeductionCreate($id)
     {
-        $employee          = Employee::where('is_active', 1)->find($id);
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $employee   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->find($id) : Employee::where('is_active', 1)->find($id);
 
         if (empty($employee) || !$employee) {
             return redirect()->back()->with('error', __('Inactive'));

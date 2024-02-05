@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\AttendanceEmployee;
 use App\Models\LeaveType;
@@ -47,8 +48,21 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
             $attendances= AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC');
 
         } else {
-            $employee_id = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
-            $attendances = !empty(\Auth::user()?->branch_id) ? AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC') : AttendanceEmployee::orderBy('date', 'DESC');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $employee_id = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
+            $attendances = $branch_id?->isNotEmpty() ? AttendanceEmployee::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC') : AttendanceEmployee::orderBy('date', 'DESC');
         }
 
         if (!empty($query)) {
@@ -105,24 +119,24 @@ class AttendanceExport implements FromCollection, WithHeadings, WithEvents, Shou
     public function headings(): array
     {
         return [
-            "Employee Name",
-            "Employee ID",
-            "Branch",
-            "Department",
-            "Designation",
-            "Shift",
-            "Date",
-            "Status",
-            "Is Valid",
-            "Clock In",
-            "Clock Out",
-            "Late",
-            "Early Leaving",
-            "Work Hours",
-            "Clock In Picture URL",
-            "Clock In Location URL",
-            "Clock Out Picture URL",
-            "Clock Out Location URL",
+            __("Employee Name"),
+            __("Employee ID"),
+            __("Branch"),
+            __("Department"),
+            __("Designation"),
+            __("Shift"),
+            __("Date"),
+            __("Status"),
+            __("Is Valid"),
+            __("Clock In"),
+            __("Clock Out"),
+            __("Late"),
+            __("Early Leaving"),
+            __("Work Hours"),
+            __("Clock In Picture URL"),
+            __("Clock In Location URL"),
+            __("Clock Out Picture URL"),
+            __("Clock Out Location URL"),
         ];
     }
 
