@@ -664,7 +664,10 @@
                                     <h5>{{ __("Today's Not Clock In") }}</h5>
                                 </div>
                                 <div class="col-2">
-                                    <button type="button" class="btn btn-info btn-lg btn-block disabled">{{ count($notClockIns) }}</button>
+                                    <a href="{{ route('attendanceemployee.exportNotClockIn', ['date' => date('Y-m-d')]) }}" data-bs-toggle="tooltip"
+                                        data-bs-original-title="{{ __('Export') }}">
+                                        <button type="button" class="btn btn-info btn-lg btn-block">{{ count($notClockIns) }}</button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
