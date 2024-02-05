@@ -1830,5 +1830,8 @@
     "Enter Cost": "Enter Cost",
     "Export At": "Export At",
     "Data Date": "Data Date",
-    "Total Not Clock In": "Total Not Clock In"
+    "Total Not Clock In": "Total Not Clock In",
+    "Total Attendance": "Total Attendance",
+    "Total Valid Attendance": "Total Valid Attendance",
+    "Total Invalid Attendance": "Total Invalid Attendance"
 }

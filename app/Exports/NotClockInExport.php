@@ -89,7 +89,7 @@ class NotClockInExport implements FromCollection, WithEvents, ShouldAutoSize
                         ]
                     ],
                     'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+                        'fillType' => Fill::FILL_GRADIENT_LINEAR,
                         'rotation' => 90,
                         'startColor' => [
                             'argb' => 'B7BCEE',

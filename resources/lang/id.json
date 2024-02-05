@@ -1829,5 +1829,8 @@
   "Enter Cost": "Masukkan Biaya",
   "Export At": "Di Export Pada",
   "Data Date": "Tanggal Data",
-  "Total Not Clock In": "Total Karyawan Yang Tidak Hadir"
+  "Total Not Clock In": "Total Karyawan Yang Tidak Hadir",
+  "Total Attendance": "Total Kehadiran",
+  "Total Valid Attendance": "Total Kehadiran Yang Valid",
+  "Total Invalid Attendance": "Total Kehadiran Yang Tidak Valid"
 }

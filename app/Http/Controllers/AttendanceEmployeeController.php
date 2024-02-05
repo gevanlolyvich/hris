@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceMultipleExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
 use App\Models\Branch;
@@ -12,15 +13,14 @@ use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\LogAttendance;
+use App\Utilities\DistanceCalculator;
+use App\Exports\NotClockInExport;
+use App\Models\ShiftHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AttendanceExport;
-use App\Exports\NotClockInExport;
-use App\Models\ShiftHistory;
 
 class AttendanceEmployeeController extends Controller
 {
@@ -1220,8 +1220,8 @@ class AttendanceEmployeeController extends Controller
             }
         }
 
-        $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
-        $data = Excel::download(new AttendanceExport(json_encode($queryArray)), $name . '.xlsx');
+        $name = 'Attendance-Employee' . date('Y-m-d H:i:s');
+        $data = Excel::download(new AttendanceMultipleExport(json_encode($queryArray)), $name . '.xlsx');
 
         return $data;
     }
