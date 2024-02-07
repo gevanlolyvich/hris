@@ -9,13 +9,13 @@
     <li class="breadcrumb-item">{{ __('Manage Monthly Attendance Report') }}</li>
 @endsection
 @section('action-button')
-    <a href="#" class="btn btn-sm btn-primary" onclick="saveAsPDF()" data-bs-toggle="tooltip" title="{{ __('Download') }}"
-        data-original-title="{{ __('Download') }}">
+    <a href="#" class="btn btn-sm btn-primary" onclick="saveAsPDF()" data-bs-toggle="tooltip" title="{{ __('Download') }} PDF"
+        data-original-title="{{ __('Download') }} PDF">
         <span class="btn-inner--icon"><i class="ti ti-download"></i></span>
     </a>
-    <a href="{{ route('report.attendance', [isset($_GET['month']) ? $_GET['month'] : date('Y-m'), isset($_GET['branch']) && !empty($_GET['branch']) ? $_GET['branch'] : 0, isset($_GET['department']) && !empty($_GET['department']) ? $_GET['department'] : 0]) }}"
-        class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="" data-bs-original-title="Export">
-        <span class="btn-inner--icon"><i class="ti ti-file-download text-white-off "></i></span>
+    <a href="{{ route('report.monthlyAttendace.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+        data-bs-original-title="{{ __('Export') }} Excel">
+        <i class="ti ti-file-export"></i>
     </a>
 @endsection
 
@@ -72,7 +72,7 @@
                             <div class="btn-box">
 
                                 {{ Form::label('branch', __('Branch'), ['class' => 'form-label']) }}
-                                {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select2']) }}
+                                {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
 
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                             <div class="btn-box">
 
                                 {{ Form::label('department', __('Department'), ['class' => 'form-label']) }}
-                                {{ Form::select('department', $department, isset($_GET['department']) ? $_GET['department'] : '', ['class' => 'form-control select2']) }}
+                                {{ Form::select('department', $department, isset($_GET['department']) ? $_GET['department'] : '', ['class' => 'form-control select2', 'placeholder' => __('Select Department')]) }}
 
                             </div>
                         </div>

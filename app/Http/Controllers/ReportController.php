@@ -21,6 +21,8 @@ use App\Models\ShiftTime;
 use App\Models\Overtime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MonthlyAttendanceExport;
 
 class ReportController extends Controller
 {
@@ -114,11 +116,24 @@ class ReportController extends Controller
     public function leave(Request $request)
     {
         if (\Auth::user()->can('Manage Report')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             
-            if (empty(\Auth::user()->branch_id)) {
+            if (empty($childrenbranch_id)) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
             }
@@ -127,7 +142,7 @@ class ReportController extends Controller
             $filterYear['department']    = __('All');
             $filterYear['type']          = __('Monthly');
             $filterYear['dateYearRange'] = date('M-Y');
-            $employees                   = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC') : Employee::orderby('name', 'ASC');
+            $employees                   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'ASC') : Employee::orderby('name', 'ASC');
             if (!empty($request->branch)) {
                 $employees->where('branch_id', $request->branch);
                 $filterYear['branch'] = !empty(Branch::find($request->branch)) ? Branch::find($request->branch)->name : '';
@@ -219,12 +234,25 @@ class ReportController extends Controller
     public function employeeLeave(Request $request, $employee_id, $status, $type, $month, $year)
     {
         if (\Auth::user()->can('Manage Report')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
             $leaveTypes = LeaveType::get();
             $leaves     = [];
             foreach ($leaveTypes as $leaveType) {
                 $leave        = new Leave();
                 $leave->title = $leaveType->title;
-                $totalLeave   = !empty(\Auth::user()->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
+                $totalLeave   = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
                 if ($type == 'yearly') {
                     $totalLeave->whereYear('applied_on', $year);
                 } else {
@@ -239,7 +267,7 @@ class ReportController extends Controller
                 $leaves[]     = $leave;
             }
 
-            $leaveData = !empty(\Auth::user()->branch_id) ? Leave::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
+            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
             if ($type == 'yearly') {
                 $leaveData->whereYear('applied_on', $year);
             } else {
@@ -377,11 +405,24 @@ class ReportController extends Controller
     {
 
         if (\Auth::user()->can('Manage Report')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             
-            if (empty(\Auth::user()->branch_id)) {
+            if (empty($branch_id?->isNotEmpty())) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
             }
@@ -431,8 +472,8 @@ class ReportController extends Controller
                 $filterYear['department'] = !empty(Department::find($request->department)) ? Department::find($request->department)->name : '';
             }
 
-            $employees = Employee::where('branch_id', \Auth::user()->branch_id)->select('id')->get()->pluck('id');
-            $payslips = !empty(\Auth::user()->branch_id) ? $payslips->whereIn('employee_id', $employees)->get() : $payslips->get();
+            $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id') : Employee::select('id')->get()->pluck('id');
+            $payslips   = $branch_id?->isNotEmpty() ? $payslips->whereIn('employee_id', $employees)->get() : $payslips->get();
 
             $totalBasicSalary = $totalNetSalary = $totalAllowance = $totalCommision = $totalLoan = $totalSaturationDeduction = $totalOtherPayment = $totalOverTime = 0;
 
@@ -504,11 +545,24 @@ class ReportController extends Controller
     public function monthlyAttendance(Request $request)
     {
         if (\Auth::user()->can('Manage Report')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             
-            if (empty(\Auth::user()->branch_id)) {
+            if (empty($branch_id)) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
             }
@@ -516,10 +570,10 @@ class ReportController extends Controller
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
-            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
                 // $employees->where('branch_id', $request->branch);
-                $showed_branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->find($request->branch) : Branch::find($request->branch);
+                $showed_branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->find($request->branch) : Branch::find($request->branch);
                 if (!empty($showed_branch)) {
                     $employees      = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
@@ -528,7 +582,7 @@ class ReportController extends Controller
 
             if (!empty($request->department)) {
                 // $employees->where('department_id', $request->department);
-                $showed_department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->find($request->department) : Department::find($request->department);
+                $showed_department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->find($request->department) : Department::find($request->department);
 
                 if (!empty($showed_department)) {
                     $employees          = $employees->where('department_id', $showed_department->id);
@@ -702,7 +756,7 @@ class ReportController extends Controller
     public function LeaveReportExport()
     {
         $name = 'leave_' . date('Y-m-d i:h:s');
-        $data = \Excel::download(new LeaveReportExport(), $name . '.xlsx');
+        $data = Excel::download(new LeaveReportExport(), $name . '.xlsx');
 
         return $data;
     }
@@ -710,7 +764,7 @@ class ReportController extends Controller
     public function AccountStatementReportExport(Request $request)
     {
         $name = 'Account Statement_' . date('Y-m-d i:h:s');
-        $data = \Excel::download(new accountstatementExport(), $name . '.xlsx');
+        $data = Excel::download(new accountstatementExport(), $name . '.xlsx');
 
         return $data;
     }
@@ -718,7 +772,7 @@ class ReportController extends Controller
     public function PayrollReportExport(Request $request)
     {
         $name = 'Payroll_' . date('Y-m-d i:h:s');
-        $data = \Excel::download(new PayrollExport(), $name . '.xlsx');
+        $data = Excel::download(new PayrollExport(), $name . '.xlsx');
 
         return $data;
     }
@@ -726,7 +780,7 @@ class ReportController extends Controller
     public function exportTimeshhetReport(Request $request)
     {
         $name = 'Timesheet_' . date('Y-m-d i:h:s');
-        $data = \Excel::download(new TimesheetReportExport(), $name . '.xlsx');
+        $data = Excel::download(new TimesheetReportExport(), $name . '.xlsx');
 
         return $data;
     }
@@ -818,5 +872,26 @@ class ReportController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportMonthlyAttendance(Request $request)
+    {
+        if (\Auth::user()->can('Manage Report')) {
+            $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+            $queryArray = [];
+            if (!empty($urlQuery)) {
+                foreach (explode('&', $urlQuery) as $query) {
+                    list($key, $value) = explode('=', $query);
+                    $queryArray[$key] = $value;
+                }
+            }
+    
+            $name = 'Monthly_Attendance_Employee' . date('Y-m-d H:i:s');
+            $data = Excel::download(new MonthlyAttendanceExport(json_encode($queryArray)), $name . '.xlsx');
+    
+            return $data;
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 }
