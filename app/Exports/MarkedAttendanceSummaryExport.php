@@ -48,26 +48,25 @@ class MarkedAttendanceSummaryExport implements FromCollection, WithHeadings, Wit
             else {
                 $employee_id[] = \Auth::user()->employee->id;
             }
-          
-            $employees = Employee::whereIn('employee_id', $employee_id)->orderBy('name', 'ASC');
 
+            $employees = Employee::whereIn('id', $employee_id)->orderBy('name', 'ASC');
         } else {
             $branch = Branch::find(\Auth::user()->branch_id);
             $branch_id = collect();
             if ($branch) {
                 $branch_id->push($branch?->id);
             }
-
+            
             $children = $branch?->childBranchFlatten();
             if ($children?->isNotEmpty()) {
                 foreach ($children as $child) {
                     $branch_id->push($child->id);
                 }
             }
-
+            
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
         }
-
+        
         // Getting Sum Of Attendance
         if (!empty($this->query)) {
             if ($this->query->type == 'monthly' && !empty($this->query->month)) {
@@ -76,7 +75,7 @@ class MarkedAttendanceSummaryExport implements FromCollection, WithHeadings, Wit
     
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
+
                 $employees->whereHas('attendances')->withCount([
                     'attendances as total_attendance' => function ($q) use ($start_date, $end_date) {
                         $q->whereBetween('date', [$start_date, $end_date]);
@@ -88,13 +87,6 @@ class MarkedAttendanceSummaryExport implements FromCollection, WithHeadings, Wit
                         $q->whereBetween('date', [$start_date, $end_date])->whereNull('is_valid');
                     },
                 ]);
-                // $employees->whereBetween(
-                //     'date',
-                //     [
-                //         $start_date,
-                //         $end_date,
-                //     ]
-                // );
             } else if ($this->query->type == 'daily' && !empty($this->query->date)) {
                 $employees->whereHas('attendances')->withCount([
                     'attendances as total_attendance' => function ($q) {
@@ -181,17 +173,19 @@ class MarkedAttendanceSummaryExport implements FromCollection, WithHeadings, Wit
                     ],
                 ]);
 
-                foreach ($sheet->getRowIterator(2) as $row) {
-                    // Check if 'late' is not '00:00:00'
-                    $cellValue = $sheet->getCell('D' . $row->getRowIndex())->getValue();
-
-                    if ($cellValue >= 1) {
-                        $sheet->getStyle('D' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
+                if ($sheet->getHighestRow() > 1) {
+                    foreach ($sheet->getRowIterator(2) as $row) {
+                        // Check if 'late' is not '00:00:00'
+                        $cellValue = $sheet->getCell('D' . $row->getRowIndex())->getValue();
+    
+                        if ($cellValue >= 1) {
+                            $sheet->getStyle('D' . $row->getRowIndex())->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
                     }
                 }
             },
