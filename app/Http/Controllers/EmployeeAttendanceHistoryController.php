@@ -10,6 +10,7 @@ use App\Models\Employee;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
+use App\Utilities\DistanceCalculator;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\ShiftHistory;
@@ -208,6 +209,7 @@ class EmployeeAttendanceHistoryController extends Controller
             $secs               = floor($overtime_hours % 60);
             $overtime['total']  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
         }
+
         $hours                  = floor($total_overtime / 3600);
         $mins                   = floor($total_overtime / 60 % 60);
         $total_overtime         = [ 'hours' => $hours, 'minutes' => $mins];
@@ -217,6 +219,55 @@ class EmployeeAttendanceHistoryController extends Controller
         // Getting shift changes
         $shift_changes = ShiftHistory::where('employee_id', $empId)->get();
         $home_changes = EmployeeHomeHistory::where('employee_id', $empId)->get();
+
+        $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
+
+        foreach($attendanceEmployee as $attendance) {
+            if ($attendance->coord_in || $attendance->coord_out) {
+                $nearest_in         = null;
+                $nearest_in_coord   = null;
+                $near_in_name       = null;
+                $near_in_radius     = null;
+                $nearest_out        = null;
+                $nearest_out_coord  = null;
+                $near_out_name      = null;
+                $near_out_radius    = null;
+
+                $attendance_in      = explode(', ', $attendance->coord_in);
+                $attendance_out     = explode(', ', $attendance->coord_out);
+
+                foreach ($branchCoordinates as $coordinate) {
+                    if (sizeof($attendance_in) > 1) {
+                        $distance_in       = DistanceCalculator::haversineDistance($attendance_in[0], $attendance_in[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                        if ($nearest_in > $distance_in || $nearest_in == null) {
+                            $nearest_in         = $distance_in;
+                            $nearest_in_coord   = $coordinate->latitude . ', ' . $coordinate->longitude;
+                            $near_in_name       = $coordinate->name;
+                            $near_in_radius     = $coordinate->tolerance;
+                        }
+                    }
+
+                    if (sizeof($attendance_out) > 1) {
+                        $distance_out       = DistanceCalculator::haversineDistance($attendance_out[0], $attendance_out[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                        if ($nearest_out > $distance_out || $nearest_out == null) {
+                            $nearest_out        = $distance_out;
+                            $nearest_out_coord  = $coordinate->latitude . ', ' . $coordinate->longitude;
+                            $near_out_name      = $coordinate->name;
+                            $near_out_radius    = $coordinate->tolerance;
+                        }
+                    }
+                }
+
+                $attendance['location_in_coordinate']   = $nearest_in_coord;
+                $attendance['location_in_address']      = $near_in_name;
+                $attendance['location_in_radius']       = $near_in_radius;
+                $attendance['location_out_coordinate']  = $nearest_out_coord;
+                $attendance['location_out_address']     = $near_out_name;
+                $attendance['location_out_radius']      = $near_out_radius;
+            }
+        }
 
         return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit'));
     }

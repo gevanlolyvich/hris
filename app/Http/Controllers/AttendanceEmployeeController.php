@@ -1203,7 +1203,7 @@ class AttendanceEmployeeController extends Controller
             $attendance->validate_by = \Auth::user()->id;
             $attendance->save();
 
-            return redirect()->route('attendanceemployee.index')->with('success', __('Attendance successfully validated.'));
+            return redirect()->back()->with('success', __('Attendance successfully validated.'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
