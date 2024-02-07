@@ -1832,5 +1832,8 @@
   "Total Not Clock In": "Total Karyawan Yang Tidak Hadir",
   "Total Attendance": "Total Kehadiran",
   "Total Valid Attendance": "Total Kehadiran Yang Valid",
-  "Total Invalid Attendance": "Total Kehadiran Yang Tidak Valid"
+  "Total Invalid Attendance": "Total Kehadiran Yang Tidak Valid",
+  "Employee Attendance": "Kehadiran Karyawan",
+  "Out Side Attendance": "Hadir / Absen Diluar",
+  "Holiday": "Libur"
 }

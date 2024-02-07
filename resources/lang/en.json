@@ -1833,5 +1833,8 @@
     "Total Not Clock In": "Total Not Clock In",
     "Total Attendance": "Total Attendance",
     "Total Valid Attendance": "Total Valid Attendance",
-    "Total Invalid Attendance": "Total Invalid Attendance"
+    "Total Invalid Attendance": "Total Invalid Attendance",
+    "Employee Attendance": "Employee Attendance",
+    "Out Side Attendance": "Out Side Attendance",
+    "Holiday": "Holiday"
 }
