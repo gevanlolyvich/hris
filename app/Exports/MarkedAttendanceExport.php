@@ -11,7 +11,6 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Conditional;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -172,53 +171,55 @@ class MarkedAttendanceExport implements FromCollection, WithHeadings, WithEvents
                     ],
                 ]);
 
-                foreach ($sheet->getRowIterator(2) as $row) {
-                    // Check if 'late' is not '00:00:00'
-                    $cellValue = $sheet->getCell('L' . $row->getRowIndex())->getValue();
-
-                    if ($cellValue !== '00:00:00') {
-                        $sheet->getStyle('L' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
-                    }
-
-                    // Check if 'early leaving' is not '00:00:00'
-                    $earlyCell = $sheet->getCell('M' . $row->getRowIndex())->getValue();
-
-                    if ($earlyCell !== '00:00:00') {
-                        $sheet->getStyle('M' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
-                    }
-
-                    // Check if 'work hours' is under '09:00:00'
-                    $workHourCell = $sheet->getCell('N' . $row->getRowIndex())->getValue();
-
-                    if (strtotime('08:00:00') > strtotime($workHourCell)) {
-                        $sheet->getStyle('N' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
-                    }
-
-                    // Check if attendance is valid
-                    $validCell = $sheet->getCell('I' . $row->getRowIndex())->getValue();
-
-                    if ($validCell !== __('Valid Attendance')) {
-                        $sheet->getStyle('I' . $row->getRowIndex())->applyFromArray([
-                            'fill' => [
-                                'fillType' => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'FF0000'],
-                            ],
-                        ]);
+                if ($sheet->getHighestRow() > 1) {
+                    foreach ($sheet->getRowIterator(2) as $row) {
+                        // Check if 'late' is not '00:00:00'
+                        $cellValue = $sheet->getCell('L' . $row->getRowIndex())->getValue();
+    
+                        if ($cellValue !== '00:00:00') {
+                            $sheet->getStyle('L' . $row->getRowIndex())->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
+    
+                        // Check if 'early leaving' is not '00:00:00'
+                        $earlyCell = $sheet->getCell('M' . $row->getRowIndex())->getValue();
+    
+                        if ($earlyCell !== '00:00:00') {
+                            $sheet->getStyle('M' . $row->getRowIndex())->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
+    
+                        // Check if 'work hours' is under '09:00:00'
+                        $workHourCell = $sheet->getCell('N' . $row->getRowIndex())->getValue();
+    
+                        if (strtotime('08:00:00') > strtotime($workHourCell)) {
+                            $sheet->getStyle('N' . $row->getRowIndex())->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
+    
+                        // Check if attendance is valid
+                        $validCell = $sheet->getCell('I' . $row->getRowIndex())->getValue();
+    
+                        if ($validCell !== __('Valid Attendance')) {
+                            $sheet->getStyle('I' . $row->getRowIndex())->applyFromArray([
+                                'fill' => [
+                                    'fillType' => Fill::FILL_SOLID,
+                                    'startColor' => ['rgb' => 'FF0000'],
+                                ],
+                            ]);
+                        }
                     }
                 }
             },
