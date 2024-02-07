@@ -93,7 +93,7 @@ class MarkedAttendanceExport implements FromCollection, WithHeadings, WithEvents
             {    
                 $data->push([
                     $attendance?->employee?->name ?? 'Deleted Employee',
-                    $attendance?->employee?->employee_id ?? '-',
+                    $attendance?->employee?->employee_id ? "{$attendance?->employee?->employee_id} " : '-',
                     !empty(\Auth::user()->getBranch($attendance?->employee?->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
                     !empty(\Auth::user()->getDepartment($attendance?->employee?->department_id)) ? \Auth::user()->getDepartment($attendance->employee->department_id)->name : '-',
                     !empty(\Auth::user()->getDesignation($attendance?->employee?->designation_id)) ? \Auth::user()->getDesignation($attendance->employee->designation_id)->name : '-',
