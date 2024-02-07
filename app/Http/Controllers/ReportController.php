@@ -19,6 +19,7 @@ use App\Models\PaySlip;
 use App\Models\TimeSheet;
 use App\Models\ShiftTime;
 use App\Models\Overtime;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -604,9 +605,14 @@ class ReportController extends Controller
             }
 
             $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
+            $holiday_date = [];
             for ($i = 1; $i <= $num_of_days; $i++) {
-                $dates[] = str_pad($i, 2, '0', STR_PAD_LEFT);
-                $formated_dates[] = $year . '-' . $month . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                $formatted_date         = str_pad($i, 2, '0', STR_PAD_LEFT);
+                $dates[]                = $formatted_date;
+                $formated_dates[]       = $year . '-' . $month . '-' . $formatted_date;
+                $date                   = "{$year}-{$month}-{$formatted_date}";
+                $holiday                = Holiday::where('start_date', '>=', $date)->where('end_date', '<=', $date)->exists(); 
+                $holiday_date[$date]    = $holiday; 
             }
 
             $employeesAttendance        = [];
@@ -652,13 +658,13 @@ class ReportController extends Controller
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
-                        } elseif (!$shift[date('l', strtotime($dateFormat))]) {
+                        } elseif (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
                             $attendanceStatus[$date] = 'L';
                         }
                          else {
                             $attendanceStatus[$date] = 'A';
                         }
-                    } else {
+                    } else{
                         $attendanceStatus[$date] = '';
                     }
                 }
@@ -697,9 +703,6 @@ class ReportController extends Controller
             $timesheets       = TimeSheet::select('time_sheets.*', 'employees.name')->leftjoin('employees', 'time_sheets.employee_id', '=', 'employees.id')->where('time_sheets.created_by', \Auth::user()->creatorId());
 
             $timesheetFilters = TimeSheet::select('time_sheets.*', 'employees.name')->groupBy('employee_id')->selectRaw('sum(hours) as total')->leftjoin('employees', 'time_sheets.employee_id', '=', 'employees.id')->where('time_sheets.created_by', \Auth::user()->creatorId());
-
-
-
 
             if (!empty($request->start_date) && !empty($request->end_date)) {
                 $timesheets->where('date', '>=', $request->start_date);
