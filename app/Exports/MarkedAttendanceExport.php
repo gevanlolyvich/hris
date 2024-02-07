@@ -89,8 +89,6 @@ class MarkedAttendanceExport implements FromCollection, WithHeadings, WithEvents
 
         $attendances = $attendances->withAggregate('employee', 'name')->orderBy('employee_name', 'ASC')->get();
 
-        Log::info(json_encode($attendances, JSON_PRETTY_PRINT));
-
         foreach($attendances as $attendance)
             {    
                 $data->push([
