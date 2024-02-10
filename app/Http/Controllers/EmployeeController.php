@@ -188,7 +188,7 @@ class EmployeeController extends Controller
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
                     'address' => $request['address'],
-                    'domicile_address' => $request['domicile_address'] || null,
+                    'domicile_address' => $request['domicile_address'] ?? null,
                     'emergency_contact_number' => $request['emergency_contact_number'],
                     'emergency_contact_relation' => $request['emergency_contact_relation'],
                     'marital_status' => $request['marital_status'],
@@ -415,7 +415,7 @@ class EmployeeController extends Controller
                         } else {
                             $employee_document                 = new EmployeeDocument();
                             $employee_document->employee_id    = $employee->id;
-                            $employee_document->personel_id    = $employee->personel_id;
+                            // $employee_document->personel_id    = $employee->personel_id;
                             $employee_document->document_id    = $key;
                             $employee_document->document_value = $fileNameToStore;
                             $employee_document->save();
@@ -530,11 +530,11 @@ class EmployeeController extends Controller
                 $branch_id->push($parent->id);
             }
         }
-        
+
         if ($request->branch_id) {
             $branch_id->push($request->branch_id);
         }
-        
+
         $departments = Department::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($departments);
