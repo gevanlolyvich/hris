@@ -71,7 +71,6 @@
     <div class="background-image-login">
         <!-- [ auth-signup ] start -->
         <div class="auth-wrapper auth-v3">
-
             <div class="auth-content">
                 <div class="px-4 py-3 px-md-5 text-center text-lg-start bg-login-card">
                     <nav class="navbar navbar-expand-md navbar-light default">

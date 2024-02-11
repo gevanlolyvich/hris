@@ -27510,6 +27510,7 @@ body.anim-slip-from-top.modal-open .dash-header {
 .bg-login-card {
     background-color: #292A33;
     border-radius: 20px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
 .support-text {

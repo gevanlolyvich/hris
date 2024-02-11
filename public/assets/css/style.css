@@ -2745,11 +2745,11 @@ textarea.form-control-lg {
 .bg-login-card {
     background-color: hsl(0, 0%, 96%);
     border-radius: 20px;
-
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
-body.theme-3 .background-image-login {
-    background-color: #6fd943 !important;
+.background-image-login {
+    background-color: rgb(235, 235, 235) !important;
 }
 
 .support-text {
