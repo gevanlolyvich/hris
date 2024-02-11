@@ -68,27 +68,25 @@
 </head>
 
 <body class="{{ $color }}">
-    <div class="background-image-login">
-        <!-- [ auth-signup ] start -->
-        <div class="auth-wrapper auth-v3">
-
-            <div class="auth-content">
-                <div class="px-4 py-3 px-md-5 text-center text-lg-start bg-login-card">
-                    <nav class="navbar navbar-expand-md navbar-light default">
-                        <div class="container-fluid pe-2 no-pad">
-                            <a class="navbar-brand" href="#">
-                                <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}" class="logo logo-lg"
-                                    width="50"height="50" />
-                            </a>
-
-                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-                            <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="flex-grow: 0;">
-                                <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
-                                    {{-- <li class="nav-item">
+    <!-- [ auth-signup ] start -->
+    <div class="auth-wrapper auth-v3">
+        <div class="bg-auth-side bg-primary"></div>
+        <div class="auth-content">
+            <nav class="navbar navbar-expand-md navbar-light default">
+                <div class="container-fluid pe-2">
+                    <a class="navbar-brand" href="#">
+                        <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}" class="logo logo-lg"
+                            width="50"height="50" />
+                    </a>
+                    <h4 style="margin-bottom: 0px">{{ env('APP_NAME') }}</h4>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="flex-grow: 0;">
+                        <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link active" href="#">{{ __('Support') }}</a>
                             </li>
                             <li class="nav-item">
@@ -97,29 +95,26 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="#">{{ __('Privacy') }}</a>
                             </li> --}}
-                                    <li class="nav-item">
-                                        @yield('language-bar')
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </nav>
-                    <div class="card">
-                        <div class="row align-items-center text-start">
-                            @yield('content')
-
-                        </div>
-                    </div>
-                    <div class="auth-footer">
-                        <div class="container-fluid">
-                        </div>
+                            <li class="nav-item">
+                                @yield('language-bar')
+                            </li>
+                        </ul>
                     </div>
                 </div>
+            </nav>
+            <div class="card">
+                <div class="row align-items-center text-start">
+                    @yield('content')
 
+                </div>
+            </div>
+            <div class="auth-footer">
+                <div class="container-fluid">
+                </div>
             </div>
         </div>
-        <!-- [ auth-signup ] end -->
     </div>
+    <!-- [ auth-signup ] end -->
 
     <!-- Required Js -->
     <script src="{{ asset('js/jquery.min.js') }}"></script>
