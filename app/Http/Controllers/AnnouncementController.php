@@ -161,8 +161,14 @@ class AnnouncementController extends Controller
                 }
             }
 
+            if (in_array('0', $request->department_id)) {
+                $departments = Department::where('branch_id', $request->branch_id)->get()->pluck('id');
+            } else {
+                $departments = $request->department_id;
+            }
+
             if (in_array('0', $request->employee_id)) {
-                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->get()->pluck('id');
+                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $departments)->get()->pluck('id');
             } else {
                 $departmentEmployee = $request->employee_id;
             }
@@ -293,7 +299,9 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement)
     {
         if (\Auth::user()->can('Delete Announcement')) {
-            if ($announcement->created_by == \Auth::user()->creatorId()) {
+            if ($announcement->created_by == \Auth::user()->id || (\Auth::user()->type == 'hr' && $announcement->branch_id == \Auth::user()->branch_id) || \Auth::user()->type == 'company') {
+                AnnouncementEmployee::where('announcement_id', $announcement->id)->delete();
+
                 $announcement->delete();
 
                 return redirect()->route('announcement.index')->with('success', __('Announcement successfully deleted.'));
