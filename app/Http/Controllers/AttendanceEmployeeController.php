@@ -246,7 +246,7 @@ class AttendanceEmployeeController extends Controller
             $endTime    = Utility::getValByName('company_end_time');
             $attendance = AttendanceEmployee::where('employee_id', '=', $request->employee_id)->where('date', '=', $request->date)->where('clock_out', '=', '00:00:00')->get()->toArray();
             if ($attendance) {
-                return redirect()->route('attendanceemployee.index')->with('error', __('Employee Attendance Already Created.'));
+                return redirect()->back()->with('error', __('Employee Attendance Already Created.'));
             } else {
                 $date = date("Y-m-d");
 
@@ -310,7 +310,7 @@ class AttendanceEmployeeController extends Controller
     }
     public function show(Request $request)
     {
-        return redirect()->route('attendance.index');
+        return redirect()->route('attendanceemployee.index');
     }
 
     public function edit($id)
