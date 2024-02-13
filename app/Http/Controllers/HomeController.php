@@ -106,7 +106,6 @@ class HomeController extends Controller
                 $employees_id->push($emp->id);
 
                 $announcements = Announcement::orderBy('announcements.id', 'desc')->take(5)->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', $emp->id)->where('announcements.start_date', '<=', date('Y-m-d'))->where('announcements.end_date', '>=', date('Y-m-d'))->get();
-                // $announcements = Announcement::where('start_date', '>=', date('Y-m-d'))->where('end_date', '<=', date('Y-m-d'))->orderBy('announcements.id', 'desc')->take(5)->leftjoin('announcement_employees', 'announcements.id', '=', 'announcement_employees.announcement_id')->where('announcement_employees.employee_id', $emp->id)->get();
 
                 $terminations = Termination::whereIn('employee_id', $employees_id)->where('notice_date', '<=', $today)->where('termination_date', '>=', $today)->get();
 
@@ -207,7 +206,8 @@ class HomeController extends Controller
                     }
                 }
 
-                $announcements = $branch_id?->isNotEmpty() ? Announcement::whereIn('branch_id', $branch_id)->orderBy('announcements.id', 'desc') : Announcement::orderBy('announcements.id', 'desc');
+                $announcements = $branch_id?->isNotEmpty() ? Announcement::whereIn('branch_id', $branch_id)->orderBy('start_date', 'desc') : Announcement::orderBy('start_date', 'desc');
+                $announcements = $announcements->where('start_date', '<=', date('Y-m-d'))->where('end_date', '>=', date('Y-m-d'))->get();
 
                 $emp           = $branch_id?->isNotEmpty() ? User::whereHas('employee', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
@@ -272,7 +272,7 @@ class HomeController extends Controller
                     $announcements->push($terminationAsAnnouncement);
                 }
 
-                $announcements = $announcements->sortByDesc('start_date');
+                // $announcements = $announcements->sortByDesc('start_date');
 
                 return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount', 'settings'));
             }
