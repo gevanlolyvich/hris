@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Transfer;
+use App\Models\User;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Log;
 
@@ -36,14 +37,17 @@ class TransferEmployeeCron extends Command
         $transfers = Transfer::where('transfer_date', '<=', $today)->get();
         for ($i = 0; $i < count($transfers); $i++) {
             $transfer = $transfers[$i];
-            // $emp = Employee::where('id', $transfer->employee_id)->get();
+            $emp = Employee::where('id', $transfer->employee_id)->first();
             Employee::where('id', $transfer->employee_id)->update([
                 'branch_id' => $transfer->branch_id,
                 'department_id' => $transfer->department_id,
                 'designation_id' => $transfer->designation_id,
                 'managed_by' => $transfer->managed_by ?? null,
             ]);
-            // Log::info($emp);
+
+            User::where('id', $emp->user_id)->update([
+                'branch_id' => $transfer->branch_id,
+            ]);
         }
         $this->info('Employee transfer process completed.');
         return Command::SUCCESS;

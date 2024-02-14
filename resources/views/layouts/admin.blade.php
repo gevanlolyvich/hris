@@ -261,6 +261,7 @@ if (!empty($mode_setting['theme_color'])) {
 
     <script>
         const dataTable = new simpleDatatables.DataTable("#pc-dt-simple");
+        const dataTable2 = new simpleDatatables.DataTable("#pc-dt-simple2");
     </script>
 
     <script>
