@@ -21,6 +21,14 @@
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
+                {{ Form::label('parent_branch', __('Main Branch'), ['class' => 'form-label']) }}
+                {{ Form::select('parent_branch', $parent_branches, null, ['class' => 'form-control', 'placeholder' => __('Select Main Branch')]) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
                 {{ Form::label('tolerance', __('Tolerance'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
                     {{ Form::text('tolerance', null, ['class' => 'form-control', 'id' => 'tolerance', 'placeholder' => __('Enter Branch Tolerance In Meter')]) }}

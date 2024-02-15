@@ -1509,4 +1509,6 @@ Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attend
 Route::post('overtime/attendance', [OvertimeController::class, 'attendance'])->name('overtime.attendance')->middleware(['auth', 'XSS']);
 Route::post('overtime/report', [OvertimeController::class, 'report'])->name('overtime.report')->middleware(['auth', 'XSS']);
 
-Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export');
+Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export')->middleware(['auth', 'XSS']);
+Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNotClockIn'])->name('attendanceemployee.exportNotClockIn')->middleware(['auth', 'XSS']);
+Route::get('report/monthlyattendance/export', [ReportController::class, 'exportMonthlyAttendance'])->name('report.monthlyAttendace.export')->middleware(['auth', 'XSS']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\OtherPayment;
 use Illuminate\Http\Request;
@@ -10,7 +11,20 @@ class OtherPaymentController extends Controller
 {
     public function otherpaymentCreate($id)
     {
-        $employee = Employee::where('is_active', 1)->find($id);
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->find($id) : Employee::where('is_active', 1)->find($id);
         $otherpaytype=OtherPayment::$otherPaymenttype;
         return view('otherpayment.create', compact('employee','otherpaytype'));
     }

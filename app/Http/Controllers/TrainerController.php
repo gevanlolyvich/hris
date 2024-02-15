@@ -8,6 +8,7 @@ use App\Models\Branch;
 use App\Models\Trainer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TrainerController extends Controller
@@ -16,7 +17,20 @@ class TrainerController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Trainer')) {
-            $trainers = !empty(\Auth::user()->branch_id) ? Trainer::where('branch', \Auth::user()->branch_id)->get() : Trainer::get();
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $trainers = $branch_id?->isNotEmpty() ? Trainer::whereIn('branch', $branch_id)->get() : Trainer::get();
 
             return view('trainer.index', compact('trainers'));
         } else {
@@ -28,7 +42,20 @@ class TrainerController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Trainer')) {
-            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             return view('trainer.create', compact('branches'));
         } else {
@@ -65,7 +92,7 @@ class TrainerController extends Controller
             $trainer->email      = $request->email;
             $trainer->address    = $request->address;
             $trainer->expertise  = $request->expertise;
-            $trainer->created_by = \Auth::user()->creatorId();
+            $trainer->created_by = \Auth::user()->id;
             $trainer->save();
 
             return redirect()->route('trainer.index')->with('success', __('Trainer  successfully created.'));
@@ -84,7 +111,20 @@ class TrainerController extends Controller
     public function edit(Trainer $trainer)
     {
         if (\Auth::user()->can('Edit Trainer')) {
-            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
 
             return view('trainer.edit', compact('branches', 'trainer'));
         } else {
@@ -132,7 +172,7 @@ class TrainerController extends Controller
     public function destroy(Trainer $trainer)
     {
         if (\Auth::user()->can('Delete Trainer')) {
-            if ($trainer->created_by == \Auth::user()->creatorId()) {
+            if ($trainer->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $trainer->delete();
 
                 return redirect()->route('trainer.index')->with('success', __('Trainer successfully deleted.'));

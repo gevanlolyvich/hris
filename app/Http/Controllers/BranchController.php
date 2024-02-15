@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BranchController extends Controller
 {
@@ -24,7 +25,9 @@ class BranchController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Branch')) {
-            return view('branch.create');
+            $parent_branches = Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
+            return view('branch.create', compact('parent_branches'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -49,12 +52,13 @@ class BranchController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $branch             = new Branch();
-            $branch->name       = $request->name;
-            $branch->tolerance  = $request->tolerance;
-            $branch->latitude   = $request->latitude;
-            $branch->longitude  = $request->longitude;
-            $branch->created_by = \Auth::user()->creatorId();
+            $branch                 = new Branch();
+            $branch->name           = $request->name;
+            $branch->parent_branch  = $request->parent_branch;
+            $branch->tolerance      = $request->tolerance;
+            $branch->latitude       = $request->latitude;
+            $branch->longitude      = $request->longitude;
+            $branch->created_by     = \Auth::user()->id;
             $branch->save();
 
             return redirect()->route('branch.index')->with('success', __('Branch  successfully created.'));
@@ -71,9 +75,10 @@ class BranchController extends Controller
     public function edit(Branch $branch)
     {
         if (\Auth::user()->can('Edit Branch')) {
-            if ($branch->created_by == \Auth::user()->creatorId()) {
+            if ($branch->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
+                $parent_branches = Branch::whereNot('id', $branch->id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-                return view('branch.edit', compact('branch'));
+                return view('branch.edit', compact('branch', 'parent_branches'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }

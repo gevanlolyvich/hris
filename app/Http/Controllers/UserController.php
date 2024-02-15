@@ -28,7 +28,20 @@ class UserController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage User')) {
-            $users = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get() : User::withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $users = $branch_id?->isNotEmpty() ? User::whereIn('branch_id', $branch_id)->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get() : User::withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
 
             return view('user.index', compact('users'));
         } else {
@@ -113,8 +126,21 @@ class UserController extends Controller
         if (\Auth::user()->can('Edit User')) {
             $user  = User::find($id);
             $roles = Role::where('created_by', '=', $user->creatorId())->get()->pluck('name', 'id');
+            
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
 
-            $branches = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Branch::orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
             return view('user.edit', compact('user', 'roles', 'branches'));
         } else {

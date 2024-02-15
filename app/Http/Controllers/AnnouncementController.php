@@ -27,8 +27,21 @@ class AnnouncementController extends Controller
                     }
                 )->get();
             } else {
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
                 $current_employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $announcements    = !empty(\Auth::user()->branch_id) ? Announcement::where('branch_id', \Auth::user()->branch_id)->orderBy('start_date', 'DESC')->get() : Announcement::orderBy('start_date', 'DESC')->get();
+                $announcements    = $branch_id?->isNotEmpty() ? Announcement::whereIn('branch_id', $branch_id)->orderBy('start_date', 'DESC')->get() : Announcement::orderBy('start_date', 'DESC')->get();
             }
 
             return view('announcement.index', compact('announcements', 'current_employee'));
@@ -43,10 +56,24 @@ class AnnouncementController extends Controller
             $employees   = null;
             $branch      = null;
             $departments = null;
-            if (!empty(\Auth::user()->branch_id)) {
-                $employees   = Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
-                $branch      = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
-                $departments = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get();
+
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            if ($branch_id?->isNotEmpty()) {
+                $employees   = Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $branch      = Branch::whereIn('id', $branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                $departments = Department::whereIn('branch_id', $branch_id)->orderby('name', 'ASC')->get();
             } else {
                 $employees   = Employee::where('is_active', 1)->orderby('name', 'ASC')->get()->pluck('name', 'id');
                 $branch      = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
@@ -134,8 +161,14 @@ class AnnouncementController extends Controller
                 }
             }
 
+            if (in_array('0', $request->department_id)) {
+                $departments = Department::where('branch_id', $request->branch_id)->get()->pluck('id');
+            } else {
+                $departments = $request->department_id;
+            }
+
             if (in_array('0', $request->employee_id)) {
-                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $request->department_id)->get()->pluck('id');
+                $departmentEmployee = Employee::where('is_active', 1)->whereIn('department_id', $departments)->get()->pluck('id');
             } else {
                 $departmentEmployee = $request->employee_id;
             }
@@ -162,10 +195,24 @@ class AnnouncementController extends Controller
     {
         if (\Auth::user()->can('Edit Announcement')) {
             $announcement = Announcement::find($announcement);
+
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
             if ($announcement->created_by == Auth::user()->id || \Auth::user()->type == 'company') {
-                if (!empty(\Auth::user()->branch_id)) {
-                    $branch         = Branch::where('id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
-                    $departments    = Department::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                if ($branch_id?->isNotEmpty()) {
+                    $branch         = Branch::whereIn('id', $branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
+                    $departments    = Department::whereIn('branch_id', $branch_id)->orderby('name', 'ASC')->get()->pluck('name', 'id');
                 } else {
                     $branch         = Branch::orderby('name', 'ASC')->get()->pluck('name', 'id');
                     $departments    = Department::orderby('name', 'ASC')->get()->pluck('name', 'id');
@@ -185,7 +232,7 @@ class AnnouncementController extends Controller
     public function update(Request $request, Announcement $announcement)
     {
         if (\Auth::user()->can('Edit Announcement')) {
-            if ($announcement->created_by == \Auth::user()->creatorId()) {
+            if ($announcement->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
 
                 $validator = \Validator::make(
                     $request->all(),
@@ -252,7 +299,9 @@ class AnnouncementController extends Controller
     public function destroy(Announcement $announcement)
     {
         if (\Auth::user()->can('Delete Announcement')) {
-            if ($announcement->created_by == \Auth::user()->creatorId()) {
+            if ($announcement->created_by == \Auth::user()->id || (\Auth::user()->type == 'hr' && $announcement->branch_id == \Auth::user()->branch_id) || \Auth::user()->type == 'company') {
+                AnnouncementEmployee::where('announcement_id', $announcement->id)->delete();
+
                 $announcement->delete();
 
                 return redirect()->route('announcement.index')->with('success', __('Announcement successfully deleted.'));
@@ -273,8 +322,21 @@ class AnnouncementController extends Controller
             $departments = Department::where('branch_id', $request->branch_id)->orderby('name', 'ASC');
         }
 
-        if (!empty(\Auth::user()->branch_id)) {
-            $departments = $departments->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id')->toArray();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        if ($branch_id?->isNotEmpty()) {
+            $departments = $departments->whereIn('branch_id', $branch_id)->get()->pluck('name', 'id')->toArray();
         } else {
             $departments = $departments->get()->pluck('name', 'id')->toArray();
         }
@@ -284,7 +346,20 @@ class AnnouncementController extends Controller
 
     public function getemployee(Request $request)
     {
-        $employees = !empty(\Auth::user()->branch_id) ? Employee::where('is_active', 1) : Employee::where('is_active', 1)->where('branch_id', \Auth::user()->branch_id);
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $employees = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id) : Employee::where('is_active', 1);
         if ($request->department_id) {
             $employees = $employees->whereIn('department_id', $request->department_id);
         }

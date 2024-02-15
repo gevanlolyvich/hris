@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\Trainer;
 use App\Models\Training;
 use App\Models\TrainingType;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
@@ -17,11 +18,24 @@ class TrainingExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = !empty(\Auth::user()->branch_id) ? Training::where('branch', \Auth::user()->branch_id)->get() : Training::get();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $data = $branch_id?->isNotEmpty() ? Training::whereIn('branch', $branch_id)->get() : Training::get();
 
         foreach ($data as $k => $training) {
             unset($training->created_at,$training->updated_at);
-            $data[$k]["branch"] = Branch::where('id', $training->branch)->pluck('name')->first();
+            $data[$k]["branch"] = $training->branch_ref?->name ?? '-';
             
             $trainer_option     = $training->trainer_option;
             if ($trainer_option == 0) {
@@ -29,25 +43,13 @@ class TrainingExport implements FromCollection, WithHeadings
             } else {
                 $data[$k]["trainer_option"] = 'External';
             }
-            $data[$k]["training_type"]     = TrainingType::where('id', $training->training_type)->pluck('name')->first();
-            $data[$k]["trainer"]     = Trainer::where('id', $training->trainer)->pluck('firstname')->first();
-            $data[$k]["employee"]     = Employee::where('id', $training->employee)->pluck('name')->first();
-            $data[$k]["status"]=Training::status($training->status);
-            $data[$k]["created_by"]=Employee::login_user($training->created_by); 
 
-            $data[$k]["performance"]     = Employee::where('id', $training->employee)->pluck('name')->first();
-            $performance     = $training->performance;
-            if ($performance == 0) {
-                $data[$k]["performance"] = 'Not Concluded';
-            } else if ($performance == 1) {
-                $data[$k]["performance"] = 'Satisfactory';
-            } elseif ($performance == 2) {
-                $data[$k]["performance"] = 'Average';
-            } elseif ($performance == 3) {
-                $data[$k]["performance"] = 'Poor';
-            } else {
-                $data[$k]["performance"] = 'Excellent';
-            }
+            $data[$k]["training_type"]      = $training->type?->name ?? '-';
+            $data[$k]["trainer"]            = $training->trainer_ref?->firstname ?? '-';
+            $data[$k]["employee"]           = $training->employee_ref?->name ?? '-';
+            $data[$k]["status"]             = Training::status($training->status);
+            $data[$k]["performance"]        = Training::performance($training->performance);
+            $data[$k]["created_by"]         = Employee::login_user($training->created_by); 
         }
         return $data;
     }
@@ -55,20 +57,20 @@ class TrainingExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            "ID",
-            "Branch Name",
-            "Trainer Option",
-            "Trainer Type",
-            "Trainer",
-            "Trainer Cost",
-            "Employee Name",
-            "Start Date",
-            "End Date",
-            "Description",
-            "Performance",
-            "status",
-            "Remarks",
-            "Created By"
+            __("ID"),
+            __("Branch Name"),
+            __("Trainer Option"),
+            __("Trainer Type"),
+            __("Trainer"),
+            __("Trainer Cost"),
+            __("Employee Name"),
+            __("Start Date"),
+            __("End Date"),
+            __("Description"),
+            __("Performance"),
+            __("status"),
+            __("Remarks"),
+            __("Created By"),
         ];
     }
 }

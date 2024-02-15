@@ -21,8 +21,21 @@ class PermitController extends Controller
 {
     public function index(Request $request)
     {
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
         $status = $request->query('status', null);
-        $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+        $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
         $department = collect();
 
         if (\Auth::user()->can('Manage Leave')) {
@@ -40,7 +53,7 @@ class PermitController extends Controller
 
                 $permits   = Permit::whereIn('employee_id', $employees)->orderBy('start_date', 'DESC');
             } else {
-                $permits = !empty(\Auth::user()->branch_id) ? Permit::whereHas('employee', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
+                $permits = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
             }
 
             if ($status != null && $status == 'Pending') {
@@ -70,7 +83,20 @@ class PermitController extends Controller
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('is_active', 1)->where('user_id', '=', Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
-                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
             $permittypes   = PermitType::get();
 
@@ -153,7 +179,7 @@ class PermitController extends Controller
             $permit->created_by         = Auth::user()->id;
 
             $permit->save();
-            return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Created'));
+            return redirect()->back()->with('success', __('Attendance Permit Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -161,7 +187,7 @@ class PermitController extends Controller
 
     public function show(Permit $permit)
     {
-        return redirect()->route('permit.index');
+        return redirect()->back();
     }
 
     public function edit($id)
@@ -170,7 +196,20 @@ class PermitController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
-                $employees  = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
                 
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
@@ -246,7 +285,7 @@ class PermitController extends Controller
 
                 //* Update Data
                 Permit::where('id', $permit->id)->update($form);
-                return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Updated'));
+                return redirect()->back()->with('success', __('Attendance Permit Successfully Updated'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
@@ -310,8 +349,6 @@ class PermitController extends Controller
                     new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($permit->end_date))))
                 );
 
-                Log::info(json_encode($period, JSON_PRETTY_PRINT));
-    
                 foreach ($period as $key => $value) {
                     array_push($dates, $value->format('Y-m-d'));
                 }
@@ -350,6 +387,6 @@ class PermitController extends Controller
             // AttendanceEmployee::create($form_attendance);
         });
 
-        return redirect()->route('permit.index')->with('success', __('Attendance Permit Successfully Updated'));
+        return redirect()->back()->with('success', __('Attendance Permit Successfully Updated'));
     }
 }

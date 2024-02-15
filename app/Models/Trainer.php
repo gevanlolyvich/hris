@@ -21,4 +21,9 @@ class Trainer extends Model
     {
         return $this->hasOne('App\Models\Branch', 'id', 'branch');
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch', 'id');
+    }
 }

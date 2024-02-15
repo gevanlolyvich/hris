@@ -43,13 +43,26 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Employee')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $department = collect();
 
             if (Auth::user()->type == 'employee') {
                 $employees = Employee::where('user_id', '=', Auth::user()->id)->orderby('name', 'asc');
             } else {
-                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
             }
 
             if (!empty($request->branch_id)) {
@@ -175,7 +188,7 @@ class EmployeeController extends Controller
                     'gender' => $request['gender'],
                     'phone' => $request['phone'],
                     'address' => $request['address'],
-                    'domicile_address' => $request['domicile_address'] || null,
+                    'domicile_address' => $request['domicile_address'] ?? null,
                     'emergency_contact_number' => $request['emergency_contact_number'],
                     'emergency_contact_relation' => $request['emergency_contact_relation'],
                     'marital_status' => $request['marital_status'],
@@ -402,7 +415,7 @@ class EmployeeController extends Controller
                         } else {
                             $employee_document                 = new EmployeeDocument();
                             $employee_document->employee_id    = $employee->id;
-                            $employee_document->personel_id    = $employee->personel_id;
+                            // $employee_document->personel_id    = $employee->personel_id;
                             $employee_document->document_id    = $key;
                             $employee_document->document_value = $fileNameToStore;
                             $employee_document->save();
@@ -495,10 +508,6 @@ class EmployeeController extends Controller
 
     public function json(Request $request)
     {
-        // $department_id = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('id')->toArray() : Department::orderBy('name', 'ASC')->get()->pluck('id')->toArray();
-        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
-        // $designations = !empty(\Auth::user()->branch_id) ? Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
-        // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
         $designations = Designation::where('department_id', $request->department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
 
 
@@ -508,9 +517,25 @@ class EmployeeController extends Controller
 
     public function departmentJson(Request $request)
     {
-        $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Department::where('branch_id', $request->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
-        // $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray() : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
-        // $designations = Designation::where('department_id', $request->department_id)->get()->pluck('name', 'id')->toArray();
+        $branch     = Branch::find(!empty(\Auth::user()->branch_id) ? \Auth::user()->branch_id : $request->branch_id);
+        $branch_id  = collect();
+
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $parents = $branch?->parentBranchFlatten();
+        if ($parents?->isNotEmpty()) {
+            foreach ($parents as $parent) {
+                $branch_id->push($parent->id);
+            }
+        }
+
+        if ($request->branch_id) {
+            $branch_id->push($request->branch_id);
+        }
+
+        $departments = Department::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
 
         return response()->json($departments);
     }
@@ -605,7 +630,19 @@ class EmployeeController extends Controller
 
     public function lastLogin()
     {
-        $users = !empty(\Auth::user()->branch_id) ? User::where('branch_id', \Auth::user()->branch_id)->get() : User::get();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+        $users = $branch_id?->isNotEmpty() ? User::whereIn('branch_id', $branch_id)->get() : User::get();
 
         return view('employee.lastLogin', compact('users'));
     }
@@ -626,13 +663,26 @@ class EmployeeController extends Controller
         }
 
         $employees = $employees->pluck('name', 'id')->toArray();
-        // Log::info($employees);
         return response()->json($employees);
     }
 
     public function branchShiftJson(Request $request)
     {
-        $shift_types      = !empty($request->branch_id) ? ShiftType::where('branch_id', $request->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+        $branch = Branch::find(!empty(\Auth::user()->branch_id) ? \Auth::user()->branch_id : $request->branch_id);
+        $branch_id = collect();
+
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $parents = $branch?->parentBranchFlatten();
+        if ($parents?->isNotEmpty()) {
+            foreach ($parents as $parent) {
+                $branch_id->push($parent->id);
+            }
+        }
+
+        $shift_types      = ShiftType::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
         return response()->json($shift_types);
     }
     public function importFile()

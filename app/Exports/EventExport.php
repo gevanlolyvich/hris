@@ -14,7 +14,19 @@ class EventExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = !empty(\Auth::user()?->branch_id) ? Event::where('branch_id', \Auth::user()->branch_id)->orderby('start_date', 'DESC')->get() : Event::orderby('start_date', 'DESC')->get();
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+        $data = $branch_id?->isNotEmpty() ? Event::whereIn('branch_id', $branch_id)->orderby('start_date', 'DESC')->get() : Event::orderby('start_date', 'DESC')->get();
 
         foreach ($data as $k => $events) {
             $data[$k]["branch_id"]     = Branch::where('id',$events->branch_id)->pluck('name')->first();
@@ -27,18 +39,18 @@ class EventExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            "ID",
-            "Branch Id",
-            "Department Id",
-            "Employee Id",
-            "Title",
-            "Start Date",
-            "End Date",
-            "Color",
-            "Description",
-            "Created By",
-            "Created At",
-            "Updated At",
+            __("ID"),
+            __("Branch Id"),
+            __("Department Id"),
+            __("Employee Id"),
+            __("Title"),
+            __("Start Date"),
+            __("End Date"),
+            __("Color"),
+            __("Description"),
+            __("Created By"),
+            __("Created At"),
+            __("Updated At"),
         ];
     }
 }
