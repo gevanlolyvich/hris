@@ -134,31 +134,6 @@
             });
         });
     </script>
-
-    {{-- <script>
-        $(document).ready(function () {
-            let employeeData = @json(session('employee'));
-
-            if (employeeData) {
-                // do something here with employeeData.name
-                let searchTable = document.getElementsByClassName('dataTable-input');
-
-                if (searchTable?.length) {
-                    searchTable[0].value = employeeData.name;
-                    var event = new KeyboardEvent('keydown', {
-                        key: 'Enter',
-                        bubbles: true,
-                        cancelable: true,
-                        keyCode: 13,
-                        code: 'Enter',
-                    });
-                    searchTable[0].dispatchEvent(event);
-                    $(searchTable[0]).trigger('input');
-                    searchTable[0].trigger('input');
-                }
-            }
-        })
-    </script> --}}
 @endpush
 
 @section('action-button')
@@ -225,7 +200,7 @@
                                     <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
                                 </div>
                                     <div class="form-check form-check-inline form-group">
-                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='daily' ?'checked':'checked'}}>
+                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
                                         <label class="form-check-label" for="daily">{{__('Daily')}}</label>
                                     </div>
                             </div>

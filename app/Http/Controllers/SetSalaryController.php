@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Allowance;
 use App\Models\AllowanceOption;
+use App\Models\Branch;
 use App\Models\Commission;
 use App\Models\DeductionOption;
 use App\Models\Employee;
@@ -128,7 +129,19 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->can('Manage Set Salary'))
         {
-            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get();
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }
@@ -186,6 +199,19 @@ class SetSalaryController extends Controller
 
     public function show($id, Request $request)
     {
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
         $year                 = $request->month ? date('Y', strtotime($request->month)) : date('Y');
         $month                = $request->month ? date('m', strtotime($request->month)): date('m');
         $start_date           = date($year . '-' . $month . '-01');
@@ -195,9 +221,13 @@ class SetSalaryController extends Controller
         $allowance_options    = AllowanceOption::get()->pluck('name', 'id');
         $loan_options         = LoanOption::get()->pluck('name', 'id');
         $deduction_options    = DeductionOption::get()->pluck('name', 'id');
-        $employee             = \Auth::user()->type == 'employee' ? Employee::where('user_id', '=', \Auth::user()->id) : Employee::where('id', $id);
-        
-        $employee             = !empty(\Auth::user()->branch_id) ? $employee->where('branch_id', \Auth::user()->branch_id)->first() : $employee->first();
+
+        $employee               = null;
+        if (\Auth::user()->type == 'employee') {
+            $employee           = Employee::find(\Auth::user()->id);
+        } else {
+            $employee           = $branch_id?->isNotEmpty() ? Employee::where('id', $id)->whereIn('branch_id', $branch_id)->first() : Employee::find($id);
+        }  
 
         if (empty($employee)) {
             return redirect()->back()->with('error', __('Permission denied'));
@@ -215,46 +245,41 @@ class SetSalaryController extends Controller
         $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
 
         foreach ( $allowances as  $value) {
-            if($value->type == 'percentage' )
-        {
-            $employee           = Employee::find($value->employee_id);
-            $empsal             = $value->amount * $employee->salary / 100;
-            $value->tota_allow  = $empsal;
+            if($value->type == 'percentage' ){
+                // $employee           = Employee::find($value->employee_id);
+                $empsal             = $value->amount * $employee->salary / 100;
+                $value->tota_allow  = $empsal;
             }
         }
 
         foreach ( $commissions as  $value) {
-            if(  $value->type == 'percentage' )
-        {
-            $empsal            = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            if(  $value->type == 'percentage' ){
+                $empsal            = $value->amount * $employee->salary / 100;
+                $value->tota_allow = $empsal;
             }
         }
 
         foreach ( $loans as  $value) {
-            if(  $value->type == 'percentage' )
-        {
-            $employee          = Employee::find($value->employee_id);
-            $empsal  = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            if(  $value->type == 'percentage' ){
+                // $employee          = Employee::find($value->employee_id);
+                $empsal  = $value->amount * $employee->salary / 100;
+                $value->tota_allow = $empsal;
             }
         }
 
         foreach ( $saturationdeductions as  $value) {
-            if(  $value->type == 'percentage' )
-        {
-            $employee          = Employee::find($value->employee_id);
-            $empsal  = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            if(  $value->type == 'percentage' ){
+                // $employee          = Employee::find($value->employee_id);
+                $empsal  = $value->amount * $employee->salary / 100;
+                $value->tota_allow = $empsal;
             }
         }
 
         foreach ( $otherpayments as  $value) {
-            if(  $value->type == 'percentage' )
-        {
-            $employee          = Employee::find($value->employee_id);
-            $empsal  = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            if(  $value->type == 'percentage' ){
+                // $employee          = Employee::find($value->employee_id);
+                $empsal  = $value->amount * $employee->salary / 100;
+                $value->tota_allow = $empsal;
             }
         }
 
@@ -287,7 +312,20 @@ class SetSalaryController extends Controller
     {
         if(\Auth::user()->type == "employee")
         {
-            $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get() : Employee::where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get();
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get() : Employee::where('user_id', \Auth::user()->id)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
         }

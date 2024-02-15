@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Employee;
+use App\Models\Branch;
 use App\Models\PaySlip;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,7 +15,20 @@ class PayrollExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $data = !empty(\Auth::user()?->branch_id) ? PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id')->where('employees.branch_id', \Auth::user()?->branch_id) : PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id');
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $data = $branch_id?->isNotEmpty() ? PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id')->whereIn('employees.branch_id', $branch_id) : PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id');
 
         $month = date('Y-m');
 

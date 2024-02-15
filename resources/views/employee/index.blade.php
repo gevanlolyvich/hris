@@ -113,7 +113,7 @@
                                     <td>
                                         {{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}
                                     </td>
-                                    <td>{{ ucwords( $employee->type) }}</td>
+                                    <td>{{ ucwords( $employee?->employeeType?->name ?? '-') }}</td>
                                     <td>{{ $employee->shift_type?->name ?? '' }}</td>
                                     @if (Gate::check('Edit Employee') || Gate::check('Delete Employee'))
                                         <td class="Action">

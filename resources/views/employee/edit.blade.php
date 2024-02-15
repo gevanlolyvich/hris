@@ -497,7 +497,7 @@
                                             </select>`;
                     $('.department_div').html(emp_selct);
 
-                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
+                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
                     $.each(data, function(key, value) {
                         $('.department_id').append('<option value="' + key + '">' + value +
                             '</option>');

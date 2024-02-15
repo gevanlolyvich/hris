@@ -25,8 +25,21 @@ class AttendanceRequestController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Request Attendance')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
             $is_approved = $request->query('is_approved', null);
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $department = collect();
 
             if (Auth::user()->type == 'employee') {
@@ -43,8 +56,8 @@ class AttendanceRequestController extends Controller
 
                 $attendance_requests   = AttendanceRequest::wherein('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
             } else {
-                $employee_id = Employee::where('branch_id', \Auth::user()?->branch_id ?? 0)->get()->pluck('id')->toArray();
-                $attendance_requests = !empty(\Auth::user()?->branch_id) ? AttendanceRequest::whereIn('employee_id', $employee_id)->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC') : AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
+                // $employee_id = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->get()->pluck('id')->toArray() : Employee::get()->pluck('id')->toArray();
+                $attendance_requests = $branch_id?->isNotEmpty() ? AttendanceRequest::whereHas('employee', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->orderBy('date', 'DESC')->orderBy('employee_id', 'ASC') : AttendanceRequest::orderBy('date', 'DESC')->orderBy('employee_id', 'ASC');
             }
 
             if ($is_approved != null && $is_approved == '0') {
@@ -81,7 +94,20 @@ class AttendanceRequestController extends Controller
                     $shifts[$key] = $formated_times.  ' | ' . $shift;
                 }
             } else {
-                $employees  = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
             return view('attendancerequest.create', compact('employees', 'shifts'));
@@ -164,8 +190,21 @@ class AttendanceRequestController extends Controller
         $attendance_request = AttendanceRequest::find($id);
 
         if (\Auth::user()->can('Edit Request Attendance')) {
-            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
-                $employees = !empty(\Auth::user()?->branch_id) ? Employee::where('branch_id', \Auth::user()?->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()?->employee?->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $shifts    = ShiftType::where('branch_id', $attendance_request->employee->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
                 foreach ($shifts as $key => $shift) {
@@ -187,7 +226,7 @@ class AttendanceRequestController extends Controller
     {
         $attendance_request = AttendanceRequest::find($attendance_request_id);
         if (\Auth::user()->can('Edit Request Attendance')) {
-            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
+            if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()?->employee?->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1) {
                 $validator = Validator::make(
                     $request->all(),
                     [

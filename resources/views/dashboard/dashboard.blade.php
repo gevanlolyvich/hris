@@ -20,7 +20,6 @@
         </div>
     @endif
 
-    {{-- @if (\Auth::user()->type == 'employee') --}}
     {{-- Modal --}}
 
     @if (Auth::user()->type == 'employee')
@@ -235,60 +234,45 @@
                             {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                         </div>
                         <div class="col-md-6 text-center mx-auto mt-1">
-                            {{-- @if (empty($employeeAttendance) || $employeeAttendance->clock_out != '00:00:00') --}}
                             @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
-                                <button type="submit" value="0" name="in" id="clock_in"
+                                <button type="button" value="0" name="in" id="clock_in"
                                     class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                            {{-- @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600) && strtotime(date('Y-m-d H:i:s')) < (strtotime($yesterdayOfficeTime['absolute_out']))) --}}
                             @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
-                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
                                     class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
                             @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
-                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
                                     class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                            {{-- @elseif (!empty($employeeAttendance) && (($employeeAttendance->clock_out != '00:00:00') && ($employeeAttendance->clock_out != $employeeAttendance->clock_in ))) --}}
                             @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
-                                {{-- {{ $employeeAttendance }} --}}
-                                <button type="submit" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
                                     class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                             @else
-                                <button type="submit" value="0" name="in" id="clock_in"
+                                <button type="button" value="0" name="in" id="clock_in"
                                     class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
                             @endif
                             {{ Form::close() }}
                         </div>                                                    
                         <div class="col-md-6 text-center mx-auto mt-3">
-                            {{-- @if (!empty($employeeAttendance) && $employeeAttendance->clock_out == '00:00:00') --}}
-                            {{-- Tambahin validasi abs out terkait kalo dia sudah clock out masih dapat clock out lagi selagi masih dalam waktu AbsOut-nya --}}
-                            {{-- @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && time() < $yesterdayOfficeTime['absolute_out']) --}}
                             @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
                                 <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                            {{-- @elseif ($employeeAttendance) --}}
                             @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
                                 <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                            {{-- @elseif (!$officeTime['is_cross_day'] && !empty($employeeAttendance))
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT']) }}
-                                <input type="hidden" name="latitude" id="latitude_out" value="0">
-                                <input type="hidden" name="longitude" id="longitude_out" value="0">
-                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
-                                <button type="submit" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button> --}}
                             @else
-                                <button type="submit" value="0" name="out" id="clock_out"
+                                <button type="button" value="0" name="out" id="clock_out"
                                     class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
                             @endif
                             {{ Form::close() }}
@@ -659,6 +643,41 @@
                 <div class="col-xl-5">
                     <div class="card">
                         <div class="card-header card-body table-border-style">
+                            <div class="row">
+                                <div class="col-9">
+                                    <h5>{{ __("Today's Not Clock In") }}</h5>
+                                </div>
+                                <div class="col-2">
+                                    <a href="{{ route('attendanceemployee.exportNotClockIn', ['date' => date('Y-m-d')]) }}" data-bs-toggle="tooltip"
+                                        data-bs-original-title="{{ __('Export') }}">
+                                        <button type="button" class="btn btn-info btn-lg btn-block">{{ count($notClockIns) }}</button>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="height: 324px; overflow:auto">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Name') }}</th>
+                                            <th>{{ __('Status') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="list">
+                                        @foreach ($notClockIns as $notClockIn)
+                                            <tr>
+                                                <td>{{ $notClockIn->name }}</td>
+                                                <td><span class="absent-btn">{{ __('Absent') }}</span></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header card-body table-border-style">
                             <h5>{{ __('Meeting schedule') }}</h5>
                         </div>
                         <div class="card-body" style="height: 324px; overflow:auto">
@@ -693,38 +712,6 @@
                                                         </div>
                                                     </span>
                                                 </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header card-body table-border-style">
-                            <div class="row">
-                                <div class="col-9">
-                                    <h5>{{ __("Today's Not Clock In") }}</h5>
-                                </div>
-                                <div class="col-2">
-                                    <button type="button" class="btn btn-info btn-lg btn-block disabled">{{ count($notClockIns) }}</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body" style="height: 324px; overflow:auto">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ __('Name') }}</th>
-                                            <th>{{ __('Status') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="list">
-                                        @foreach ($notClockIns as $notClockIn)
-                                            <tr>
-                                                <td>{{ $notClockIn->name }}</td>
-                                                <td><span class="absent-btn">{{ __('Absent') }}</span></td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -959,62 +946,62 @@
     </script> 
 
     @if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
-    <script type="text/javascript">
-        $(document).ready(function() {
-            get_data();
-        });
-
-        function get_data() {
-            var calender_type = $('#calender_type :selected').val();
-            $('#calendar').removeClass('local_calender');
-            $('#calendar').removeClass('google_calender');
-            if (calender_type == undefined) {
-                calender_type = 'local_calender';
-            }
-            $('#calendar').addClass(calender_type);
-
-            $.ajax({
-                url: $("#path_admin").val() + "/event/get_event_data",
-                method: "POST",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    'calender_type': calender_type,
-                    'user_type': "{{ Auth::user()->type }}",
-                },
-                success: function(data) {
-                    (function() {
-                        var etitle;
-                        var etype;
-                        var etypeclass;
-                        var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                            headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                            },
-                            buttonText: {
-                                timeGridDay: "{{ __('Day') }}",
-                                timeGridWeek: "{{ __('Week') }}",
-                                dayGridMonth: "{{ __('Month') }}"
-                            },
-                            themeSystem: 'bootstrap',
-                            slotDuration: '00:10:00',
-                            navLinks: true,
-                            droppable: true,
-                            selectable: true,
-                            selectMirror: true,
-                            editable: true,
-                            dayMaxEvents: true,
-                            handleWindowResize: true,
-                            events: data,
-                        });
-                        calendar.render();
-                    })();
-                }
+        <script type="text/javascript">
+            $(document).ready(function() {
+                get_data();
             });
 
-        }
-    </script>
+            function get_data() {
+                var calender_type = $('#calender_type :selected').val();
+                $('#calendar').removeClass('local_calender');
+                $('#calendar').removeClass('google_calender');
+                if (calender_type == undefined) {
+                    calender_type = 'local_calender';
+                }
+                $('#calendar').addClass(calender_type);
+
+                $.ajax({
+                    url: $("#path_admin").val() + "/event/get_event_data",
+                    method: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        'calender_type': calender_type,
+                        'user_type': "{{ Auth::user()->type }}",
+                    },
+                    success: function(data) {
+                        (function() {
+                            var etitle;
+                            var etype;
+                            var etypeclass;
+                            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                                headerToolbar: {
+                                    left: 'prev,next today',
+                                    center: 'title',
+                                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                                },
+                                buttonText: {
+                                    timeGridDay: "{{ __('Day') }}",
+                                    timeGridWeek: "{{ __('Week') }}",
+                                    dayGridMonth: "{{ __('Month') }}"
+                                },
+                                themeSystem: 'bootstrap',
+                                slotDuration: '00:10:00',
+                                navLinks: true,
+                                droppable: true,
+                                selectable: true,
+                                selectMirror: true,
+                                editable: true,
+                                dayMaxEvents: true,
+                                handleWindowResize: true,
+                                events: data,
+                            });
+                            calendar.render();
+                        })();
+                    }
+                });
+
+            }
+        </script>
     @else
     <script>
         $(document).ready(function() {
@@ -1509,6 +1496,50 @@
                     tracks?.forEach(track => track.stop());
                     video_overtime.srcObject = null;
                 });
+            });
+        </script>
+
+        <script>
+            $('body').on('click', '#clock_in', async function() {
+                const { latitude, longitude, accuracy } = await getLocation();
+
+
+                const latElement = document.getElementById("latitude");
+                const longElement = document.getElementById("longitude");
+                const accElement = document.getElementById("accuracy");
+
+                if (latElement) {
+                    latElement.value = latitude;
+                }
+                if (longElement) {
+                    longElement.value = longitude
+                }
+                if (accElement) {
+                    accElement.value = accuracy;
+                }
+
+                // Submit the form
+                $('#clock-in-form').submit();
+            });
+
+            $('body').on('click', '#clock_out', async function() {
+                const { latitude, longitude, accuracy } = await getLocation();
+
+                const latOutElement = document.getElementById("latitude_out");
+                const longOutElement = document.getElementById("longitude_out");
+                const accOutElement = document.getElementById("accuracy_out");
+                if (latOutElement) {
+                    latOutElement.value = latitude;
+                }
+                if (longOutElement) {
+                    longOutElement.value = longitude
+                }
+                if (accOutElement) {
+                    accOutElement.value = accuracy;
+                }
+
+                // Submit the form
+                $('#clock-out-form').submit();
             });
         </script>
     @endif

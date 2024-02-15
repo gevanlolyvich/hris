@@ -10,6 +10,7 @@ use App\Models\Employee;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
+use App\Utilities\DistanceCalculator;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\ShiftHistory;
@@ -27,10 +28,23 @@ class EmployeeAttendanceHistoryController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('All', '');
 
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
             $employees = null;
@@ -58,7 +72,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
                 $employees = $employees->orderby('name', 'asc')->get();
             } else {
-                $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
+                $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
                 if (!empty($request->branch)) {
                     $employee->where('branch_id', $request->branch);
                 }
@@ -195,6 +209,7 @@ class EmployeeAttendanceHistoryController extends Controller
             $secs               = floor($overtime_hours % 60);
             $overtime['total']  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
         }
+
         $hours                  = floor($total_overtime / 3600);
         $mins                   = floor($total_overtime / 60 % 60);
         $total_overtime         = [ 'hours' => $hours, 'minutes' => $mins];
@@ -204,6 +219,55 @@ class EmployeeAttendanceHistoryController extends Controller
         // Getting shift changes
         $shift_changes = ShiftHistory::where('employee_id', $empId)->get();
         $home_changes = EmployeeHomeHistory::where('employee_id', $empId)->get();
+
+        $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
+
+        foreach($attendanceEmployee as $attendance) {
+            if ($attendance->coord_in || $attendance->coord_out) {
+                $nearest_in         = null;
+                $nearest_in_coord   = null;
+                $near_in_name       = null;
+                $near_in_radius     = null;
+                $nearest_out        = null;
+                $nearest_out_coord  = null;
+                $near_out_name      = null;
+                $near_out_radius    = null;
+
+                $attendance_in      = explode(', ', $attendance->coord_in);
+                $attendance_out     = explode(', ', $attendance->coord_out);
+
+                foreach ($branchCoordinates as $coordinate) {
+                    if (sizeof($attendance_in) > 1) {
+                        $distance_in       = DistanceCalculator::haversineDistance($attendance_in[0], $attendance_in[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                        if ($nearest_in > $distance_in || $nearest_in == null) {
+                            $nearest_in         = $distance_in;
+                            $nearest_in_coord   = $coordinate->latitude . ', ' . $coordinate->longitude;
+                            $near_in_name       = $coordinate->name;
+                            $near_in_radius     = $coordinate->tolerance;
+                        }
+                    }
+
+                    if (sizeof($attendance_out) > 1) {
+                        $distance_out       = DistanceCalculator::haversineDistance($attendance_out[0], $attendance_out[1], (float)$coordinate['latitude'], (float)$coordinate['longitude']);
+
+                        if ($nearest_out > $distance_out || $nearest_out == null) {
+                            $nearest_out        = $distance_out;
+                            $nearest_out_coord  = $coordinate->latitude . ', ' . $coordinate->longitude;
+                            $near_out_name      = $coordinate->name;
+                            $near_out_radius    = $coordinate->tolerance;
+                        }
+                    }
+                }
+
+                $attendance['location_in_coordinate']   = $nearest_in_coord;
+                $attendance['location_in_address']      = $near_in_name;
+                $attendance['location_in_radius']       = $near_in_radius;
+                $attendance['location_out_coordinate']  = $nearest_out_coord;
+                $attendance['location_out_address']     = $near_out_name;
+                $attendance['location_out_radius']      = $near_out_radius;
+            }
+        }
 
         return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit'));
     }

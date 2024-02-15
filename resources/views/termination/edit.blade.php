@@ -3,11 +3,11 @@
     <div class="row">
         <div class="form-group  col-lg-6 col-md-6">
             {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-            {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'required' => 'required']) }}
+            {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee'), 'required' => 'required']) }}
         </div>
         <div class="form-group  col-lg-6 col-md-6">
             {{ Form::label('termination_type', __('Termination Type'), ['class' => 'col-form-label']) }}
-            {{ Form::select('termination_type', $terminationtypes, null, ['class' => 'form-control select2', 'required' => 'required']) }}
+            {{ Form::select('termination_type', $terminationtypes, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Termination Type')]) }}
         </div>
         <div class="form-group  col-lg-6 col-md-6">
             {{ Form::label('notice_date', __('Notice Date'), ['class' => 'col-form-label']) }}

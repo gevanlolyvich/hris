@@ -24,9 +24,22 @@ class EventController extends Controller
             $today_date = date('m');
 
             if (\Auth::user()->type != 'employee') {
-                $events    = !empty(\Auth::user()->branch_id) ? LocalEvent::where('branch_id', \Auth::user()->branch_id)->orderby('start_date', 'DESC')->get() : LocalEvent::orderby('start_date', 'DESC')->get();
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
 
-                $current_month_event = !empty(\Auth::user()->branch_id) ? LocalEvent::where('branch_id', \Auth::user()->branch_id)->select('id', 'start_date', 'end_date', 'title', 'created_at', 'color')
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $events    = $branch_id?->isNotEmpty() ? LocalEvent::whereIn('branch_id', $branch_id)->orderby('start_date', 'DESC')->get() : LocalEvent::orderby('start_date', 'DESC')->get();
+
+                $current_month_event = $branch_id?->isNotEmpty() ? LocalEvent::whereIn('branch_id', $branch_id)->select('id', 'start_date', 'end_date', 'title', 'created_at', 'color')
                     ->orderby('start_date', 'DESC')
                     ->whereNotNull(['start_date', 'end_date'])
                     ->Where(
@@ -43,26 +56,6 @@ class EventController extends Controller
                                 ->orWhereMonth('end_date', $today_date);
                         }
                     )->get();
-
-                // if (!empty(\Auth::user()->branch_id)) {
-                //     $events = LocalEvent::orderby('start_date', 'DESC')->whereHas('eventEmployees.employee', function ($query) {
-                //         $query->where('branch_id', \Auth::user()->branch_id);
-                //     })
-                //     ->get();
-
-                //     $current_month_event = LocalEvent::select('id','start_date','end_date', 'title', 'created_at','color')
-                //     ->orderby('start_date', 'DESC')
-                //     ->whereNotNull(['start_date','end_date'])
-                //     ->Where(
-                //         function ($q) use ($today_date) {
-                //             $q->whereMonth('start_date',$today_date)
-                //               ->orWhereMonth('end_date',$today_date);
-                //         }
-                //     )->whereHas('eventEmployees.employee', function ($query) {
-                //         $query->where('branch_id', \Auth::user()->branch_id);
-                //     })->get();
-                // }
-
             } else {
                 $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
                 $employee_id = null;
@@ -120,7 +113,20 @@ class EventController extends Controller
             // $employees   = Employee::orderby('name', 'asc')->get()->pluck('name', 'id');
             $branch = null;
             if (\Auth::user()->type != 'employee') {
-                $branch      = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get() : Branch::get();
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $branch      = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
             } else {
                 $branch      = Branch::where('id', \Auth::user()->employee->branch_id)->get();
             }
@@ -220,7 +226,7 @@ class EventController extends Controller
                 $eventEmployee              = new EventEmployee();
                 $eventEmployee->event_id    = $event->id;
                 $eventEmployee->employee_id = $employee;
-                $eventEmployee->created_by  = \Auth::user()->creatorId();
+                $eventEmployee->created_by  = \Auth::user()->id;
                 $eventEmployee->save();
             }
 
@@ -245,7 +251,20 @@ class EventController extends Controller
     {
         $event = LocalEvent::find($event);
 
-        if (!empty(\Auth::user()->branch_id) && $event->branch_id != \Auth::user()->branch_id) {
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        if ($branch_id?->isNotEmpty() && !$branch_id->contains($event->branch_id)) {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
         $event_employees = EventEmployee::where('event_id', $event->id)->get();
@@ -255,11 +274,24 @@ class EventController extends Controller
     public function edit($event)
     {
         if (\Auth::user()->can('Edit Assignment')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
             $event                        = LocalEvent::find($event);
-            $created_by                   = \Auth::user()->creatorId();
-            $employees                    = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
-            $branch                       = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get() : Branch::get();
-            $departments                  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get() : Department::get();
+            $created_by                   = \Auth::user()->id;
+            $employees                    = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch                       = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
+            $departments                  = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
             $event_employees              = EventEmployee::where('event_id', $event->id)->select('employee_id')->get()->pluck('employee_id');
             $selected_departments         = Department::whereIn('id', json_decode($event->department_id, true))->select('id', 'branch_id', 'name')->get();
             $selected_employees           = Employee::whereIn('id', json_decode($event->employee_id, true))->select('id', 'user_id', 'department_id', 'name')->get();
@@ -333,7 +365,7 @@ class EventController extends Controller
                         $eventEmployee              = new EventEmployee();
                         $eventEmployee->event_id    = $event->id;
                         $eventEmployee->employee_id = $employee;
-                        $eventEmployee->created_by  = \Auth::user()->creatorId();
+                        $eventEmployee->created_by  = \Auth::user()->id;
                         $eventEmployee->save();
                     }
                 }
@@ -379,12 +411,25 @@ class EventController extends Controller
     {
         if (\Auth::user()->type != 'employee') {
             if ($request->branch_id == 0) {
-                $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id')->toArray() : Department::get()->pluck('name', 'id')->toArray();
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $departments = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id')->toArray() : Department::get()->pluck('name', 'id')->toArray();
             } else {
                 $departments = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id')->toArray();
             }
         } else {
-            $departments = Department::where('created_by', \Auth::user()->creatorId())->where('id', \Auth::user()->employee->department_id)->get()->pluck('name', 'id')->toArray();
+            $departments = Department::where('id', \Auth::user()->employee->department_id)->get()->pluck('name', 'id')->toArray();
         }
 
         return response()->json($departments);
@@ -394,7 +439,20 @@ class EventController extends Controller
     {
         if (\Auth::user()->type != 'employee') {
             if (in_array('0', $request->department_id)) {
-                $employees = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray() : Employee::orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+                $branch = Branch::find(\Auth::user()->branch_id);
+                $branch_id = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray() : Employee::orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             } else {
                 $employees = Employee::whereIn('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
             }

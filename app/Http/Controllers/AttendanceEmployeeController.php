@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceMultipleExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
 use App\Models\Branch;
@@ -12,24 +13,37 @@ use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\LogAttendance;
+use App\Utilities\DistanceCalculator;
+use App\Exports\NotClockInExport;
+use App\Models\ShiftHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AttendanceExport;
-use App\Models\ShiftHistory;
 
 class AttendanceEmployeeController extends Controller
 {
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('All', '');
 
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
             $is_valid = $request->query('is_valid', null);
@@ -86,7 +100,7 @@ class AttendanceEmployeeController extends Controller
 
                 $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             } else {
-                $employee = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->select('id') : Employee::select('id');
+                $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id') : Employee::select('id');
                 if (!empty($request->branch)) {
                     $employee->where('branch_id', $request->branch);
                 }
@@ -189,7 +203,20 @@ class AttendanceEmployeeController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Attendance')) {
-            $employees = !empty(\Auth::user()->branch_id) ? User::where('is_active', 1)->where('type', '=', "employee")->where('branch_id', \Auth::user()->branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id') : User::where('is_active', 1)->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $employees = $branch_id?->isNotEmpty() ? User::where('is_active', 1)->where('type', '=', "employee")->whereIn('branch_id', $branch_id)->orderby('name', 'asc')->get()->pluck('name', 'id') : User::where('is_active', 1)->where('type', '=', "employee")->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.create', compact('employees'));
         } else {
@@ -219,7 +246,7 @@ class AttendanceEmployeeController extends Controller
             $endTime    = Utility::getValByName('company_end_time');
             $attendance = AttendanceEmployee::where('employee_id', '=', $request->employee_id)->where('date', '=', $request->date)->where('clock_out', '=', '00:00:00')->get()->toArray();
             if ($attendance) {
-                return redirect()->route('attendanceemployee.index')->with('error', __('Employee Attendance Already Created.'));
+                return redirect()->back()->with('error', __('Employee Attendance Already Created.'));
             } else {
                 $date = date("Y-m-d");
 
@@ -283,14 +310,27 @@ class AttendanceEmployeeController extends Controller
     }
     public function show(Request $request)
     {
-        return redirect()->route('attendance.index');
+        return redirect()->route('attendanceemployee.index');
     }
 
     public function edit($id)
     {
         if (\Auth::user()->can('Edit Attendance')) {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
             $attendanceEmployee = AttendanceEmployee::where('id', $id)->first();
-            $employees          = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees          = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
 
             return view('attendance.edit', compact('attendanceEmployee', 'employees'));
         } else {
@@ -989,10 +1029,23 @@ class AttendanceEmployeeController extends Controller
     {
         if (\Auth::user()->can('Create Attendance')) {
 
-            $branch = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+            
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
             $branch->prepend('Select Branch', '');
 
-            $department = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
             $department->prepend('Select Department', '');
 
             $employees = [];
@@ -1150,7 +1203,7 @@ class AttendanceEmployeeController extends Controller
             $attendance->validate_by = \Auth::user()->id;
             $attendance->save();
 
-            return redirect()->route('attendanceemployee.index')->with('success', __('Attendance successfully validated.'));
+            return redirect()->back()->with('success', __('Attendance successfully validated.'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -1167,8 +1220,17 @@ class AttendanceEmployeeController extends Controller
             }
         }
 
-        $name = 'Attendance-Employee' . date('Y-m-d i:h:s');
-        $data = Excel::download(new AttendanceExport(json_encode($queryArray)), $name . '.xlsx');
+        $name = 'Attendance-Employee' . date('Y-m-d H:i:s');
+        $data = Excel::download(new AttendanceMultipleExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
+    }
+
+    public function exportNotClockIn(Request $request) {
+        $date = $request->date ?? date('Y-m-d');
+
+        $name = 'Not-Clock-In_Employee' . date('Y-m-d H:i:s');
+        $data = Excel::download(new NotClockInExport($date), $name . '.xlsx');
 
         return $data;
     }

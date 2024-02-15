@@ -6,6 +6,7 @@ namespace App\Exports;
 use App\Models\Employee;
 use App\Models\PaySlip;
 use App\Models\Bank;
+use App\Models\Branch;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +31,20 @@ class PayslipExport implements FromCollection, WithHeadings
             $formated_month_year = date('Y') . '-' . date('m', strtotime('last month'));
         }
 
-        $data = !empty(\Auth::user()->branch_id) ? PaySlip::whereHas('employees', function ($query) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', '=', $formated_month_year) : PaySlip::where('salary_month', '=', $formated_month_year);
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        $data = $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', '=', $formated_month_year) : PaySlip::where('salary_month', '=', $formated_month_year);
         $data=$data->get();
         $result = array();
 
