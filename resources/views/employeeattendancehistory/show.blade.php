@@ -45,6 +45,7 @@
     <script>
         $(document).ready(function() {
             var map = null;
+            var mapHome = null;
             var imageSrc = null;
             var notes = null;
 
@@ -135,6 +136,42 @@
                     }
                 });
             });
+            
+            $('body').on('click', '.home-coordinate', function() {
+                var coordinates = $(this).data('coordinates').split(', ');
+
+                // Convert the radius string to a number
+                var radius = parseFloat(coordinates[2]);
+
+            
+                // Open the modal
+                $('#openStreetMapHomeModal').modal('show');
+            
+                // Initialize the map after the modal is fully shown
+                $('#openStreetMapHomeModal').on('shown.bs.modal', function () {
+                    // If a map already exists, remove it
+                    if (mapHome !== null) {
+                        mapHome.remove();
+                    }
+
+                    mapHome = L.map('openStreetMapHomeContainer').setView([coordinates[0], coordinates[1]], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(mapHome);
+                
+                    // Add a marker for the location
+                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(mapHome);
+                
+                    // Add a circle with the converted radius
+                    var circle = L.circle([coordinates[0], coordinates[1]], {
+                        color: 'blue',
+                        fillColor: '#f0023',
+                        fillOpacity: 0.2,
+                        radius: radius,
+                    }).addTo(mapHome); 
+                });
+            });
+            
         });
     </script>
 @endpush
@@ -278,11 +315,22 @@
 
     <div class="row">
         <div class="col-xl-12">
+            {{-- Attendance --}}
             <div class="row">
                 <div class="col-sm-12 col-md-12">
                     <div class="card">
                         <div class="card-header card-body employee-detail-body fulls-card table-border-style">
-                            <h5>{{__('Attendance')}}</h5>
+                            <div class="row">
+                                <div class="col-10">
+                                    <h5>{{__('Attendance')}}</h5>
+                                </div>
+                                <div class="col-2">
+                                    <a href="{{ route('report.monthlyAttendace.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+                                        data-bs-original-title="{{ __('Export Employee Attendance Data') }} Excel">
+                                        <i class="ti ti-file-export"></i>
+                                    </a>
+                                </div>
+                            </div>
                             <hr>
                             <div class="table-responsive">
                                 <table class="table" id="pc-dt-simple">
@@ -367,6 +415,8 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Work Hours And Overtime --}}
             <div class="row">
                 <div class="col-sm-12 col-md-6">
                     <div class="card ">
@@ -438,6 +488,7 @@
                 </div>
             </div>
 
+            {{-- Late And Early Leaving --}}
             <div class="row">
                 <div class="col-sm-12 col-md-6">
                     <div class="card">
@@ -502,6 +553,8 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Shift Changes And Address Changes --}}
             <div class="row">
                 <div class="col-sm-12 col-md-6">
                     <div class="card">
@@ -557,6 +610,72 @@
                                                         </a>
                                                     @endif
                                                 </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Employee Transfer And Training --}}
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Transfer')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="pc-dt-simple">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Date') }}</th>
+                                            <th>{{ __('Branch') }}</th>
+                                            <th>{{ __('Department') }}</th>
+                                            <th>{{ __('Designation') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($transfers as $transfer)
+                                            <tr>
+                                                <td>{{ $transfer->transfer_date }}</td>
+                                                <td>{{ $transfer?->branch?->name ?? '-' }}</td>
+                                                <td>{{ $transfer?->department?->name ?? '-' }}</td>
+                                                <td>{{ $transfer?->designation?->name ?? '-' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Training')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="pc-dt-simple">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Start Date') }}</th>
+                                            <th>{{ __('End Date') }}</th>
+                                            <th>{{ __('Cost') }}</th>
+                                            <th>{{ __('Description') }}</th>
+                                        </tr>
+                                    </thead> 
+                                    <tbody>
+                                        @foreach ($trainings as $training)
+                                            <tr>
+                                                <td>{{ $training->start_date }}</td>
+                                                <td>{{ $training->end_date }}</td>
+                                                <td>{{ $training->training_cost }}</td>
+                                                <td>{{ $training->description }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
