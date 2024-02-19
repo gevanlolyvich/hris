@@ -79,7 +79,7 @@
     </div>
 </div>
 
-@if ($permit->employee_id !== \Auth::user()->employee->id)
+@if ($leave->employee_id !== \Auth::user()->employee->id)
 <div class="modal-footer">
     <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $leave->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
     <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $leave->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>
