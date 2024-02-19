@@ -325,7 +325,7 @@
                                     <h5>{{__('Attendance')}}</h5>
                                 </div>
                                 <div class="col-2">
-                                    <a href="{{ route('report.monthlyAttendace.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+                                    <a href="{{ route('individualAttendance.export', ['id' => \Illuminate\Support\Facades\Crypt::encrypt($employee->id), 'url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
                                         data-bs-original-title="{{ __('Export Employee Attendance Data') }} Excel">
                                         <i class="ti ti-file-export"></i>
                                     </a>
