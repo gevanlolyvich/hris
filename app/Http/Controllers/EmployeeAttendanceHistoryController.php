@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\IndividualAttendanceMultipleExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
 use App\Models\Branch;
@@ -20,6 +21,7 @@ use App\Models\Overtime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeAttendanceHistoryController extends Controller
 {
@@ -276,5 +278,25 @@ class EmployeeAttendanceHistoryController extends Controller
         $trainings  = Training::where('employee', $empId)->get();
 
         return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit', 'transfers', 'trainings'));
+    }
+
+    public function exportIndividualAttendance(Request $request)
+    {
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                list($key, $value) = explode('=', $query);
+                $queryArray[$key] = $value;
+            }
+        }
+
+        $employee                   = Employee::find(Crypt::decrypt($request->id));
+        $queryArray['employee_id']  = $employee?->id;
+
+        $name = preg_replace('/\s+/', '', $employee?->name) . '_Attendance' . date('Y-m-d H:i:s');
+        $data = Excel::download(new IndividualAttendanceMultipleExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
     }
 }
