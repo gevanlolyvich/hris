@@ -57,7 +57,7 @@
     </div>
 </div>
 
-@if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
+@if ($permit->employee_id !== \Auth::user()->employee->id)
 <div class="modal-footer">
     <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $permit->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
     <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $permit->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>

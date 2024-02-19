@@ -30,7 +30,7 @@
                 <div class="designation_div">
                     <select class="form-control select2  designation_id" name="designation_id"
                          placeholder="Select Designation">
-                         
+                         <option value="" disabled selected>{{ __('Select Designation') }}</option>
                     </select>
                 </div>
             </div>

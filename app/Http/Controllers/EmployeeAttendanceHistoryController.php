@@ -7,6 +7,8 @@ use App\Models\AttendanceStatus;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Transfer;
+use App\Models\Training;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
@@ -269,6 +271,10 @@ class EmployeeAttendanceHistoryController extends Controller
             }
         }
 
-        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit'));
+        $transfers  = Transfer::where('employee_id', $empId)->where('transfer_date', '<=', date('Y-m-d'))->get();
+
+        $trainings  = Training::where('employee', $empId)->get();
+
+        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit', 'transfers', 'trainings'));
     }
 }
