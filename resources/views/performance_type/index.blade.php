@@ -31,16 +31,18 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th width="10px">ID</th>
+                                {{-- <th width="10px">ID</th> --}}
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Part Of') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($performance_types as $performance_type)
                                 <tr>
-                                    <td>{{ $performance_type->id }}</td>
+                                    {{-- <td>{{ $performance_type->id }}</td> --}}
                                     <td>{{ $performance_type->name }}</td>
+                                    <td>{{ $performance_type?->parent?->name ?? '-' }}</td>
                                     <td class="Action">
                                         <span>
                                             @can('Edit Performance Type')
