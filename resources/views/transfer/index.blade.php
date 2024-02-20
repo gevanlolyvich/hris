@@ -46,9 +46,9 @@
                             @foreach ($transfers as $transfer)
                                 <tr>
                                     @role(['company', 'hr'])
-                                        <td>{{ !empty($transfer->employee()) ? $transfer->employee()->name : '' }}</td>
+                                        <td>{{ $transfer->employee->name ?? '-' }}</td>
                                     @endrole
-                                    <td>{{ !empty($transfer->branch()) ? $transfer->branch()->name : '' }}</td>
+                                    <td>{{ $transfer->branch->name ?? '-' }}</td>
                                     <td>{{ $transfer->department->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($transfer->transfer_date) }}</td>
                                     <td>
