@@ -1838,5 +1838,17 @@
   "Holiday": "Libur",
   "Team Data": "Data Tim",
   "Personal Data": "Data Pribadi",
-  "Export Employee Attendance Data": "Ekpor Data Kehadiran Karyawan"
+  "Export Employee Attendance Data": "Ekpor Data Kehadiran Karyawan",
+  "Manage Level Designation": "Kelola Level Jabatan",
+  "Level Designation": "Level Jabatan",
+  "Create New Level Designation": "Buat Level Jabatan Baru",
+  "Level Detail": "Detail Level",
+  "Edit Level": "Ubah Level",
+  "Delete Level": "Hapus Level",
+  "Level Name": "Nama Level",
+  "Enter Level Name": "Masukkan Nama Level",
+  "Designations Already Have A Level": "Jabatan Sudah Memiliki Level",
+  "New Level Designation Successfully Created": "Level Jabatan Baru Berhasil Dibuat",
+  "Level Designation Succesfully Updated": "Level Jabatan Berhasil Dirubah",
+  "Level Designation Succesfully Deleted": "Level Jabatan Berhasil Dihapus"
 }

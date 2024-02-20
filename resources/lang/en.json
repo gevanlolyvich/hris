@@ -1839,5 +1839,17 @@
     "Holiday": "Holiday",
     "Team Data": "Team Data",
     "Personal Data": "Personal Data",
-    "Export Employee Attendance Data": "Export Employee Attendance Data"
+    "Export Employee Attendance Data": "Export Employee Attendance Data",
+    "Manage Level Designation": "Manage Level Designation",
+    "Level Designation": "Level Designation",
+    "Create New Level Designation": "Create New Level Designation",
+    "Level Detail": "Level Detail",
+    "Edit Level": "Edit Level",
+    "Delete Level": "Delete Level",
+    "Level Name": "Level Name",
+    "Enter Level Name": "Enter Level Name",
+    "Designations Already Have A Level": "Designations Already Have A Level",
+    "New Level Designation Successfully Created": "New Level Designation Successfully Created",
+    "Level Designation Succesfully Updated": "Level Designation Succesfully Updated",
+    "Level Designation Succesfully Deleted": "Level Designation Succesfully Deleted"
 }
