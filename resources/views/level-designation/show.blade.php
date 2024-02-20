@@ -1,0 +1,22 @@
+<div class="modal-body">
+    <div class="row">
+        <div class="col-12">
+            <table class="table modal-table" id="pc-dt-simple">
+                <tr role="row">
+                    <th>{{ __('Level Name') }}</th>
+                    <td>{{ !empty($level->name) ? $level->name : '' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Designation') }}</th>
+                    {{-- <td>{{ implode(' ; ', $designations) }}</td> --}}
+                    <td>
+                        @foreach ($designations as $designation)
+                            - {{$designation}}
+                            <br>
+                        @endforeach
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
