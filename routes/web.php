@@ -87,6 +87,7 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
+use App\Http\Controllers\LevelDesignationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1513,3 +1514,9 @@ Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'e
 Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNotClockIn'])->name('attendanceemployee.exportNotClockIn')->middleware(['auth', 'XSS']);
 Route::get('report/monthlyattendance/export', [ReportController::class, 'exportMonthlyAttendance'])->name('report.monthlyAttendace.export')->middleware(['auth', 'XSS']);
 Route::get('employeehistory/export', [EmployeeAttendanceHistoryController::class, 'exportIndividualAttendance'])->name('individualAttendance.export')->middleware(['auth', 'XSS']);
+Route::resource('level-designation', LevelDesignationController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);

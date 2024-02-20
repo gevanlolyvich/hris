@@ -178,7 +178,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             @endif
                         @endif
                         <li class="dash-item">
-                            <a class="dash-link"
+                            <a class="dash-link {{ request()->is('employeeattendancehistory*') ? 'active' : '' }}"
                                 href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                         </li>
                     </ul>
@@ -747,6 +747,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <li class="dash-item {{ request()->is('designation*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('designation.index') }}">{{ __('Designation') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Level')
+                                <li class="dash-item {{ request()->is('level-designation*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('level-designation.index') }}">{{ __('level') }}</a>
                                 </li>
                             @endcan
                             @if (Auth::user()->type=='company' || (Auth::user()->type=='hr' && !(Auth::user()->branch_id)))
