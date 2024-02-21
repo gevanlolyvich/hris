@@ -133,15 +133,11 @@ class PerformanceTypeController extends Controller
         if (\Auth::user()->can('Delete Performance Type')) {
             if (\Auth::user()->type != 'employee') {
                 $performance_Type = Performance_Type::findOrFail($id);
-                $competencies = Competencies::where('type', $performance_Type->id)->get();
-                if (count($competencies) == 0) {
 
-                    $performance_Type->delete();
+                $performance_Type->delete();
 
-                    Performance_Type::where('parent_id', $performance_Type->id)->update(['parent_id' => null]);
-                } else {
-                    return redirect()->route('performanceType.index')->with('error', __('This Performance Type has Competencies. Please remove the Competencies from this Performance Type.'));
-                }
+                Performance_Type::where('parent_id', $performance_Type->id)->update(['parent_id' => null]);
+                Competencies::where('performance_type_id', $performance_Type->id)->update(['performance_type_id' => null]);
 
                 return redirect()->route('performanceType.index')->with('success', __('Performance Type successfully deleted.'));
             } else {
