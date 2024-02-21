@@ -5,15 +5,14 @@
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
+                {{ Form::label('parent_id', __('Part Of'), ['class' => 'col-form-label']) }}
+                {{ Form::select('parent_id', $parents, null, ['class' => 'form-control select2','placeholder'=>__('Select Perfomace Type')]) }}
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
                 {{ Form::label('name', __('Name'), ['class' => 'form-label']) }}
-                <div class="form-icon-user">
-                    {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => __('Enter Performance Type Name')]) }}
-                </div>
-                @error('name')
-                    <span class="invalid-name" role="alert">
-                        <strong class="text-danger">{{ $message }}</strong>
-                    </span>
-                @enderror
+                {{ Form::text('name', null, ['class' => 'form-control', 'required' => 'required', 'placeholder' => __('Enter Performance Type Name')]) }}
             </div>
         </div>
     </div>

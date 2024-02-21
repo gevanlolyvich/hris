@@ -110,7 +110,8 @@
                                     'Permit Type',
                                     'Permit',
                                     'Request Attendance',
-                                    'Bank'
+                                    'Bank',
+                                    'Level'
                                 ];
                                 if (Auth::user()->type == 'super admin') {
                                     $modules[] = 'Language';

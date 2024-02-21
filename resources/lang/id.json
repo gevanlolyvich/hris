@@ -341,7 +341,7 @@
   "Create New Branch" : "Buat Cabang Baru",
   "Create New Company" : "Buat Perusahaan Baru",
   "Create New Company Policy" : "Buat Kebijakan Perusahaan Baru",
-  "Create New Competencies" : "Buat profil baru",
+  "Create New Competencies" : "Buat Kompetensi baru",
   "Create New Complaint" : "Buat Keluhan Baru",
   "Create New Coupon" : "Buat Coupon Baru",
   "Create New Custom Question" : "Buat Pertanyaan Baru",
@@ -1850,5 +1850,10 @@
   "Designations Already Have A Level": "Jabatan Sudah Memiliki Level",
   "New Level Designation Successfully Created": "Level Jabatan Baru Berhasil Dibuat",
   "Level Designation Succesfully Updated": "Level Jabatan Berhasil Dirubah",
-  "Level Designation Succesfully Deleted": "Level Jabatan Berhasil Dihapus"
+  "Level Designation Succesfully Deleted": "Level Jabatan Berhasil Dihapus",
+  "Part Of": "Bagian Dari",
+  "Select Performance Type": "Pilih Tipe Kinerja",
+  "Select Competencies Type": "Pilih Tipe Kompetensi",
+  "Grade": "Skor",
+  "Essay": "Esai"
 }
