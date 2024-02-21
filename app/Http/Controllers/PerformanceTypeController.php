@@ -15,7 +15,7 @@ class PerformanceTypeController extends Controller
      */
     public function index()
     {
-        $performance_types = Performance_Type::orderBy('id', 'ASC')->get();
+        $performance_types = Performance_Type::orderBy('name', 'ASC')->get();
         return view('performance_type.index', compact('performance_types'));
     }
 
@@ -27,7 +27,8 @@ class PerformanceTypeController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Performance Type')) {
-            return view('performance_type.create');
+            $parents = Performance_Type::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            return view('performance_type.create', compact('parents'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -53,9 +54,10 @@ class PerformanceTypeController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
-        $performance_type = new Performance_Type();
-        $performance_type->name = $request->name;
-        $performance_type->created_by = \Auth::user()->id;
+        $performance_type               = new Performance_Type();
+        $performance_type->name         = $request->name;
+        $performance_type->parent_id    = $request->parent_id;
+        $performance_type->created_by   = \Auth::user()->id;
         $performance_type->save();
 
         return redirect()->back()->with('success', 'Performance Type created successfully');
@@ -81,8 +83,9 @@ class PerformanceTypeController extends Controller
     public function edit($id)
     {
         if (\Auth::user()->can('Edit Performance Type')) {
-            $performance_type  = Performance_Type::find($id);
-            return view('performance_type.edit', compact('performance_type'));
+            $performance_type   = Performance_Type::find($id);
+            $parents            = Performance_Type::whereNot('id', $id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            return view('performance_type.edit', compact('performance_type', 'parents'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -111,10 +114,11 @@ class PerformanceTypeController extends Controller
         }
 
         $performance_type = Performance_Type::findOrFail($id);
-        $performance_type->name = $request->name;
+        $performance_type->name         = $request->name;
+        $performance_type->parent_id    = $request->parent_id;
         $performance_type->save();
 
-        return redirect()->back()->with('success', 'Performance Type updated successfully');
+        return redirect()->back()->with('success', __('Performance Type updated successfully'));
     }
 
     /**
@@ -129,13 +133,11 @@ class PerformanceTypeController extends Controller
         if (\Auth::user()->can('Delete Performance Type')) {
             if (\Auth::user()->type != 'employee') {
                 $performance_Type = Performance_Type::findOrFail($id);
-                $competencies = Competencies::where('type', $performance_Type->id)->get();
-                if (count($competencies) == 0) {
 
-                    $performance_Type->delete();
-                } else {
-                    return redirect()->route('performanceType.index')->with('error', __('This Performance Type has Competencies. Please remove the Competencies from this Performance Type.'));
-                }
+                $performance_Type->delete();
+
+                Performance_Type::where('parent_id', $performance_Type->id)->update(['parent_id' => null]);
+                Competencies::where('performance_type_id', $performance_Type->id)->update(['performance_type_id' => null]);
 
                 return redirect()->route('performanceType.index')->with('success', __('Performance Type successfully deleted.'));
             } else {

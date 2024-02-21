@@ -292,13 +292,26 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!--timesheet-->
 
                 <!-- performance-->
-                @if (Gate::check('Manage Indicator') || Gate::check('Manage Appraisal') || Gate::check('Manage Goal Tracking'))
+                @if (Gate::check('Manage Indicator') || Gate::check('Manage Appraisal') || Gate::check('Manage Goal Tracking') || Gate::check('Manage Performance Type') || Gate::check('Manage Competencies'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-3d-cube-sphere"></i></span><span
                                 class="dash-mtext">{{ __('Performance') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            @can('Manage Performance Type')
+                                <li
+                                    class="dash-item {{ request()->is('performanceType*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('performanceType.index') }}">{{ __('Performance Type') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Competencies')
+                                <li class="dash-item {{ request()->is('competencies*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('competencies.index') }}">{{ __('Competencies') }}</a>
+                                </li>
+                            @endcan
                             @can('Manage Indicator')
                                 <li class="dash-item">
                                     <a class="dash-link"
@@ -864,19 +877,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <li class="dash-item {{ request()->is('job-stage*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('job-stage.index') }}">{{ __('Job Stage') }}</a>
-                                </li>
-                            @endcan
-
-                            <li
-                                class="dash-item {{ request()->is('performanceType*') ? 'active' : '' }}">
-                                <a class="dash-link"
-                                    href="{{ route('performanceType.index') }}">{{ __('Performance Type') }}</a>
-                            </li>
-
-                            @can('Manage Competencies')
-                                <li class="dash-item {{ request()->is('competencies*') ? 'active' : '' }}">
-                                    <a class="dash-link"
-                                        href="{{ route('competencies.index') }}">{{ __('Competencies') }}</a>
                                 </li>
                             @endcan
 

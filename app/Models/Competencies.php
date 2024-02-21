@@ -10,16 +10,17 @@ class Competencies extends Model
         'name',
         'type',
         'created_by',
+        'performance_type_id',
+        'description'
     ];
 
-    // public static $types = [
-    //     'technical' => 'Technical',
-    //     'organizational' => 'Organizational',
-    //     'behavioural' => 'Behavioural',
-    // ];
+    public static $types = [
+        'Grade' => 'Grade',
+        'Essay' => 'Essay'
+    ];
 
-    public function getPerformance_type()
+    public function performance_type()
     {
-        return $this->hasOne('App\Models\Performance_Type', 'id', 'type');
+        return $this->belongsTo(Performance_Type::class, 'performance_type_id', 'id');
     }
 }
