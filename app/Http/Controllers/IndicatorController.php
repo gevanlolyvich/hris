@@ -8,8 +8,11 @@ use App\Models\Designation;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Indicator;
+use App\Models\IndicatorWeight;
+use App\Models\LevelDesignation;
 use App\Models\Performance_Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class IndicatorController extends Controller
 {
@@ -17,14 +20,7 @@ class IndicatorController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Indicator')) {
-            $user = \Auth::user();
-            if ($user->type == 'employee') {
-                $employee = Employee::where('user_id', $user->id)->first();
-
-                $indicators = Indicator::where('branch', $employee->branch_id)->where('department', $employee->department_id)->where('designation', $employee->designation_id)->get();
-            } else {
-                $indicators = !empty(\Auth::user()->branch_id) ? Indicator::where('branch', \Auth::user()->branch_id)->get() : Indicator::get();
-            }
+            $indicators = Indicator::get();
 
             return view('indicator.index', compact('indicators'));
         } else {
@@ -36,15 +32,9 @@ class IndicatorController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Indicator')) {
-            $performance_types = Performance_Type::get();
-            $brances     = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $departments->prepend('Select Department', '');
-
-            $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Department::get()->pluck('id')->toArray();
-            $degisnation = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
-
-            return view('indicator.create', compact('performance_types', 'brances', 'departments', 'degisnation'));
+            $performance_types  = Performance_Type::whereNull('parent_id')->get();
+            $levels             = LevelDesignation::get()->pluck('name', 'id');
+            return view('indicator.create', compact('performance_types', 'levels'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -57,9 +47,8 @@ class IndicatorController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'branch' => 'required',
-                    'department' => 'required',
-                    'designation' => 'required',
+                    'level' => 'required',
+                    'competencies' => 'required|array'
                 ]
             );
             if ($validator->fails()) {
@@ -68,52 +57,57 @@ class IndicatorController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-
-            $indicator              = new Indicator();
-            $indicator->branch      = $request->branch;
-            $indicator->department  = $request->department;
-            $indicator->designation = $request->designation;
-            $indicator->rating      = json_encode($request->rating, true);
-
-            if (\Auth::user()->type == 'company') {
-                $indicator->created_user = \Auth::user()->creatorId();
-            } else {
-                $indicator->created_user = \Auth::user()->id;
+            $levelDuplicate         = Indicator::where('level_id', $request->level)->first();
+            if ($levelDuplicate) {
+                return redirect()->back()->with('error', $levelDuplicate->level->name . ' ' . __('Level Already Has Indicator'));
             }
 
-            $indicator->created_by = \Auth::user()->creatorId();
+            $indicator                          = new Indicator();
+            $indicator->level_id                = $request->level;
+            $indicator->created_by              = \Auth::user()->id;
             $indicator->save();
+            
+            foreach ($request->competencies as $competency => $weight) {
+                $indicatorWeight                = new IndicatorWeight();
+                $indicatorWeight->competency_id = $competency;
+                $indicatorWeight->indicator_id  = $indicator->id;
+                $indicatorWeight->weight        = $weight;
+                $indicatorWeight->save();
+            }
 
             return redirect()->route('indicator.index')->with('success', __('Indicator successfully created.'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function show(Indicator $indicator)
     {
-        $ratings = json_decode($indicator->rating, true);
-        $performance_types = Performance_Type::get();
-        // $technicals      = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'technical')->get();
-        // $organizationals = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'organizational')->get();
-        // $behaviourals = Competencies::where('created_by', \Auth::user()->creatorId())->where('type', 'behavioural')->get();
+        $performance_types  = Performance_Type::whereNull('parent_id')->get();
+        $weights            = $indicator->weights->pluck('weight', 'competency_id');
 
-        return view('indicator.show', compact('indicator', 'ratings', 'performance_types'));
+        $processed_weights  = array();
+        foreach ($weights as $key => $value) {
+            $processed_weights["competency_{$key}"] = $value;
+        }
+
+        return view('indicator.show', compact('indicator', 'performance_types', 'processed_weights'));
     }
 
 
     public function edit(Indicator $indicator)
     {
         if (\Auth::user()->can('Edit Indicator')) {
-            $performance_types = Performance_Type::get();
-            $brances     = !empty(\Auth::user()->branch_id) ? Branch::where('id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $departments = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $departments->prepend('Select Department', '');
+            $levels             = LevelDesignation::get()->pluck('name', 'id');
+            $performance_types  = Performance_Type::whereNull('parent_id')->get();
+            $weights            = $indicator->weights->pluck('weight', 'competency_id');
 
-            $department_id  = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->get()->pluck('id')->toArray() : Department::get()->pluck('id')->toArray();
-            $degisnation = Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $processed_weights  = array();
+            foreach ($weights as $key => $value) {
+                $processed_weights["competency_{$key}"] = $value;
+            }
 
-            $ratings = json_decode($indicator->rating, true);
-
-            return view('indicator.edit', compact('performance_types', 'brances', 'departments', 'indicator', 'ratings', 'degisnation'));
+            return view('indicator.edit', compact('performance_types', 'indicator', 'processed_weights', 'levels'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -126,9 +120,8 @@ class IndicatorController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'branch' => 'required',
-                    'department' => 'required',
-                    'designation' => 'required',
+                    'level_id' => 'required',
+                    'competencies' => 'required|array'
                 ]
             );
             if ($validator->fails()) {
@@ -137,11 +130,27 @@ class IndicatorController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $indicator->branch      = $request->branch;
-            $indicator->department  = $request->department;
-            $indicator->designation = $request->designation;
-            $indicator->rating = json_encode($request->rating, true);
+            $levelDuplicate         = Indicator::whereNot('id', $indicator->id)->where('level_id', $request->level_id)->first();
+            if ($levelDuplicate) {
+                return redirect()->back()->with('error', $levelDuplicate->level->name . ' ' . __('Level Already Has Indicator'));
+            }
+
+            $indicator->level_id    = $request->level_id;
             $indicator->save();
+
+            foreach ($request->competencies as $competency => $weight) {
+                $indicator_weight                   = IndicatorWeight::where('indicator_id', $indicator->id)->where('competency_id', $competency)->first();
+                if ($indicator_weight) {
+                    $indicator_weight->weight       = $weight;
+                    $indicator_weight->save();
+                } else {
+                    $indicatorWeight                = new IndicatorWeight();
+                    $indicatorWeight->competency_id = $competency;
+                    $indicatorWeight->indicator_id  = $indicator->id;
+                    $indicatorWeight->weight        = $weight;
+                    $indicatorWeight->save();
+                }
+            }
 
             return redirect()->route('indicator.index')->with('success', __('Indicator successfully updated.'));
         }
@@ -151,13 +160,11 @@ class IndicatorController extends Controller
     public function destroy(Indicator $indicator)
     {
         if (\Auth::user()->can('Delete Indicator')) {
-            if ($indicator->created_by == \Auth::user()->creatorId()) {
-                $indicator->delete();
+            $indicator->delete();
 
-                return redirect()->route('indicator.index')->with('success', __('Indicator successfully deleted.'));
-            } else {
-                return redirect()->back()->with('error', __('Permission denied.'));
-            }
+            IndicatorWeight::where('indicator_id', $indicator->id)->delete();
+
+            return redirect()->back()->with('success', __('Indicator successfully deleted.'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

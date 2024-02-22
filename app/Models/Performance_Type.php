@@ -63,4 +63,9 @@ class Performance_Type extends Model
         
         return $result;
     }
+
+    public function competencies(): HasMany
+    {
+        return $this->hasMany(Competencies::class, 'performance_type_id');
+    }
 }
