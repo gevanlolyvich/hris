@@ -21,7 +21,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!-- ========   change your logo hear   ============ -->
                 <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
                     class="logo logo-lg" style="height: 75px;" />
-               
             </a>
         
         </div>
@@ -292,7 +291,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!--timesheet-->
 
                 <!-- performance-->
-                @if (Gate::check('Manage Indicator') || Gate::check('Manage Appraisal') || Gate::check('Manage Goal Tracking') || Gate::check('Manage Performance Type') || Gate::check('Manage Competencies'))
+                @if (Gate::check('Manage Indicator') || Gate::check('Manage Appraisal') || Gate::check('Manage Goal Tracking') || Gate::check('Manage Performance Type') || Gate::check('Manage Competencies') || Gate::check('Manage Goal'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-3d-cube-sphere"></i></span><span
@@ -319,6 +318,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
                             @endcan
 
+                            @can('Manage Goal')
+                                <li class="dash-item {{ request()->is('goal*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('goal.index') }}">{{ __('Goal') }}</a>
+                                </li>
+                            @endcan
+                            
                             @can('Manage Appraisal')
                                 <li class="dash-item">
                                     <a class="dash-link"
@@ -326,12 +332,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
                             @endcan
 
-                            @can('Manage Goal Tracking')
+
+                            {{-- @can('Manage Goal Tracking')
                                 <li class="dash-item">
                                     <a class="dash-link"
                                         href="{{ route('goaltracking.index') }}">{{ __('Goal Tracking') }}</a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                         </ul>
                     </li>
                 @endif

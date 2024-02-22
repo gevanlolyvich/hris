@@ -1858,5 +1858,19 @@
     "Grade": "Grade",
     "Essay": "Essay",
     "Select Level Designation": "Select Level Designation",
-    "Value Weight": "Value Weight"
+    "Value Weight": "Value Weight",
+    "Goal": "Goal",
+    "Manage Goal": "Manage Goal",
+    "Create New Goal": "Create New Goal",
+    "Main Goal": "Main Goal",
+    "Enter Target": "Enter Target",
+    "Edit Goal": "Edit Goal",
+    "Goal Successfully Created": "Goal Successfully Created",
+    "Goal Successfully Updated": "Goal Successfully Updated",
+    "Goal Successfully Deleted": "Goal Successfully Deleted",
+    "Goal Detail": "Goal Detail",
+    "Progress Percentage": "Progress Percentage",
+    "Enter Progress": "Enter Progress",
+    "Goal Progress": "Goal Progress",
+    "Goal Successfully Progressed": "Goal Successfully Progressed"
 }
