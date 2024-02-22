@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             NewSystemSetting::class,
             BankSeeder::class,
             NewFeatureBank::class,
-            NewFeatureLevel::class
+            NewFeatureLevel::class,
+            NewFeatureGoal::class
         ]);
     }
 }
