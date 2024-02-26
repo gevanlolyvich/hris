@@ -106,10 +106,11 @@ class BranchController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $branch->name = $request->name;
-                $branch->tolerance  = $request->tolerance;
-                $branch->latitude   = $request->latitude;
-                $branch->longitude  = $request->longitude;
+                $branch->name           = $request->name;
+                $branch->tolerance      = $request->tolerance;
+                $branch->parent_branch  = $request->parent_branch;
+                $branch->latitude       = $request->latitude;
+                $branch->longitude      = $request->longitude;
                 $branch->save();
 
                 return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));
