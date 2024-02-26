@@ -88,6 +88,7 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\LevelDesignationController;
+use App\Http\Controllers\GoalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1515,6 +1516,24 @@ Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNot
 Route::get('report/monthlyattendance/export', [ReportController::class, 'exportMonthlyAttendance'])->name('report.monthlyAttendace.export')->middleware(['auth', 'XSS']);
 Route::get('employeehistory/export', [EmployeeAttendanceHistoryController::class, 'exportIndividualAttendance'])->name('individualAttendance.export')->middleware(['auth', 'XSS']);
 Route::resource('level-designation', LevelDesignationController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('goal', GoalController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('goal/{id}/progress', [GoalController::class, 'getProgress'])->name('goal.getProgress')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('goal/{id}/progress', [GoalController::class, 'progress'])->name('goal.progress')->middleware(
     [
         'auth',
         'XSS',

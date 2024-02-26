@@ -7,14 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Performance_Type extends Model
+class Goal extends Model
 {
-    // use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
-        'name',
-        'created_by',
         'parent_id',
+        'employee_id',
+        'name',
+        'target',
+        'start_date',
+        'end_date',
+        'description',
+        'goal',
+        'progress',
     ];
 
     public function parent(): BelongsTo
@@ -31,7 +37,7 @@ class Performance_Type extends Model
     {
         $result = collect();
         $item   = $this->recursiveParent;
-        if ($item instanceof Performance_Type) {
+        if ($item instanceof Goal) {
             $result->push($item);
             $result = $result->merge($item->parentFlatten());
         }
@@ -55,7 +61,7 @@ class Performance_Type extends Model
         $childs     = $this->childRecursive;
         
         foreach ($childs as $child) {
-            if ($child instanceof Performance_Type) {
+            if ($child instanceof Goal) {
                 $result->push($child);
                 $result = $result->merge($child->childsFlatten());
             }
@@ -64,8 +70,8 @@ class Performance_Type extends Model
         return $result;
     }
 
-    public function competencies(): HasMany
+    public function employee()
     {
-        return $this->hasMany(Competencies::class, 'performance_type_id');
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }
