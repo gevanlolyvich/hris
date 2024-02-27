@@ -11,9 +11,9 @@
 
     </div>
     <div class="row">
-        @foreach ($performance_types as $performance_type)
+        @foreach ($performance_types as $index => $performance_type)
             <div class="col-md-12 mt-3">
-                <h5>{{ $performance_type->name }}</h5>
+                <h5>{{ \Auth::user()->romanize($index + 1)}}. {{ $performance_type->name }}</h5>
                 <hr class="mt-0">
             </div>
             @foreach ($performance_type->competencies as $comptency_0)
@@ -26,16 +26,16 @@
                     </div>
                 </div>
             @endforeach
-            @foreach ($performance_type->child as $type_1)
+            @foreach ($performance_type->child as $index_1 => $type_1)
                 <div class="col-12 mt-4 mx-1">
-                    <h6><i>{{ $type_1->name }}</i></h6>
+                    <h6><i>{{ $index_1 + 1 }}. {{ $type_1->name }}</i></h6>
                     <hr class="mt-0">
                 </div>
                 <br>
                 @if (count($type_1->child) > 0)
-                    @foreach ($type_1->child as $type_2)
+                    @foreach ($type_1->child as $index_2 => $type_2)
                         <div class="col-12 mt-4 mx-2">
-                            <h6><i>{{ $type_2->name }}</i></h6>
+                            <h6><i>{{ \Auth::user()->alpbatize($index_2) }}. {{ $type_2->name }}</i></h6>
                             <hr class="mt-0">
                         </div>
                         @if (count($type_2->child) > 0)
