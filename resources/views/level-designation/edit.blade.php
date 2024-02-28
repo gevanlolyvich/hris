@@ -9,31 +9,25 @@
             </div>
         </div>
 
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="form-group">
+                {{ Form::label('goal_weight', __('Goal Weight'), ['class' => 'col-form-label']) }}
+                {{ Form::number('goal_weight', old('goal_weight'), ['class' => 'form-control', 'placeholder' => __('Enter Goal Weight'), 'required' => 'required', 'step' => '1', 'min' => 1, 'max' => 100]) }}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="form-group">
+                {{ Form::label('competency_weight', __('Competency Weight'), ['class' => 'col-form-label']) }}
+                {{ Form::number('competency_weight', old('competency_weight'), ['class' => 'form-control', 'placeholder' => __('Enter Competency Weight'), 'required' => 'required', 'step' => '1', 'min' => 1, 'max' => 100]) }}
+            </div>
+        </div>
+
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
                 {{ Form::label('designation_id', __('Designation'), ['class' => 'col-form-label']) }}
                 {{ Form::select('designation_id', $designations, (!empty($level->designation_ids)) ? explode(",",$level->designation_ids) : [], ['class' => 'form-control select2 designation_id', 'data-placeholder' => __('Select Designation'), 'multiple' => true, 'name' => 'designation_id[]']) }}
             </div>
         </div>
-        {{-- <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('department_id', __('Department'), ['class' => 'col-form-label']) }}
-
-                <div class="department_div">
-                    {{ Form::select('department_id[]', $departments, (!empty($announcement->department_id)) ? explode(",",$announcement->department_id) :null, ['class' => 'form-control select2 department_id','multiple','id'=>'department_id', 'placeholder' => __('Select Department')]) }}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-
-                <div class="employee_div">
-                    {{ Form::select('employee_id[]', $employees, (!empty($announcement->employee_id)) ? explode(",",$announcement->employee_id) :null, ['class' => 'form-control select2 employee_id','multiple','id'=>'employee_id', 'placeholder' => __('Select Employee')]) }}
-                </div>
-            </div>
-        </div> --}}
     </div>
     <div class="modal-footer">
         <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">

@@ -86,6 +86,8 @@ class LevelDesignationController extends Controller
             $level                      = new LevelDesignation();
             $level->name                = $request->name;
             $level->designation_ids     = implode(',', $request->designation_id);
+            $level->goal_weight         = $request->goal_weight;
+            $level->competency_weight   = $request->competency_weight;
             $level->save();
 
             Designation::whereIn('id', $request->designation_id)->update(['level_id' => $level->id]);
@@ -148,12 +150,14 @@ class LevelDesignationController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $old_designation_ids                = explode(',', $levelDesignation->designation_ids);
-            $difference_to_delete               = array_diff($old_designation_ids, $request->designation_id);
-            $difference_to_create               = array_diff($request->designation_id, $old_designation_ids);
+            $old_designation_ids                    = explode(',', $levelDesignation->designation_ids);
+            $difference_to_delete                   = array_diff($old_designation_ids, $request->designation_id);
+            $difference_to_create                   = array_diff($request->designation_id, $old_designation_ids);
 
-            $levelDesignation->name             = $request->name;
-            $levelDesignation->designation_ids  = implode(',', $request->designation_id);
+            $levelDesignation->name                 = $request->name;
+            $levelDesignation->designation_ids      = implode(',', $request->designation_id);
+            $levelDesignation->goal_weight          = $request->goal_weight;
+            $levelDesignation->competency_weight    = $request->competency_weight;
             $levelDesignation->save();
 
             // update desgination level_id
