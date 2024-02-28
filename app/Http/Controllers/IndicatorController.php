@@ -68,11 +68,13 @@ class IndicatorController extends Controller
             $indicator->save();
             
             foreach ($request->competencies as $competency => $weight) {
-                $indicatorWeight                = new IndicatorWeight();
-                $indicatorWeight->competency_id = $competency;
-                $indicatorWeight->indicator_id  = $indicator->id;
-                $indicatorWeight->weight        = $weight;
-                $indicatorWeight->save();
+                if ($weight > 0) {
+                    $indicatorWeight                = new IndicatorWeight();
+                    $indicatorWeight->competency_id = $competency;
+                    $indicatorWeight->indicator_id  = $indicator->id;
+                    $indicatorWeight->weight        = $weight;
+                    $indicatorWeight->save();
+                }
             }
 
             return redirect()->route('indicator.index')->with('success', __('Indicator successfully created.'));
@@ -144,11 +146,13 @@ class IndicatorController extends Controller
                     $indicator_weight->weight       = $weight;
                     $indicator_weight->save();
                 } else {
-                    $indicatorWeight                = new IndicatorWeight();
-                    $indicatorWeight->competency_id = $competency;
-                    $indicatorWeight->indicator_id  = $indicator->id;
-                    $indicatorWeight->weight        = $weight;
-                    $indicatorWeight->save();
+                    if ($weight > 0) {
+                        $indicatorWeight                = new IndicatorWeight();
+                        $indicatorWeight->competency_id = $competency;
+                        $indicatorWeight->indicator_id  = $indicator->id;
+                        $indicatorWeight->weight        = $weight;
+                        $indicatorWeight->save();
+                    }
                 }
             }
 
