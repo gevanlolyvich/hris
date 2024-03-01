@@ -71,18 +71,20 @@
                                                     </a>
                                                 </div>
                                             @endcan
-                                            @can('Progress Goal')
-                                                <div class="action-btn bg-primary ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  goal-items-center" data-size="xl"
-                                                    data-url="{{ URL::to('goal/' . $goal->id . '/progress') }}"
-                                                        data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Goal Progress') }}"
-                                                        data-bs-original-title="{{ __('Progress') }}">
-                                                        <i class="ti ti-percentage text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                            @if (Gate::check('Edit Goal') || Gate::check('Delete Goal'))
+                                            @if (($goal->employee_id == \Auth::user()->employee?->id || \Auth::user()->type == 'company') || !$goal->employee_id)
+                                                @can('Progress Goal')
+                                                    <div class="action-btn bg-primary ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm  goal-items-center" data-size="xl"
+                                                        data-url="{{ URL::to('goal/' . $goal->id . '/progress') }}"
+                                                            data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                            title="" data-title="{{ __('Goal Progress') }}"
+                                                            data-bs-original-title="{{ __('Progress') }}">
+                                                            <i class="ti ti-percentage text-white"></i>
+                                                        </a>
+                                                    </div>
+                                                @endcan
+                                            @endif
+                                            @if ((Gate::check('Edit Goal') || Gate::check('Delete Goal')) && (($goal->employee_id == \Auth::user()->employee?->id || \Auth::user()->type == 'company') || !$goal->employee_id))
                                                 @can('Edit Goal')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="xl"

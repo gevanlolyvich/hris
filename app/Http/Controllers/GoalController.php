@@ -16,7 +16,24 @@ class GoalController extends Controller
         if(\Auth::user()->can('Manage Goal'))
         {
             if (\Auth::user()->type == 'employee') {
-                $goals      = Goal::where('employee_id', \Auth::user()?->employee?->id)->orWhere('employee_id', null)->get();
+                $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
+
+                $userId = \Auth::user()->employee->user_id;
+                $subordinates = \Auth::user()->employee->subordinatesFlatten();
+
+                // Check if employee managing other employee or not
+                if ($subordinates->isNotEmpty()) {
+                    $employees = collect();
+                    foreach ($subordinates as $subordinate) {
+                        $employees->push($subordinate->id);
+                    }
+
+                    $employees->push($emp);
+
+                    $goals = Goal::whereIn('employee_id', $employees)->orWhere('employee_id', null)->get();
+                } else {
+                    $goals = Goal::where('employee_id', $emp)->orWhere('employee_id', null)->get();
+                }
             } else {
                 $branch = Branch::find(\Auth::user()->branch_id);
                 $branch_id = collect();
