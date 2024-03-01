@@ -1539,3 +1539,21 @@ Route::patch('goal/{id}/progress', [GoalController::class, 'progress'])->name('g
         'XSS',
     ]
 );
+Route::post('appraisal/goal', [AppraisalController::class, 'getGoals'])->name('appraisal.getgoal')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/essay', [AppraisalController::class, 'getEssayCompetency'])->name('appraisal.getessay')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompetency'])->name('appraisal.getweightcompetency')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
