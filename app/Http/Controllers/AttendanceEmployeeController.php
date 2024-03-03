@@ -41,10 +41,8 @@ class AttendanceEmployeeController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $branch->prepend('All', '');
 
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $department->prepend('All', '');
 
             $is_valid = $request->query('is_valid', null);
 
@@ -107,6 +105,10 @@ class AttendanceEmployeeController extends Controller
 
                 if (!empty($request->department)) {
                     $employee->where('department_id', $request->department);
+                }
+
+                if (empty($request->department) && empty($request->branch)) {
+                    $department = [];
                 }
 
                 $employee = $employee?->orderby('name', 'asc')?->get()?->pluck('id');

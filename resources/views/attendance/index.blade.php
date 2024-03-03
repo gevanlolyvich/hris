@@ -133,6 +133,42 @@
             });
         });
     </script>
+
+    <script>
+        function getDepartment(branch_id) {
+            $.ajax({
+                url: '{{ route('department.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.department').empty();
+                    var emp_selct = ` <select class="form-control select2  department" name="department" id="choices-multiple"
+                                            placeholder="Select Department" >
+                                            </select>`;
+                    $('.department_div').html(emp_selct);
+
+                    $('.department').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.department').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
+        $(document).on('change', 'select[name=branch]', function() {
+            var branch_id = $(this).val();
+            getDepartment(branch_id);
+        });
+    </script>
 @endpush
 
 @section('action-button')
@@ -218,13 +254,15 @@
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
                                     <div class="btn-box">
                                         {{ Form::label('branch', __('Branch'),['class'=>'form-label'])}}
-                                        {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', array('class' => 'form-control select')) }}
+                                        {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', ['class' => 'form-control select2 branch', 'placeholder' => __('Select Branch')]) }}
                                     </div>
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
                                     <div class="btn-box">
                                         {{ Form::label('department', __('Department'),['class'=>'form-label'])}}
-                                        {{ Form::select('department', $department,isset($_GET['department'])?$_GET['department']:'', array('class' => 'form-control select')) }}
+                                        <div class="department_div btn-box">
+                                            {{ Form::select('department', !empty($department) ? $department : [], isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                        </div>
                                     </div>
                                 </div>
                             @endif
