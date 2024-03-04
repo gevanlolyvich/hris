@@ -13,7 +13,8 @@
 @push('script-page')
     <script>
         $(document).ready(function () {
-            let main_goals      = @json($main_goals);
+            let main_goals      = [];
+            let personal_goals  = [];
             let roman_chapter   = [];
 
             function convertToRoman(number) {
@@ -60,7 +61,10 @@
                     success: function(data) {
                         $('#goals').empty();
 
-                        if (data.length) {
+                        main_goals = data.main_goals;
+                        personal_goals = data.personal_goals;
+
+                        if (personal_goals.length) {
                             roman_chapter.push('Goal');
 
                             let chapter_number = convertToRoman(roman_chapter.length);
@@ -90,7 +94,7 @@
                                     </table>
                                 </div>
                             `);
-                            data.forEach((element, index) => {
+                            personal_goals.forEach((element, index) => {
                                 let elementId   = element?.id;
                                 // let goal_selct = `{{ Form::select('main_goal_id_${elementId}', [], null, ['class' => 'form-control select2 main_goal_id', 'id' => 'main_goal_id_${elementId}', 'style' => 'width: 600px;']) }}`;
                                 let goal_selct  = `<select class="form-control select2 main_goal_id" name="main_goal_id[${elementId}]" id="main_goal_id_${elementId}" style="width: 600px;"></select>`;
@@ -134,7 +138,7 @@
     
                                 $(`.main_goal_id`).append('<option value="" disabled selected>{{ __('Select Main Goal') }}</option>');
                                 $.each(main_goals, function(key, value) {
-                                    $(`.main_goal_id`).append('<option value="' + key + '">' + value +
+                                    $(`.main_goal_id`).append('<option value="' + value.id + '">' + value.name +
                                         '</option>');
                                 });
                                 

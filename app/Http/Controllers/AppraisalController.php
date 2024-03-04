@@ -330,7 +330,20 @@ class AppraisalController extends Controller
             }
             $employee           = $employee->pluck('name', 'id');
 
-            $main_goals         = Goal::whereNull('parent_id')->whereNull('employee_id')->select('name', 'id')->get()->pluck('name', 'id');
+            $selected_employee  = Employee::find($appraisal->employee_id);
+
+            $start_month        = $appraisal->start_month;
+            $end_month          = $appraisal->end_month;
+
+            $main_goals             = Goal::whereNull('parent_id')->whereNull('employee_id')->where('department_id', $selected_employee->department_id)
+                                    ->where(function ($query) use ($start_month, $end_month) {
+                                        $query->orWhereBetween('start_date', [$start_month, $end_month])
+                                            ->orWhereBetween('end_date', [$start_month, $end_month])
+                                            ->orWhere(function ($query) use ($start_month, $end_month) {
+                                                $query->where('start_date', '<=', $start_month)
+                                                        ->where('end_date', '>=', $end_month);
+                                            });
+                                    })->get()->pluck('name', 'id');
             $goals              = $appraisal->goal_evaluations;
 
             $competency_ratings = $appraisal->competency_ratings;
@@ -564,6 +577,7 @@ class AppraisalController extends Controller
     }
 
     public function getGoals(Request $request) {
+        $employee               = Employee::find($request->employee_id);
         $start_month            = date('Y-m-d', strtotime($request->start_month));
         $end_month              = date('Y-m-t', strtotime($request->end_month));
         $personal_goals         = Goal::where('employee_id', $request->employee_id)
@@ -575,7 +589,17 @@ class AppraisalController extends Controller
                                                         ->where('end_date', '>=', $end_month);
                                             });
                                     })->get();
-        return $personal_goals;
+                                    
+        $main_goals             = Goal::whereNull('parent_id')->whereNull('employee_id')->where('department_id', $employee->department_id)
+                                    ->where(function ($query) use ($start_month, $end_month) {
+                                        $query->orWhereBetween('start_date', [$start_month, $end_month])
+                                            ->orWhereBetween('end_date', [$start_month, $end_month])
+                                            ->orWhere(function ($query) use ($start_month, $end_month) {
+                                                $query->where('start_date', '<=', $start_month)
+                                                        ->where('end_date', '>=', $end_month);
+                                            });
+                                    })->get();
+        return ['personal_goals' => $personal_goals, 'main_goals' => $main_goals];
     }
 
     public function getMainGoals() {
