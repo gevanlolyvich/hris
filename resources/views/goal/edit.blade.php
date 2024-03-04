@@ -2,10 +2,26 @@
 {{ Form::model($goal, ['route' => ['goal.update', $goal->id], 'method' => 'PUT']) }}
 <div class="modal-body">
     <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1"> *</span>
+                {{ Form::select('branch_id', $branch, null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                {{ Form::label('department_id', __('Department'), ['class' => 'col-form-label']) }}
+                <div class="department_div">
+                    {{ Form::select('department_id', $department, null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department'), 'id' => 'department_id']) }}
+                </div>
+            </div>
+        </div>
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-                {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee')]) }}
+                <div class="employee_div">
+                    {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2  employee_id', 'placeholder' => __('Select Employee'), 'id' => 'employee_id']) }}
+                </div>
             </div>
         </div>
         <div class="col-12">

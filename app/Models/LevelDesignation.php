@@ -12,5 +12,7 @@ class LevelDesignation extends Model
     protected $fillable = [
         'name',
         'designation_ids',
+        'goal_weight',
+        'competency_weight',
     ];
 }

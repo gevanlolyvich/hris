@@ -21,6 +21,8 @@ class Goal extends Model
         'description',
         'goal',
         'progress',
+        'branch_id',
+        'department_id'
     ];
 
     public function parent(): BelongsTo
@@ -73,5 +75,15 @@ class Goal extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
 }

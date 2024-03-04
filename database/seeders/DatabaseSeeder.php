@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             BankSeeder::class,
             NewFeatureBank::class,
             NewFeatureLevel::class,
-            NewFeatureGoal::class
+            NewFeatureGoal::class,
+            ManagePerformanceTypeFeature::class,
         ]);
     }
 }

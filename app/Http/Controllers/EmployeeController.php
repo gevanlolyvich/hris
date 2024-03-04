@@ -653,6 +653,14 @@ class EmployeeController extends Controller
 
         return response()->json($employees);
     }
+
+    public function employeeDepartmentJson(Request $request)
+    {
+        $employees = Employee::where('is_active', 1)->where('department_id', $request->department_id)->orderby('name', 'asc')->get()->pluck('name', 'id')->toArray();
+
+        return response()->json($employees);
+    }
+
     public function directSpvJson(Request $request)
     {
         $employees = Employee::where('is_active', 1)

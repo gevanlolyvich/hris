@@ -229,6 +229,12 @@ Route::post('department/employee/json', [EmployeeController::class, 'departmentJ
         'XSS',
     ]
 );
+Route::post('employee/department/json', [EmployeeController::class, 'employeeDepartmentJson'])->name('employee.department.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])->name('branch.employee.json')->middleware(
     [
         'auth',
@@ -1534,6 +1540,24 @@ Route::get('goal/{id}/progress', [GoalController::class, 'getProgress'])->name('
     ]
 );
 Route::patch('goal/{id}/progress', [GoalController::class, 'progress'])->name('goal.progress')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/goal', [AppraisalController::class, 'getGoals'])->name('appraisal.getgoal')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/essay', [AppraisalController::class, 'getEssayCompetency'])->name('appraisal.getessay')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompetency'])->name('appraisal.getweightcompetency')->middleware(
     [
         'auth',
         'XSS',

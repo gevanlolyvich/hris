@@ -326,12 +326,11 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             @endcan
                             
                             @can('Manage Appraisal')
-                                <li class="dash-item">
+                                <li class="dash-item {{ Request::segment(1) == 'appraisal' ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('appraisal.index') }}">{{ __('Appraisal') }}</a>
                                 </li>
                             @endcan
-
 
                             {{-- @can('Manage Goal Tracking')
                                 <li class="dash-item">
