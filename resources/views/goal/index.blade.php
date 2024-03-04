@@ -27,9 +27,11 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th>{{ __('Branch') }}</th>
+                                <th>{{ __('Department') }}</th>
                                 <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Name') }}</th>
-                                <th>{{ __('Target') }}</th>
+                                {{-- <th>{{ __('Target') }}</th> --}}
                                 <th>{{ __('Start Date') }}</th>
                                 <th>{{ __('End Date') }}</th>
                                 <th width="20%">{{ __('Progress Percentage') }}</th>
@@ -41,9 +43,11 @@
                         <tbody>
                             @foreach ($goals as $goal)
                                 <tr>
+                                    <td>{{ $goal?->branch?->name ?? '-' }}</td>
+                                    <td>{{ $goal?->department?->name ?? '-' }}</td>
                                     <td>{{ $goal?->employee?->name ?? '-' }}</td>
                                     <td>{{ $goal->name }}</td>
-                                    <td>{{ $goal->target }}</td>
+                                    {{-- <td>{{ $goal->target }}</td> --}}
                                     <td>{{ \Auth::user()->dateFormat($goal->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($goal->end_date) }}</td>
                                     <td>
@@ -71,18 +75,20 @@
                                                     </a>
                                                 </div>
                                             @endcan
-                                            @can('Progress Goal')
-                                                <div class="action-btn bg-primary ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  goal-items-center" data-size="xl"
-                                                    data-url="{{ URL::to('goal/' . $goal->id . '/progress') }}"
-                                                        data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Goal Progress') }}"
-                                                        data-bs-original-title="{{ __('Progress') }}">
-                                                        <i class="ti ti-percentage text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                            @if (Gate::check('Edit Goal') || Gate::check('Delete Goal'))
+                                            @if (($goal->employee_id == \Auth::user()->employee?->id || \Auth::user()->type == 'company') || !$goal->employee_id)
+                                                @can('Progress Goal')
+                                                    <div class="action-btn bg-primary ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm  goal-items-center" data-size="xl"
+                                                        data-url="{{ URL::to('goal/' . $goal->id . '/progress') }}"
+                                                            data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                            title="" data-title="{{ __('Goal Progress') }}"
+                                                            data-bs-original-title="{{ __('Progress') }}">
+                                                            <i class="ti ti-percentage text-white"></i>
+                                                        </a>
+                                                    </div>
+                                                @endcan
+                                            @endif
+                                            @if ((Gate::check('Edit Goal') || Gate::check('Delete Goal')) && (($goal->employee_id == \Auth::user()->employee?->id || \Auth::user()->type == 'company') || !$goal->employee_id))
                                                 @can('Edit Goal')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="xl"
@@ -117,3 +123,92 @@
         </div>
     </div>
 @endsection
+
+@push('script-page')
+    <script>
+        $(document).ready(function () {
+            function getDepartment(branch_id) {
+                $.ajax({
+                    url: '{{ route('department.employee.json') }}',
+                    type: 'POST',
+                    data: {
+                        "branch_id": branch_id,
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    success: function(data) {
+                        // dept
+                        $('.department_id').empty();
+                        var dept_select = ` <select class="form-control select2  department_id" name="department_id" id="department_id"
+                                                placeholder="Select Department" >
+                                                </select>`;
+                        $('.department_div').html(dept_select);
+
+                        $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.department_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#department_id', {
+                            removeItemButton: true,
+                        });
+
+                        // employee
+                        $('.employee_id').empty();
+                        var emp_selct = ` <select class="form-control select2  employee_id" name="employee_id" id="employee_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.employee_div').html(emp_selct);
+
+                        $('.employee_id').append('<option value="" disabled selected>{{ __('Select Employee') }}</option>');
+                        new Choices('#employee_id', {
+                            removeItemButton: true,
+                        });
+                    }
+                });
+            }
+
+            function getEmployee(department_id) {
+                $.ajax({
+                    url: '{{ route('employee.department.json') }}',
+                    type: 'POST',
+                    data: {
+                        "department_id": department_id,
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    success: function(data) {
+                        $('.employee_id').empty();
+                        var emp_selct = ` <select class="form-control select2  employee_id" name="employee_id" id="employee_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.employee_div').html(emp_selct);
+
+                        $('.employee_id').append('<option value="" disabled selected>{{ __('Select Employee') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.employee_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#employee_id', {
+                            removeItemButton: true,
+                        });
+                    }
+                });
+            }
+
+            $('body').on('change', 'select[name=branch_id]', function() {
+                let branch_id = $(this).val();
+
+                if (branch_id) {
+                    getDepartment(branch_id);
+                    $('.employee_id').empty();
+                }
+            });
+            $('body').on('change', 'select[name=department_id]', function() {
+                let department_id = $(this).val();
+
+                if (department_id) {
+                    getEmployee(department_id);
+                }
+            });
+        });
+    </script>
+@endpush

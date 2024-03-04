@@ -46,10 +46,8 @@ class EmployeeAttendanceHistoryController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $branch->prepend('All', '');
 
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $department->prepend('All', '');
 
             $employees = null;
 
@@ -87,6 +85,11 @@ class EmployeeAttendanceHistoryController extends Controller
 
                 $employees = $employee->get();
             }
+
+            if (empty($request->department) && empty($request->branch)) {
+                $department = [];
+            }
+            
             return view('employeeattendancehistory.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

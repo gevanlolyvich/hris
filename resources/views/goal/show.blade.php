@@ -3,6 +3,14 @@
         <div class="col-12">
             <table class="table modal-table" id="pc-dt-simple">
                 <tr role="row">
+                    <th>{{ __('Branch') }}</th>
+                    <td>{{ $goal?->branch?->name ?? '-'}}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Department') }}</th>
+                    <td>{{ $goal?->department?->name ?? '-'}}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Employee') }}</th>
                     <td>{{ $goal?->employee?->name ?? '-'}}</td>
                 </tr>
@@ -27,18 +35,18 @@
                     <td>
                         {{ Form::textarea('target', $goal->target, ['class' => 'form-control' ,'rows'=>'3', 'disabled' => 'disabled']) }}
                     </td>
-                    {{-- <td>{{ $goal->target }}</td> --}}
                 </tr>
                 <tr>
                     <th>{{ __('Description') }}</th>
                     <td>
                         {{ Form::textarea('description', $goal->description, ['class' => 'form-control' ,'rows'=>'3', 'disabled' => 'disabled']) }}
                     </td>
-                    {{-- <td>{{ $goal->description }}</td> --}}
                 </tr>
                 <tr>
                     <th>{{ __('Progress') }}</th>
-                    <td>{{ $goal->goal ?? '-' }}</td>
+                    <td>
+                        {{ Form::textarea('goal', $goal->goal, ['class' => 'form-control' ,'rows'=>'5', 'disabled' => 'disabled']) }}
+                    </td>
                 </tr>
                 <tr>
                     <th>{{ __('Progress Percentage') }}</th>
@@ -55,18 +63,6 @@
                         </div>
                     </td>
                 </tr>
-                {{-- <tr>
-                    <th>{{ __() }}</th>
-                    <td>{{ $goal }}</td>
-                </tr>
-                <tr>
-                    <th>{{ __() }}</th>
-                    <td>{{ $goal }}</td>
-                </tr>
-                <tr>
-                    <th>{{ __() }}</th>
-                    <td>{{ $goal }}</td>
-                </tr> --}}
             </table>
         </div>
     </div>

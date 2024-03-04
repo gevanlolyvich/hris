@@ -28,6 +28,8 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Goal Weight') }}</th>
+                                <th>{{ __('Competency Weight') }}</th>
                                 <th>{{ __('Detail') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -36,11 +38,13 @@
                             @foreach ($levels as $level)
                                 <tr>
                                     <td>{{ $level?->name ?? '-' }}</td>
+                                    <td>{{ $level?->goal_weight ?? 0 }}</td>
+                                    <td>{{ $level?->competency_weight ?? 0 }}</td>
                                     <td>
                                         <span>
                                             @can('Manage Level')
                                                 <div class="action-btn bg-warning ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="xl"
                                                         data-url="{{ route('level-designation.show', $level->id) }}"
                                                         data-ajax-popup="true" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Level Detail') }}"

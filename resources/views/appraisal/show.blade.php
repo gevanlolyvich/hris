@@ -1,114 +1,179 @@
+@extends('layouts.admin')
 
-<div class="modal-body">
-    <div class="row py-4">
-        <div class="col-md-12">
-            <div class="info text-sm">
-                <strong>{{ __('Branch') }} : </strong>
-                <span>{{ !empty($appraisal->branches) ? $appraisal->branches->name : '' }}</span>
+@section('page-title')
+   {{ __('Appraisal Detail') }}
+@endsection
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ url('appraisal') }}">{{ __('Appraisal') }}</a></li>
+    <li class="breadcrumb-item">{{ __('Appraisal Detail') }}</li>
+@endsection
+
+@push('script-page')
+@endpush
+
+@section('content')
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
+                        {{ Form::select('employee_id', $employee, $appraisal->employee_id, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Employee'), 'id' => 'employee_id', 'disabled' => 'disabled']) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ Form::label('start_month', __('Select Start Month'), ['class' => 'col-form-label']) }}
+                        {{ Form::month('start_month', date('Y-m', strtotime($appraisal->start_month)), ['class' => 'form-control ','autocomplete'=>'off' ,'required' => 'required', 'disabled' => 'disabled']) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ Form::label('end_month', __('Select End Month'), ['class' => 'col-form-label']) }}
+                        {{ Form::month('end_month', date('Y-m', strtotime($appraisal->end_month)), ['class' => 'form-control ','autocomplete'=>'off' ,'required' => 'required', 'disabled' => 'disabled']) }}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6 mt-3">
-            <div class="info text-sm font-style">
-                <strong>{{ __('Employee') }} : </strong>
-                <span>{{ !empty($appraisal->employees) ? $appraisal->employees->name : '' }}</span>
-            </div>
-        </div>
-        <div class="col-md-6 mt-3">
-            <div class="info text-sm font-style">
-                <strong>{{ __('Appraisal Date') }} : </strong>
-                <span>{{ $appraisal->appraisal_date }}</span>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-      
-
- <div class="col-5  text-end" style="margin-left: 51px;">
-    <h5>{{__('Indicator')}}</h5>
-</div>
-<div class="col-4  text-end">
-   <h5>{{__('Appraisal')}}</h5>
-</div>
-@foreach ($performance_types as $performance_type)
-<div class="col-md-12 mt-3">
-   <h6>{{ $performance_type->name }}</h6>
-   <hr class="mt-0">
-</div>
-
-@foreach ($performance_type->types as $types)
-   <div class="col-4">
-       {{ $types->name }}
-   </div>
-   <div class="col-4">
-           <fieldset id='demo' class="rate">
-               <input class="stars" type="radio" id="technical-5*-{{ $types->id }}"
-                   name="ratings[{{ $types->id }}]" value="5"
-                   {{ isset($ratings[$types->id]) && $ratings[$types->id] == 5 ? 'checked' : '' }} disabled>
-               <label class="full" for="technical-5*-{{ $types->id }}"
-                   title="Awesome - 5 stars"></label>
-               <input class="stars" type="radio" id="technical-4*-{{ $types->id }}"
-                   name="ratings[{{ $types->id }}]" value="4"
-                   {{ isset($ratings[$types->id]) && $ratings[$types->id] == 4 ? 'checked' : '' }} disabled>
-               <label class="full" for="technical-4*-{{ $types->id }}"
-                   title="Pretty good - 4 stars"></label>
-               <input class="stars" type="radio" id="technical-3*-{{ $types->id }}"
-                   name="ratings[{{ $types->id }}]" value="3"
-                   {{ isset($ratings[$types->id]) && $ratings[$types->id] == 3 ? 'checked' : '' }} disabled>
-               <label class="full" for="technical-3*-{{ $types->id }}"
-                   title="Meh - 3 stars"></label>
-               <input class="stars" type="radio" id="technical-2*-{{ $types->id }}"
-                   name="ratings[{{ $types->id }}]" value="2"
-                   {{ isset($ratings[$types->id]) && $ratings[$types->id] == 2 ? 'checked' : '' }} disabled>
-               <label class="full" for="technical-2*-{{ $types->id }}"
-                   title="Kinda bad - 2 stars"></label>
-               <input class="stars" type="radio" id="technical-1*-{{ $types->id }}"
-                   name="ratings[{{ $types->id }}]" value="1"
-                   {{ isset($ratings[$types->id]) && $ratings[$types->id] == 1 ? 'checked' : '' }} disabled>
-               <label class="full" for="technical-1*-{{ $types->id }}"
-                   title="Sucks big time - 1 star"></label>
-           </fieldset>
-   </div>
-   <div class="col-4">
-       <fieldset id='demo1' class="rate">
-           <input class="stars" type="radio" id="technical-5-{{ $types->id }}"
-               name="rating[{{ $types->id }}]" value="5"
-               {{ isset($rating[$types->id]) && $rating[$types->id] == 5 ? 'checked' : '' }} disabled>
-           <label class="full" for="technical-5-{{ $types->id }}"
-               title="Awesome - 5 stars"></label>
-           <input class="stars" type="radio" id="technical-4-{{ $types->id }}"
-               name="rating[{{ $types->id }}]" value="4"
-               {{ isset($rating[$types->id]) && $rating[$types->id] == 4 ? 'checked' : '' }} disabled>
-           <label class="full" for="technical-4-{{ $types->id }}"
-               title="Pretty good - 4 stars"></label>
-           <input class="stars" type="radio" id="technical-3-{{ $types->id }}"
-               name="rating[{{ $types->id }}]" value="3"
-               {{ isset($rating[$types->id]) && $rating[$types->id] == 3 ? 'checked' : '' }} disabled>
-           <label class="full" for="technical-3-{{ $types->id }}"
-               title="Meh - 3 stars"></label>
-           <input class="stars" type="radio" id="technical-2-{{ $types->id }}"
-               name="rating[{{ $types->id }}]" value="2"
-               {{ isset($rating[$types->id]) && $rating[$types->id] == 2 ? 'checked' : '' }} disabled>
-           <label class="full" for="technical-2-{{ $types->id }}"
-               title="Kinda bad - 2 stars"></label>
-           <input class="stars" type="radio" id="technical-1-{{ $types->id }}"
-               name="rating[{{ $types->id }}]" value="1"
-               {{ isset($rating[$types->id]) && $rating[$types->id] == 1 ? 'checked' : '' }} disabled>
-           <label class="full" for="technical-1-{{ $types->id }}"
-               title="Sucks big time - 1 star"></label>
-       </fieldset>
-</div>
-
-@endforeach
-@endforeach
-    </div>
-    <div class="row">
-        <div class="col-md-12">
             <hr>
-            <h6>{{ __('Remark') }}</h6>
-        </div>
-        <div class="col-md-12 mt-3">
-            <p class="text-sm">{{ $appraisal->remark }}</p>
+            <hr>
+            @php
+                $sub_title = 0;
+            @endphp
+            @if (count($goals) > 0)
+                @php
+                    $sub_title += 1;
+                @endphp
+
+                <div id="goals">
+                    <i><h5>{{\Auth::user()->romanize($sub_title)}}. {{ __("Goal")}} :</h5></i>
+                    <div class="table-responsive mt-3">
+                        <table class="table" id="goal-table">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('No') }}</th>
+                                    <th>{{ __('Main Goal') }}</th>
+                                    <th>{{ __('Detail') }}</th>
+                                    <th>{{ __('Evaluation') }}</th>
+                                    <th>{{ __('Weight') }}</th>
+                                    <th>{{ __('Rating') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="goal_data">
+                                @foreach ($goals as $index => $goal)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td id='main_goal_select_{{$goal->id}}' style="width: 600px;">
+                                            {{ Form::select("main_goal_id[$goal->id]", $main_goals, $goal?->goal?->parent?->id, ['class' => 'form-control select2 main_goal_id', 'id' => "main_goal_id_$goal->id", 'required' => 'required', 'disabled' => 'disabled']) }}
+                                        </td>
+                                        @php
+                                            echo $goal?->goal?->parent?->id ? 'yes' : 'no';
+                                        @endphp
+                                        <td id="goal_detail_{{$goal->id}}" class='text-center'>
+                                            <div class="action-btn bg-warning ms-2">
+                                                <a href="#" class="mx-3 btn btn-sm  goal-items-center" data-size="lg"
+                                                    data-url="{{ route('goal.show', $goal->goal_id) }}"
+                                                    data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Goal Detail') }} - {{$index + 1}}"
+                                                    data-bs-original-title="{{ __('View') }}">
+                                                    <i class="ti ti-eye text-white"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td id="goal_eval_{{$goal->id}}">
+                                            {{ Form::textarea("goal_evaluation[$goal->id]", $goal->evaluation, ['class' => 'form-control', 'placeholder' => __('Enter Evaluation'), 'required' => 'required', 'rows' => '5', 'style' => 'width: 250px;', 'disabled' => 'disabled']) }}
+                                        </td>
+                                        <td id="goal_weight_{{$goal->id}}">
+                                            {{ Form::number("goal_weight[$goal->id]", $goal->weight, ['class' => 'form-control', 'placeholder' => __('Enter weight'), 'required' => 'required', 'step' => '1', 'min' => 1, 'max' => 100, 'style' => 'width: 100px;', 'disabled' => 'disabled']) }}
+                                        </td>
+                                        <td id="goal_rating_{{$goal->id}}">
+                                            {{ Form::number("goal_rating[$goal->id]", $goal->rating, ['class' => 'form-control', 'placeholder' => __('Enter Rating'), 'required' => 'required', 'step' => '1', 'min' => 1, 'max' => 5, 'style' => 'width: 100px;', 'disabled' => 'disabled']) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+            <hr>
+            <hr>
+            @if (count($performances) > 0)
+                <div id="weights">
+                    @php
+                        $sub_title += 1;
+                    @endphp
+
+                    <i><h5>{{\Auth::user()->romanize($sub_title)}}. {{ __('Competencies')}} :</h5></i>
+                    <br>
+                    @php
+                        $performance_index = 0;
+                    @endphp
+                    @foreach ($performances as $performance_id => $performance)
+                        @php
+                            $performance_index += 1;
+                        @endphp
+                        <div class='row'>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <h6>{{$performance_index}}. <u>{{$performance['name']}}</u></h6>
+                                    <div id='performance_{{$performance_id}}' class='mx-4'>
+                                        @php
+                                            $order = 0;
+                                        @endphp
+                                        @foreach ($performance['competencies'] as $competency)
+                                        @php
+                                            $rating_id  = $competency['rating_id'];
+                                            $order      += 1;
+                                        @endphp
+                                        {{ Form::label("compentecy[$rating_id]", "$performance_index.$order. {$competency['name']}", ['class' => 'col-form-label']) }}
+                                            <p><small>{{$competency['description']}}</small></p>
+                                            <div class='row mb-3'>
+                                                {{ Form::hidden("competency_weight[$rating_id]", "{$competency['weight']}") }}
+                                                <div class='col-8'>
+                                                    {{ Form::textarea("competency_evaluation[$rating_id]", "{$competency['evaluation']}", ['class' => 'form-control', 'placeholder' => __('Enter Evaluation'), 'rows' => '2', 'disabled' => 'disabled']) }}
+                                                </div>
+                                                <div class='col-2'>
+                                                    {{ Form::text('weight',  __('Weight') . ": {$competency['weight']}", ['class' => 'form-control', 'disabled' => 'disabled']) }}
+                                                </div>
+                                                <div class='col-2'>
+                                                    {{ Form::number("competency_rating[$rating_id]", "{$competency['rating']}", ['class' => 'form-control', 'placeholder' => __('Enter Rating'), 'required' => 'required', 'step' => '1', 'min' => 1, 'max' => 5, 'disabled' => 'disabled']) }}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    @endforeach
+                </div>
+            @endif
+            <hr>
+            <hr>
+            <div id="essays">
+                @php
+                    $sub_title += 1;
+                @endphp
+
+                <i><h5>{{\Auth::user()->romanize($sub_title)}}. {{ __("Essay")}} :</h5></i>
+                @foreach ($essay_competency as $index => $essay)
+                    @php
+                        $index += 1;
+                    @endphp
+                    <div class='row'>
+                        <div class="col-12">
+                            <div class="form-group">
+                                {{ Form::label("essay[$essay->id]", "$index. {$essay->competency->name}", ['class' => 'col-form-label']) }}
+                                <p><small>{{$essay->competency->description}}</small></p>
+                                {{ Form::textarea("essay[$essay->id]", $essay->evaluation, ['class' => 'form-control', 'rows' => '2', 'disabled' => 'disabled']) }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
+@endsection
 
-</div>
