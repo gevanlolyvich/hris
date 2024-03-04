@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Goal;
 use Illuminate\Http\Request;
@@ -62,7 +63,19 @@ class GoalController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Goal')) {
+            $branch_id = collect();
             if (\Auth::user()->type == 'employee') {
+                $branch = Branch::find(\Auth::user()->employee?->branch_id);
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
                 $employees = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
             } else {
                 $branch = Branch::find(\Auth::user()->branch_id);
@@ -81,7 +94,9 @@ class GoalController extends Controller
                 $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             }
 
-            return view('goal.create', compact('employees'));
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+
+            return view('goal.create', compact('employees', 'branch'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -93,6 +108,7 @@ class GoalController extends Controller
         {
             $validator = \Validator::make(
                 $request->all(), [
+                                   'branch_id'       => 'required',
                                    'name'       => 'required',
                                    'start_date' => 'required|date',
                                    'end_date'   => 'required|date|after_or_equal:start_date',
@@ -107,6 +123,8 @@ class GoalController extends Controller
             }
 
             $goal               = new Goal();
+            $goal->branch_id    = $request->branch_id;
+            $goal->department_id= $request->department_id;
             $goal->name         = $request->name;
             $goal->employee_id  = $request->employee_id;
             $goal->start_date   = $request->start_date;
@@ -133,8 +151,21 @@ class GoalController extends Controller
     {
         if(\Auth::user()->can('Edit Goal'))
         {
+            $branch_id = collect();
             if (\Auth::user()->type == 'employee') {
-                $employees = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $branch = Branch::find(\Auth::user()->employee?->branch_id);
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+
+                $children = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+
+                $employees = Employee::where('is_active', 1)->where('user_id', \Auth::user()->id)->orderby('name', 'asc');
             } else {
                 $branch = Branch::find(\Auth::user()->branch_id);
                 $branch_id = collect();
@@ -149,9 +180,17 @@ class GoalController extends Controller
                     }
                 }
 
-                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc') : Employee::where('is_active', 1)->orderby('name', 'asc');
             }
-            return view('goal.edit', compact('goal', 'employees'));
+
+            $branch     = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $department = Department::find($goal->department_id)->pluck('name', 'id');
+            if ($goal->department_id) {
+                $employees  = $employees->where('department_id', $goal->department_id)->get()->pluck('name', 'id');
+            } else {
+                $employees  = $employees->get()->pluck('name', 'id');
+            }
+            return view('goal.edit', compact('goal', 'employees', 'branch', 'department'));
         }
         else
         {

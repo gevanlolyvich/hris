@@ -229,6 +229,12 @@ Route::post('department/employee/json', [EmployeeController::class, 'departmentJ
         'XSS',
     ]
 );
+Route::post('employee/department/json', [EmployeeController::class, 'employeeDepartmentJson'])->name('employee.department.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::post('branch/employee/json', [EmployeeController::class, 'employeeJson'])->name('branch.employee.json')->middleware(
     [
         'auth',

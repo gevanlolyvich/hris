@@ -27,9 +27,11 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
+                                <th>{{ __('Branch') }}</th>
+                                <th>{{ __('Department') }}</th>
                                 <th>{{ __('Employee') }}</th>
                                 <th>{{ __('Name') }}</th>
-                                <th>{{ __('Target') }}</th>
+                                {{-- <th>{{ __('Target') }}</th> --}}
                                 <th>{{ __('Start Date') }}</th>
                                 <th>{{ __('End Date') }}</th>
                                 <th width="20%">{{ __('Progress Percentage') }}</th>
@@ -41,9 +43,11 @@
                         <tbody>
                             @foreach ($goals as $goal)
                                 <tr>
+                                    <td>{{ $goal?->branch?->name ?? '-' }}</td>
+                                    <td>{{ $goal?->department?->name ?? '-' }}</td>
                                     <td>{{ $goal?->employee?->name ?? '-' }}</td>
                                     <td>{{ $goal->name }}</td>
-                                    <td>{{ $goal->target }}</td>
+                                    {{-- <td>{{ $goal->target }}</td> --}}
                                     <td>{{ \Auth::user()->dateFormat($goal->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($goal->end_date) }}</td>
                                     <td>
@@ -119,3 +123,92 @@
         </div>
     </div>
 @endsection
+
+@push('script-page')
+    <script>
+        $(document).ready(function () {
+            function getDepartment(branch_id) {
+                $.ajax({
+                    url: '{{ route('department.employee.json') }}',
+                    type: 'POST',
+                    data: {
+                        "branch_id": branch_id,
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    success: function(data) {
+                        // dept
+                        $('.department_id').empty();
+                        var dept_select = ` <select class="form-control select2  department_id" name="department_id" id="department_id"
+                                                placeholder="Select Department" >
+                                                </select>`;
+                        $('.department_div').html(dept_select);
+
+                        $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.department_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#department_id', {
+                            removeItemButton: true,
+                        });
+
+                        // employee
+                        $('.employee_id').empty();
+                        var emp_selct = ` <select class="form-control select2  employee_id" name="employee_id" id="employee_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.employee_div').html(emp_selct);
+
+                        $('.employee_id').append('<option value="" disabled selected>{{ __('Select Employee') }}</option>');
+                        new Choices('#employee_id', {
+                            removeItemButton: true,
+                        });
+                    }
+                });
+            }
+
+            function getEmployee(department_id) {
+                $.ajax({
+                    url: '{{ route('employee.department.json') }}',
+                    type: 'POST',
+                    data: {
+                        "department_id": department_id,
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    success: function(data) {
+                        $('.employee_id').empty();
+                        var emp_selct = ` <select class="form-control select2  employee_id" name="employee_id" id="employee_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.employee_div').html(emp_selct);
+
+                        $('.employee_id').append('<option value="" disabled selected>{{ __('Select Employee') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.employee_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#employee_id', {
+                            removeItemButton: true,
+                        });
+                    }
+                });
+            }
+
+            $('body').on('change', 'select[name=branch_id]', function() {
+                let branch_id = $(this).val();
+
+                if (branch_id) {
+                    getDepartment(branch_id);
+                    $('.employee_id').empty();
+                }
+            });
+            $('body').on('change', 'select[name=department_id]', function() {
+                let department_id = $(this).val();
+
+                if (department_id) {
+                    getEmployee(department_id);
+                }
+            });
+        });
+    </script>
+@endpush
