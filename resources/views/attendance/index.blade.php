@@ -314,9 +314,6 @@
                                         <th>{{ __('Early Leaving') }}</th>
                                         <th>{{ __('Work Hours') }}</th>
                                         <th>{{ __('Validation') }}</th>
-                                        @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')))
-                                            <th width="200px">{{ __('Action') }}</th>
-                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -415,36 +412,6 @@
                                                         @endif
                                                     </span>
                                                 </td>
-                                                @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                                    <td class="Action">
-                                                        <span>
-                                                            @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                                                {{-- @endcan --}}
-                                                                @can('Edit Attendance')
-                                                                    <div class="action-btn bg-warning ms-2">
-                                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                                            data-url="{{ URL::to('attendanceemployee/' . $attendance->id . '/edit') }}"
-                                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                            title="" data-title="{{ __('Edit Attendance') }}"
-                                                                            data-bs-original-title="{{ __('Edit') }}">
-                                                                            <i class="ti ti-pencil text-white"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                @endcan
-                                                                @can('Delete Attendance')
-                                                                    <div class="action-btn bg-danger ms-2">
-                                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['attendanceemployee.destroy', $attendance->id], 'id' => 'delete-form-' . $attendance->id]) !!}
-                                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                                            aria-label="Delete"><i
-                                                                                class="ti ti-trash text-white text-white"></i></a>
-                                                                        </form>
-                                                                    </div>
-                                                                @endcan
-                                                            @endif
-                                                        </span>
-                                                    </td>
-                                                @endif
                                             </tr>
                                         @endif
                                     @endforeach
