@@ -1898,5 +1898,9 @@
     "Rating Must Be Between 1 And 5": "Rating Must Be Between 1 And 5",
     "Time Period": "Time Period",
     "Goal Name": "Goal Name",
-    "Total Late": "Total Late"
+    "Total Late": "Total Late",
+    "Can Do Self Assessment": "Can Do Self Assessment",
+    "Yes": "Yes",
+    "No": "No",
+    "Self Assessment": "Self Assessment"
 }

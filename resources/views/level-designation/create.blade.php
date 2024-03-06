@@ -3,10 +3,16 @@
     <div class="modal-body">
 
         <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="form-group">
                     {{ Form::label('name', __('Level Name'), ['class' => 'form-label']) }}
                     {!! Form::text('name', old('name'), ['class' => 'form-control', 'required' => 'required' ,'placeholder'=> __('Enter Level Name')]) !!}
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="form-group">
+                    {{ Form::label('can_self_assessment', __('Self Assessment'), ['class' => 'form-label']) }}
+                    {{ Form::select('can_self_assessment', [0 => __('No'), 1 => __('Yes')], null, ['class' => 'form-control select2']) }}
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6">

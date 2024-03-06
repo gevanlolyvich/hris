@@ -69,6 +69,7 @@ class LevelDesignationController extends Controller
                 [
                     'name' => 'required',
                     'designation_id' => 'required',
+                    'can_self_assessment' => 'required|boolean',
                 ]
             );
 
@@ -88,6 +89,7 @@ class LevelDesignationController extends Controller
             $level->designation_ids     = implode(',', $request->designation_id);
             $level->goal_weight         = $request->goal_weight;
             $level->competency_weight   = $request->competency_weight;
+            $level->can_self_assessment = $request->can_self_assessment;
             $level->save();
 
             Designation::whereIn('id', $request->designation_id)->update(['level_id' => $level->id]);
@@ -141,6 +143,7 @@ class LevelDesignationController extends Controller
                 [
                     'name' => 'required',
                     'designation_id' => 'required',
+                    'can_self_assessment' => 'required|boolean',
                 ]
             );
 
@@ -155,6 +158,7 @@ class LevelDesignationController extends Controller
             $difference_to_create                   = array_diff($request->designation_id, $old_designation_ids);
 
             $levelDesignation->name                 = $request->name;
+            $levelDesignation->can_self_assessment  = $request->can_self_assessment;
             $levelDesignation->designation_ids      = implode(',', $request->designation_id);
             $levelDesignation->goal_weight          = $request->goal_weight;
             $levelDesignation->competency_weight    = $request->competency_weight;

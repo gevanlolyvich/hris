@@ -7,6 +7,10 @@
                     <td>{{ !empty($level->name) ? $level->name : '' }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Can Do Self Assessment') }}</th>
+                    <td>{{ $level->can_self_assessment ? __('Yes') : __('No') }}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Goal Weight') }}</th>
                     <td>{{ !empty($level->goal_weight) ? $level->goal_weight : '0' }}</td>
                 </tr>

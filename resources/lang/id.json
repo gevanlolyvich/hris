@@ -1897,5 +1897,9 @@
   "Rating Must Be Between 1 And 5": "Peringkat / Nilai Harus Diantara 1 Sampai 5",
   "Time Period": "Jangka Waktu",
   "Goal Name": "Nama Program / Kegiatan",
-  "Total Late": "Total Keterlambatan"
+  "Total Late": "Total Keterlambatan",
+  "Can Do Self Assessment": "Dapat Melakukan Penilaian Diri Sendiri",
+  "Yes": "Ya",
+  "No": "Tidak",
+  "Self Assessment": "Menilai Diri Sendiri"
 }
