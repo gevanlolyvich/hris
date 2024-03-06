@@ -1563,3 +1563,9 @@ Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompete
         'XSS',
     ]
 );
+Route::patch('appraisal/{id}/comment', [AppraisalController::class, 'comment'])->name('appraisal.comment')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);

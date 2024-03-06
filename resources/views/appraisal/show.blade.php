@@ -175,5 +175,29 @@
             </div>
         </div>
     </div>
+
+    <div class="card">
+        {{ Form::model($appraisal, ['route' => ['appraisal.comment', $appraisal->id], 'method' => 'PATCH']) }}
+            <div class="card-body">
+                <div class="form-group">
+                    <h5>
+                        {{ Form::label("comment", __('Comment From The Assessee'), ['class' => 'col-form-label']) }}
+                    </h5>
+                    @if ($appraisal->employee_id == \Auth::user()->employee?->id)
+                        {{ Form::textarea("comment", $appraisal->comment, ['class' => 'form-control', 'rows' => '5', 'placeholder' => __('Enter Comment')]) }}
+                    @else
+                        {{ Form::textarea("comment", $appraisal->comment, ['class' => 'form-control', 'rows' => '5', 'disabled' => 'disabled']) }}
+                    @endif
+                </div>
+            </div>
+            @if ($appraisal->employee_id == \Auth::user()->employee?->id)
+                <div class="card-footer text-end">
+                    <a class="btn btn-md btn-light btn-outline-dark" href="{{ url('appraisal') }}" style="color: black;">{{ __('Cancel') }}</a>
+                    
+                    <button type="button" class="btn btn-primary btn-outline-dark bs-pass-para">{{ __('Send') }}</button>
+                </div>
+            @endif
+        {{ Form::close() }}
+    </div>
 @endsection
 

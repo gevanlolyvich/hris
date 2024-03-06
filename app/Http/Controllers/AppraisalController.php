@@ -548,6 +548,8 @@ class AppraisalController extends Controller
             $appraisal->save();
 
             return redirect()->route('appraisal.index')->with('success', __('Appraisal successfully updated.'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
@@ -659,5 +661,33 @@ class AppraisalController extends Controller
     public function getEssayCompetency(Request $request) {
         $essays = Competencies::where('type', 'Essay')->select('id', 'name', 'description')->get();
         return $essays;
+    }
+
+    public function comment(Request $request, $appraisal_id)
+    {
+        $appraisal = Appraisal::find($appraisal_id);
+        if ($appraisal->employee_id == \Auth::user()->employee?->id // the one who being assessed
+            || \Auth::user()->type == 'company' // admin
+            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+        ) {
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'comment' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $messages = $validator->getMessageBag();
+
+                return redirect()->back()->with('error', $messages->first());
+            }
+
+            $appraisal->comment     = $request->comment;
+            $appraisal->save();
+
+            return redirect()->back()->with('success', __('Appraisal Comment Successfully Sent'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 }
