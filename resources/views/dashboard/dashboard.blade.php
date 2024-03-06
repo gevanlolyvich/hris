@@ -313,11 +313,11 @@
                                             <td>
                                                 @if ($attendanceData->coord_out)
                                                     <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @else
                                                     <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @endif
                                             </td>

@@ -353,11 +353,11 @@
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
                                                             data-image="{{ $attendance->picture_out }}">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @else
                                                         <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @endif
                                                 </td>
@@ -475,11 +475,11 @@
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
                                                             data-image="{{ $attendance->picture_out }}">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @else
                                                         <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @endif
                                                 </td>
@@ -632,11 +632,11 @@
                                                     data-near-name="{{ $attendance->location_out_address }}"
                                                     data-near-radius="{{ $attendance->location_out_radius }}"
                                                     data-image="{{ $attendance->picture_out }}">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                 </a>
                                             @else
                                                 <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                 </a>
                                             @endif
                                         </td>
