@@ -11,6 +11,7 @@ class LevelDesignation extends Model
 
     protected $fillable = [
         'name',
+        'can_self_assessment',
         'designation_ids',
         'goal_weight',
         'competency_weight',

@@ -29,4 +29,9 @@ class Competencies extends Model
     {
         return $this->hasMany(IndicatorWeight::class, 'competency_id');
     }
+
+    public function Appraisals(): HasMany
+    {
+        return $this->hasMany(AppraisalRating::class, 'competency_id');
+    }
 }
