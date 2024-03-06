@@ -53,8 +53,9 @@ class AppraisalController extends Controller
                 $employee_id = null;
                 if (!empty($subordinate_ids)) {
                     $employee_id = $subordinate_ids;
-                    $employee_id[] = \Auth::user()->employee->id;
-                } else {
+                } 
+
+                if (\Auth::user()->employee?->designation?->level?->can_self_assessment) {
                     $employee_id[] = \Auth::user()->employee->id;
                 }
                 
@@ -248,7 +249,7 @@ class AppraisalController extends Controller
 
     public function show(Appraisal $appraisal)
     {
-        if ($appraisal->created_by == \Auth::user()->id // the one who craete the appraisal
+        if ($appraisal->created_by == \Auth::user()->id // the one who create the appraisal
             || \Auth::user()->type == 'company' // admin
             || $appraisal->employee_id == \Auth::user()->employee?->id // the employee being assessed
             || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
@@ -316,7 +317,7 @@ class AppraisalController extends Controller
     {
         if (\Auth::user()->can('Edit Appraisal') &&
             (
-                $appraisal->created_by == \Auth::user()->id // the one who craete the appraisal
+                $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
                 || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
@@ -397,7 +398,7 @@ class AppraisalController extends Controller
     {
         if (\Auth::user()->can('Edit Appraisal') &&
             (
-                $appraisal->created_by == \Auth::user()->id // the one who craete the appraisal
+                $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
                 || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
@@ -555,7 +556,7 @@ class AppraisalController extends Controller
     {
         if (\Auth::user()->can('Delete Appraisal') && 
             (
-                $appraisal->created_by == \Auth::user()->id // the one who craete the appraisal
+                $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
                 || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
