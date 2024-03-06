@@ -205,7 +205,6 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
                 // Setting Relative Colomn
                 $relativeColomn = $this->getRelativeColumn();
-                Log::info(json_encode($relativeColomn, JSON_PRETTY_PRINT));
                 $sheet->mergeCells($relativeColomn['dateColomn']);
                 $sheet->mergeCells($relativeColomn['totalColomn']);
                 $sheet->mergeCells($relativeColomn['lateColomn']);
