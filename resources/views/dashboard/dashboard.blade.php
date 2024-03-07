@@ -496,7 +496,7 @@
                                             </div>
                                             <div class="ms-3">
                                                 <small class="text-muted">{{ __('Total') }}</small>
-                                                <h6 class="m-0">{{ __('Staff') }}</h6>
+                                                <h6 class="m-0">{{ __('Employee') }}</h6>
                                             </div>
                                         </div>
                                     </div>
