@@ -147,6 +147,7 @@ Route::group(
     function () {
 
         Route::resource('settings', SettingsController::class);
+        Route::post('tax-settings', [SettingsController::class, 'saveTaxSettings'])->name('tax.settings');
         Route::post('email-settings', [SettingsController::class, 'saveEmailSettings'])->name('email.settings');
         Route::post('company-settings', [SettingsController::class, 'saveCompanySettings'])->name('company.settings');
         Route::post('system-settings', [SettingsController::class, 'saveSystemSettings'])->name('system.settings');

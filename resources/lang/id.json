@@ -1905,5 +1905,10 @@
   "Comment From The Assessee": "Komentar Dari Yang Dinilai",
   "Send": "Kirim",
   "Enter Comment": "Masukkan Komentar",
-  "Appraisal Comment Successfully Sent": "Komentar Penilaian Kinerja Berhasil Dikirim"
+  "Appraisal Comment Successfully Sent": "Komentar Penilaian Kinerja Berhasil Dikirim",
+  "Tax Settings": "Pengaturan Pajak",
+  "Signer Identification Type": "Tipe Identifikasi Penandatangan",
+  "Select Signer Identification Type": "Pilih Tipe Identifikasi Penandatangan",
+  "Signer Identification": "Identifikasi Penandatangan",
+  "Enter Signer Identification": "Masukkan Identifikasi Penandatangan"
 }
