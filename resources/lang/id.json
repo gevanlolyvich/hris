@@ -1910,5 +1910,8 @@
   "Signer Identification Type": "Tipe Identifikasi Penandatangan",
   "Select Signer Identification Type": "Pilih Tipe Identifikasi Penandatangan",
   "Signer Identification": "Identifikasi Penandatangan",
-  "Enter Signer Identification": "Masukkan Identifikasi Penandatangan"
+  "Enter Signer Identification": "Masukkan Identifikasi Penandatangan",
+  "Dependents": "Tanggungan",
+  "Enter Total Dependents": "Masukkan Total Tanggungan",
+  "Employee Successfully Updated": "Karyawan Berhasil Dirubah"
 }

@@ -27,6 +27,7 @@ class Employee extends Model
         'address',
         'domicile_address',
         'marital_status',
+        'dependents',
         'emergency_contact_number',
         'emergency_contact_relation',
         'emergency_contact_photo',

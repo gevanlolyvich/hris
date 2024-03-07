@@ -80,7 +80,10 @@
                                     {!! Form::label('marital_status', __('Marital Status'), ['class' => 'form-label']) !!}
                                     {!! Form::select('marital_status', $marital_statuses, old('marital_status'), ['class' => 'form-control', 'id' => 'marital_status','placeholder' =>  __('Select Marital Status')]) !!}
                                 </div>
-
+                                <div class="form-group col-md-6">
+                                    {!! Form::label('dependents', __('Dependents'), ['class' => 'form-label']) !!}
+                                    {!! Form::number('dependents', old('dependents'), ['class' => 'form-control', 'id' => 'dependents','placeholder' =>  __('Enter Total Dependents'), 'step' => '1', 'min' => 0]) !!}
+                                </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('nationality', __('Nationality'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::select('nationality', $nationalities, old('nationality'), ['class' => 'form-control', 'id' => 'nationality', 'required' => 'required','placeholder' =>  __('Select Nationality')]) !!}
@@ -89,7 +92,7 @@
                                     {!! Form::label('identity_type', __('Identity Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::select('identity_type', $identity_types, old('identity_type'), ['class' => 'form-control', 'id' => 'identity_type', 'required' => 'required','placeholder' =>  __('Select Identity Type')]) !!}
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-12">
                                     {!! Form::label('identity_number', __('Identity Number'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
                                     {!! Form::text('identity_number', old('identity_number'), ['class' => 'form-control', 'required' => 'required','placeholder'=>__('Enter Identity Number')]) !!}
                                 </div>

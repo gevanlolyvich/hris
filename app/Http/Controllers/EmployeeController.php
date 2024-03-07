@@ -120,7 +120,6 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
-        // return $request;
         if (\Auth::user()->can('Create Employee')) {
             $validator = \Validator::make(
                 $request->all(),
@@ -192,6 +191,7 @@ class EmployeeController extends Controller
                     'emergency_contact_number' => $request['emergency_contact_number'],
                     'emergency_contact_relation' => $request['emergency_contact_relation'],
                     'marital_status' => $request['marital_status'],
+                    'dependents' => $request['dependents'] ?? 0,
                     'email' => $request['email'],
                     'password' => Hash::make($request['password']),
                     'employee_id' => $request['employee_id'],
@@ -450,14 +450,14 @@ class EmployeeController extends Controller
             $employee->fill($input)->save();
 
             $user->fill($request->except('type'))->save();
-            if ($request->salary) {
-                return redirect()->route('setsalary.index')->with('success', 'Employee successfully updated.');
-            }
+            // if ($request->salary) {
+            //     return redirect()->route('setsalary.index')->with('success', 'Employee Successfully Updated');
+            // }
 
             if (\Auth::user()->type != 'employee') {
-                return redirect()->route('employee.index')->with('success', 'Employee successfully updated.');
+                return redirect()->back()->back()->with('success', 'Employee Successfully Updated');
             } else {
-                return redirect()->route('employee.show', Crypt::encrypt($employee->id))->with('success', 'Employee successfully updated.');
+                return redirect()->route('employee.show', Crypt::encrypt($employee->id))->with('success', 'Employee Successfully Updated');
             }
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -469,7 +469,7 @@ class EmployeeController extends Controller
 
         if (\Auth::user()->can('Delete Employee')) {
             $employee      = Employee::findOrFail($id);
-            $user          = User::where('id', '=', $employee->user_id)->first();
+            $user          = User::where('id', $employee->user_id)->first();
             $emp_documents = EmployeeDocument::where('employee_id', $employee->employee_id)->get();
             $employee->delete();
             $user->delete();
@@ -482,7 +482,7 @@ class EmployeeController extends Controller
                 }
             }
 
-            return redirect()->route('employee.index')->with('success', 'Employee successfully deleted.');
+            return redirect()->back()->with('success', 'Employee successfully deleted.');
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
