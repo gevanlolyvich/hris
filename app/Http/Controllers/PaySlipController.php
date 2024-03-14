@@ -134,6 +134,9 @@ class PaySlipController extends Controller
         if ($request->branch) {
             $validatePaysilp    = PaySlip::whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch); })->where('salary_month', $formate_month_year)->pluck('employee_id');
             $payslip_employee   = Employee::where('branch_id', $request->branch)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        } elseif (!$request->branch && \Auth::user()->branch_id) {
+            $validatePaysilp    = PaySlip::whereHas('employees', function ($query) use ($request) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id');
+            $payslip_employee   = Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
         } else {
             $validatePaysilp    = $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id') : PaySlip::where('salary_month', $formate_month_year)->pluck('employee_id');
             $payslip_employee   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
