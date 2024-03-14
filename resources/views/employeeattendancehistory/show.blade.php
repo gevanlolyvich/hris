@@ -388,9 +388,21 @@
                                                         </a>
                                                     @endif
                                                 </td>
-                                                <td class="text-center">{{ $attendance->late }}</td>
-                                                <td class="text-center">{{ $attendance->early_leaving }}</td>
-                                                <td class="text-center">{{ $attendance->work_hours }}</td>
+                                                <td class="text-center">
+                                                    <span @if($attendance->late != '00:00:00' && strpos($attendance->late, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                                        {{ $attendance->late }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span @if($attendance->early_leaving != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                                        {{ $attendance->early_leaving }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span @if(strtotime('08:00:00') > strtotime($attendance->work_hours) && $attendance->status == 'Present')) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                                        {{ $attendance?->work_hours ?? '00:00:00' }}
+                                                    </span>
+                                                </td>
                                                 <td class="text-center">
                                                     @if ($attendance->is_valid)
                                                         <div class="action-btn bg-success ms-2">
