@@ -20,6 +20,7 @@ class Appraisal extends Model
         'total_competency_overall',
         'total_apprisal',
         'category',
+        'comment',
         'created_at',
     ];
 

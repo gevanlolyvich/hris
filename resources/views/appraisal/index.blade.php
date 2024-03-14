@@ -67,7 +67,11 @@
                                                     </div>
                                                 @endcan
 
-                                                @if (in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? []) || \Auth::user()->type == 'company' || $appraisal->employee->branch_id == \Auth::user()->branch_id || (\Auth::user()->type == 'hr' && !\Auth::user()->branch_id))
+                                                @if (in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? []) 
+                                                    || \Auth::user()->type == 'company' 
+                                                    || $appraisal->employee->branch_id == \Auth::user()->branch_id 
+                                                    || (\Auth::user()->type == 'hr' && !\Auth::user()->branch_id)
+                                                    || $appraisal->created_by == \Auth::user()->id)
                                                     @can('Edit Appraisal')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="{{ route('appraisal.edit', $appraisal->id) }}" class="mx-3 btn btn-sm align-items-center" 

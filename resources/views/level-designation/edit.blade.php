@@ -2,13 +2,18 @@
 {{ Form::model($level, ['route' => ['level-designation.update', $level->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data']) }}
 <div class="modal-body">
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="form-group">
                 {{ Form::label('name', __('Level Name'), ['class' => 'col-form-label']) }}
                 {{ Form::text('name', null, ['class' => 'form-control', 'placeholder' => __('Enter Level Name')]) }}
             </div>
         </div>
-
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="form-group">
+                {{ Form::label('can_self_assessment', __('Self Assessment'), ['class' => 'form-label']) }}
+                {{ Form::select('can_self_assessment', [0 => __('No'), 1 => __('Yes')], null, ['class' => 'form-control select2']) }}
+            </div>
+        </div>
         <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="form-group">
                 {{ Form::label('goal_weight', __('Goal Weight'), ['class' => 'col-form-label']) }}

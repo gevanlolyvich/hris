@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppraisalRating;
 use App\Models\Competencies;
+use App\Models\IndicatorWeight;
 use App\Models\Performance_Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -121,6 +123,9 @@ class CompetenciesController extends Controller
         if (\Auth::user()->can('Delete Competencies')) {
             $competencies = Competencies::find($id);
             $competencies->delete();
+
+            IndicatorWeight::where('competency_id', $id)->delete();
+            AppraisalRating::where('competency_id', $id)->delete();
 
             return redirect()->route('competencies.index')->with('success', __('Competencies  successfully deleted.'));
         } else {
