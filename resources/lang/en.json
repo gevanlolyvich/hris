@@ -1914,5 +1914,8 @@
     "Enter Signer Identification": "Enter Signer Identification",
     "Dependents": "Dependents",
     "Enter Total Dependents": "Enter Total Dependents",
-    "Employee Successfully Updated": "Employee Successfully Updated"
+    "Employee Successfully Updated": "Employee Successfully Updated",
+    "Please Generate Employee Payslip First": "Please Generate Employee Payslip First",
+    "PPh 21 Already Created": "PPh 21 Already Created",
+    "PPh 21 Successfully Deleted": "PPh 21 Successfully Deleted"
 }

@@ -1913,5 +1913,8 @@
   "Enter Signer Identification": "Masukkan Identifikasi Penandatangan",
   "Dependents": "Tanggungan",
   "Enter Total Dependents": "Masukkan Total Tanggungan",
-  "Employee Successfully Updated": "Karyawan Berhasil Dirubah"
+  "Employee Successfully Updated": "Karyawan Berhasil Dirubah",
+  "Please Generate Employee Payslip First": "Silahkan Buat Slip Gaji Karyawan Terlebih Dahulu",
+  "PPh 21 Already Created": "PPh 21 Sudah Ada",
+  "PPh 21 Successfully Deleted": "PPh 21 Berhasil Dihapus"
 }
