@@ -206,28 +206,8 @@ class Employee extends Model
         $total_work_hours        = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
-        //allowance
-        $allowances      = Allowance::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $total_allowance = 0;
-        foreach ($allowances as $allowance) {
-            if ($allowance->type == 'percentage') {
-                $total_allowance  = $allowance->amount * $employee->salary / 100  + $total_allowance;
-            } else {
-                $total_allowance = $allowance->amount + $total_allowance;
-            }
-        }
-
-        //commission
-        $commissions      = Commission::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-
-        $total_commission = 0;
-        foreach ($commissions as $commission) {
-            if ($commission->type == 'percentage') {
-                $total_commission  = $commission->amount * $employee->salary / 100 + $total_commission;
-            } else {
-                $total_commission = $commission->amount + $total_commission;
-            }
-        }
+        // Normal Salary Calculate
+        $normal_salary  = $this->get_bruto_salary($month, $year);
 
         //Loan
         $loans      = Loan::where('employee_id', '=', $this->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
@@ -251,56 +231,10 @@ class Employee extends Model
             }
         }
 
-        //OtherPayment
-        $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->get();
-        $total_other_payment = 0;
-        foreach ($other_payments as $other_payment) {
-            if ($other_payment->type == 'percentage') {
-                $total_other_payment  = $other_payment->amount * $employee->salary / 100  + $total_other_payment;
-            } else {
-                $total_other_payment = $other_payment->amount + $total_other_payment;
-            }
-        }
-
-        //Overtime
-        $over_times             = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
-        $total_over_time        = 0;
-        $total_over_time_hours  = 0;
-        $overtime_limit         = $employee?->departments?->overtime_limit;
-        foreach ($over_times as $over_time) {
-            // $total_hours        = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
-            $total_hours = 0;
-            if ($over_time->type == 'daily') {
-                $total_hours = 8;
-            } else {
-                if (date('Y-m-d', strtotime($over_time->clock_out)) != date('Y-m-d', strtotime($over_time->clock_in))) {
-                    $end = date('Y-m-d', strtotime($over_time->clock_in . ' +1 day'));
-                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600, 2));
-                } else {
-                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
-                }
-            }
-
-            if ($overtime_limit) {
-                if ($total_over_time_hours >= $overtime_limit) {
-                    continue;
-                }
-                if (($total_over_time_hours + $total_hours) >= $overtime_limit) {
-                    $total_hours =  $overtime_limit - $total_over_time_hours;
-                }
-                $total_over_time_hours += $total_hours;
-            }
-            $amount             = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
-            $total_over_time    = $amount + $total_over_time;
-        }
-
-        // Normal Salary Calculate
-        $normal_salary  = $this->get_salary($month, $year);
-
         //Net Salary Calculate
-        $advance_salary = $total_allowance + $total_commission + $total_other_payment + $total_over_time - $total_loan - $total_saturation_deduction;
+        $deduction_salary = $total_loan - $total_saturation_deduction;
 
-        $net_salary     =  $normal_salary + $advance_salary;
+        $net_salary     =  $normal_salary + $deduction_salary;
 
         return $net_salary;
     }
