@@ -201,16 +201,19 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('setsalary.index') }}">{{ __('Set Salary') }}</a>
                                 </li>
                                 <li class="dash-item">
-                                    <a class="dash-link"
+                                    <a class="dash-link {{ Request::segment(1) == 'payslip' ? 'active' : '-'}}"
                                         href="{{ route('payslip.index') }}">{{ __('Payslip') }}</a>
                                 </li>
                             @else
                                 <li class="dash-item">
-                                    <a class="dash-link"
+                                    <a class="dash-link {{ Request::segment(1) == 'payslip' ? 'active' : '-'}}"
                                         href="{{ route('payslip.employee', \Illuminate\Support\Facades\Crypt::encrypt(\Auth::user()?->employee?->id)) }}">{{ __('Payslip') }}</a>
                                 </li>
                             @endif
-
+                            <li class="dash-item">
+                                <a class="dash-link {{ Request::segment(1) == 'pph21' ? 'active' : '-'}}"
+                                    href="{{ route('pph21.index') }}">{{ __('PPh 21') }}</a>
+                            </li>                                
                         </ul>
                     </li>
                 @endif
