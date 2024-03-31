@@ -89,6 +89,7 @@ use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\Pph21Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -1565,6 +1566,19 @@ Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompete
     ]
 );
 Route::patch('appraisal/{id}/comment', [AppraisalController::class, 'comment'])->name('appraisal.comment')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('pph21', Pph21Controller::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('pph21/export', [Pph21Controller::class, 'export'])->name('pph21.export')->middleware(
     [
         'auth',
         'XSS',
