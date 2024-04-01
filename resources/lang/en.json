@@ -1917,5 +1917,9 @@
     "Employee Successfully Updated": "Employee Successfully Updated",
     "Please Generate Employee Payslip First": "Please Generate Employee Payslip First",
     "PPh 21 Already Created": "PPh 21 Already Created",
-    "PPh 21 Successfully Deleted": "PPh 21 Successfully Deleted"
+    "PPh 21 Successfully Deleted": "PPh 21 Successfully Deleted",
+    "Employee Report List": "Employee Report List",
+    "Employee Report": "Employee Report",
+    "Weekly": "Weekly",
+    "Select Report Type": "Select Report Type"
 }
