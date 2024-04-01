@@ -303,6 +303,11 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Performance') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            <li
+                                class="dash-item {{ request()->is('employee-report*') ? 'active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('employee-report.index') }}">{{ __('Employee Report') }}</a>
+                            </li>
                             @can('Manage Performance Type')
                                 <li
                                     class="dash-item {{ request()->is('performanceType*') ? 'active' : '' }}">

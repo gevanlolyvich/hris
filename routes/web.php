@@ -90,6 +90,7 @@ use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\Pph21Controller;
+use App\Http\Controllers\EmployeeReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1579,6 +1580,12 @@ Route::resource('pph21', Pph21Controller::class)->middleware(
     ]
 );
 Route::post('pph21/export', [Pph21Controller::class, 'export'])->name('pph21.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('employee-report', EmployeeReportController::class)->middleware(
     [
         'auth',
         'XSS',
