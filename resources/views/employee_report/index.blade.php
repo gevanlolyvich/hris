@@ -50,11 +50,13 @@
 @endpush
 
 @section('action-button')
-<!-- <a class="btn btn-sm btn-primary collapsed" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button"
-        aria-expanded="false" aria-controls="multiCollapseExample1" data-bs-toggle="tooltip" title="{{ __('Filter') }}">
-        <i class="ti ti-filter"></i>
-    </a> -->
+    <a href="{{ route('employee-report.create') }}" data-ajax-popup="true"
+        data-title="{{ __('Create New Report') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+        data-bs-original-title="{{ __('Create New Report') }}">
+        <i class="ti ti-plus"></i>
+    </a>
 @endsection
+
 @section('content')
 <div class="col-sm-12">
     <div class=" mt-2 " id="multiCollapseExample1">
@@ -123,6 +125,27 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach ($reports as $report)
+                            <tr>
+                                <td>{{ $report->employee->name }}</td>
+                                <td>{{ $report->employee->designation->name }}</td>
+                                <td>{{ $report->employee->branch->name }}</td>
+                                <td>{{ __("$report->type") }}</td>
+                                <td>{{ $report->start_date }} - {{ $report->end_date }}</td>
+                                <td>
+                                    <span>
+                                        <div class="action-btn bg-warning ms-2">
+                                            <a href="{{ route('appraisal.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
+                                                data-bs-toggle="tooltip" data-ajax-popup="true"
+                                                title="" data-title="{{ __('Appraisal Detail') }}"
+                                                data-bs-original-title="{{ __('View') }}">
+                                                <i class="ti ti-eye text-white"></i>
+                                            </a>
+                                        </div>
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
