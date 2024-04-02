@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -89,6 +90,8 @@ class EmployeeReportController extends Controller
         foreach ($type as $index => $name) {
             $type[$index] = __($name);
         }
+
+        $reports = $reports->OrderBy('start_date', 'DESC')->get();
 
         return view('employee_report.index', compact('reports', 'branch', 'department', 'type'));
     }
@@ -242,7 +245,34 @@ class EmployeeReportController extends Controller
     {
     }
 
-    public function destroy(Report $report)
+    public function destroy($report)
     {
+        $report = Report::find($report);
+        if (Auth::user()->id == $report->created_by) {
+            $employee_name      = preg_replace('/\s+/', '', $report->user->name);
+
+            // deleting uploaded file
+            foreach ($report->attachments as $attachment) {
+                $filepath_array = explode('/', $attachment->attachment);
+                $filename = array_pop($filepath_array);
+                
+                // Check if the file exists before attempting to delete
+                if (Storage::disk('public')->exists("uploads/report/$employee_name/$filename")) {
+                    Storage::disk('public')->delete("uploads/report/$employee_name/$filename");
+                }
+            }
+
+            // deleting data
+            ReportAccomplishment::where('report_id', $report->id)->delete();
+            ReportActivity::where('report_id', $report->id)->delete();
+            ReportAttachment::where('report_id', $report->id)->delete();
+            ReportObstacle::where('report_id', $report->id)->delete();
+            ReportPlan::where('report_id', $report->id)->delete();
+            $report->delete();
+
+            return redirect()->back()->with('success', __('Report Successfully Deleted'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 }

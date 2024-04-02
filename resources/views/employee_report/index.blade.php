@@ -126,22 +126,52 @@
                     </thead>
                     <tbody>
                         @foreach ($reports as $report)
+                            @php
+                                $type = null;
+                                switch ($report->type) {
+                                    case 'daily':
+                                        $type = 'Daily';
+                                        break;
+                                    case 'weekly':
+                                        $type = 'Weekly';
+                                        break;
+                                    case 'monthly':
+                                        $type = 'Monthly';
+                                        break;
+                                    case 'yearly':
+                                        $type = 'Yearly';
+                                        break;
+                                    
+                                    default:
+                                        break;
+                                }
+                            @endphp
                             <tr>
                                 <td>{{ $report->employee->name }}</td>
                                 <td>{{ $report->employee->designation->name }}</td>
                                 <td>{{ $report->employee->branch->name }}</td>
-                                <td>{{ __("$report->type") }}</td>
+                                <td>{{ __("$type") }}</td>
                                 <td>{{ $report->start_date }} - {{ $report->end_date }}</td>
                                 <td>
                                     <span>
                                         <div class="action-btn bg-warning ms-2">
-                                            <a href="{{ route('appraisal.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
+                                            <a href="{{ route('employee-report.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
                                                 data-bs-toggle="tooltip" data-ajax-popup="true"
                                                 title="" data-title="{{ __('Appraisal Detail') }}"
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-eye text-white"></i>
                                             </a>
                                         </div>
+                                        @if (\Auth::user()->id == $report->created_by)
+                                            <div class="action-btn bg-danger ms-2">
+                                                {!! Form::open(['method' => 'DELETE', 'route' => ['employee-report.destroy', $report->id], 'id' => 'delete-form-' . $report->id]) !!}
+                                                <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                    data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                    aria-label="Delete"><i
+                                                        class="ti ti-trash text-white text-white"></i></a>
+                                                </form>
+                                            </div>
+                                        @endif
                                     </span>
                                 </td>
                             </tr>
