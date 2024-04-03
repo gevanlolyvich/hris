@@ -163,6 +163,14 @@
                                             </a>
                                         </div>
                                         @if (\Auth::user()->id == $report->created_by || \Auth::user()->type == 'company')
+                                            <div class="action-btn bg-info ms-2">
+                                                <a href="{{ route('employee-report.edit', $report->id) }}" class="mx-3 btn btn-sm align-items-center" 
+                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Edit Report') }}"
+                                                    data-bs-original-title="{{ __('Edit') }}">
+                                                    <i class="ti ti-pencil text-white"></i>
+                                                </a>
+                                            </div>
                                             <div class="action-btn bg-danger ms-2">
                                                 {!! Form::open(['method' => 'DELETE', 'route' => ['employee-report.destroy', $report->id], 'id' => 'delete-form-' . $report->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
