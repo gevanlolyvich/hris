@@ -11,7 +11,6 @@ use App\Models\ReportActivity;
 use App\Models\ReportAttachment;
 use App\Models\ReportObstacle;
 use App\Models\ReportPlan;
-use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -233,8 +232,16 @@ class EmployeeReportController extends Controller
         return redirect()->route('employee-report.index')->with('success', __('Report Successfully Created'));
     }
 
-    public function show(Report $report)
+    public function show($report_id)
     {
+        $report = Report::find($report_id);
+        Log::info($report_id);
+        Log::info($report);
+        $type   = Report::$report_type;
+        foreach ($type as $index => $name) {
+            $type[$index] = __($name);
+        }
+        return view('employee_report.show', compact('report', 'type'));
     }
 
     public function edit(Report $report)
@@ -248,7 +255,7 @@ class EmployeeReportController extends Controller
     public function destroy($report)
     {
         $report = Report::find($report);
-        if (Auth::user()->id == $report->created_by) {
+        if (Auth::user()->id == $report->created_by || Auth::user()->type == 'company') {
             $employee_name      = preg_replace('/\s+/', '', $report->user->name);
 
             // deleting uploaded file

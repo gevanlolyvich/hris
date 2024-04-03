@@ -157,12 +157,12 @@
                                         <div class="action-btn bg-warning ms-2">
                                             <a href="{{ route('employee-report.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
                                                 data-bs-toggle="tooltip" data-ajax-popup="true"
-                                                title="" data-title="{{ __('Appraisal Detail') }}"
+                                                title="" data-title="{{ __('Report Detail') }}"
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-eye text-white"></i>
                                             </a>
                                         </div>
-                                        @if (\Auth::user()->id == $report->created_by)
+                                        @if (\Auth::user()->id == $report->created_by || \Auth::user()->type == 'company')
                                             <div class="action-btn bg-danger ms-2">
                                                 {!! Form::open(['method' => 'DELETE', 'route' => ['employee-report.destroy', $report->id], 'id' => 'delete-form-' . $report->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
