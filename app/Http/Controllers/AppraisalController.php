@@ -252,7 +252,7 @@ class AppraisalController extends Controller
         if ($appraisal->created_by == \Auth::user()->id // the one who create the appraisal
             || \Auth::user()->type == 'company' // admin
             || $appraisal->employee_id == \Auth::user()->employee?->id // the employee being assessed
-            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id == \Auth::user()->branch_id)) // HR
             || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
         ) {
             $employee           = Employee::where('id', $appraisal->employee_id)->get();
@@ -319,7 +319,7 @@ class AppraisalController extends Controller
             (
                 $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
-                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id == \Auth::user()->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
             )
         ) {
@@ -400,7 +400,7 @@ class AppraisalController extends Controller
             (
                 $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
-                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id == \Auth::user()->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
             )
         ) {
@@ -560,7 +560,7 @@ class AppraisalController extends Controller
             (
                 $appraisal->created_by == \Auth::user()->id // the one who create the appraisal
                 || \Auth::user()->type == 'company' // admin
-                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+                || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id == \Auth::user()->branch_id)) // HR
                 || in_array($appraisal->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()) // the supervisor
             )
         ) {
@@ -668,7 +668,7 @@ class AppraisalController extends Controller
         $appraisal = Appraisal::find($appraisal_id);
         if ($appraisal->employee_id == \Auth::user()->employee?->id // the one who being assessed
             || \Auth::user()->type == 'company' // admin
-            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id)) // HR
+            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $appraisal?->employee?->branch_id == \Auth::user()->branch_id)) // HR
         ) {
             $validator = \Validator::make(
                 $request->all(),

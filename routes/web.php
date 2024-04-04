@@ -89,6 +89,8 @@ use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\Pph21Controller;
+use App\Http\Controllers\EmployeeReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +149,7 @@ Route::group(
     function () {
 
         Route::resource('settings', SettingsController::class);
+        Route::post('tax-settings', [SettingsController::class, 'saveTaxSettings'])->name('tax.settings');
         Route::post('email-settings', [SettingsController::class, 'saveEmailSettings'])->name('email.settings');
         Route::post('company-settings', [SettingsController::class, 'saveCompanySettings'])->name('company.settings');
         Route::post('system-settings', [SettingsController::class, 'saveSystemSettings'])->name('system.settings');
@@ -1564,6 +1567,25 @@ Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompete
     ]
 );
 Route::patch('appraisal/{id}/comment', [AppraisalController::class, 'comment'])->name('appraisal.comment')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('pph21', Pph21Controller::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('pph21/export', [Pph21Controller::class, 'export'])->name('pph21.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('employee-report', EmployeeReportController::class)->middleware(
     [
         'auth',
         'XSS',

@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Payslip') }}
+    {{ __('PPh 21') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a></li>
-    <li class="breadcrumb-item">{{ __('payslip') }}</li>
+    <li class="breadcrumb-item">{{ __('PPh 21') }}</li>
 @endsection
 
 
@@ -15,12 +15,14 @@
         <div class="card">
             <div class="card-body">
                 <div class="row justify-content-end">
-                    <div class="col-3">
-                        <div class="btn-box">
-                            {{Form::label('branch',__('Branch'),['class'=>'form-label'])}}
-                            {{Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : null, ['class'=>'month-btn form-control select2', 'placeholder' => __('Select Branch'), 'id' => 'branch-filter'])}}
+                    @if (\Auth::user()->type != 'employee')
+                        <div class="col-4">
+                            <div class="btn-box">
+                                {{Form::label('branch',__('Branch'),['class'=>'form-label'])}}
+                                {{Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : null, ['class'=>'month-btn form-control select2', 'placeholder' => __('Select Branch'), 'id' => 'branch-filter'])}}
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     <div class="col-3 month">
                         <div class="btn-box">
                             {{Form::label('month',__('Month'),['class'=>'form-label'])}}
@@ -28,7 +30,7 @@
                         </div>
                     </div>
                     <div class="col-auto p-1 pt-1 mt-4">
-                        {{ Form::open(['route' => ['payslip.index'], 'method' => 'GET', 'id' => 'payslip_filter']) }}
+                        {{ Form::open(['route' => ['pph21.index'], 'method' => 'GET', 'id' => 'payslip_filter']) }}
                             {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'filter_month'])}}
                             {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'filter_branch'])}}
                             {{-- <input type="hidden" name="filter_month" id="filter_month"> --}}
@@ -41,7 +43,7 @@
                     </div>
                     @if (\Auth::user()->type != 'employee')
                         <div class="col-auto p-1 pt-1 mt-4">
-                            {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
+                            {{ Form::open(['route' => ['pph21.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
                                 {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'generate_month'])}}
                                 {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'generate_branch'])}}
                                 {{-- <input type="hidden" name="generate_month" id="generate_month"> --}}
@@ -53,17 +55,17 @@
                             {{ Form::close() }}
                         </div>
                     @endif
-                    <div class="col-auto p-1 pt-1 mt-4">
-                        {{ Form::open(['route' => ['payslip.bulkpayment', ['date'=>$month]], 'method' => 'POST', 'id' => 'payslip_bulkpay']) }}
+                    {{-- <div class="col-auto p-1 pt-1 mt-4">
+                        {{ Form::open(['route' => ['pph21.bulkpayment', ['date'=>$month]], 'method' => 'POST', 'id' => 'payslip_bulkpay']) }}
                             {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'bulk_branch'])}}
                             <button type="button" class="btn btn-success bs-pass-para"
                                 data-bs-toggle="tooltip" title="{{ __('Bulk Payment Payslip') }}"
                                 data-original-title="{{ __('Bulk Payment Payslip') }}">{{ __('Bulk Payment') }}
                             </button>
                         {{ Form::close() }}
-                    </div>
+                    </div> --}}
                     <div class="col-auto p-1 pt-1 mt-4">
-                        {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_export']) }}
+                        {{ Form::open(['route' => ['pph21.export'], 'method' => 'POST', 'id' => 'payslip_export']) }}
                             {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'export_month'])}}
                             {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'export_branch'])}}
                             {{-- <input type="hidden" name="export_month" id="export_month"> --}}
@@ -75,91 +77,47 @@
                         {{ Form::close() }}
                     </div>
                 </div>
-                </div>
+            </div>
         </div>
     </div>
 
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                {{--                <form> --}}
-                {{-- <div class="d-flex justify-content-between w-100"> --}}
                 <h5>{{ __('Employee Payslip') }}</h5>
-                {{-- <div class="row align-items-center justify-content-end mt-4">
-                    <div class="col-4 month">
-                        <div class="btn-box">
-                            <select class="form-control month_date " name="year" tabindex="-1" aria-hidden="true">
-                                <option value="--">--</option>
-                                @foreach ($month as $k => $mon)
-                                    @php
-                                        $selected = date('m') - 1 == $k ? 'selected' : '';
-                                    @endphp
-                                    <option value="{{ $k }}" {{ $selected }}>{{ $mon }}</option>
-                                @endforeach
-                            </select>
-
-                        </div>
-                    </div>
-                    <div class="col-4 year">
-                        <div class="btn-box">
-                            {{ Form::select('year', $year, null, ['class' => 'form-control year_date ']) }}
-                        </div>
-                    </div>
-
-                    <div class="col-auto float-end">
-                        {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                            <input type="hidden" name="filter_month" class="filter_month">
-                            <input type="hidden" name="filter_year" class="filter_year">
-                            <input type="submit" value="{{ __('Export') }}" class="btn btn-primary">
-                        {{ Form::close() }}
-                    </div>
-                </div> --}}
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>{{ __('Name') }}</th>
-                                <th>{{ __('Payroll Type') }}</th>
-                                <th>{{ __('Salary') }}</th>
-                                <th>{{ __('Net Salary') }}</th>
-                                <th>{{ __('Status') }}</th>
-                                <th>{{ __('Action') }}</th>
+                                <th>{{ __('Employee') }}</th>
+                                <th>{{ __('Branch') }}</th>
+                                <th>{{ __('PTKP') }}</th>
+                                <th>{{ __('Date') }}</th>
+                                <th>{{ __('Bruto') }}</th>
+                                <th>{{ __('PPh 21') }}</th>
+                                @if (\Auth::user()->type != 'employee')
+                                    <th>{{ __('Action') }}</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($payslips as $payslip)
+                            @foreach ($pph21 as $pph)
                                 <tr>
-                                    <td>{{ $payslip?->employees?->name ?? '-' }}</td>
-                                    <td>{{ $payslip?->employees?->salaryType?->name ?? '-' }}</td>
-                                    <td>{{ \Auth::user()->priceFormat($payslip?->basic_salary ?? '0') }}</td>
-                                    <td>{{ \Auth::user()->priceFormat($payslip?->net_payble ?? '0') }}</td>
-                                    <td>
-                                        @if ($payslip?->status)
-                                            <div class="badge bg-success p-2 px-3 rounded text-white">{{__('Paid')}}</div>
-                                        @else
-                                            <div class="badge bg-danger p-2 px-3 rounded text-white">{{__('UnPaid')}}</div>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="#" data-url="{{ route('payslip.pdf', ['id' => $payslip->employee_id, 'm' => $month]) }}" data-size="md-pdf"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Employee Payslip') }}">{{ __('Payslip') }}</a>
-                                    
-                                            @if (\Auth::user()->type != 'employee')
-                                                @if ($payslip->status == 0)
-                                                    {!! Form::open(['method' => 'GET', 'route' => ['payslip.paysalary', ['id' => $payslip->employee_id, 'date' => $month]]]) !!}
-                                                    <button type="button" class="btn-sm btn m-1 btn-primary bs-pass-para">{{ __('Click To Paid') }}</button>
-                                                    </form>
-                                                    
-                                                    {!! Form::open(['method' => 'GET', 'route' => ['payslip.delete', $payslip->id]]) !!}
-                                                    <button type="button" class="btn btn-danger m-1 btn-sm bs-pass-para">{{ __('Delete') }}</button>
-                                                    </form>
-                                                @endif
-                                    
-                                            @endif
-                                        </div>
-                                    </td>
+                                    <td>{{ $pph?->employee?->name ?? '-' }}</td>
+                                    <td>{{ $pph?->employee?->branch?->name ?? '-' }}</td>
+                                    <td>{{ $pph?->ptkp }}</td>
+                                    <td>{{ $pph?->date }}</td>
+                                    <td>{{ number_format($pph?->bruto ?? 0, 2) }}</td>
+                                    <td>{{ number_format($pph?->pph21 ?? 0, 2) }}</td>
+                                    @if (\Auth::user()->type != 'employee')
+                                        <td>
+                                            {{  Form::open(['method' => 'DELETE', 'route' => ['pph21.destroy', $pph->id]]) }}
+                                                <button type="button" class="btn btn-danger m-1 btn-sm bs-pass-para">{{ __('Delete') }}</button>
+                                            {{ Form::close() }}
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

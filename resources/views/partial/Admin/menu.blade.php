@@ -26,79 +26,79 @@ $mode_setting = \App\Models\Utility::mode_layout();
         </div>
         <div class="navbar-content">
             <ul class="dash-navbar">
-
                 <!-- dashboard-->
                 @if (\Auth::user()->type == 'employee')
-                 <li class="dash-item">
-                    <a href="{{ route('home') }}" class="dash-link"><span class="dash-micon"><i
-                                class="ti ti-home"></i></span><span
-                            class="dash-mtext">{{ __('Dashboard') }}</span></a>
-                </li> 
+                    <li class="dash-item">
+                        <a href="{{ route('home') }}" class="dash-link"><span class="dash-micon"><i
+                                    class="ti ti-home"></i></span><span
+                                class="dash-mtext">{{ __('Dashboard') }}</span>
+                        </a>
+                    </li> 
                 @endif
                 @if (\Auth::user()->type != 'employee')
-                <li
-                        class="dash-item dash-hasmenu  {{ Request::segment(1) == 'null' ? 'active dash-trigger' : '' }}">
+                    <li class="dash-item dash-hasmenu  {{ Request::segment(1) == 'null' ? 'active dash-trigger' : '' }}">
                         <a href="#" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-home"></i></span><span
                                 class="dash-mtext">{{ __('Dashboard') }}</span><span class="dash-arrow"><i
-                                    data-feather="chevron-right"></i></span></a>
+                                    data-feather="chevron-right"></i></span>
+                        </a>
                         <ul class="dash-submenu ">
                             <li class="dash-item {{ ( Request::segment(1) == null   || Request::segment(1) == 'report') ? ' active dash-trigger' : ''}}">
                                 <a class="dash-link"
                                     href="{{ route('home') }}">{{ __('Overview') }}</a>
                             </li>
-                          
+                            
                             @if (Gate::check('Manage Report'))
-                    <li class="dash-item dash-hasmenu">
-                        <a href="#!" class="dash-link"><span class=""><i
-                                    class=""></i></span><span
-                                class="dash-mtext">{{ __('Report') }}</span><span
-                                class="dash-arrow"><i data-feather="chevron-right"></i></span></a>
-                        <ul class="dash-submenu">
-                            @can('Manage Report')
-                                {{-- <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.income-expense') }}">{{ __('Income Vs Expense') }}</a>
-                                </li> --}}
+                                <li class="dash-item dash-hasmenu">
+                                    <a href="#!" class="dash-link"><span class=""><i
+                                                class=""></i></span><span
+                                            class="dash-mtext">{{ __('Report') }}</span><span
+                                            class="dash-arrow"><i data-feather="chevron-right"></i></span></a>
+                                    <ul class="dash-submenu">
+                                        @can('Manage Report')
+                                            {{-- <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.income-expense') }}">{{ __('Income Vs Expense') }}</a>
+                                            </li> --}}
 
-                                <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.monthly.attendance') }}">{{ __('Monthly Attendance') }}</a>
+                                            <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.monthly.attendance') }}">{{ __('Monthly Attendance') }}</a>
+                                            </li>
+
+                                            <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.leave') }}">{{ __('Leave') }}</a>
+                                            </li>
+
+
+                                            {{-- <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.account.statement') }}">{{ __('Account Statement') }}</a>
+                                            </li> --}}
+
+
+                                            <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.payroll') }}">{{ __('Payroll') }}</a>
+                                            </li>
+
+
+                                            {{-- <li class="dash-item">
+                                                <a class="dash-link"
+                                                    href="{{ route('report.timesheet') }}">{{ __('Timesheet') }}</a>
+                                            </li> --}}
+                                        @endcan
+
+
+                                    </ul>
                                 </li>
-
-                                <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.leave') }}">{{ __('Leave') }}</a>
-                                </li>
-
-
-                                {{-- <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.account.statement') }}">{{ __('Account Statement') }}</a>
-                                </li> --}}
-
-
-                                <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.payroll') }}">{{ __('Payroll') }}</a>
-                                </li>
-
-
-                                {{-- <li class="dash-item">
-                                    <a class="dash-link"
-                                        href="{{ route('report.timesheet') }}">{{ __('Timesheet') }}</a>
-                                </li> --}}
-                            @endcan
-
+                            @endif
+                            
 
                         </ul>
                     </li>
                 @endif
-                          
-
-                        </ul>
-                    </li>
-                    @endif
                 <!--dashboard-->
 
                 <!-- user-->
@@ -153,7 +153,8 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     <a href="#!" class="dash-link"><span class="dash-micon"><i
                                 class="ti ti-user"></i></span><span
                             class="dash-mtext">{{ __('Employee') }}</span><span class="dash-arrow"><i
-                                data-feather="chevron-right"></i></span></a>
+                                data-feather="chevron-right"></i></span>
+                    </a>
                     <ul class="dash-submenu">
                         @if (\Auth::user()->type == 'employee')
                             @php
@@ -181,6 +182,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                         </li>
                     </ul>
+                </li>
                 @endif
                 <!-- employee-->
 
@@ -199,16 +201,19 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('setsalary.index') }}">{{ __('Set Salary') }}</a>
                                 </li>
                                 <li class="dash-item">
-                                    <a class="dash-link"
+                                    <a class="dash-link {{ Request::segment(1) == 'payslip' ? 'active' : '-'}}"
                                         href="{{ route('payslip.index') }}">{{ __('Payslip') }}</a>
                                 </li>
                             @else
                                 <li class="dash-item">
-                                    <a class="dash-link"
+                                    <a class="dash-link {{ Request::segment(1) == 'payslip' ? 'active' : '-'}}"
                                         href="{{ route('payslip.employee', \Illuminate\Support\Facades\Crypt::encrypt(\Auth::user()?->employee?->id)) }}">{{ __('Payslip') }}</a>
                                 </li>
                             @endif
-
+                            <li class="dash-item">
+                                <a class="dash-link {{ Request::segment(1) == 'pph21' ? 'active' : '-'}}"
+                                    href="{{ route('pph21.index') }}">{{ __('PPh 21') }}</a>
+                            </li>                                
                         </ul>
                     </li>
                 @endif
@@ -298,6 +303,11 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Performance') }}</span><span class="dash-arrow"><i
                                     data-feather="chevron-right"></i></span></a>
                         <ul class="dash-submenu">
+                            <li
+                                class="dash-item {{ request()->is('employee-report*') ? 'active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('employee-report.index') }}">{{ __('Employee Report') }}</a>
+                            </li>
                             @can('Manage Performance Type')
                                 <li
                                     class="dash-item {{ request()->is('performanceType*') ? 'active' : '' }}">
@@ -898,7 +908,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif
                 <!--constant-->
 
-
                 @if (Gate::check('Manage Company Settings') || Gate::check('Manage System Settings'))
                     <li class="dash-item ">
                         <a href="{{ route('settings.index') }}" class="dash-link"><span
@@ -908,8 +917,8 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     </li>
                 @endif
 
-</ul>
+            </ul>
 
-</div>
-</div>
+        </div>
+    </div>
 </nav>

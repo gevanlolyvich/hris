@@ -138,6 +138,8 @@ class Utility extends Model
             "late_tolerance" => "",
             "photo_on_clock" => "",
             "map_tile_url" => "",
+            "signer_identification_type" => "",
+            "signer_identification" => "",
         ];
 
         foreach ($data as $row) {

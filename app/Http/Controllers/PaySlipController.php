@@ -31,25 +31,7 @@ class PaySlipController extends Controller
     public function index(Request $request)
     {
         $month  = $request->month ?? date('Y-m', strtotime(date('Y-m') . ' -1 month'));
-        if (\Auth::user()->can('Manage Pay Slip') && \Auth::user()->type == 'employee') {
-            $subordinates = \Auth::user()->employee->subordinatesFlatten();
-
-            // Check if employee managing other employee or not
-            $employees = collect();
-            if ($subordinates->isNotEmpty()) {
-                foreach ($subordinates as $subordinate) {
-                    $employees->push($subordinate->id);
-                }
-
-                $employees->push(\Auth::user()->employee->id);
-            } else {
-                $employees->push(\Auth::user()->employee->id);
-            }
-
-            $payslips = PaySlip::where('salary_month', $month)->whereIn('employee_id', $employees)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
-
-            return view('payslip.index', compact('payslips', 'month'));
-        } elseif (\Auth::user()->type != 'employee') {
+        if (\Auth::user()->can('Manage Pay Slip') && \Auth::user()->type != 'employee') {
             $branch = Branch::find(\Auth::user()->branch_id);
             $branch_id = collect();
             if ($branch) {
@@ -63,14 +45,19 @@ class PaySlipController extends Controller
                 }
             }
 
-            if ($branch_id?->isNotEmpty()) {
+            if ($request->branch) {
+                $employees  = Employee::where('branch_id', $request->branch)->select('id')->get()->pluck('id');
+                $payslips   = PaySlip::whereIn('employee_id', $employees)->where('salary_month', $month)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
+            } elseif ($branch_id?->isNotEmpty()) {
                 $employees  = Employee::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id');
                 $payslips   = PaySlip::whereIn('employee_id', $employees)->where('salary_month', $month)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
             } else {
                 $payslips   = PaySlip::where('salary_month', $month)->withAggregate('employees', 'name')->orderBy('employees_name', 'asc')->get();
             }
 
-            return view('payslip.index', compact('payslips', 'month'));
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+
+            return view('payslip.index', compact('payslips', 'month', 'branch'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -144,14 +131,30 @@ class PaySlipController extends Controller
             }
         }
 
-        $validatePaysilp    = $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id') : PaySlip::where('salary_month', $formate_month_year)->pluck('employee_id');
-        $payslip_employee   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        if ($request->branch) {
+            $validatePaysilp    = PaySlip::whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch); })->where('salary_month', $formate_month_year)->pluck('employee_id');
+            $payslip_employee   = Employee::where('branch_id', $request->branch)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        } elseif (!$request->branch && \Auth::user()->branch_id) {
+            $validatePaysilp    = PaySlip::whereHas('employees', function ($query) use ($request) { $query->where('branch_id', \Auth::user()->branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id');
+            $payslip_employee   = Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        } else {
+            $validatePaysilp    = $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', $formate_month_year)->pluck('employee_id') : PaySlip::where('salary_month', $formate_month_year)->pluck('employee_id');
+            $payslip_employee   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->count();
+        }
 
         if ($payslip_employee > count($validatePaysilp)) {
-            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
+            if ($request->branch) {
+                $employees = Employee::where('branch_id', $request->branch)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();                 
 
-            // check if there is employe that salary has to be set
-            $employeesSalary = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('salary', '<=', 0)->first() : Employee::where('is_active', 1)->where('salary', '<=', 0)->first();
+                // check if there is employe that salary has to be set
+                $employeesSalary = Employee::where('branch_id', $request->branch)->where('is_active', 1)->where('salary', '<=', 0)->first();
+            } else {
+                $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get() : Employee::where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $validatePaysilp)->get();
+
+                // check if there is employe that salary has to be set
+                $employeesSalary = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->where('salary', '<=', 0)->first() : Employee::where('is_active', 1)->where('salary', '<=', 0)->first();
+            }
+
 
             if (!empty($employeesSalary)) {
                 return redirect()->back()->with('error', __('Please set employee salary.'));
@@ -162,6 +165,7 @@ class PaySlipController extends Controller
             foreach ($employees as $employee) {
                 $payslipEmployee                       = new PaySlip();
                 $payslipEmployee->employee_id          = $employee->id;
+                $payslipEmployee->bruto                = $employee->get_bruto_salary($month, $year);
                 $payslipEmployee->net_payble           = $employee->get_net_salary($month, $year);
                 $payslipEmployee->salary_month         = $formate_month_year;
                 $payslipEmployee->status               = 0; // not paid yet
@@ -438,20 +442,24 @@ class PaySlipController extends Controller
 
     public function bulkpayment(Request $request, $date)
     {
-        $branch = Branch::find(\Auth::user()->branch_id);
-        $branch_id = collect();
-        if ($branch) {
-            $branch_id->push($branch?->id);
-        }
-
-        $children = $branch?->childBranchFlatten();
-        if ($children?->isNotEmpty()) {
-            foreach ($children as $child) {
-                $branch_id->push($child->id);
+        if ($request->branch) {
+            PaySlip::whereHas('employees', function ($query) use ($request) { $query->where('branch_id', $request->branch); })->where('salary_month', $date)->where('status', 0)->update(['status' => 1]);
+        } else {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
             }
-        }
 
-        $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', $date)->where('status', 0)->update(['status' => 1]) : PaySlip::where('salary_month', $date)->where('status', 0)->update(['status' => 1]);
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branch_id?->isNotEmpty() ? PaySlip::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('salary_month', $date)->where('status', 0)->update(['status' => 1]) : PaySlip::where('salary_month', $date)->where('status', 0)->update(['status' => 1]);
+        }
 
         return redirect()->back()->with('success', __('Payslip Bulk Payment successfully.'));
     }
@@ -622,7 +630,8 @@ class PaySlipController extends Controller
         $payslipEmployee->saturation_deduction = Employee::saturation_deduction($payslipEmployee->employee_id);
         $payslipEmployee->other_payment        = Employee::other_payment($payslipEmployee->employee_id);
         $payslipEmployee->overtime             = Employee::get_overtime($payslipEmployee->employee_id, $month, $year);
-        $payslipEmployee->net_payble           = Employee::find($payslipEmployee->employee_id)->get_net_salary();
+        $payslipEmployee->net_payble           = Employee::find($payslipEmployee->employee_id)->get_net_salary($month, $year);
+        $payslipEmployee->bruto                = Employee::find($payslipEmployee->employee_id)->get_bruto_salary($month, $year);
         $payslipEmployee->save();
 
         return redirect()->back()->with('success', __('Employee payroll successfully updated.'));
