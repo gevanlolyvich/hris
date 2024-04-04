@@ -49,22 +49,39 @@
 
     <div class="card">
         <div class="card-body">
+            {{-- Employee Detail --}}
+            <div class="row text-center">
+                <div class="col">
+                    <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $report->employee->name }}</h6> 
+                </div>
+                <div class="col">
+                    <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($report->employee->branch_id)) ? \Auth::user()->getBranch($report->employee->branch_id)->name : '-' }}</h6>
+                </div>
+                <div class="col">
+                    <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($report->employee->department_id)) ? \Auth::user()->getDepartment($report->employee->department_id)->name : '-' }}</h6>
+                </div>
+                <div class="col">
+                    <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($report->employee->designation_id)) ? \Auth::user()->getDesignation($report->employee->designation_id)->name : '-' }}</h6>
+                </div>
+            </div>
+            <hr>
+            
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {{ Form::label('type', __('Type'),['class'=>'col-form-label'])}} <span class="text-danger pl-1"> * {{__('Required')}}</span>
+                        {{ Form::label('type', __('Type'),['class'=>'col-form-label'])}}
                         {{ Form::select('type', $type, $report->type, ['class' => 'form-control select2 type', 'id' => 'type', 'placeholder' => __('Select Report Type'), 'disabled' => 'disabled']) }}
                     </div>
                 </div>
                 <div class="col-md-4 date-form">
                     <div class="form-group">
-                        {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> * {{__('Required')}}</span>
+                        {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
                         {{ Form::date('start_date', $report->start_date, ['class' => 'form-control ','autocomplete'=>'off' ,'required' => 'required', 'id' => 'start_date', 'disabled' => 'disabled']) }}
                     </div>
                 </div>
                 <div class="col-md-4 date-form">
                     <div class="form-group">
-                        {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> * {{__('Required')}}</span>
+                        {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
                         {{ Form::date('end_date', $report->end_date, ['class' => 'form-control ','autocomplete'=>'off' ,'required' => 'required', 'id' => 'end_date', 'disabled' => 'disabled']) }}
                         {{ Form::hidden('end_date', '', ['id' => 'end_date_hidden']) }}
                     </div>
@@ -192,6 +209,58 @@
                 @endforeach
             </div>
             <hr>
+            
+            {{-- Report Response --}}
+            @if (\Auth::user()->employee?->id != $report->employee_id)
+                {{ Form::open(['route' => ['report.response', $report->id], 'method' => 'post']) }}
+                    <div id="response-form">
+                        <div class="row my-2">
+                            <div class="col-auto">
+                                <h4>{{ __("Report Response") }}</h4>
+                            </div>
+                        </div>
+                        <div class="row response">
+                            <div class="col-md-12">
+                                <div class="form-group mb-2">
+                                    {{ Form::textarea('response', $report->response, ['class' => 'form-control', 'rows' => '3', 'placeholder' => __('Enter Report Response')]) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @if ($report->response_by)
+                        <div class="row">
+                            <h6 class="text-muted">{{ __('Response From') }} : {{ $report->responder?->employee->name ?? $report->responder?->name}}</h6>
+                        </div>
+                    @endif
+                    <hr>
+                    <div class="text-end">
+                        <a class="btn btn-md btn-light btn-outline-dark" href="{{ url('employee-report') }}" style="color: black;">{{ __('Cancel') }}</a>
+                        
+                        <button type="button" class="btn btn-primary btn-outline-dark bs-pass-para">{{ __('Send') }}</button>
+                    </div>
+                {{ Form::close() }}
+            @else
+                <div id="response-form">
+                    <div class="row my-2">
+                        <div class="col-auto">
+                            <h4>{{ __("Report Response") }}</h4>
+                        </div>
+                    </div>
+                    <div class="row response">
+                        <div class="col-md-12">
+                            <div class="form-group mb-2">
+                                {{ Form::textarea('response', $report->response ?? '-', ['class' => 'form-control', 'rows' => '3', 'placeholder' => __('Enter Report Response'), 'disabled' => 'disabled']) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if ($report->response_by)
+                    <div class="row">
+                        <h6 class="text-muted">{{ __('Response From') }} : {{ $report->responder?->employee->name ?? $report->responder?->name}}</h6>
+                    </div>
+                @endif
+                <hr>
+            @endif
         </div>
     </div>
 @endsection

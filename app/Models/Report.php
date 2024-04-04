@@ -17,6 +17,8 @@ class Report extends Model
         'type',
         'start_date',
         'end_date',
+        'response',
+        'response_by',
     ];
 
     public function employee()
@@ -27,6 +29,11 @@ class Report extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by', 'id')->withTrashed();;
+    }
+
+    public function responder()
+    {
+        return $this->belongsTo(User::class, 'response_by', 'id')->withTrashed();;
     }
 
     public function activities(): HasMany
