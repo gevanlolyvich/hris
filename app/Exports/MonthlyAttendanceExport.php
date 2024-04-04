@@ -119,6 +119,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             $totalAttendance        = 0;
             $arrayAttendanceDate    = [];
             $totalLate              = 0;
+            $totalLateTime          = 0;
             
             foreach ($dates as $d => $date) {
                 $dateFormat = $year . '-' . $month . '-' . $date;
@@ -147,6 +148,12 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                     (strtotime($attendance->clock_in) > (strtotime($attendance_shift->start_time) + ((int)$settings['late_tolerance'] * 60)))) {
                                     $totalLate += 1;
                                     $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+
+                                    // Parse late time to extract hours, minutes, and seconds
+                                    list($hours, $minutes, $seconds) = explode(':', $attendance->late);
+                                    
+                                    // Convert time to seconds and add to total late time
+                                    $totalLateTime += $hours * 3600 + $minutes * 60 + $seconds;
                                 }
                             } else if ($attendance->status == 'Leave' && !$present) {
                                 $date_data          = __('Leave');
@@ -174,7 +181,11 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 }
             }
 
-            array_push($arrayAttendanceDate, $totalAttendance >= 1 ? $totalAttendance : '0', $totalLate >= 1 ? $totalLate : '0');
+            $totalLateHours     = floor($totalLateTime / 3600);
+            $totalLateMinutes   = floor(($totalLateTime % 3600) / 60);
+            $totalLateSeconds   = $totalLateTime % 60;
+
+            array_push($arrayAttendanceDate, $totalAttendance >= 1 ? $totalAttendance : '0', $totalLate >= 1 ? $totalLate : '0', sprintf("%02d:%02d:%02d", $totalLateHours, $totalLateMinutes, $totalLateSeconds));
 
             $data->push(array_merge($employeeArray, $arrayAttendanceDate));
         }
@@ -208,12 +219,15 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 $sheet->mergeCells($relativeColomn['dateColomn']);
                 $sheet->mergeCells($relativeColomn['totalColomn']);
                 $sheet->mergeCells($relativeColomn['lateColomn']);
+                $sheet->mergeCells($relativeColomn['lateTimeColomn']);
                 $sheet->setCellValue($relativeColomn['totalCell'], "Total");
                 $sheet->setCellValue($relativeColomn['lateCell'], __('Total Late'));
+                $sheet->setCellValue($relativeColomn['lateTimeCell'], __('Total Late Time'));
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['dateColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['dateNumberColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['totalColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['lateColomn']);
+                $this->applyHeaderCellStyles($sheet, $relativeColomn['lateTimeColomn']);
                 
                 // Style Cells
                 $sheet->getStyle('B2:B3')->applyFromArray(['font' => ['bold' => true]]);
@@ -250,6 +264,11 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                             'borderStyle' => Border::BORDER_THIN,
                         ]
                     ],
+                ]);
+                $sheet->getStyle("{$relativeColomn['lastColomn']}7:{$relativeColomn['lastColomn']}{$this->total_data}")->applyFromArray([
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    ]
                 ]);
 
                 // Search For Holiday To Style It
@@ -297,40 +316,47 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
     protected function getRelativeColumn(): array
     {
         $lastDateColumn = 'AI';
-        $totalColumn = 'AJ';
-        $lateColumn = 'AK';
+        $totalColumn    = 'AJ';
+        $lateColumn     = 'AK';
+        $lateTimeColumn = 'AL';
 
         switch ($this->total_days) {
             case 28:
                 $lastDateColumn = 'AH';
-                $totalColumn = 'AI';
-                $lateColumn = 'AJ';
+                $totalColumn    = 'AI';
+                $lateColumn     = 'AJ';
+                $lateTimeColumn = 'AK';
                 break;
             case 29:
                 $lastDateColumn = 'AI';
-                $totalColumn = 'AJ';
-                $lateColumn = 'AK';
+                $totalColumn    = 'AJ';
+                $lateColumn     = 'AK';
+                $lateTimeColumn = 'AL';
                 break;
             case 30:
                 $lastDateColumn = 'AJ';
-                $totalColumn = 'AK';
-                $lateColumn = 'AL';
+                $totalColumn    = 'AK';
+                $lateColumn     = 'AL';
+                $lateTimeColumn = 'AM';
                 break;
             case 31:
                 $lastDateColumn = 'AK';
-                $totalColumn = 'AL';
-                $lateColumn = 'AM';
+                $totalColumn    = 'AL';
+                $lateColumn     = 'AM';
+                $lateTimeColumn = 'AN';
                 break;
         }
         return [
-            'dateColomn' => "G5:{$lastDateColumn}5",
-            'dateNumberColomn' => "G6:{$lastDateColumn}6",
-            'totalColomn' => "{$totalColumn}5:{$totalColumn}6",
-            'totalCell' => "{$totalColumn}5",
-            'lastColomn' => $lateColumn,
-            'lateColomn' => "{$lateColumn}5:{$lateColumn}6",
-            'lateCell' => "{$lateColumn}5",
-            'lastCell' => "{$lateColumn}6",
+            'dateColomn'        => "G5:{$lastDateColumn}5",
+            'dateNumberColomn'  => "G6:{$lastDateColumn}6",
+            'totalColomn'       => "{$totalColumn}5:{$totalColumn}6",
+            'totalCell'         => "{$totalColumn}5",
+            'lateColomn'        => "{$lateColumn}5:{$lateColumn}6",
+            'lateCell'          => "{$lateColumn}5",
+            'lateTimeColomn'    => "{$lateTimeColumn}5:{$lateTimeColumn}6",
+            'lateTimeCell'      => "{$lateTimeColumn}5",
+            'lastColomn'        => $lateTimeColumn,
+            'lastCell'          => "{$lateTimeColumn}6",
         ];
     }
 
