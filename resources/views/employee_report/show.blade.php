@@ -344,7 +344,7 @@
                                         <i class="fas fa-file"></i> {{ $filename }}
                                     </a>
                                 @else
-                                    <a href="{{ asset($attachment->attachment) }}" target="blank" class="mx-3 btn btn-md btn-info align-items-center text-start"
+                                    <a href="{{ asset($attachment->attachment) }}" target="blank" class="btn btn-md btn-info align-items-center text-start"
                                         data-bs-toggle="tooltip"
                                         data-bs-original-title="{{ __('View') }}">
                                         <i class="fas fa-file"></i> {{ $filename }}
