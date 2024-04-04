@@ -1591,3 +1591,10 @@ Route::resource('employee-report', EmployeeReportController::class)->middleware(
         'XSS',
     ]
 );
+
+Route::post('employee-report/{id}/report', [EmployeeReportController::class, 'response'])->name('report.response')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
