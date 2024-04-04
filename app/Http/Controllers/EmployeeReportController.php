@@ -510,4 +510,18 @@ class EmployeeReportController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
+
+    public function response(Request $request, $report_id)
+    {
+        $report     = Report::find($report_id);
+        if (Auth::user()->employee?->id != $report->employee_id) {
+            $report->response      = $request->response;
+            $report->response_by   = Auth::user()->id;
+            $report->save();
+
+            return redirect()->back()->with('success', __('Report Response Successfully Sent'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'))->withInput();
+        }
+    }
 }
