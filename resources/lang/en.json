@@ -1943,5 +1943,9 @@
     "Report Successfully Deleted": "Report Successfully Deleted",
     "Report Detail": "Report Detail",
     "Report Successfully Updated": "Report Successfully Updated",
-    "Total Late Time": "Total Late Time"
+    "Total Late Time": "Total Late Time",
+    "Report Response": "Report Response",
+    "Enter Report Response": "Enter Report Response",
+    "Report Response Successfully Sent": "Report Response Successfully Sent",
+    "Response From": "Response From"
 }

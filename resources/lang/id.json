@@ -1942,5 +1942,9 @@
   "Report Successfully Deleted": "Laporan Berhasil Dihapus",
   "Report Detail": "Detail Laporan",
   "Report Successfully Updated": "Laporan Berhasil Dirubah",
-  "Total Late Time": "Total Waktu Keterlambatan"
+  "Total Late Time": "Total Waktu Keterlambatan",
+  "Report Response": "Tanggapan Laporan",
+  "Enter Report Response": "Masukkan Tanggapan Laporan",
+  "Report Response Successfully Sent": "Tanggapan Laporan Berhasil Dikirim",
+  "Response From": "Tanggapan Dari"
 }
