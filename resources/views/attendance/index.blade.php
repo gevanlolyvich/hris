@@ -641,7 +641,7 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            <span @if($attendance->late != '00:00:00' && strpos($attendance->late, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                                 {{ $attendance->late }}
                                             </span>
                                         </td>

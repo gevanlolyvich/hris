@@ -276,6 +276,38 @@ class SettingsController extends Controller
         }
     }
 
+    public function saveTaxSettings(Request $request)
+    {
+        if (\Auth::user()->type == 'company') {
+            $request->validate(
+                [
+                    'signer_identification_type' => 'required|string|max:255',
+                    'signer_identification' => 'required|string|max:255',
+                ]
+            );
+
+            $post = $request->all();
+            $settings = Utility::settings();
+            foreach ($post as $key => $data) {
+                if (in_array($key, array_keys($settings)) && !empty($data)) {
+                    \DB::insert(
+                        'insert into settings (`value`, `name`,`created_by`, `created_at`,`updated_at`) values (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`) ',
+                        [
+                            $data,
+                            $key,
+                            \Auth::user()->id,
+                            date('Y-m-d H:i:s'),
+                            date('Y-m-d H:i:s'),
+                        ]
+                    );
+                }
+            }
+            return redirect()->back()->with('success', __('Tax Setting Successfully Updated'));
+        } else {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+    }
+
 
     public function savePaymentSettings(Request $request)
     {
