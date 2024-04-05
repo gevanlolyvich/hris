@@ -101,6 +101,16 @@ class OvertimeController extends Controller
 
         $overtimes = $overtimes->orderBy('date', 'DESC')->get();
 
+        $branch_count = 2;
+        foreach ($branch as $index => $b) {
+            if ($b == 'Head Office') {
+                $branch[$index] = '1. '.  $b;
+            } else {
+                $branch[$index] = $branch_count. '. ' . __($b);
+                $branch_count += 1;
+            }
+        }
+
         return view('overtime.index', compact('overtimes', 'branch', 'department'));
     }
 

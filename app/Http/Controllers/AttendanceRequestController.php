@@ -73,6 +73,16 @@ class AttendanceRequestController extends Controller
                 $attendance_requests         = $attendance_requests->whereHas('employee', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
             }
 
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
+
             $attendance_requests = $attendance_requests->get();
             return view('attendancerequest.index', compact('attendance_requests', 'branch', 'department'));
         } else {
