@@ -75,6 +75,16 @@ class EmployeeController extends Controller
             }
             $employees      = $employees->get();
 
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
+
             return view('employee.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
