@@ -86,8 +86,21 @@ class EmployeeReportController extends Controller
         }
 
         $type   = Report::$report_type;
+        array_splice($type, 3, 1);
+        $count = 1;
         foreach ($type as $index => $name) {
-            $type[$index] = __($name);
+            $type[$index] = $count. '. ' . __($name);
+            $count += 1;
+        }
+
+        $branch_count = 2;
+        foreach ($branch as $index => $b) {
+            if ($b == 'Head Office') {
+                $branch[$index] = '1. '.  $b;
+            } else {
+                $branch[$index] = $branch_count. '. ' . __($b);
+                $branch_count += 1;
+            }
         }
 
         $reports = $reports->OrderBy('start_date', 'DESC')->get();
@@ -99,8 +112,11 @@ class EmployeeReportController extends Controller
     {
         if (\Auth::user()->type == 'employee') {
             $type   = Report::$report_type;
+            array_splice($type, 3, 1);
+            $count = 1;
             foreach ($type as $index => $name) {
-                $type[$index] = __($name);
+                $type[$index] = $count. '. ' . __($name);
+                $count += 1;
             }
 
             return view('employee_report.create', compact('type'));
@@ -236,6 +252,7 @@ class EmployeeReportController extends Controller
     {
         $report = Report::find($report_id);
         $type   = Report::$report_type;
+        array_splice($type, 3, 1);
         foreach ($type as $index => $name) {
             $type[$index] = __($name);
         }
@@ -244,10 +261,12 @@ class EmployeeReportController extends Controller
 
     public function edit($report_id)
     {
-        $report = Report::find($report_id);
         $type   = Report::$report_type;
+        array_splice($type, 3, 1);
+        $count = 1;
         foreach ($type as $index => $name) {
-            $type[$index] = __($name);
+            $type[$index] = $count. '. ' . __($name);
+            $count += 1;
         }
         return view('employee_report.edit', compact('report', 'type'));
     }
