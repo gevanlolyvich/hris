@@ -224,61 +224,58 @@
             <div class="card-body">
             {{ Form::open(array('route' => array('attendanceemployee.index'),'method'=>'get','id'=>'attendanceemployee_filter')) }}
                 <div class="row align-items-center justify-content-end">
-                    <div class="col-xl-10">
-                        <div class="row">
-                            <div class="col-3">
-                                <label class="form-label">{{__('Type')}}</label>
-                                <br>
-                                <div class="form-check form-check-inline form-group">
-                                    <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
-                                    <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
-                                </div>
-                                    <div class="form-check form-check-inline form-group">
-                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
-                                        <label class="form-check-label" for="daily">{{__('Daily')}}</label>
-                                    </div>
-                            </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 month">
-                                <div class="btn-box">
-                                    {{Form::label('month',__('Month'),['class'=>'form-label'])}}
-                                    {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
-                                <div class="btn-box">
-                                    {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
-                                    {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
-                                </div>
-                            </div>
-                            @if(\Auth::user()->type != 'employee')
-                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('branch', __('Branch'),['class'=>'form-label'])}}
-                                        {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', ['class' => 'form-control select2 branch', 'placeholder' => __('Select Branch')]) }}
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('department', __('Department'),['class'=>'form-label'])}}
-                                        <div class="department_div btn-box">
-                                            {{ Form::select('department', !empty($department) ? $department : [], isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                    <div class="col-2">
+                        <div class="text-center">
+                            <label>{{__('Type')}}</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-2 mt-2">
+                            <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
+                            <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
+                        </div>
+                        <br>
+                        <div class="form-check form-check-inline">
+                            <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
+                            <label class="form-check-label" for="daily">{{__('Daily')}}</label>
                         </div>
                     </div>
-                    <div class="col-auto mt-4">
-                        <div class="row">
-                            <div class="col-auto">
-                                <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('attendanceemployee_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
-                                    <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
-                                </a>
-                                <a href="{{route('attendanceemployee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
-                                    <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
-                                </a>
+                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 col-12 month">
+                        <div class="btn-box">
+                            {{Form::label('month',__('Month'),['class'=>'form-label'])}}
+                            {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 col-12 date">
+                        <div class="btn-box">
+                            {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
+                            {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
+                        </div>
+                    </div>
+                    @if(\Auth::user()->type != 'employee')
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="btn-box">
+                                {{ Form::label('branch', __('Branch'),['class'=>'form-label'])}}
+                                {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', ['class' => 'form-control select2 branch', 'placeholder' => __('Select Branch')]) }}
                             </div>
                         </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="btn-box">
+                                {{ Form::label('department', __('Department'),['class'=>'form-label'])}}
+                                <div class="department_div btn-box">
+                                    {{ Form::select('department', !empty($department) ? $department : [], isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <hr>
+                <div class="row align-items-center justify-content-end">
+                    <div class="col-auto">
+                        <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('attendanceemployee_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                            <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                        </a>
+                        <a href="{{route('attendanceemployee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                            <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                        </a>
                     </div>
                 </div>
             </div>
