@@ -15,6 +15,8 @@ class LogAttendance extends Model
         'coordinate',
         'min',
         'max',
+        'min_source',
+        'max_source',
     ];
 
     public function employee()
