@@ -43,6 +43,7 @@
             var map = null;
             var imageSrc = null;
             var notes = null;
+            var sourceValue = null;
 
             let customIcon = L.icon({
                 iconUrl: 'https://cdn4.iconfinder.com/data/icons/leto-most-searched-mix-8/64/__business_office_building-256.png',
@@ -63,7 +64,7 @@
                 var employeeName = $(this).data('employee');
                 notes = $(this).data('note');
                 var attendanceType = $(this).data('type');
-                var sourceValue = $(this).data('source');
+                sourceValue = $(this).data('source');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -347,7 +348,7 @@
                                                             data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                             data-near-name="{{ $attendance->location_in_address }}"
                                                             data-near-radius="{{ $attendance->location_in_radius }}"
-                                                            data-source="{{ $attendance->source_out }}"
+                                                            data-source="{{ $attendance->source_in }}"
                                                             data-note="{{ $attendance->note }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                         </a>
