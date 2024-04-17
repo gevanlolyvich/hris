@@ -63,6 +63,7 @@
                 var employeeName = $(this).data('employee');
                 notes = $(this).data('note');
                 var attendanceType = $(this).data('type');
+                var sourceValue = $(this).data('source');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -95,6 +96,14 @@
                     } else {
                         document.getElementById('modal-type').style.display = 'none';
                         document.getElementById('type-value').value = '';
+                    }
+
+                    if (sourceValue) {
+                        document.getElementById('modal-source').style.display = '';
+                        document.getElementById('source-value').value = sourceValue;
+                    } else {
+                        document.getElementById('modal-source').style.display = 'none';
+                        document.getElementById('source-value').value = '';
                     }
 
                     // If a map already exists, remove it
@@ -198,6 +207,12 @@
                         <div class="text-center mx-auto">
                             <strong>{{__('Type')}}</strong>
                             <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="col" style="display: none;" id="modal-source">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Source')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="source-value" id="source-value" rows="2" disabled></textarea>
                         </div>
                     </div>
                 </div>
@@ -332,6 +347,7 @@
                                                             data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                             data-near-name="{{ $attendance->location_in_address }}"
                                                             data-near-radius="{{ $attendance->location_in_radius }}"
+                                                            data-source="{{ $attendance->source_out }}"
                                                             data-note="{{ $attendance->note }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                         </a>
@@ -349,6 +365,7 @@
                                                             data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
+                                                            data-source="{{ $attendance->source_out }}"
                                                             data-image="{{ $attendance->picture_out }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
@@ -454,6 +471,7 @@
                                                             data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                             data-near-name="{{ $attendance->location_in_address }}"
                                                             data-near-radius="{{ $attendance->location_in_radius }}"
+                                                            data-source="{{ $attendance->source_in }}"
                                                             data-note="{{ $attendance->note }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                         </a>
@@ -471,6 +489,7 @@
                                                             data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
+                                                            data-source="{{ $attendance->source_out }}"
                                                             data-image="{{ $attendance->picture_out }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
@@ -611,6 +630,7 @@
                                                     data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                     data-near-name="{{ $attendance->location_in_address }}"
                                                     data-near-radius="{{ $attendance->location_in_radius }}"
+                                                    data-source="{{ $attendance->source_in }}"
                                                     data-note="{{ $attendance->note }}">
                                                     <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                 </a>
@@ -628,6 +648,7 @@
                                                     data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                     data-near-name="{{ $attendance->location_out_address }}"
                                                     data-near-radius="{{ $attendance->location_out_radius }}"
+                                                    data-source="{{ $attendance->source_out }}"
                                                     data-image="{{ $attendance->picture_out }}">
                                                     <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                 </a>

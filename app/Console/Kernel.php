@@ -19,10 +19,10 @@ class Kernel extends ConsoleKernel
         // ->timezone('Asia/Jakarta')
         // ->between('8:00', '23:59');
 
-        // $schedule->command('access_door_sync_attendance:cron')
-        //     ->everyFifteenMinutes()
-        //     ->timezone('Asia/Jakarta')
-        //     ->between('1:00', '23:59');
+        $schedule->command('access_door_sync_attendance:cron')
+            ->everyTenMinutes()
+            ->timezone('Asia/Jakarta')
+            ->between('1:00', '23:59');
 
         $schedule->command('terminate:employees')
             ->everyTenMinutes()
