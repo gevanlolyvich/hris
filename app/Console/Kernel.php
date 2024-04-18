@@ -20,19 +20,22 @@ class Kernel extends ConsoleKernel
         // ->between('8:00', '23:59');
 
         $schedule->command('access_door_sync_attendance:cron')
-            ->everyTenMinutes()
+            ->everyFiveMinutes()
             ->timezone('Asia/Jakarta')
-            ->between('1:00', '23:59');
+            ->between('1:00', '23:59')
+            ->sentryMonitor();
 
         $schedule->command('terminate:employees')
             ->everyTenMinutes()
             ->timezone('Asia/Jakarta')
-            ->between('1:00', '23:59');
+            ->between('1:00', '23:59')
+            ->sentryMonitor();
 
         $schedule->command('transfer:employees')
             ->everyTenMinutes()
             ->timezone('Asia/Jakarta')
-            ->between('1:00', '23:59');
+            ->between('1:00', '23:59')
+            ->sentryMonitor();
     }
 
     /**
