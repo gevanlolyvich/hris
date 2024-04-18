@@ -12,6 +12,7 @@ use App\Models\Department;
 use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Utility;
+use App\Models\LogAttendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -434,6 +435,8 @@ class AttendanceRequestController extends Controller
                     'attendance_type_id'    => 1, //* ON SITE
                     'coord_in'              => null,
                     'coord_out'             => null,
+                    'source_in'             => 'Application',
+                    'source_out'            => 'Application',
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
                     'shift_type_id'         => $attendance_request->employee->shift_type_id,
@@ -455,6 +458,8 @@ class AttendanceRequestController extends Controller
                     'attendance_type_id'    => 1, //* ON SITE
                     'coord_in'              => null,
                     'coord_out'             => null,
+                    'source_in'             => 'Application',
+                    'source_out'            => 'Application',
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
                     'shift_type_id'         => $attendance_request->employee->shift_type_id,
@@ -462,13 +467,26 @@ class AttendanceRequestController extends Controller
             }
         }
 
-        DB::transaction(function () use ($attendance_request, $form, $form_attendance) {
+        DB::transaction(function () use ($attendance_request, $form, $form_attendance, $date) {
             AttendanceRequest::where('id', $attendance_request->id)->update($form);
 
 
             if ($form_attendance && $form['is_approved']) {
                 AttendanceEmployee::where('employee_id', $form_attendance['employee_id'])->where('date', $form_attendance['date'])->delete();
                 AttendanceEmployee::create($form_attendance);
+
+                $logForm =  [
+                    'personel_id'   => $attendance_request->employee->personel_id,
+                    'date'          => $date,
+                    'coordinate'    => null,
+                    'min'           => $form_attendance['clock_in'],
+                    'max'           => $form_attendance['clock_out'],
+                    'min_source'    => 'Application',
+                    'max_source'    => 'Application',
+                    'shift_id'      => $form_attendance['shift_type_id'],
+                ];
+
+                LogAttendance::create($logForm);
             }
         });
 
