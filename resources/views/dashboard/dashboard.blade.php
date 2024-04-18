@@ -132,10 +132,24 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" style="padding-top: 0.35rem">
-                        <div style="display: none;" id="modal-note">
-                            <div class="text-center mx-auto">
-                                <strong>{{__('Notes')}}</strong>
-                                <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                        <div class="row text-center mx-auto">
+                            <div class="col" style="display: none;" id="modal-note">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Notes')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="col" style="display: none;" id="modal-type">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Type')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="col" style="display: none;" id="modal-source">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Source')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="source-value" id="source-value" rows="2" disabled></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
@@ -303,7 +317,7 @@
                                             <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
                                             <td>
                                                 @if ($attendanceData->coord_in)
-                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
+                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}" data-source="{{ $attendanceData->source_in }}" data-type="{{ $attendanceData->attendance_type?->name ?? '-' }}">
                                                         <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
                                                     </a>
                                                 @else
@@ -314,7 +328,7 @@
                                             </td>
                                             <td>
                                                 @if ($attendanceData->coord_out)
-                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
+                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}" data-source="{{ $attendanceData->source_out }}">
                                                         <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @else
@@ -1069,10 +1083,13 @@
             var map = null;
             var imageSrc = null;
             var notes = null;
+            var sourceValue = null;
 
             $('body').on('click', '.map-link', function() {
                 var coordinates = $(this).data('coordinates').split(', ');
                 notes = $(this).data('note');
+                var attendanceType = $(this).data('type');
+                sourceValue = $(this).data('source');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -1098,6 +1115,23 @@
                         document.getElementById('modal-note').style.display = 'none';
                         document.getElementById('note-value').value = '';
                     }
+
+                    if (attendanceType) {
+                        document.getElementById('modal-type').style.display = '';
+                        document.getElementById('type-value').value = attendanceType;
+                    } else {
+                        document.getElementById('modal-type').style.display = 'none';
+                        document.getElementById('type-value').value = '';
+                    }
+
+                    if (sourceValue) {
+                        document.getElementById('modal-source').style.display = '';
+                        document.getElementById('source-value').value = sourceValue;
+                    } else {
+                        document.getElementById('modal-source').style.display = 'none';
+                        document.getElementById('source-value').value = '';
+                    }
+
                     // If a map already exists, remove it
                     if (map !== null) {
                         map.remove();
