@@ -50,7 +50,7 @@ class AppraisalController extends Controller
         if (\Auth::user()->can('Create Appraisal')) {
             if (\Auth::user()->type == 'employee') {
                 $subordinate_ids = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray();
-                $employee_id = null;
+                $employee_id = [];
                 if (!empty($subordinate_ids)) {
                     $employee_id = $subordinate_ids;
                 } 
