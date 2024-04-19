@@ -20,7 +20,7 @@ class TestController extends Controller
     function new_get_attendances()
     {
         $units = ['Head Office'];
-        $apis =['http://172.16.0.11:3050'];
+        $apis =['http://172.16.0.16:3050'];
         $locations = '-6.172612489913187, 106.8627610802651';
         $default_coordinate = '-6.172612489913187, 106.8627610802651, 20';
         $date = date('Y-m-d');
