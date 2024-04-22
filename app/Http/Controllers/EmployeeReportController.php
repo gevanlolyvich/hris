@@ -261,6 +261,7 @@ class EmployeeReportController extends Controller
 
     public function edit($report_id)
     {
+        $report = Report::find($report_id);
         $type   = Report::$report_type;
         array_splice($type, 3, 1);
         $count = 1;
