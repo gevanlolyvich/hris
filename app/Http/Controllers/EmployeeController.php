@@ -465,7 +465,7 @@ class EmployeeController extends Controller
             // }
 
             if (\Auth::user()->type != 'employee') {
-                return redirect()->back()->back()->with('success', 'Employee Successfully Updated');
+                return redirect()->route('employee.index')->with('success', 'Employee Successfully Updated');
             } else {
                 return redirect()->route('employee.show', Crypt::encrypt($employee->id))->with('success', 'Employee Successfully Updated');
             }
