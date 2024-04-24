@@ -123,7 +123,7 @@ class Employee extends Model
             $attendanceDayName = date('l', strtotime($attendance->date));
 
             // Check if the attendance date is a workda based on shift times
-            $shift = $attendance->shift_type->shiftTimes->firstWhere('days', $attendanceDayName);
+            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);
 
             if ($shift && $shift->is_working && $type == 'Fixed') {
                 // Calculate required work hours based on shift
@@ -167,7 +167,7 @@ class Employee extends Model
 
     public function shift_type()
     {
-        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id')->withTrashed();;
     }
 
     public function documents()
