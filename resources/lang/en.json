@@ -1948,5 +1948,8 @@
     "Enter Report Response": "Enter Report Response",
     "Report Response Successfully Sent": "Report Response Successfully Sent",
     "Response From": "Response From",
-    "Source": "Source"
+    "Source": "Source",
+    "Seen": "Seen",
+    "Already Seen": "Already Seen",
+    "Not Seen": "Not Seen"
 }

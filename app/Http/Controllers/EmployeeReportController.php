@@ -251,6 +251,13 @@ class EmployeeReportController extends Controller
     public function show($report_id)
     {
         $report = Report::find($report_id);
+
+        // Set status to be read, if direct supervisor read the report
+        if (Auth::user()->employee?->id == $report->employee->managed_by) {
+            $report->is_read = true;
+            $report->save();
+        }
+
         $type   = Report::$report_type;
         array_splice($type, 3, 1);
         foreach ($type as $index => $name) {

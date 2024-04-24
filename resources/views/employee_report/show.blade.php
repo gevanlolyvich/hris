@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 @foreach ($report->activities as $activity)
-                    <div class="row activity">
+                    <div class="row activity mb-2">
                         <div class="col-md-2">
                             <div class="form-group">
                                 {{ Form::date('activity_date[]', $activity->date, ['class' => 'form-control activity_date', 'disabled' => 'disabled']) }}
@@ -105,7 +105,7 @@
                         </div>
                         <div class="col-md-10">
                             <div class="form-group">
-                                {{ Form::textarea('activity[]', $activity->activity, ['class' => 'form-control', 'rows' => '2', 'placeholder' => __('Enter Report Activity'), 'disabled' => 'disabled']) }}
+                                {{ Form::textarea('activity[]', $activity->activity, ['class' => 'form-control', 'rows' => '4', 'placeholder' => __('Enter Report Activity'), 'disabled' => 'disabled']) }}
                             </div>
                         </div>
                     </div>
@@ -125,7 +125,7 @@
                     <div class="row accomplishment">
                         <div class="col-md-12">
                             <div class="form-group">
-                                {{ Form::textarea('accomplishment[]', $accomplishment->accomplishment, ['class' => 'form-control', 'rows' => '2', 'placeholder' => __('Enter Accomplishment'), 'disabled' => 'disabled']) }}
+                                {{ Form::textarea('accomplishment[]', $accomplishment->accomplishment, ['class' => 'form-control', 'rows' => '4', 'placeholder' => __('Enter Accomplishment'), 'disabled' => 'disabled']) }}
                             </div>
                         </div>
                     </div>
@@ -145,7 +145,7 @@
                     <div class="row obstacle">
                         <div class="col-md-12">
                             <div class="form-group">
-                                {{ Form::textarea('obstacle[]', $obstacle->obstacle, ['class' => 'form-control', 'rows' => '2', 'placeholder' => __('Enter Obstacle'), 'disabled' => 'disabled']) }}
+                                {{ Form::textarea('obstacle[]', $obstacle->obstacle, ['class' => 'form-control', 'rows' => '4', 'placeholder' => __('Enter Obstacle'), 'disabled' => 'disabled']) }}
                             </div>
                         </div>
                     </div>
@@ -165,7 +165,7 @@
                     <div class="row plan">
                         <div class="col-md-12">
                             <div class="form-group">
-                                {{ Form::textarea('plan[]', $plan->plan, ['class' => 'form-control', 'rows' => '2', 'placeholder' => __('Enter Work Plan'), 'disabled' => 'disabled']) }}
+                                {{ Form::textarea('plan[]', $plan->plan, ['class' => 'form-control', 'rows' => '4', 'placeholder' => __('Enter Work Plan'), 'disabled' => 'disabled']) }}
                             </div>
                         </div>
                     </div>
