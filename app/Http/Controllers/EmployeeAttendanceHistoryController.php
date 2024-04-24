@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\IndividualAttendanceMultipleExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Transfer;
+use App\Models\Training;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
@@ -18,6 +21,7 @@ use App\Models\Overtime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeAttendanceHistoryController extends Controller
 {
@@ -42,10 +46,8 @@ class EmployeeAttendanceHistoryController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $branch->prepend('All', '');
 
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $department->prepend('All', '');
 
             $employees = null;
 
@@ -83,6 +85,21 @@ class EmployeeAttendanceHistoryController extends Controller
 
                 $employees = $employee->get();
             }
+
+            if (empty($request->department) && empty($request->branch)) {
+                $department = [];
+            }
+
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
+            
             return view('employeeattendancehistory.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -269,6 +286,30 @@ class EmployeeAttendanceHistoryController extends Controller
             }
         }
 
-        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit'));
+        $transfers  = Transfer::where('employee_id', $empId)->where('transfer_date', '<=', date('Y-m-d'))->get();
+
+        $trainings  = Training::where('employee', $empId)->get();
+
+        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit', 'transfers', 'trainings'));
+    }
+
+    public function exportIndividualAttendance(Request $request)
+    {
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                list($key, $value) = explode('=', $query);
+                $queryArray[$key] = $value;
+            }
+        }
+
+        $employee                   = Employee::find(Crypt::decrypt($request->id));
+        $queryArray['employee_id']  = $employee?->id;
+
+        $name = preg_replace('/\s+/', '', $employee?->name) . '_Attendance' . date('Y-m-d H:i:s');
+        $data = Excel::download(new IndividualAttendanceMultipleExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
     }
 }

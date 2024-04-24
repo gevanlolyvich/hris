@@ -10,67 +10,74 @@
 @endsection
 
 
-@section('content')
-    
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row justify-content-end">
-                        <div class="col-4 month">
-                            <div class="btn-box">
-                                {{Form::label('month',__('Month'),['class'=>'form-label'])}}
-                                {{Form::month('month',isset($_GET['month'])?$_GET['month'] : date('Y-m', strtotime(date('Y-m') . ' -1 month')), ['class'=>'month-btn form-control month-btn', 'id'=>'month-filter'])}}
-                            </div>
-                        </div>
-                        <div class="col-auto p-1 pt-1 mt-4">
-                            {{ Form::open(['route' => ['payslip.index'], 'method' => 'GET', 'id' => 'payslip_filter']) }}
-                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'filter_month'])}}
-                                {{-- <input type="hidden" name="filter_month" id="filter_month"> --}}
-                                <a href="#" class="btn  btn-primary"
-                                    onclick="document.getElementById('payslip_filter').submit(); return false;"
-                                    data-bs-toggle="tooltip" title="{{ __('Search Payslip') }}"
-                                    data-original-title="{{ __('Search Payslip') }}">{{ __('Search') }}
-                                </a>
-                            {{ Form::close() }}
-                        </div>
-                        @if (\Auth::user()->type != 'employee')
-                            <div class="col-auto p-1 pt-1 mt-4">
-                                {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
-                                {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'generate_month'])}}
-                                    {{-- <input type="hidden" name="generate_month" id="generate_month"> --}}
-                                    <a href="#" class="btn  btn-info"
-                                        onclick="document.getElementById('payslip_form').submit(); return false;"
-                                        data-bs-toggle="tooltip" title="{{ __('Generate Payslip') }}"
-                                        data-original-title="{{ __('Generate Payslip') }}">{{ __('Generate') }}
-                                    </a>
-                                {{ Form::close() }}
-                            </div>
-                        @endif
-                        <div class="col-auto p-1 pt-1 mt-4">
-                            {{ Form::open(['route' => ['payslip.bulkpayment', ['date'=>$month]], 'method' => 'POST', 'id' => 'payslip_bulkpay']) }}
-                                <button type="button" class="btn btn-success bs-pass-para"
-                                    data-bs-toggle="tooltip" title="{{ __('Bulk Payment Payslip') }}"
-                                    data-original-title="{{ __('Bulk Payment Payslip') }}">{{ __('Bulk Payment') }}
-                                </button>
-                            {{ Form::close() }}
-                        </div>
-                        <div class="col-auto p-1 pt-1 mt-4">
-                            {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_export']) }}
-                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'export_month'])}}
-                                {{-- <input type="hidden" name="export_month" id="export_month"> --}}
-                                <a href="#" class="btn btn-warning"
-                                    onclick="document.getElementById('payslip_export').submit(); return false;"
-                                    data-bs-toggle="tooltip" title="{{ __('Export Payslip') }}"
-                                    data-original-title="{{ __('Export Payslip') }}">{{ __('Export') }}
-                                </a>
-                            {{ Form::close() }}
+@section('content')  
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row justify-content-end">
+                    <div class="col-3">
+                        <div class="btn-box">
+                            {{Form::label('branch',__('Branch'),['class'=>'form-label'])}}
+                            {{Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : null, ['class'=>'month-btn form-control select2', 'placeholder' => __('Select Branch'), 'id' => 'branch-filter'])}}
                         </div>
                     </div>
-                 </div>
-            </div>
+                    <div class="col-3 month">
+                        <div class="btn-box">
+                            {{Form::label('month',__('Month'),['class'=>'form-label'])}}
+                            {{Form::month('month',isset($_GET['month'])?$_GET['month'] : date('Y-m', strtotime(date('Y-m') . ' -1 month')), ['class'=>'month-btn form-control month-btn', 'id'=>'month-filter'])}}
+                        </div>
+                    </div>
+                    <div class="col-auto p-1 pt-1 mt-4">
+                        {{ Form::open(['route' => ['payslip.index'], 'method' => 'GET', 'id' => 'payslip_filter']) }}
+                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'filter_month'])}}
+                            {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'filter_branch'])}}
+                            {{-- <input type="hidden" name="filter_month" id="filter_month"> --}}
+                            <a href="#" class="btn  btn-primary"
+                                onclick="document.getElementById('payslip_filter').submit(); return false;"
+                                data-bs-toggle="tooltip" title="{{ __('Search Payslip') }}"
+                                data-original-title="{{ __('Search Payslip') }}">{{ __('Search') }}
+                            </a>
+                        {{ Form::close() }}
+                    </div>
+                    @if (\Auth::user()->type != 'employee')
+                        <div class="col-auto p-1 pt-1 mt-4">
+                            {{ Form::open(['route' => ['payslip.store'], 'method' => 'POST', 'id' => 'payslip_form']) }}
+                                {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'generate_month'])}}
+                                {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'generate_branch'])}}
+                                {{-- <input type="hidden" name="generate_month" id="generate_month"> --}}
+                                <a href="#" class="btn  btn-info"
+                                    onclick="document.getElementById('payslip_form').submit(); return false;"
+                                    data-bs-toggle="tooltip" title="{{ __('Generate Payslip') }}"
+                                    data-original-title="{{ __('Generate Payslip') }}">{{ __('Generate') }}
+                                </a>
+                            {{ Form::close() }}
+                        </div>
+                    @endif
+                    <div class="col-auto p-1 pt-1 mt-4">
+                        {{ Form::open(['route' => ['payslip.bulkpayment', ['date'=>$month]], 'method' => 'POST', 'id' => 'payslip_bulkpay']) }}
+                            {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'bulk_branch'])}}
+                            <button type="button" class="btn btn-success bs-pass-para"
+                                data-bs-toggle="tooltip" title="{{ __('Bulk Payment Payslip') }}"
+                                data-original-title="{{ __('Bulk Payment Payslip') }}">{{ __('Bulk Payment') }}
+                            </button>
+                        {{ Form::close() }}
+                    </div>
+                    <div class="col-auto p-1 pt-1 mt-4">
+                        {{ Form::open(['route' => ['payslip.export'], 'method' => 'POST', 'id' => 'payslip_export']) }}
+                            {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'export_month'])}}
+                            {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'export_branch'])}}
+                            {{-- <input type="hidden" name="export_month" id="export_month"> --}}
+                            <a href="#" class="btn btn-warning"
+                                onclick="document.getElementById('payslip_export').submit(); return false;"
+                                data-bs-toggle="tooltip" title="{{ __('Export Payslip') }}"
+                                data-original-title="{{ __('Export Payslip') }}">{{ __('Export') }}
+                            </a>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+                </div>
         </div>
-    
-
+    </div>
 
     <div class="col-12">
         <div class="card">
@@ -167,6 +174,7 @@
     <script>
         $(document).ready(function() {
             callback();
+            branchChange();
 
             function callback() {
                 var month = $("#month-filter").val();
@@ -194,7 +202,34 @@
                 }
             }
 
+            function branchChange() {
+                var branch = $("#branch-filter").val();
+
+                let filterbranch = document.getElementById('filter_branch');
+                let exportbranch = document.getElementById('export_branch');
+                let generatebranch = document.getElementById('generate_branch');
+                let bulkpaybranch = document.getElementById('bulk_branch');
+
+                if (filterbranch) {
+                    filterbranch.value = branch;
+                    filterbranch.val = branch;
+                }
+                if (exportbranch) {
+                    exportbranch.value = branch;
+                    exportbranch.val = branch;
+                }
+                if (generatebranch) {
+                    generatebranch.value = branch;
+                    generatebranch.val = branch;
+                }
+                if (bulkpaybranch) {
+                    bulkpaybranch.value = branch;
+                    bulkpaybranch.val = branch;
+                }
+            }
+
             $(document).on("change", "#month-filter", callback);
+            $(document).on("change", "#branch-filter", branchChange);
 
             //bulkpayment Click
             $(document).on("click", "#bulk_payment", function() {

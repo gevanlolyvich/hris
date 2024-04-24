@@ -87,6 +87,10 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
+use App\Http\Controllers\LevelDesignationController;
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\Pph21Controller;
+use App\Http\Controllers\EmployeeReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -145,6 +149,7 @@ Route::group(
     function () {
 
         Route::resource('settings', SettingsController::class);
+        Route::post('tax-settings', [SettingsController::class, 'saveTaxSettings'])->name('tax.settings');
         Route::post('email-settings', [SettingsController::class, 'saveEmailSettings'])->name('email.settings');
         Route::post('company-settings', [SettingsController::class, 'saveCompanySettings'])->name('company.settings');
         Route::post('system-settings', [SettingsController::class, 'saveSystemSettings'])->name('system.settings');
@@ -222,6 +227,12 @@ Route::post('employee/json', [EmployeeController::class, 'json'])->name('employe
     ]
 );
 Route::post('department/employee/json', [EmployeeController::class, 'departmentJson'])->name('department.employee.json')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('employee/department/json', [EmployeeController::class, 'employeeDepartmentJson'])->name('employee.department.json')->middleware(
     [
         'auth',
         'XSS',
@@ -1512,3 +1523,78 @@ Route::post('overtime/report', [OvertimeController::class, 'report'])->name('ove
 Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export')->middleware(['auth', 'XSS']);
 Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNotClockIn'])->name('attendanceemployee.exportNotClockIn')->middleware(['auth', 'XSS']);
 Route::get('report/monthlyattendance/export', [ReportController::class, 'exportMonthlyAttendance'])->name('report.monthlyAttendace.export')->middleware(['auth', 'XSS']);
+Route::get('employeehistory/export', [EmployeeAttendanceHistoryController::class, 'exportIndividualAttendance'])->name('individualAttendance.export')->middleware(['auth', 'XSS']);
+Route::resource('level-designation', LevelDesignationController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('goal', GoalController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('goal/{id}/progress', [GoalController::class, 'getProgress'])->name('goal.getProgress')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('goal/{id}/progress', [GoalController::class, 'progress'])->name('goal.progress')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/goal', [AppraisalController::class, 'getGoals'])->name('appraisal.getgoal')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/essay', [AppraisalController::class, 'getEssayCompetency'])->name('appraisal.getessay')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('appraisal/weight', [AppraisalController::class, 'getWeightedCompetency'])->name('appraisal.getweightcompetency')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('appraisal/{id}/comment', [AppraisalController::class, 'comment'])->name('appraisal.comment')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('pph21', Pph21Controller::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('pph21/export', [Pph21Controller::class, 'export'])->name('pph21.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('employee-report', EmployeeReportController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('employee-report/{id}/report', [EmployeeReportController::class, 'response'])->name('report.response')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);

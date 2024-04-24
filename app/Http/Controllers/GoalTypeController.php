@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoalType;
+use App\Models\GoalTracking;
 use Illuminate\Http\Request;
 
 class GoalTypeController extends Controller

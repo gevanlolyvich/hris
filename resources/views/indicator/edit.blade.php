@@ -1,172 +1,67 @@
-{{-- {{ Form::model($indicator, ['route' => ['indicator.update', $indicator->id], 'method' => 'PUT']) }}
-<div class="modal-body">
-    <div class="row">
-            <div class="form-group">
-                {{ Form::label('branch', __('Branch'), ['class' => 'col-form-label']) }}
-                {{ Form::select('branch', $brances, null, ['class' => 'form-control select2', 'required' => 'required']) }}
-            </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('department', __('Department'), ['class' => 'col-form-label']) }}
-                {{ Form::select('department', $departments, null, ['class' => 'form-control select2','required' => 'required','id' => 'department_id']) }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('designation', __('Designation'), ['class' => 'col-form-label']) }}
-                <select class="select2 form-control select2-multiple" id="designation_id" name="designation"
-                    data-toggle="select2" data-placeholder="{{ __('Select Designation ...') }}" required>
-                </select>
-            </div>
-        </div>
-
-    </div>
-    <div class="row">
-        @foreach ($performance_types as $performances)
-            <div class="col-md-12 mt-3">
-                <h6>{{ $performances->name }}</h6>
-            </div>
-            @foreach ($performances->types as $types)
-                <div class="col-6 mt-2">
-                    {{ $types->name }}
-                </div>
-                <div class="col-6 mt-2">
-                    <fieldset id='demo1' class="rating">
-                        <input class="stars form-check-input" type="radio" id="technical-5-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="5"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 5 ? 'checked' : '' }}>
-                        <label class="full form-check-label" for="technical-5-{{ $types->id }}"
-                            title="Awesome - 5 stars"></label>
-                        <input class="stars form-check-input" type="radio" id="technical-4-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="4"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 4 ? 'checked' : '' }}>
-                        <label class="full form-check-label" for="technical-4-{{ $types->id }}"
-                            title="Pretty good - 4 stars"></label>
-                        <input class="stars form-check-input" type="radio" id="technical-3-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="3"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 3 ? 'checked' : '' }}>
-                        <label class="full form-check-label" for="technical-3-{{ $types->id }}"
-                            title="Meh - 3 stars"></label>
-                        <input class="stars form-check-input" type="radio" id="technical-2-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="2"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 2 ? 'checked' : '' }}>
-                        <label class="full form-check-label" for="technical-2-{{ $types->id }}"
-                            title="Kinda bad - 2 stars"></label>
-                        <input class="stars form-check-input" type="radio" id="technical-1-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="1"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 1 ? 'checked' : '' }}>
-                        <label class="full form-check-label" for="technical-1-{{ $types->id }}"
-                            title="Sucks big time - 1 star"></label>
-                    </fieldset>
-                </div>
-            @endforeach
-        @endforeach
-    </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Close') }}</button>
-     <input type="submit" value="{{ __('Update') }}" class="btn  btn-primary">
-</div>
-{{ Form::close() }}
-<script type="text/javascript">
-    function getDesignation(did) {
-        $.ajax({
-            url: '{{ route('employee.json') }}',
-            type: 'POST',
-            data: {
-                "department_id": did,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                console.log(data);
-                $('#designation_id').empty();
-                $('#designation_id').append('<option value="">Select any Designation</option>');
-                $.each(data, function(key, value) {
-                    var select = '';
-                    if (key == '{{ $indicator->designation }}') {
-                        select = 'selected';
-                    }
-
-                    $('#designation_id').append('<option value="' + key + '"  ' + select + '>' +
-                        value + '</option>');
-                });
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        var d_id = $('#department_id').val();
-        getDesignation(d_id);
-    });
-</script> --}}
-
 {{ Form::model($indicator, ['route' => ['indicator.update', $indicator->id], 'method' => 'PUT']) }}
 <div class="modal-body">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-12">
             <div class="form-group">
-                {{ Form::label('branch', __('Branch'), ['class' => 'col-form-label']) }}
-                {{ Form::select('branch', $brances, null, ['class' => 'form-control select2', 'required' => 'required']) }}
+                {{ Form::label('level_id', __('Level Designation'), ['class' => 'col-form-label']) }}
+                {{ Form::select('level_id', $levels, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Level Designation')]) }}
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('department', __('Department'), ['class' => 'col-form-label']) }}
-                {{ Form::select('department', $departments, null, ['class' => 'form-control select2', 'required' => 'required', 'id' => 'department_id']) }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ Form::label('designation', __('Designation'), ['class' => 'col-form-label']) }}
-                <div class="designation_div">
-                    <select class="select2 form-control designation_id" name="designation"
-                    data-placeholder="{{ __('Select Designation ...') }}" required>
-               </select>
-                </div>
-
-            </div>
-        </div>
-
     </div>
     <div class="row">
-        @foreach ($performance_types as $performances)
+        @foreach ($performance_types as $index => $performance_type)
             <div class="col-md-12 mt-3">
-                <h6>{{ $performances->name }}</h6>
+                <h5>{{ \Auth::user()->romanize($index + 1)}}. {{ $performance_type->name }}</h5>
                 <hr class="mt-0">
             </div>
-            @foreach ($performances->types as $types)
-                <div class="col-6">
-                    {{ $types->name }}
+            @foreach ($performance_type->competencies as $comptency_0)
+                <div class="row mt-2 mx-1">
+                    <div class="col-9 align-items-center">
+                        <p>{{ $comptency_0->name }}</p>
+                    </div>
+                    <div class="col-3">
+                        {{ Form::number($comptency_0->id, array_key_exists("competency_{$comptency_0->id}", $processed_weights) ? $processed_weights["competency_{$comptency_0->id}"] : null, ['class' => 'form-control', 'placeholder' => __('Value Weight'), 'name' => "competencies[{$comptency_0->id}]", 'min' => '0']) }}
+                    </div>
                 </div>
-                <div class="col-6">
-                    <fieldset id='demo1' class="rate">
-                        <input class="stars" type="radio" id="technical-5-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="5"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 5 ? 'checked' : '' }}>
-                        <label class="full" for="technical-5-{{ $types->id }}"
-                            title="Awesome - 5 stars"></label>
-                        <input class="stars" type="radio" id="technical-4-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="4"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 4 ? 'checked' : '' }}>
-                        <label class="full" for="technical-4-{{ $types->id }}"
-                            title="Pretty good - 4 stars"></label>
-                        <input class="stars" type="radio" id="technical-3-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="3"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 3 ? 'checked' : '' }}>
-                        <label class="full" for="technical-3-{{ $types->id }}"
-                            title="Meh - 3 stars"></label>
-                        <input class="stars" type="radio" id="technical-2-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="2"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 2 ? 'checked' : '' }}>
-                        <label class="full" for="technical-2-{{ $types->id }}"
-                            title="Kinda bad - 2 stars"></label>
-                        <input class="stars" type="radio" id="technical-1-{{ $types->id }}"
-                            name="rating[{{ $types->id }}]" value="1"
-                            {{ isset($ratings[$types->id]) && $ratings[$types->id] == 1 ? 'checked' : '' }}>
-                        <label class="full" for="technical-1-{{ $types->id }}"
-                            title="Sucks big time - 1 star"></label>
-                    </fieldset>
+            @endforeach
+            @foreach ($performance_type->child as $index_1 => $type_1)
+                <div class="col-12 mt-4 mx-1">
+                    <h6><i>{{ $index_1 + 1 }}. {{ $type_1->name }}</i></h6>
+                    <hr class="mt-0">
                 </div>
+                <br>
+                @if (count($type_1->child) > 0)
+                    @foreach ($type_1->child as $index_2 => $type_2)
+                        <div class="col-12 mt-4 mx-2">
+                            <h6><i>{{ \Auth::user()->alpbatize($index_2) }}. {{ $type_2->name }}</i></h6>
+                            <hr class="mt-0">
+                        </div>
+                        @if (count($type_2->child) > 0)
+                        @else
+                            @foreach ($type_2->competencies as $comptency_2)
+                                <div class="row mt-2 mx-2">
+                                    <div class="col-9 align-items-center">
+                                        <p>{{ $comptency_2->name }}</p>
+                                    </div>
+                                    <div class="col-3">
+                                        {{ Form::number($comptency_2->id, array_key_exists("competency_{$comptency_2->id}", $processed_weights) ? $processed_weights["competency_{$comptency_2->id}"] : null, ['id' => "competency_{$comptency_2->id}", 'class' => 'form-control', 'placeholder' => __('Value Weight'), 'name' => "competencies[{$comptency_2->id}]", 'min' => '0']) }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    @endforeach
+                @else
+                    @foreach ($type_1->competencies as $comptency_1)
+                        <div class="row mt-2 mx-1">
+                            <div class="col-9 align-items-center" >
+                                <p>{{ $comptency_1->name }}</p>
+                            </div>
+                            <div class="col-3">
+                                {{ Form::number($comptency_1->id, array_key_exists("competency_{$comptency_1->id}", $processed_weights) ? $processed_weights["competency_{$comptency_1->id}"] : null, ['id' => "competency_{$comptency_1->id}", 'class' => 'form-control', 'placeholder' => __('Value Weight'), 'name' => "competencies[{$comptency_1->id}]", 'min' => '0']) }}
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             @endforeach
         @endforeach
     </div>
@@ -177,64 +72,3 @@
     <input type="submit" value="{{ __('Update') }}" class="btn btn-primary">
 </div>
     {{ Form::close() }}
-
-<script type="text/javascript">
-    function getDesignation(did) {
-        $.ajax({
-            url: '{{ route('employee.json') }}',
-            type: 'POST',
-            data: {
-                "department_id": did,
-                "_token": "{{ csrf_token() }}",
-            },
-            success: function(data) {
-                console.log(data);
-
-
-
-                // $('#designation_id').empty();
-                // $('#designation_id').append('<option value="">Select any Designation</option>');
-                // $.each(data, function(key, value) {
-                //     var select = '';
-                //     if (key == '{{ $indicator->designation }}') {
-                //         select = 'selected';
-                //     }
-
-                //     $('#designation_id').append('<option value="' + key + '"  ' + select + '>' +
-                //         value + '</option>');
-                // });
-
-
-                $('.designation_id').empty();
-                    var emp_selct = ` <select class="form-control  designation_id" name="designation" id="choices-multiple"
-                                            placeholder="Select Designation" >
-                                            </select>`;
-                     $('.designation_div').html(emp_selct);
-                    $.each(data, function(key, value) {
-                    var select = '';
-                    if (key == '{{ $indicator->designation }}') {
-                        select = 'selected';
-                    }
-
-                    $('.designation_id').append('<option value="' + key + '"  ' + select + '>' +
-                        value + '</option>');
-                });
-
-                    // $('.designation_id').append('<option value="0"> {{ __('All') }} </option>');
-                    // $.each(data, function(key, value) {
-                    //     $('.designation_id').append('<option value="' + key + '">' + value +
-                    //         '</option>');
-                    // });
-                    new Choices('#choices-multiple', {
-                        removeItemButton: true,
-                    });
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        var d_id = $('#department_id').val();
-        getDesignation(d_id);
-    });
-</script>
-

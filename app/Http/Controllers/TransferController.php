@@ -35,10 +35,16 @@ class TransferController extends Controller
     public function create()
     {
         if (\Auth::user()->can('Create Transfer')) {
-            $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $departments = Department::get()->pluck('name', 'id');
             $branches    = Branch::get()->pluck('name', 'id');
-            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get();
             $direct_spv  = Employee::where('is_active', 1)->where('user_id', '!=', \Auth::user()->id)->orderby('name', 'asc')->get()->pluck('name', 'id');
+
+            foreach ($employees  as $employee) {
+                $employee->name = "{$employee->name} | {$employee->branch->name}";
+            }
+
+            $employees  = $employees->pluck('name', 'id');
 
             return view('transfer.create', compact('employees', 'departments', 'branches', 'direct_spv'));
         } else {
@@ -127,16 +133,16 @@ class TransferController extends Controller
     public function edit(Transfer $transfer)
     {
         if (\Auth::user()->can('Edit Transfer')) {
-            $departments = Department::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $branches    = Branch::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-            $employees   = Employee::where('is_active', 1)->where('created_by', \Auth::user()->creatorId())->orderby('name', 'asc')->get()->pluck('name', 'id');
-            if ($transfer->created_by == \Auth::user()->creatorId()) {
+            $departments = Department::get()->pluck('name', 'id');
+            $branches    = Branch::get()->pluck('name', 'id');
+            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            if ($transfer->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 return view('transfer.edit', compact('transfer', 'employees', 'departments', 'branches'));
             } else {
-                return response()->json(['error' => __('Permission denied.')], 401);
+                return redirect()->back()->with('error', __('Permission denied.'));
             }
         } else {
-            return response()->json(['error' => __('Permission denied.')], 401);
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
@@ -144,7 +150,7 @@ class TransferController extends Controller
     {
         // return $request;
         if (\Auth::user()->can('Edit Transfer')) {
-            if ($transfer->created_by == \Auth::user()->creatorId()) {
+            if ($transfer->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 $validator = \Validator::make(
                     $request->all(),
                     [
@@ -191,7 +197,7 @@ class TransferController extends Controller
     public function destroy(Transfer $transfer)
     {
         if (\Auth::user()->can('Delete Transfer')) {
-            if ($transfer->created_by == \Auth::user()->creatorId()) {
+            if ($transfer->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 $transfer->delete();
 
                 return redirect()->route('transfer.index')->with('success', __('Transfer successfully deleted.'));

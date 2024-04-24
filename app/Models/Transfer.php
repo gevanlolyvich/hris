@@ -20,17 +20,17 @@ class Transfer extends Model
 
     public function department()
     {
-        return $this->belongsTo('App\Models\Department', 'department_id', 'id');
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
-
+    
     public function branch()
     {
-        return $this->hasMany('App\Models\Branch', 'id', 'branch_id')->first();
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
     }
 
     public function designation()
     {
-        return $this->belongsTo('App\Models\Designation', 'designation_id', 'id');
+        return $this->belongsTo(Designation::class, 'designation_id', 'id');
     }
 
     public function managed()
@@ -41,6 +41,6 @@ class Transfer extends Model
 
     public function employee()
     {
-        return $this->hasOne('App\Models\Employee', 'id', 'employee_id')->first();
+        return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
 }

@@ -41,10 +41,8 @@ class AttendanceEmployeeController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            $branch->prepend('All', '');
 
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            $department->prepend('All', '');
 
             $is_valid = $request->query('is_valid', null);
 
@@ -107,6 +105,10 @@ class AttendanceEmployeeController extends Controller
 
                 if (!empty($request->department)) {
                     $employee->where('department_id', $request->department);
+                }
+
+                if (empty($request->department) && empty($request->branch)) {
+                    $department = [];
                 }
 
                 $employee = $employee?->orderby('name', 'asc')?->get()?->pluck('id');
@@ -193,6 +195,16 @@ class AttendanceEmployeeController extends Controller
             }
 
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
+
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
 
             return view('attendance.index', compact('attendanceEmployee', 'branch', 'department', 'emp'));
         } else {
@@ -468,6 +480,7 @@ class AttendanceEmployeeController extends Controller
 
                     $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
 
                     $attendanceEmployee->save();
 
@@ -477,6 +490,8 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
+                        'max_source'    => 'Application',
+                        'shift_id'      => $attendanceEmployee->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);
@@ -527,6 +542,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
 
                     $attendanceEmployee->save();
 
@@ -545,6 +561,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
                     $attendanceEmployee->save();
 
                     $logForm =  [
@@ -553,6 +570,8 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
+                        'max_source'    => 'Application',
+                        'shift_id'      => $attendanceEmployee->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);
@@ -574,6 +593,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
 
                     $attendanceEmployee->save();
 
@@ -630,6 +650,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->work_hours      = $workhours;
                     $attendanceEmployee->coord_out       = $coord_out;
                     $attendanceEmployee->picture_out     = $picture_path;
+                    $attendanceEmployee->source_out      = 'Application';
                     $attendanceEmployee->save();
 
                     $logForm =  [
@@ -638,6 +659,8 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
+                        'max_source'    => 'Application',
+                        'shift_id'      => $attendanceEmployee->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);
@@ -689,6 +712,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
 
                     $attendanceEmployee->save();
 
@@ -707,6 +731,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->work_hours    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
                     $attendanceEmployee->save();
 
                     $logForm =  [
@@ -715,6 +740,8 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_out,
                         'min'           => $attendanceEmployee->clock_in,
                         'max'           => $time,
+                        'max_source'    => 'Application',
+                        'shift_id'      => $attendanceEmployee->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);
@@ -735,6 +762,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
+                    $attendanceEmployee->source_out    = 'Application';
 
                     $attendanceEmployee->save();
 
@@ -917,6 +945,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
                     $employeeAttendance->shift_type_id          = $request->shift_type_id;
+                    $employeeAttendance->source_in              = 'Application';
                     $employeeAttendance->save();
 
                     $logForm =  [
@@ -925,6 +954,9 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_in,
                         'min'           => $time,
                         'max'           => $time,
+                        'min_source'    => 'Application',
+                        'max_source'    => 'Application',
+                        'shift_id'      => $request->shift_type_id,
                     ];
 
                     //* Shift History
@@ -964,6 +996,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
                     $employeeAttendance->shift_type_id          = $request->shift_type_id;
+                    $employeeAttendance->source_in              = 'Application';
 
                     $logForm =  [
                         'personel_id'   => $employee->personel_id,
@@ -971,6 +1004,9 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_in,
                         'min'           => $time,
                         'max'           => $time,
+                        'min_source'    => 'Application',
+                        'max_source'    => 'Application',
+                        'shift_id'      => $request->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);
@@ -1001,6 +1037,7 @@ class AttendanceEmployeeController extends Controller
                     $employeeAttendance->picture_in             = $picture_path;
                     $employeeAttendance->created_by             = \Auth::user()->id;
                     $employeeAttendance->shift_type_id          = $request->shift_type_id;
+                    $employeeAttendance->source_in              = 'Application';
 
                     $employeeAttendance->save();
 
@@ -1010,6 +1047,9 @@ class AttendanceEmployeeController extends Controller
                         'coordinate'    => $coord_in,
                         'min'           => $time,
                         'max'           => $time,
+                        'min_source'    => 'Application',
+                        'max_source'    => 'Application',
+                        'shift_id'      => $request->shift_type_id,
                     ];
 
                     LogAttendance::create($logForm);

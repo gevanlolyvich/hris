@@ -1896,7 +1896,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $settings = Utility::settings();
 
-        return (($settings['site_currency_symbol_position'] == "pre") ? $settings['site_currency_symbol'] : '') . number_format($price, 2) . (($settings['site_currency_symbol_position'] == "post") ? $settings['site_currency_symbol'] : '');
+        return (($settings['site_currency_symbol_position'] == "pre") ? $settings['site_currency_symbol'] : '') . ' ' . number_format($price, 2) . ' ' . (($settings['site_currency_symbol_position'] == "post") ? $settings['site_currency_symbol'] : '');
     }
 
     public function currencySymbol()
@@ -2095,5 +2095,42 @@ class User extends Authenticatable implements MustVerifyEmail
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id', 'id');
+    }
+
+    public function romanize($number)
+    {
+        $romanSymbols = array(
+            'M'  => 1000,
+            'CM' => 900,
+            'D'  => 500,
+            'CD' => 400,
+            'C'  => 100,
+            'XC' => 90,
+            'L'  => 50,
+            'XL' => 40,
+            'X'  => 10,
+            'IX' => 9,
+            'V'  => 5,
+            'IV' => 4,
+            'I'  => 1
+        );
+        
+        $romanNumeral = '';
+        
+        // Iterate through the symbols and subtract their values from the number
+        foreach ($romanSymbols as $symbol => $value) {
+            // Repeat the symbol until the value is less than or equal to the number
+            while ($number >= $value) {
+                $romanNumeral .= $symbol;
+                $number -= $value;
+            }
+        }
+        
+        return $romanNumeral;
+    }
+
+    function alpbatize($index) {
+        // Convert the numeric index into an alphabetical index
+        return chr(65 + $index); // ASCII value for 'A' is 65
     }
 }

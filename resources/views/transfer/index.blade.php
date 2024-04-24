@@ -29,7 +29,7 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                @role('company')
+                                @role(['company', 'hr'])
                                     <th>{{ __('Employee Name') }}</th>
                                 @endrole
                                 <th>{{ __('Branch') }}</th>
@@ -45,10 +45,10 @@
 
                             @foreach ($transfers as $transfer)
                                 <tr>
-                                    @role('company')
-                                        <td>{{ !empty($transfer->employee()) ? $transfer->employee()->name : '' }}</td>
+                                    @role(['company', 'hr'])
+                                        <td>{{ $transfer->employee->name ?? '-' }}</td>
                                     @endrole
-                                    <td>{{ !empty($transfer->branch()) ? $transfer->branch()->name : '' }}</td>
+                                    <td>{{ $transfer->branch->name ?? '-' }}</td>
                                     <td>{{ $transfer->department->name }}</td>
                                     <td>{{ \Auth::user()->dateFormat($transfer->transfer_date) }}</td>
                                     <td>
@@ -181,6 +181,7 @@
                     $('.department_div').html(emp_selct);
 
                     $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
                     $.each(data, function(key, value) {
                         $('.department_id').append('<option value="' + key + '">' + value +
                             '</option>');

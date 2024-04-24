@@ -3,54 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Indicator extends Model
 {
     protected $fillable = [
-        'branch',
-        'designation',
-        'customer_experience',
-        'marketing',
-        'administration',
-        'professionalism',
-        'integrity',
-        'attendance',
+        'level_id',
         'created_by',
-        'created_user',
     ];
 
-    public static $technical = [
-        'None',
-        'Beginner',
-        'Intermediate',
-        'Advanced',
-        'Expert / Leader',
-    ];
-
-    public static $organizational = [
-        'None',
-        'Beginner',
-        'Intermediate',
-        'Advanced',
-    ];
-
-    public function branches()
+    public function level()
     {
-        return $this->hasOne('App\Models\Branch', 'id', 'branch');
+        return $this->belongsTo(LevelDesignation::class, 'level_id', 'id');
     }
 
-    public function departments()
+    public function weights(): HasMany
     {
-        return $this->hasOne('App\Models\Department', 'id', 'department');
-    }
-
-    public function designations()
-    {
-        return $this->hasOne('App\Models\Designation', 'id', 'designation');
-    }
-
-    public function user()
-    {
-        return $this->hasOne('App\Models\User', 'id', 'created_user');
+        return $this->hasMany(IndicatorWeight::class, 'indicator_id');
     }
 }

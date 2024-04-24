@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppraisalRating;
 use App\Models\Competencies;
+use App\Models\IndicatorWeight;
 use App\Models\Performance_Type;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CompetenciesController extends Controller
 {
@@ -12,7 +15,7 @@ class CompetenciesController extends Controller
     public function index()
     {
         if (\Auth::user()->can('Manage Competencies')) {
-            $competencies = Competencies::where('created_by', \Auth::user()->creatorId())->orderBy('id', 'ASC')->get();
+            $competencies = Competencies::orderBy('name', 'ASC')->get();
             return view('competencies.index', compact('competencies'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -22,10 +25,14 @@ class CompetenciesController extends Controller
 
     public function create()
     {
-        $user = \Auth::user();
-        $performance_types = Performance_Type::where('created_by', '=', $user->creatorId())->get()->pluck('name', 'id');
+        $performance_types  = Performance_Type::get()->pluck('name', 'id');
+        $types              = Competencies::$types;
 
-        return view('competencies.create', compact('performance_types'));
+        foreach ($types as $type) {
+            $types[$type] = __("{$type}");
+        }
+
+        return view('competencies.create', compact('performance_types', 'types'));
     }
 
 
@@ -46,10 +53,12 @@ class CompetenciesController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $competencies             = new Competencies();
-            $competencies->name       = $request->name;
-            $competencies->type       = $request->type;
-            $competencies->created_by = \Auth::user()->creatorId();
+            $competencies                       = new Competencies();
+            $competencies->name                 = $request->name;
+            $competencies->type                 = $request->type;
+            $competencies->performance_type_id  = $request->performance_type_id;
+            $competencies->description          = $request->description;
+            $competencies->created_by           = \Auth::user()->id;
             $competencies->save();
 
             return redirect()->route('competencies.index')->with('success', __('Competencies  successfully created.'));
@@ -67,10 +76,15 @@ class CompetenciesController extends Controller
 
     public function edit($id)
     {
-        $competencies = Competencies::find($id);
-        $types = Performance_Type::get()->pluck('name', 'id');
+        $competencies       = Competencies::find($id);
+        $performance_types  = Performance_Type::get()->pluck('name', 'id');
+        $types              = Competencies::$types;
 
-        return view('competencies.edit', compact('types', 'competencies'));
+        foreach ($types as $type) {
+            $types[$type] = __("{$type}");
+        }
+
+        return view('competencies.edit', compact('types', 'performance_types', 'competencies'));
     }
 
 
@@ -90,9 +104,11 @@ class CompetenciesController extends Controller
 
                 return redirect()->back()->with('error', $messages->first());
             }
-            $competencies       = Competencies::find($id);
-            $competencies->name = $request->name;
-            $competencies->type = $request->type;
+            $competencies                       = Competencies::find($id);
+            $competencies->name                 = $request->name;
+            $competencies->type                 = $request->type;
+            $competencies->performance_type_id  = $request->performance_type_id;
+            $competencies->description          = $request->description;
             $competencies->save();
 
             return redirect()->route('competencies.index')->with('success', __('Competencies  successfully updated.'));
@@ -107,6 +123,9 @@ class CompetenciesController extends Controller
         if (\Auth::user()->can('Delete Competencies')) {
             $competencies = Competencies::find($id);
             $competencies->delete();
+
+            IndicatorWeight::where('competency_id', $id)->delete();
+            AppraisalRating::where('competency_id', $id)->delete();
 
             return redirect()->route('competencies.index')->with('success', __('Competencies  successfully deleted.'));
         } else {
