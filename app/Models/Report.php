@@ -17,6 +17,7 @@ class Report extends Model
         'type',
         'start_date',
         'end_date',
+        'is_read',
         'response',
         'response_by',
     ];

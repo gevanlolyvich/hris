@@ -1947,5 +1947,8 @@
   "Enter Report Response": "Masukkan Tanggapan Laporan",
   "Report Response Successfully Sent": "Tanggapan Laporan Berhasil Dikirim",
   "Response From": "Tanggapan Dari",
-  "Source": "Sumber"
+  "Source": "Sumber",
+  "Seen": "Dilihat",
+  "Already Seen": "Sudah Dilihat",
+  "Not Seen": "Belum Dilihat"
 }

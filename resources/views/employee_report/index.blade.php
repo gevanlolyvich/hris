@@ -121,7 +121,8 @@
                             <th>{{ __('Branch') }}</th>
                             <th>{{ __('Type') }}</th>
                             <th>{{ __('Time Period') }}</th>
-                            <th>{{ __('Action') }}</th>
+                            <th>{{ __('Status') }}</th>
+                            <th>{{ __('Action') }}</th> 
                         </tr>
                     </thead>
                     <tbody>
@@ -152,6 +153,13 @@
                                 <td>{{ $report->employee->branch->name }}</td>
                                 <td>{{ __("$type") }}</td>
                                 <td>{{ $report->start_date }} - {{ $report->end_date }}</td>
+                                <td>
+                                    @if ($report->is_read)
+                                        <button type="button" class="btn btn-sm btn-success disabled">{{ __('Already Seen')}}</button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-danger disabled">{{ __('Not Seen')}}</button>
+                                    @endif
+                                </td>
                                 <td>
                                     <span>
                                         <div class="action-btn bg-warning ms-2">
