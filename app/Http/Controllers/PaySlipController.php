@@ -491,7 +491,7 @@ class PaySlipController extends Controller
         $payslip        = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
         $employee       = Employee::find($payslip->employee_id);
 
-        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+        $salaryType     = $employee->salaryType?->name ?? '-';
 
         $payslipDetail  = Utility::employeePayslipDetail($id, $month);
 
@@ -534,7 +534,7 @@ class PaySlipController extends Controller
         $payslip  = PaySlip::where('id', $payslipId)->first();
         $employee = Employee::find($payslip->employee_id);
 
-        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+        $salaryType     = $employee->salaryType?->name ?? '-';
 
         $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id, $month);
 
@@ -668,7 +668,7 @@ class PaySlipController extends Controller
 
             $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
 
-            $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+            $salaryType     = $employee->salaryType?->name ?? '-';
 
             $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
 
