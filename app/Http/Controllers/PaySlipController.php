@@ -13,7 +13,6 @@ use App\Mail\PayslipSend;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PaySlip;
-use App\Models\PaySlipType;
 use App\Models\SaturationDeduction;
 use App\Models\Utility;
 use Illuminate\Http\Request;
