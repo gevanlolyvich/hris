@@ -4,9 +4,6 @@
     {{ __('Manage Appraisal') }}
 @endsection
 
-@push('script-page')
-@endpush
-
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
     <li class="breadcrumb-item">{{ __('Appraisal') }}</li>
@@ -14,8 +11,8 @@
 
 @section('action-button')
     @can('Create Appraisal')
-        <a href="{{ route('appraisal.create') }}" data-ajax-popup="true"
-            data-title="{{ __('Create New Appraisal') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+        <a href="{{ route('appraisal.create') }}"
+            data-title="{{ __('Create New Appraisal') }}" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create New Appraisal') }}">
             <i class="ti ti-plus"></i>
         </a>
