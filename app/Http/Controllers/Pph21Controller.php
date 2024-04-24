@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use \App\Models\Branch;
-use \App\Models\Employee;
-use \App\Models\Payslip;
-use \App\Models\Pph21;
-use \App\Models\Utility;
+use App\Models\Branch;
+use App\Models\Employee;
+use App\Models\PaySlip;
+use App\Models\Pph21;
+use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -154,7 +154,7 @@ class Pph21Controller extends Controller
 
             // check if there employee missing payslip in the time frame
             $employeeHavePayslip = collect($employees)->every(function ($employee_id) use ($formate_month_year) {
-                return Payslip::where('employee_id', $employee_id)->where('salary_month', $formate_month_year)->exists();
+                return PaySlip::where('employee_id', $employee_id)->where('salary_month', $formate_month_year)->exists();
             });
 
 
@@ -162,7 +162,7 @@ class Pph21Controller extends Controller
                 return redirect()->back()->with('error', __('Please Generate Employee Payslip First'));
             }
 
-            $payslips   = Payslip::whereIn('employee_id', $employees)->where('salary_month', $formate_month_year)->get();
+            $payslips   = PaySlip::whereIn('employee_id', $employees)->where('salary_month', $formate_month_year)->get();
 
             $month_in_year             = [];
             for ($i=1; $i <= 12 ; $i++) { 
@@ -193,8 +193,8 @@ class Pph21Controller extends Controller
                     $pph21->bruto           = $payslip->bruto;
                     $pph21->rate            = 0;
 
-                    $deduction_in_year      = Payslip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->select('saturation_deduction')->get()->pluck('saturation_deduction');
-                    $total_bruto            = Payslip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->sum('bruto');
+                    $deduction_in_year      = PaySlip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->select('saturation_deduction')->get()->pluck('saturation_deduction');
+                    $total_bruto            = PaySlip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->sum('bruto');
                     $total_pph21            = Pph21::where('employee_id', $payslip->employee_id)->whereYear('date', $year)->sum('pph21');
                     $total_zakat            = $this->calculate_total_zakat($deduction_in_year, "{$payslip->employees->salary}");
                     $position_cost          = bcmul('0.05', $total_bruto, 2);
