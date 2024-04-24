@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
-use App\Models\Employee;
-use App\Models\Payslip;
-use App\Models\Pph21;
-use App\Models\Utility;
+use \App\Models\Branch;
+use \App\Models\Employee;
+use \App\Models\Payslip;
+use \App\Models\Pph21;
+use \App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 

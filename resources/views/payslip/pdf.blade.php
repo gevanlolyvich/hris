@@ -9,8 +9,8 @@ $company_logo = Utility::getValByName('company_logo');
         <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
             data-bs-placement="bottom" title="{{ __('Download') }}" onclick="saveAsPDF()"><span
                 class="fa fa-download"></span></a>
-        <a title="Mail Send" href="{{ route('payslip.send', [$employee->id, $payslip->salary_month]) }}"
-            class="btn btn-sm btn-warning"><span class="fa fa-paper-plane"></span></a>
+        {{-- <a title="Mail Send" href="{{ route('payslip.send', [$employee->id, $payslip->salary_month]) }}"
+            class="btn btn-sm btn-warning"><span class="fa fa-paper-plane"></span></a> --}}
     </div>
     <div class="invoice" id="printableArea">
     <div class="row">
