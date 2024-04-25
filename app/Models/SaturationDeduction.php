@@ -9,6 +9,8 @@ class SaturationDeduction extends Model
     protected $fillable = [
         'employee_id',
         'deduction_option',
+        'is_recurring',
+        'period',
         'title',
         'amount',
         'created_by',
