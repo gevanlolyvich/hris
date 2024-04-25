@@ -156,13 +156,11 @@ class Pph21Controller extends Controller
             $employeeHavePayslip = collect($employees)->every(function ($employee_id) use ($formate_month_year) {
                 return PaySlip::where('employee_id', $employee_id)->where('salary_month', $formate_month_year)->exists();
             });
-
-
             if (!$employeeHavePayslip) {
                 return redirect()->back()->with('error', __('Please Generate Employee Payslip First'));
             }
 
-            $payslips   = PaySlip::whereIn('employee_id', $employees)->where('salary_month', $formate_month_year)->get();
+            $payslips   = PaySlip::whereIn('employee_id', $employees)->whereNotIn('employee_id', $exist_pph21)->where('salary_month', $formate_month_year)->get();
 
             $month_in_year             = [];
             for ($i=1; $i <= 12 ; $i++) { 

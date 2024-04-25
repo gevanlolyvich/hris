@@ -238,7 +238,6 @@
 
 @section('content')
     <div class="col-sm-12">
-        <h1>Test</h1>
         <div class="row">
             <div class="col-xl-3">
                 <div class="card sticky-top">
