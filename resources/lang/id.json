@@ -1950,5 +1950,7 @@
   "Source": "Sumber",
   "Seen": "Dilihat",
   "Already Seen": "Sudah Dilihat",
-  "Not Seen": "Belum Dilihat"
+  "Not Seen": "Belum Dilihat",
+  "Recurring": "Berulang",
+  "Period": "Period"
 }

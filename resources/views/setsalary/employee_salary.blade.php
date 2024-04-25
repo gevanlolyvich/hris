@@ -555,6 +555,8 @@
                                     <tr>
                                         <th>{{ __('Deduction Option') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
@@ -566,7 +568,8 @@
                                             <td>{{ !empty($saturationdeduction->deduction_option()) ? $saturationdeduction->deduction_option()->name : '' }}
                                             </td>
                                             <td>{{ $saturationdeduction->title }}</td>
-                                            <td>{{ ucfirst($saturationdeduction->type) }}</td>
+                                            <td>{{ $saturationdeduction->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $saturationdeduction->period ?? '-' }}</td>
                                             @if ($saturationdeduction->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($saturationdeduction->amount) }}
                                                 </td>
@@ -634,8 +637,6 @@
             getDesignation(department_id);
         });
 
-
-
         function getDesignation(did) {
             $.ajax({
                 url: '{{ route('employee.json') }}',
@@ -660,5 +661,17 @@
                 }
             });
         }
+
+        $(document).on('change', 'select[name=is_recurring]', function () {
+            let recurring_choice = $(this).val();
+            let periodHTML = document.getElementById('deduction_period');
+
+            if (recurring_choice == 1) {
+                periodHTML.disabled = true;
+                periodHTML.value = null;
+            } else if (recurring_choice == 0) {
+                periodHTML.disabled = false;
+            }
+        })
     </script>
 @endpush

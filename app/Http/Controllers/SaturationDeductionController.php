@@ -33,18 +33,21 @@ class SaturationDeductionController extends Controller
 
         $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $saturationdeduc = SaturationDeduction::$saturationDeductiontype;
+        
+        $recurringOptions = [ 0 => __('No'), 1 => __('Recurring')];
 
-        return view('saturationdeduction.create', compact('employee', 'deduction_options','saturationdeduc'));
+        return view('saturationdeduction.create', compact('employee', 'deduction_options','saturationdeduc', 'recurringOptions'));
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Saturation Deduction'))
+        if(\Auth::user()    ->can('Create Saturation Deduction'))
         {
             $validator = \Validator::make(
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'deduction_option' => 'required',
+                                   'is_recurring' => 'required',
                                    'title' => 'required',
                                    'amount' => 'required',
                                ]
@@ -65,9 +68,11 @@ class SaturationDeductionController extends Controller
             $saturationdeduction->employee_id      = $request->employee_id;
             $saturationdeduction->deduction_option = $request->deduction_option;
             $saturationdeduction->title            = $request->title;
-            $saturationdeduction->type            = $request->type;
+            $saturationdeduction->is_recurring     = $request->is_recurring;
+            $saturationdeduction->period           = $request->period;
+            $saturationdeduction->type             = $request->type;
             $saturationdeduction->amount           = $request->amount;
-            $saturationdeduction->created_by       = \Auth::user()->creatorId();
+            $saturationdeduction->created_by       = \Auth::user()->id;
             $saturationdeduction->save();
 
             if($saturationdeduction->type == 'percentage')

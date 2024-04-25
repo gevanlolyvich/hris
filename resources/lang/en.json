@@ -1951,5 +1951,7 @@
     "Source": "Source",
     "Seen": "Seen",
     "Already Seen": "Already Seen",
-    "Not Seen": "Not Seen"
+    "Not Seen": "Not Seen",
+    "Recurring": "Recurring",
+    "Period": "Period"
 }
