@@ -167,6 +167,7 @@
                                                                 data-ajax-popup="true" data-size="md"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Allowance') }}"
+                                                                data-size="lg"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
@@ -671,5 +672,21 @@
                 periodHTML.disabled = false;
             }
         })
+
+        $(document).ready(function () {
+            $('#commonModal').on('shown.bs.modal', function () {
+                let recurringHTML = document.getElementById('is_recurring');
+
+                if (recurringHTML) {
+                    let periodHTML = document.getElementById('period');
+
+                    if (recurringHTML.value == 1) {
+                        periodHTML.disabled = true;
+                    } else if (recurringHTML.value == 0) {
+                        periodHTML.disabled = false;
+                    }
+                }
+            });
+        });
     </script>
 @endpush
