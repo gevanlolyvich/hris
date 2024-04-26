@@ -144,8 +144,8 @@
                                     <tr>
                                         <th>{{ __('Allownace Option') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
                                         <th>{{ __('Period') }}</th>
-                                        <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -223,8 +223,9 @@
 
                                     <tr>
                                         <th>{{ __('Title') }}</th>
-                                        <th>{{ __('Date') }}</th>
                                         <th>{{ __('Type') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -233,9 +234,9 @@
                                     @foreach ($commissions as $commission)
                                         <tr>
                                             <td>{{ $commission->title }}</td>
-                                            <td>{{ $commission->date }}</td>
-
                                             <td>{{ ucfirst($commission->type) }}</td>
+                                            <td>{{ $commission->is_recurring ? _('Recurring') : __('No') }}</td>
+                                            <td>{{ $commission->period ?? '-' }}</td>
                                             @if ($commission->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($commission->amount) }}</td>
                                             @else

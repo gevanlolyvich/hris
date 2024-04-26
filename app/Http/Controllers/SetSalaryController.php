@@ -237,7 +237,10 @@ class SetSalaryController extends Controller
                                     $query->orWhere('is_recurring', true)
                                         ->orWhere('period', "{$year}-{$month}");
                                 })->get();
-        $commissions          = Commission::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $commissions          = Commission::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+                                    $query->orWhere('is_recurring', true)
+                                        ->orWhere('period', "{$year}-{$month}");
+                                })->get();
         $loans                = Loan::where('employee_id', $employee->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
         $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
                                     $query->orWhere('is_recurring', true)
