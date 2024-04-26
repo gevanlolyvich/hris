@@ -142,7 +142,7 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Allownace Option') }}</th>
+                                        <th>{{ __('Allowance Option') }}</th>
                                         <th>{{ __('Title') }}</th>
                                         <th>{{ __('Recurring') }}</th>
                                         <th>{{ __('Period') }}</th>
@@ -235,7 +235,7 @@
                                         <tr>
                                             <td>{{ $commission->title }}</td>
                                             <td>{{ ucfirst($commission->type) }}</td>
-                                            <td>{{ $commission->is_recurring ? _('Recurring') : __('No') }}</td>
+                                            <td>{{ $commission->is_recurring ? __('Recurring') : __('No') }}</td>
                                             <td>{{ $commission->period ?? '-' }}</td>
                                             @if ($commission->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($commission->amount) }}</td>

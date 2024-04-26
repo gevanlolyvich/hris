@@ -26,8 +26,9 @@ class CommissionController extends Controller
 
         $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->find($id) : Employee::where('is_active', 1)->find($id);
         $commissions =Commission::$commissiontype;
+        $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
 
-        return view('commission.create', compact('employee','commissions'));
+        return view('commission.create', compact('employee','commissions', 'recurringOptions'));
     }
 
     public function store(Request $request)
@@ -38,7 +39,7 @@ class CommissionController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'title' => 'required',
-                                   'date' => 'required',
+                                   'is_recurring' => 'required',
                                    'amount' => 'required',
                                ]
             );
@@ -55,13 +56,14 @@ class CommissionController extends Controller
                 return redirect()->back()->with('error', __('Inactive'));
             }
 
-            $commission              = new Commission();
-            $commission->employee_id = $request->employee_id;
-            $commission->title       = $request->title;
-            $commission->date        = $request->date;
-            $commission->type        = $request->type;
-            $commission->amount      = $request->amount;
-            $commission->created_by  = \Auth::user()->creatorId();
+            $commission                 = new Commission();
+            $commission->employee_id    = $request->employee_id;
+            $commission->title          = $request->title;
+            $commission->is_recurring   = $request->is_recurring;
+            $commission->period         = $request->period;
+            $commission->type           = $request->type;
+            $commission->amount         = $request->amount;
+            $commission->created_by     = \Auth::user()->id;
             $commission->save();
 
             if(  $commission->type == 'percentage' )
@@ -69,7 +71,7 @@ class CommissionController extends Controller
                 $comsal            = $commission->amount * $employee->salary / 100; 
             }
 
-            return redirect()->back()->with('success', __('Commission  successfully created.'));
+            return redirect()->back()->with('success', __('Commission Successfully Created'));
         }
         else
         {
@@ -87,11 +89,11 @@ class CommissionController extends Controller
         $commission = Commission::find($commission);
         if(\Auth::user()->can('Edit Commission'))
         {
-            if($commission->created_by == \Auth::user()->creatorId())
+            if($commission->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
-               
                 $commissions =Commission::$commissiontype;
-                return view('commission.edit', compact('commission','commissions'));
+                $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
+                return view('commission.edit', compact('commission','commissions', 'recurringOptions'));
             }
             else
             {
@@ -108,7 +110,7 @@ class CommissionController extends Controller
     {
         if(\Auth::user()->can('Edit Commission'))
         {
-            if($commission->created_by == \Auth::user()->creatorId())
+            if($commission->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $validator = \Validator::make(
                     $request->all(), [
@@ -149,9 +151,8 @@ class CommissionController extends Controller
 
         if(\Auth::user()->can('Delete Commission'))
         {
-            if($commission->created_by == \Auth::user()->creatorId())
+            if($commission->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
-
                 $commission->delete();
 
                 return redirect()->back()->with('success', __('Commission successfully deleted.'));
