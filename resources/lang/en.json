@@ -87,7 +87,7 @@
     "Allowance": "Allowance",
     "Allowance  successfully created.": "Allowance  successfully created.",
     "Allowance Option": "Allowance Option",
-    "Allowance Options*": "Allowance Options*",
+    "Allowance Options": "Allowance Options",
     "Allowance successfully deleted.": "Allowance successfully deleted.",
     "Allowance successfully updated.": "Allowance successfully updated.",
     "AllowanceOption  successfully created.": "AllowanceOption  successfully created.",
@@ -1953,5 +1953,8 @@
     "Already Seen": "Already Seen",
     "Not Seen": "Not Seen",
     "Recurring": "Recurring",
-    "Period": "Period"
+    "Period": "Period",
+    "Select Allowance Option": "Select Allowance Option",
+    "Enter Title": "Enter Title",
+    "Enter Amount": "Enter Amount"
 }

@@ -85,7 +85,7 @@
   "Allowance" : "Tunjangan",
   "Allowance  successfully created." : "Tunjangan yang berhasil dibuat.",
   "Allowance Option" : "Opsi Tunjangan",
-  "Allowance Options*" : "Opsi Penyimpanan",
+  "Allowance Options" : "Opsi Tunjangan",
   "Allowance successfully deleted." : "Tunjangan berhasil dihapus.",
   "Allowance successfully updated." : "Tunjangan yang berhasil diperbarui.",
   "AllowanceOption  successfully created." : "Tunjangan yang diizinkan dibuat.",
@@ -319,7 +319,7 @@
   "Cover Letter" : "Surat Lamaran",
   "Create" : "Buat",
   "Create " : "Buat  ",
-  "Create Allowance" : "Buat Uang Tunjaman",
+  "Create Allowance" : "Buat Tunjangan",
   "Create Assets" : "Buat Aset",
   "Create Award Type" : "Membuat Tipe Penghargaan",
   "Create Commission" : "Buat Komisi",
@@ -1952,5 +1952,8 @@
   "Already Seen": "Sudah Dilihat",
   "Not Seen": "Belum Dilihat",
   "Recurring": "Berulang",
-  "Period": "Period"
+  "Period": "Period",
+  "Select Allowance Option": "Pilih Opsi Tunjangan",
+  "Enter Title": "Masukkan Judul",
+  "Enter Amount": "Masukkan Jumlah"
 }

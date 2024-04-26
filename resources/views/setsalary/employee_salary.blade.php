@@ -38,26 +38,24 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body fulls-card p-3 align-items-center">
-                    <div class="row text-center">
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
-                        </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body fulls-card p-3 align-items-center">
+                <div class="row text-center">
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
                     </div>
                 </div>
             </div>
@@ -132,7 +130,7 @@
                                     <a  data-url="{{ route('allowances.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Allowance') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -146,7 +144,8 @@
                                     <tr>
                                         <th>{{ __('Allownace Option') }}</th>
                                         <th>{{ __('Title') }}</th>
-                                        <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Period') }}</th>
+                                        <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -154,11 +153,10 @@
                                 <tbody>
                                     @foreach ($allowances as $allowance)
                                         <tr>
-                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
-                                            </td>
+                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}</td>
                                             <td>{{ $allowance->title }}</td>
-
-                                            <td>{{ ucfirst($allowance->date) }}</td>
+                                            <td>{{ $allowance->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $allowance->period ?? '-' }}</td>
                                             <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
                                             <td class="Action">
                                                 <span>
@@ -665,12 +663,24 @@
         $(document).on('change', 'select[name=is_recurring]', function () {
             let recurring_choice = $(this).val();
             let periodHTML = document.getElementById('deduction_period');
+            let allowanceHTML = document.getElementById('allowance_period');
 
             if (recurring_choice == 1) {
-                periodHTML.disabled = true;
-                periodHTML.value = null;
+                if (periodHTML) {
+                    periodHTML.disabled = true;
+                    periodHTML.value = null;
+                }
+                if (allowanceHTML) {
+                    allowanceHTML.disabled = true;
+                    allowanceHTML.value = null;
+                }
             } else if (recurring_choice == 0) {
-                periodHTML.disabled = false;
+                if (periodHTML) {
+                    periodHTML.disabled = false;
+                }
+                if (allowanceHTML) {
+                    allowanceHTML.disabled = false;
+                }
             }
         })
     </script>
