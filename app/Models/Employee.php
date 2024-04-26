@@ -250,7 +250,10 @@ class Employee extends Model
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         //allowance
-        $allowances      = Allowance::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $allowances      = Allowance::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             if ($allowance->type == 'percentage') {
@@ -327,7 +330,10 @@ class Employee extends Model
 
     public static function allowance($id, $month, $year)
     {
-        $allowances      = Allowance::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->get();
+        $allowances      = Allowance::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             $total_allowance = $allowance->amount + $total_allowance;

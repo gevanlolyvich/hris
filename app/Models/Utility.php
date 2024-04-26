@@ -231,7 +231,10 @@ class Utility extends Model
         $total_work_hours     = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
 
 
-        $earning['allowance'] = Allowance::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['allowance'] = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalAllowance = 0;
 
         foreach ($earning['allowance'] as $earn) {
