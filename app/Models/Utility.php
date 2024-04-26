@@ -314,7 +314,10 @@ class Utility extends Model
             $totalloan += $emploan;
         }
 
-        $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->get();
+        $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totaldeduction = 0;
 
         foreach ($deduction['deduction'] as $earn) {

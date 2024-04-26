@@ -221,7 +221,10 @@ class Employee extends Model
         }
 
         //Saturation Deduction
-        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $this->id)->get();
+        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                        $query->orWhere('is_recurring', true)
+                                            ->orWhere('period', "{$year}-{$month}");
+                                    })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             if ($saturation_deduction->type == 'percentage') {
