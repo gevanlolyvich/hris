@@ -662,25 +662,13 @@
 
         $(document).on('change', 'select[name=is_recurring]', function () {
             let recurring_choice = $(this).val();
-            let periodHTML = document.getElementById('deduction_period');
-            let allowanceHTML = document.getElementById('allowance_period');
+            let periodHTML = document.getElementById('period');
 
             if (recurring_choice == 1) {
-                if (periodHTML) {
-                    periodHTML.disabled = true;
-                    periodHTML.value = null;
-                }
-                if (allowanceHTML) {
-                    allowanceHTML.disabled = true;
-                    allowanceHTML.value = null;
-                }
+                periodHTML.disabled = true;
+                periodHTML.value = null;
             } else if (recurring_choice == 0) {
-                if (periodHTML) {
-                    periodHTML.disabled = false;
-                }
-                if (allowanceHTML) {
-                    allowanceHTML.disabled = false;
-                }
+                periodHTML.disabled = false;
             }
         })
     </script>
