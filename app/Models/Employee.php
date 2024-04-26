@@ -167,7 +167,7 @@ class Employee extends Model
 
     public function shift_type()
     {
-        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id')->withTrashed();;
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id')->withTrashed();
     }
 
     public function documents()

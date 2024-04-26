@@ -25,6 +25,12 @@ class SaturationDeduction extends Model
     {
         return $this->hasOne('App\Models\DeductionOption', 'id', 'deduction_option')->first();
     }
+
+    public function deduction()
+    {
+        return $this->belongsTo(DeductionOption::class, 'deduction_option', 'id');
+    }
+
     public static $saturationDeductiontype = [
         'fixed'=>'Fixed',
         'percentage'=> 'Percentage',

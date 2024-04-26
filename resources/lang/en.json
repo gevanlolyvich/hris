@@ -1956,5 +1956,7 @@
     "Period": "Period",
     "Select Allowance Option": "Select Allowance Option",
     "Enter Title": "Enter Title",
-    "Enter Amount": "Enter Amount"
+    "Enter Amount": "Enter Amount",
+    "percentage": "percentage",
+    "fixed": "fixed"
 }

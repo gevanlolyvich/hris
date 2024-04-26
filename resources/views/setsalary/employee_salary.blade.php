@@ -164,10 +164,9 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('allowance/' . $allowance->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Allowance') }}"
-                                                                data-size="lg"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
@@ -208,7 +207,7 @@
                                     <a  data-url="{{ route('commissions.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Commission') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
 
@@ -251,7 +250,7 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('commission/' . $commission->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Commission') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -272,8 +271,6 @@
                                                     @endcan
                                                 </span>
                                             </td>
-
-
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -297,7 +294,7 @@
                                     <a  data-url="{{ route('otherpayments.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Other Payment') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -334,7 +331,7 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('otherpayment/' . $otherpayment->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Other Payment') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -453,7 +450,6 @@
                                         data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
-
                                 </div>
                             @endcan
                         </div>
@@ -564,11 +560,11 @@
                                 <tbody>
                                     @foreach ($saturationdeductions as $saturationdeduction)
                                         <tr>
-                                            <td>{{ !empty($saturationdeduction->deduction_option()) ? $saturationdeduction->deduction_option()->name : '' }}
-                                            </td>
+                                            <td>{{ $saturationdeduction->deduction?->name ?? '-' }}</td>
                                             <td>{{ $saturationdeduction->title }}</td>
                                             <td>{{ $saturationdeduction->is_recurring ? __('Recurring') : __('No') }}</td>
                                             <td>{{ $saturationdeduction->period ?? '-' }}</td>
+                                            <td>{{ __("$saturationdeduction->type") }}</td>
                                             @if ($saturationdeduction->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($saturationdeduction->amount) }}
                                                 </td>

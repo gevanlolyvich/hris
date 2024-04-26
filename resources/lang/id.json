@@ -1955,5 +1955,7 @@
   "Period": "Period",
   "Select Allowance Option": "Pilih Opsi Tunjangan",
   "Enter Title": "Masukkan Judul",
-  "Enter Amount": "Masukkan Jumlah"
+  "Enter Amount": "Masukkan Jumlah",
+  "percentage": "Persentase",
+  "fixed": "Konstan"
 }
