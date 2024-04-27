@@ -163,11 +163,11 @@ class OtherPaymentController extends Controller
     {
         if(\Auth::user()->can('Delete Other Payment'))
         {
-            if($otherpayment->created_by == \Auth::user()->creatorId())
+            if($otherpayment->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $otherpayment->delete();
 
-                return redirect()->back()->with('success', __('OtherPayment successfully deleted.'));
+                return redirect()->back()->with('success', __('Other Payment Successfully Deleted'));
             }
             else
             {
