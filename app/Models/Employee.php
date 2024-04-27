@@ -264,7 +264,10 @@ class Employee extends Model
         }
 
         //commission
-        $commissions      = Commission::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $commissions      = Commission::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_commission = 0;
         foreach ($commissions as $commission) {
             if ($commission->type == 'percentage') {
@@ -347,7 +350,10 @@ class Employee extends Model
     public static function commission($id, $month, $year)
     {
         //commission
-        $commissions      = Commission::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->get();
+        $commissions      = Commission::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         // dd($commissions);
         $total_commission = 0;
 

@@ -246,7 +246,10 @@ class Utility extends Model
             $totalAllowance += $empall;
         }
 
-        $earning['commission']        = Commission::where('employee_id', $employeeId)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['commission']        = Commission::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalCommission = 0;
 
         foreach ($earning['commission'] as $earn) {
