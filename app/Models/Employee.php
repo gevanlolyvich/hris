@@ -210,7 +210,10 @@ class Employee extends Model
         $normal_salary  = $this->get_bruto_salary($month, $year);
 
         //Loan
-        $loans      = Loan::where('employee_id', '=', $this->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
+        $loans      = Loan::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                        $query->orWhere('is_recurring', true)
+                            ->orWhere('period', "{$year}-{$month}");
+                    })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             if ($loan->type == 'percentage') {
@@ -371,7 +374,10 @@ class Employee extends Model
     public static function loan($id, $month, $year)
     {
         //Loan
-        $loans      = Loan::where('employee_id', '=', $id)->whereMonth('end_date', $month ?? date('m'))->whereYear('end_date', $year ?? date('Y'))->get();
+        $loans      = Loan::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                        $query->orWhere('is_recurring', true)
+                            ->orWhere('period', "{$year}-{$month}");
+                    })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             $total_loan = $loan->amount + $total_loan;

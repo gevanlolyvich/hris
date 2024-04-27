@@ -311,7 +311,10 @@ class Utility extends Model
             $earning['totalOverTime'] += $amount;
         }
 
-        $deduction['loan']           = Loan::where('employee_id', $employeeId)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
+        $deduction['loan']           = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalloan = 0;
 
         foreach ($deduction['loan'] as $earn) {
