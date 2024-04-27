@@ -941,13 +941,13 @@
     "List View": "List View",
     "Live": "Live",
     "Loan": "Loan",
-    "Loan  successfully created.": "Loan  successfully created.",
+    "Loan Successfully Created": "Loan Successfully Created",
     "Loan Amount": "Loan Amount",
     "Loan Option": "Loan Option",
     "Loan Options": "Loan Options",
     "Loan Options*": "Loan Options*",
-    "Loan successfully deleted.": "Loan successfully deleted.",
-    "Loan successfully updated.": "Loan successfully updated.",
+    "Loan Successfully Deleted": "Loan Successfully Deleted",
+    "Loan Successfully Updated": "Loan Successfully Updated",
     "LoanOption  successfully created.": "LoanOption  successfully created.",
     "LoanOption successfully deleted.": "LoanOption successfully deleted.",
     "LoanOption successfully updated.": "LoanOption successfully updated.",
@@ -1959,5 +1959,6 @@
     "Enter Amount": "Enter Amount",
     "percentage": "percentage",
     "fixed": "fixed",
-    "Something Wrong Happened, Please Refresh The Page": "Something Wrong Happened, Please Refresh The Page"
+    "Something Wrong Happened, Please Refresh The Page": "Something Wrong Happened, Please Refresh The Page",
+    "Enter Reason": "Enter Reason"
 }

@@ -940,13 +940,13 @@
   "List View" : "Tampilan Daftar",
   "Live" : "Hiduplah",
   "Loan" : "Pinjaman",
-  "Loan  successfully created." : "Pinjaman berhasil dibuat.",
+  "Loan Successfully Created" : "Pinjaman Berhasil Dibuat",
   "Loan Amount" : "Jumlah Pinjaman",
   "Loan Option" : "Pilihan Pinjaman",
   "Loan Options" : "Opsi Pinjaman",
   "Loan Options*" : "Opsi Pinjaman *",
-  "Loan successfully deleted." : "Pinjaman berhasil dihapus.",
-  "Loan successfully updated." : "Pinjaman berhasil diperbarui.",
+  "Loan Successfully Deleted" : "Pinjaman Berhasil Dihapus",
+  "Loan Successfully Updated" : "Pinjaman Berhasil Diperbarui",
   "LoanOption  successfully created." : "LoanOption berhasil dibuat.",
   "LoanOption successfully deleted." : "Opsi LoanOption berhasil dihapus.",
   "LoanOption successfully updated." : "Opsi LoanOption berhasil diperbarui.",
@@ -1958,5 +1958,6 @@
   "Enter Amount": "Masukkan Jumlah",
   "percentage": "Persentase",
   "fixed": "Konstan",
-  "Something Wrong Happened, Please Refresh The Page": "Terjadi Sesuatu Kesalahan, Harap Me-\"Refresh\" Halaman"
+  "Something Wrong Happened, Please Refresh The Page": "Terjadi Sesuatu Kesalahan, Harap Me-\"Refresh\" Halaman",
+  "Enter Reason": "Masukkan Alasan"
 }

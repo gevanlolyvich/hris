@@ -33,7 +33,8 @@ class LoanController extends Controller
 
         $loan_options      = LoanOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $loan =loan::$Loantypes;
-        return view('loan.create', compact('employee','loan_options','loan'));
+        $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
+        return view('loan.create', compact('employee','loan_options','loan', 'recurringOptions'));
     }
 
     public function store(Request $request)
@@ -45,10 +46,9 @@ class LoanController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'loan_option' => 'required',
+                                   'is_recurring' => 'required',
                                    'title' => 'required',
                                    'amount' => 'required',
-                                   'start_date' => 'required',
-                                   'end_date' => 'required',
                                    'reason' => 'required',
                                ]
             );
@@ -65,16 +65,16 @@ class LoanController extends Controller
                 return redirect()->back()->with('error', __('Inactive'));
             }    
 
-            $loan              = new Loan();
-            $loan->employee_id = $request->employee_id;
-            $loan->loan_option = $request->loan_option;
-            $loan->title       = $request->title;
-            $loan->amount      = $request->amount;
-            $loan->type        = $request->type;
-            $loan->start_date  = $request->start_date;
-            $loan->end_date    = $request->end_date;
-            $loan->reason      = $request->reason;
-            $loan->created_by  = \Auth::user()->creatorId();
+            $loan               = new Loan();
+            $loan->employee_id  = $request->employee_id;
+            $loan->loan_option  = $request->loan_option;
+            $loan->title        = $request->title;
+            $loan->is_recurring = $request->is_recurring;
+            $loan->period       = $request->period;
+            $loan->amount       = $request->amount;
+            $loan->type         = $request->type;
+            $loan->reason       = $request->reason;
+            $loan->created_by   = \Auth::user()->id;
             $loan->save();
 
             if(  $loan->type == 'percentage' )
@@ -82,7 +82,7 @@ class LoanController extends Controller
                 $loansal  = $loan->amount * $employee->salary / 100; 
             }
 
-            return redirect()->back()->with('success', __('Loan  successfully created.'));
+            return redirect()->back()->with('success', __('Loan Successfully Created'));
         }
         else
         {
