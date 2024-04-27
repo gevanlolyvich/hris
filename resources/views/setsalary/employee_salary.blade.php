@@ -467,10 +467,10 @@
                                     <tr>
                                         <th>{{ __('Loan Options') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Loan Amount') }}</th>
-                                        <th>{{ __('Start Date') }}</th>
-                                        <th>{{ __('End Date') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -480,6 +480,8 @@
                                             <td>{{ !empty($loan->loan_option()) ? $loan->loan_option()->name : '' }}
                                             </td>
                                             <td>{{ $loan->title }}</td>
+                                            <td>{{ $loan->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $loan->period ?? '-' }}</td>
                                             <td>{{ ucfirst($loan->type) }}</td>
                                             @if ($loan->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($loan->amount) }}</td>
@@ -488,10 +490,6 @@
                                                     ({{ \Auth::user()->priceFormat($loan->tota_allow) }})
                                                 </td>
                                             @endif
-
-                                            <td>{{ \Auth::user()->dateFormat($loan->start_date) }}</td>
-                                            <td>{{ \Auth::user()->dateFormat($loan->end_date) }}</td>
-
                                             <td class="Action">
                                                 <span>
                                                     @can('Edit Loan')
