@@ -116,7 +116,7 @@ class CommissionController extends Controller
                     $request->all(), [
 
                                        'title' => 'required',
-                                       'date' => 'required',
+                                       'is_recurring' => 'required',
                                        'amount' => 'required',
                                    ]
                 );
@@ -127,13 +127,14 @@ class CommissionController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $commission->title  = $request->title;
-                $commission->date   = $request->date;
-                $commission->type   = $request->type;
-                $commission->amount = $request->amount;
+                $commission->title          = $request->title;
+                $commission->type           = $request->type;
+                $commission->is_recurring   = $request->is_recurring;
+                $commission->period         = $request->period;
+                $commission->amount         = $request->amount;
                 $commission->save();
 
-                return redirect()->back()->with('success', __('Commission successfully updated.'));
+                return redirect()->back()->with('success', __('Commission Successfully Updated'));
             }
             else
             {
@@ -155,7 +156,7 @@ class CommissionController extends Controller
             {
                 $commission->delete();
 
-                return redirect()->back()->with('success', __('Commission successfully deleted.'));
+                return redirect()->back()->with('success', __('Commission Successfully Deleted'));
             }
             else
             {
