@@ -308,6 +308,8 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
@@ -317,6 +319,8 @@
                                     @foreach ($otherpayments as $otherpayment)
                                         <tr>
                                             <td>{{ $otherpayment->title }}</td>
+                                            <td>{{ $otherpayment->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $otherpayment->period ?? '-' }}</td>
                                             <td>{{ ucfirst($otherpayment->type) }}</td>
                                             @if ($otherpayment->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($otherpayment->amount) }}</td>

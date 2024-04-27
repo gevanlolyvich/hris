@@ -246,7 +246,10 @@ class SetSalaryController extends Controller
                                     $query->orWhere('is_recurring', true)
                                         ->orWhere('period', "{$year}-{$month}");
                                 })->get();
-        $otherpayments        = OtherPayment::where('employee_id', $employee->id)->get();
+        $otherpayments        = OtherPayment::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+                                    $query->orWhere('is_recurring', true)
+                                        ->orWhere('period', "{$year}-{$month}");
+                                })->get();
         $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
 
         $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
