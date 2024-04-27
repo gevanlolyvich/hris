@@ -238,9 +238,9 @@ class Employee extends Model
         }
 
         //Net Salary Calculate
-        $deduction_salary = $total_loan - $total_saturation_deduction;
+        $deduction_salary = $total_loan + $total_saturation_deduction;
 
-        $net_salary     =  $normal_salary + $deduction_salary;
+        $net_salary     =  $normal_salary - $deduction_salary;
 
         return $net_salary;
     }
