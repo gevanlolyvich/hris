@@ -278,7 +278,10 @@ class Employee extends Model
         }
 
         //OtherPayment
-        $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->get();
+        $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             if ($other_payment->type == 'percentage') {
@@ -378,10 +381,13 @@ class Employee extends Model
         return $loan_json;
     }
 
-    public static function saturation_deduction($id)
+    public static function saturation_deduction($id, $month, $year)
     {
         //Saturation Deduction
-        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $id)->get();
+        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                        $query->orWhere('is_recurring', true)
+                                            ->orWhere('period', "{$year}-{$month}");
+                                    })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             $total_saturation_deduction = $saturation_deduction->amount + $total_saturation_deduction;
@@ -391,10 +397,13 @@ class Employee extends Model
         return $saturation_deduction_json;
     }
 
-    public static function other_payment($id)
+    public static function other_payment($id, $month, $year)
     {
         //OtherPayment
-        $other_payments      = OtherPayment::where('employee_id', '=', $id)->get();
+        $other_payments      = OtherPayment::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                    $query->orWhere('is_recurring', true)
+                                        ->orWhere('period', "{$year}-{$month}");
+                                })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             $total_other_payment = $other_payment->amount + $total_other_payment;

@@ -261,7 +261,10 @@ class Utility extends Model
             $totalCommission += $empcom;
         }
 
-        $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->get();
+        $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalotherpayment = 0;
 
         foreach ($earning['otherPayment'] as $earn) {
