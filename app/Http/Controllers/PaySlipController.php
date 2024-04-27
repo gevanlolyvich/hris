@@ -662,16 +662,20 @@ class PaySlipController extends Controller
         }
 
         if (Hash::check($request->password, Auth::user()->password) && !empty($request->payslip_id)) {
-            $payslip        = PaySlip::find($request->payslip_id);
-            $employee       = Employee::find($payslip->employee_id);
-
-            $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
-
-            $salaryType     = $employee->salaryType?->name ?? '-';
-
-            $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
-
-            return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
+            try {
+                $payslip        = PaySlip::find($request->payslip_id);
+                $employee       = Employee::find($payslip->employee_id);
+    
+                $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
+    
+                $salaryType     = $employee->salaryType?->name ?? '-';
+    
+                $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+    
+                return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
+            } catch (\Throwable $th) {
+                return response()->json(['error' => __('Something Wrong Happened, Please Refresh The Page')]);
+            }
         } else {
             return response()->json(['error' => __('Wrong Password')]);
         }
