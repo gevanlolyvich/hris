@@ -1221,7 +1221,7 @@
   "Payment Method" : "Metode Pembayaran",
   "Payment Setting" : "Pengaturan Pembayaran",
   "Payment settings" : "Pengaturan pembayaran",
-  "Payment successfully updated." : "Pembayaran berhasil diperbarui.",
+  "Payment Setting Successfully Updated" : "Pengaturan Pembayaran Berhasil Dirubah",
   "Payment Type" : "Tipe Pembayaran",
   "PaymentType  successfully created." : "{\\cH00FFFF} Jenis pembayaran berhasil",
   "PaymentType successfully deleted." : "\"PaymentType\" berhasil dihapus.",
@@ -1422,7 +1422,7 @@
   "Send Test Mail" : "Kirim Surat Tes",
   "Set Basic Sallary" : "Atur Sallary Dasar",
   "Set Salary" : "Atur Gaji",
-  "Setting successfully updated." : "Pengaturan berhasil diperbarui.",
+  "Bussiness Setting Successfully Updated": "Pengaturan Bisnis Berhasil Dirubah",
   "Settings" : "Pengaturan",
   "Settings updated successfully." : "Pengaturan berhasil diperbarui.",
   "Show" : "Tampilkan",
@@ -1959,5 +1959,10 @@
   "percentage": "Persentase",
   "fixed": "Konstan",
   "Something Wrong Happened, Please Refresh The Page": "Terjadi Sesuatu Kesalahan, Harap Me-\"Refresh\" Halaman",
-  "Enter Reason": "Masukkan Alasan"
+  "Enter Reason": "Masukkan Alasan",
+  "Auto Deducting PPh 21": "Otomatis Pemotongan PPh 21",
+  "Tax Setting Successfully Updated": "Pengaturan Perpajakan Berhasil Dirubah",
+  "Email Setting Successfully Updated": "Pengaturan Email Berhasil Dirubah",
+  "Company Setting Successfully Updated": "Pengaturan Perusahaan Berhasil Dirubah",
+  "System Setting Successfully Updated": "Pengaturan Sistem Berhasil Dirubah"
 }

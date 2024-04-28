@@ -1218,7 +1218,7 @@
     "Payment Method": "Payment Method",
     "Payment Setting": "Payment Setting",
     "Payment settings": "Payment settings",
-    "Payment successfully updated.": "Payment successfully updated.",
+    "Payment Setting Successfully Updated": "Payment Setting Successfully Updated",
     "Payment Type": "Payment Type",
     "PaymentType  successfully created.": "PaymentType  successfully created.",
     "PaymentType successfully deleted.": "PaymentType successfully deleted.",
@@ -1419,7 +1419,7 @@
     "Send Test Mail": "Send Test Mail",
     "Set Basic Sallary": "Set Basic Sallary",
     "Set Salary": "Set Salary",
-    "Setting successfully updated.": "Setting successfully updated.",
+    "Bussiness Setting Successfully Updated": "Bussiness Setting Successfully Updated",
     "Settings": "Settings",
     "Settings updated successfully.": "Settings updated successfully.",
     "Show": "Show",
@@ -1960,5 +1960,10 @@
     "percentage": "percentage",
     "fixed": "fixed",
     "Something Wrong Happened, Please Refresh The Page": "Something Wrong Happened, Please Refresh The Page",
-    "Enter Reason": "Enter Reason"
+    "Enter Reason": "Enter Reason",
+    "Auto Deducting PPh 21": "Auto Deducting PPh 21",
+    "Tax Setting Successfully Updated": "Tax Setting Successfully Updated",
+    "Email Setting Successfully Updated": "Email Setting Successfully Updated",
+    "Company Setting Successfully Updated": "Company Setting Successfully Updated",
+    "System Setting Successfully Updated": "System Setting Successfully Updated"
 }

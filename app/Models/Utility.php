@@ -140,6 +140,7 @@ class Utility extends Model
             "map_tile_url" => "",
             "signer_identification_type" => "",
             "signer_identification" => "",
+            "pph21_autocut" => "",
         ];
 
         foreach ($data as $row) {
