@@ -22,6 +22,6 @@ class ShiftTime extends Model
 
     public function shiftType(): BelongsTo
     {
-        return $this->belongsTo(ShiftType::class);
+        return $this->belongsTo(ShiftType::class)->withTrashed();
     }
 }

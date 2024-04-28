@@ -15,16 +15,16 @@ class ShiftType extends Model
 
     public function shiftTimes(): HasMany
     {
-        return $this->hasMany(ShiftTime::class)->withTrashed();;
+        return $this->hasMany(ShiftTime::class)->withTrashed();
     }
 
     public function shift_histories(): HasMany
     {
-        return $this->hasMany(ShiftHistory::class)->withTrashed();;
+        return $this->hasMany(ShiftHistory::class);
     }
 
     public function branch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class)->withTrashed();;
+        return $this->belongsTo(Branch::class);
     }
 }
