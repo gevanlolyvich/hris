@@ -10,9 +10,10 @@ class Loan extends Model
         'employee_id',
         'loan_option',
         'title',
+        'is_recurring',
+        'period',
         'amount',
-        'start_date',
-        'end_date',
+        'type',
         'reason',
         'created_by',
     ];

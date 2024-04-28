@@ -33,8 +33,10 @@ class SaturationDeductionController extends Controller
 
         $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
         $saturationdeduc = SaturationDeduction::$saturationDeductiontype;
+        
+        $recurringOptions = [ 0 => __('No'), 1 => __('Recurring')];
 
-        return view('saturationdeduction.create', compact('employee', 'deduction_options','saturationdeduc'));
+        return view('saturationdeduction.create', compact('employee', 'deduction_options','saturationdeduc', 'recurringOptions'));
     }
 
     public function store(Request $request)
@@ -45,6 +47,7 @@ class SaturationDeductionController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'deduction_option' => 'required',
+                                   'is_recurring' => 'required',
                                    'title' => 'required',
                                    'amount' => 'required',
                                ]
@@ -65,9 +68,11 @@ class SaturationDeductionController extends Controller
             $saturationdeduction->employee_id      = $request->employee_id;
             $saturationdeduction->deduction_option = $request->deduction_option;
             $saturationdeduction->title            = $request->title;
-            $saturationdeduction->type            = $request->type;
+            $saturationdeduction->is_recurring     = $request->is_recurring;
+            $saturationdeduction->period           = $request->period;
+            $saturationdeduction->type             = $request->type;
             $saturationdeduction->amount           = $request->amount;
-            $saturationdeduction->created_by       = \Auth::user()->creatorId();
+            $saturationdeduction->created_by       = \Auth::user()->id;
             $saturationdeduction->save();
 
             if($saturationdeduction->type == 'percentage')
@@ -75,7 +80,7 @@ class SaturationDeductionController extends Controller
                 $saturationdeductionsal  = $saturationdeduction->amount * $employee->salary / 100;
             }
 
-            return redirect()->back()->with('success', __('SaturationDeduction  successfully created.'));
+            return redirect()->back()->with('success', __('Saturation Deduction Successfully Created'));
         }
         else
         {
@@ -93,12 +98,14 @@ class SaturationDeductionController extends Controller
         $saturationdeduction = SaturationDeduction::find($saturationdeduction);
         if(\Auth::user()->can('Edit Saturation Deduction'))
         {
-            if($saturationdeduction->created_by == \Auth::user()->creatorId())
+            if($saturationdeduction->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $deduction_options = DeductionOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
                 $saturationdeduc = SaturationDeduction::$saturationDeductiontype;
 
-                return view('saturationdeduction.edit', compact('saturationdeduction', 'deduction_options','saturationdeduc'));
+                $recurringOptions = [ 0 => __('No'), 1 => __('Recurring')];
+
+                return view('saturationdeduction.edit', compact('saturationdeduction', 'deduction_options','saturationdeduc', 'recurringOptions'));
             }
             else
             {
@@ -116,12 +123,13 @@ class SaturationDeductionController extends Controller
     {
         if(\Auth::user()->can('Edit Saturation Deduction'))
         {
-            if($saturationdeduction->created_by == \Auth::user()->creatorId())
+            if($saturationdeduction->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $validator = \Validator::make(
                     $request->all(), [
 
                                        'deduction_option' => 'required',
+                                       'is_recurring' => 'required',
                                        'title' => 'required',
                                        'amount' => 'required',
                                    ]
@@ -138,10 +146,12 @@ class SaturationDeductionController extends Controller
                     return redirect()->back()->with('error', __('Inactive'));
                 }
 
-                $saturationdeduction->deduction_option = $request->deduction_option;
-                $saturationdeduction->title            = $request->title;
-                $saturationdeduction->type            = $request->type;
-                $saturationdeduction->amount           = $request->amount;
+                $saturationdeduction->deduction_option  = $request->deduction_option;
+                $saturationdeduction->title             = $request->title;
+                $saturationdeduction->is_recurring      = $request->is_recurring;
+                $saturationdeduction->period            = $request->period;
+                $saturationdeduction->type              = $request->type;
+                $saturationdeduction->amount            = $request->amount;
                 $saturationdeduction->save();
 
                 if($saturationdeduction->type == 'percentage')
@@ -149,7 +159,7 @@ class SaturationDeductionController extends Controller
                         $saturationdeductionsal  = $saturationdeduction->amount * $employee->salary / 100;
                     }
 
-                return redirect()->back()->with('success', __('SaturationDeduction successfully updated.'));
+                return redirect()->back()->with('success', __('Saturation Deduction Successfully Updated'));
             }
             else
             {
@@ -166,11 +176,11 @@ class SaturationDeductionController extends Controller
     {
         if(\Auth::user()->can('Delete Saturation Deduction'))
         {
-            if($saturationdeduction->created_by == \Auth::user()->creatorId())
+            if($saturationdeduction->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $saturationdeduction->delete();
 
-                return redirect()->back()->with('success', __('SaturationDeduction successfully deleted.'));
+                return redirect()->back()->with('success', __('Saturation Deduction Successfully Deleted'));
             }
             else
             {

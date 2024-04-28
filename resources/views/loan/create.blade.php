@@ -3,33 +3,32 @@
 <div class="modal-body">
     <div class="row">
         <div class="form-group col-md-6">
-            {{ Form::label('title', __('Title'), ['class' => 'col-form-label']) }}
-            {{ Form::text('title', null, ['class' => 'form-control ', 'required' => 'required','placeholder'=>'Enter Title']) }}
+            {{ Form::label('title', __('Title'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+            {{ Form::text('title', null, ['class' => 'form-control ', 'required' => 'required','placeholder'=> __('Enter Title')]) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('loan_option', __('Loan Options*'), ['class' => 'col-form-label']) }}
+            {{ Form::label('loan_option', __('Loan Options'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
             {{ Form::select('loan_option', $loan_options, null, ['class' => 'form-control select2','required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }}
+            {{ Form::label('is_recurring', __('Recurring'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+            {{ Form::select('is_recurring', $recurringOptions, 1 , ['class' => 'form-control select2', 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
+            {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled'])}}
+        </div>
+        <div class="form-group col-md-6">
+            {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
             {{ Form::select('type', $loan, null, ['class' => 'form-control select2 amount_type', 'required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
-            {{ Form::label('amount', __('Loan Amount'), ['class' => 'col-form-label amount_label']) }}
-            {{ Form::number('amount', null, ['class' => 'form-control ', 'required' => 'required', 'step' => '0.01','placeholder'=>'Enter Amount']) }}
-        </div>
-
-        <div class="form-group col-md-6">
-            {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
-            {{ Form::text('start_date', null, ['class' => 'form-control d_week','required' => 'required','autocomplete'=>'off']) }}
-        </div>
-        <div class="form-group col-md-6">
-            {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
-            {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'required' => 'required','autocomplete'=>'off']) }}
+            {{ Form::label('amount', __('Loan Amount'), ['class' => 'col-form-label amount_label']) }} <span class="text-danger pl-1"> *</span>
+            {{ Form::number('amount', null, ['class' => 'form-control ', 'required' => 'required', 'step' => '0.01','placeholder'=> __('Enter Amount')]) }}
         </div>
         <div class="form-group">
-            {{ Form::label('reason', __('Reason'), ['class' => 'col-form-label']) }}
-            {{ Form::textarea('reason', null, ['class' => 'form-control', 'rows' => 3, 'required' => 'required']) }}
+            {{ Form::label('reason', __('Reason'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+            {{ Form::textarea('reason', null, ['class' => 'form-control', 'rows' => 3, 'required' => 'required', 'placeholder'=> __('Enter Reason')]) }}
         </div>
     </div>
 </div>
