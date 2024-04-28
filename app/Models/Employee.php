@@ -117,13 +117,14 @@ class Employee extends Model
         // Initialize the present days count
         $presentDaysCount = 0;
 
+        // Log::info(json_encode($attendanceData, JSON_PRETTY_PRINT));
         // Loop through each attendance entry
         foreach ($attendanceData as $attendance) {
             // Get the day of the week for the attendance date
             $attendanceDayName = date('l', strtotime($attendance->date));
 
-            // Check if the attendance date is a workda based on shift times
-            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);
+            // Check if the attendance date is a work day based on shift times
+            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);            
 
             if ($shift && $shift->is_working && $type == 'Fixed') {
                 // Calculate required work hours based on shift
@@ -135,12 +136,12 @@ class Employee extends Model
                     $endShift += 86400; // Add 24 hours
                 }
 
-                $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
+                $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 2, 2));
 
                 // Check if the work hours of attendance match the required work hours
                 if ($attendance->work_hours) {
                     list($hours, $minutes, $seconds) = explode(':', $attendance->work_hours);
-                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600);
                 } else {
                     $attendanceWorkHours = 0;
                 }
@@ -148,7 +149,7 @@ class Employee extends Model
                 if ($attendance->status != 'Present') {
                     // Increment the present days count
                     $presentDaysCount++;
-                } elseif ($attendanceWorkHours >= $requiredWorkHours || $type != 'Fixed') {
+                } elseif ($attendanceWorkHours >= $requiredWorkHours) {
                     // Increment the present days count
                     $presentDaysCount++;
                 }
