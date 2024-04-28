@@ -88,7 +88,6 @@ class SettingsController extends Controller
             $user = \Auth::user();
             if ($request->company_logo) {
 
-
                 $request->validate(
                     [
                         'company_logo' => 'image|mimes:png|max:100480',
@@ -234,7 +233,7 @@ class SettingsController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', 'Setting successfully updated.');
+            return redirect()->back()->with('success', 'Bussiness Setting Successfully Updated');
         } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
@@ -270,7 +269,7 @@ class SettingsController extends Controller
             Utility::setEnvironmentValue($arrEnv);
             Artisan::call('config:cache');
             Artisan::call('config:clear');
-            return redirect()->back()->with('success', __('Setting successfully updated.'));
+            return redirect()->back()->with('success', __('Email Setting Successfully Updated'));
         } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
@@ -287,6 +286,10 @@ class SettingsController extends Controller
             );
 
             $post = $request->all();
+            if (!isset($request->pph21_autocut)) {
+                $post['pph21_autocut'] = 'off';
+            }
+
             $settings = Utility::settings();
             foreach ($post as $key => $data) {
                 if (in_array($key, array_keys($settings)) && !empty($data)) {
@@ -355,7 +358,7 @@ class SettingsController extends Controller
             Artisan::call('config:cache');
             Artisan::call('config:clear');
 
-            return redirect()->back()->with('success', __('Payment successfully updated.'));
+            return redirect()->back()->with('success', __('Payment Setting Successfully Updated'));
         } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
@@ -418,7 +421,7 @@ class SettingsController extends Controller
 
             Utility::setEnvironmentValue($arrEnv);
 
-            return redirect()->back()->with('success', __('Setting successfully updated.'));
+            return redirect()->back()->with('success', __('Company Setting Successfully Updated'));
         } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }
@@ -452,7 +455,7 @@ class SettingsController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', __('Setting successfully updated.'));
+            return redirect()->back()->with('success', __('System Setting Successfully Updated'));
         } else {
             return redirect()->back()->with('error', 'Permission denied.');
         }

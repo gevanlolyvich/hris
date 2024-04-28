@@ -38,26 +38,24 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body fulls-card p-3 align-items-center">
-                    <div class="row text-center">
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
-                        </div>
-                        <div class="col">
-                            <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
-                        </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body fulls-card p-3 align-items-center">
+                <div class="row text-center">
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                    </div>
+                    <div class="col">
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
                     </div>
                 </div>
             </div>
@@ -132,7 +130,7 @@
                                     <a  data-url="{{ route('allowances.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Allowance') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -144,9 +142,10 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('Allownace Option') }}</th>
+                                        <th>{{ __('Allowance Option') }}</th>
                                         <th>{{ __('Title') }}</th>
-                                        <th>{{ __('Date') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -154,11 +153,10 @@
                                 <tbody>
                                     @foreach ($allowances as $allowance)
                                         <tr>
-                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
-                                            </td>
+                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}</td>
                                             <td>{{ $allowance->title }}</td>
-
-                                            <td>{{ ucfirst($allowance->date) }}</td>
+                                            <td>{{ $allowance->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $allowance->period ?? '-' }}</td>
                                             <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
                                             <td class="Action">
                                                 <span>
@@ -166,7 +164,7 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('allowance/' . $allowance->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Allowance') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -209,7 +207,7 @@
                                     <a  data-url="{{ route('commissions.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Commission') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
 
@@ -225,8 +223,9 @@
 
                                     <tr>
                                         <th>{{ __('Title') }}</th>
-                                        <th>{{ __('Date') }}</th>
                                         <th>{{ __('Type') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -235,9 +234,9 @@
                                     @foreach ($commissions as $commission)
                                         <tr>
                                             <td>{{ $commission->title }}</td>
-                                            <td>{{ $commission->date }}</td>
-
                                             <td>{{ ucfirst($commission->type) }}</td>
+                                            <td>{{ $commission->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $commission->period ?? '-' }}</td>
                                             @if ($commission->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($commission->amount) }}</td>
                                             @else
@@ -252,7 +251,7 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('commission/' . $commission->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Commission') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -273,8 +272,6 @@
                                                     @endcan
                                                 </span>
                                             </td>
-
-
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -298,7 +295,7 @@
                                     <a  data-url="{{ route('otherpayments.create', $employee->id) }}"
                                         data-ajax-popup="true" data-title="{{ __('Create Other Payment') }}"
                                         data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Create') }}">
+                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -311,6 +308,8 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
@@ -320,6 +319,8 @@
                                     @foreach ($otherpayments as $otherpayment)
                                         <tr>
                                             <td>{{ $otherpayment->title }}</td>
+                                            <td>{{ $otherpayment->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $otherpayment->period ?? '-' }}</td>
                                             <td>{{ ucfirst($otherpayment->type) }}</td>
                                             @if ($otherpayment->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($otherpayment->amount) }}</td>
@@ -335,7 +336,7 @@
                                                         <div class="action-btn bg-info ms-2">
                                                             <a  class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('otherpayment/' . $otherpayment->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md"
+                                                                data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Other Payment') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
@@ -454,7 +455,6 @@
                                         data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
-
                                 </div>
                             @endcan
                         </div>
@@ -467,10 +467,10 @@
                                     <tr>
                                         <th>{{ __('Loan Options') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Loan Amount') }}</th>
-                                        <th>{{ __('Start Date') }}</th>
-                                        <th>{{ __('End Date') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -480,6 +480,8 @@
                                             <td>{{ !empty($loan->loan_option()) ? $loan->loan_option()->name : '' }}
                                             </td>
                                             <td>{{ $loan->title }}</td>
+                                            <td>{{ $loan->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $loan->period ?? '-' }}</td>
                                             <td>{{ ucfirst($loan->type) }}</td>
                                             @if ($loan->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($loan->amount) }}</td>
@@ -488,10 +490,6 @@
                                                     ({{ \Auth::user()->priceFormat($loan->tota_allow) }})
                                                 </td>
                                             @endif
-
-                                            <td>{{ \Auth::user()->dateFormat($loan->start_date) }}</td>
-                                            <td>{{ \Auth::user()->dateFormat($loan->end_date) }}</td>
-
                                             <td class="Action">
                                                 <span>
                                                     @can('Edit Loan')
@@ -555,6 +553,8 @@
                                     <tr>
                                         <th>{{ __('Deduction Option') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Period') }}</th>
                                         <th>{{ __('Type') }}</th>
                                         <th>{{ __('Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
@@ -563,10 +563,11 @@
                                 <tbody>
                                     @foreach ($saturationdeductions as $saturationdeduction)
                                         <tr>
-                                            <td>{{ !empty($saturationdeduction->deduction_option()) ? $saturationdeduction->deduction_option()->name : '' }}
-                                            </td>
+                                            <td>{{ $saturationdeduction->deduction?->name ?? '-' }}</td>
                                             <td>{{ $saturationdeduction->title }}</td>
-                                            <td>{{ ucfirst($saturationdeduction->type) }}</td>
+                                            <td>{{ $saturationdeduction->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $saturationdeduction->period ?? '-' }}</td>
+                                            <td>{{ __("$saturationdeduction->type") }}</td>
                                             @if ($saturationdeduction->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($saturationdeduction->amount) }}
                                                 </td>
@@ -634,8 +635,6 @@
             getDesignation(department_id);
         });
 
-
-
         function getDesignation(did) {
             $.ajax({
                 url: '{{ route('employee.json') }}',
@@ -660,5 +659,33 @@
                 }
             });
         }
+
+        $(document).on('change', 'select[name=is_recurring]', function () {
+            let recurring_choice = $(this).val();
+            let periodHTML = document.getElementById('period');
+
+            if (recurring_choice == 1) {
+                periodHTML.disabled = true;
+                periodHTML.value = null;
+            } else if (recurring_choice == 0) {
+                periodHTML.disabled = false;
+            }
+        })
+
+        $(document).ready(function () {
+            $('#commonModal').on('shown.bs.modal', function () {
+                let recurringHTML = document.getElementById('is_recurring');
+
+                if (recurringHTML) {
+                    let periodHTML = document.getElementById('period');
+
+                    if (recurringHTML.value == 1) {
+                        periodHTML.disabled = true;
+                    } else if (recurringHTML.value == 0) {
+                        periodHTML.disabled = false;
+                    }
+                }
+            });
+        });
     </script>
 @endpush

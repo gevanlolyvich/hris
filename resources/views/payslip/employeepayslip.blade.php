@@ -66,7 +66,7 @@
                                                         </a>
                                                         <a href="#"
                                                             data-url="{{ route('payslip.pdf', [$payslip->employee_id, $payslip->salary_month]) }}"
-                                                            data-size="md-pdf"
+                                                            data-size="lg"
                                                             class="btn btn-sm btn-info btn-round btn-icon"
                                                             data-ajax-popup="true"
                                                             data-title="{{ __('Payslip') }}"

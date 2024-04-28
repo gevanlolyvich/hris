@@ -977,6 +977,14 @@
                                         {{ Form::label('signer_identification', __('Signer Identification'), ['class' => 'col-form-label']) }}
                                         {{ Form::text('signer_identification', null, ['class' => 'form-control', 'placeholder' => __('Enter Signer Identification')]) }}
                                     </div>
+                                    <div class="form-group col-md-6">
+                                        {{ Form::label('pph21_autocut', __('Auto Deducting PPh 21'), ['class' => 'col-form-label']) }}
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class=" form-check-input" data-toggle="switchbutton"
+                                                data-onstyle="primary" name="pph21_autocut" id="pph21_autocut"
+                                                {{ $settings['pph21_autocut'] == 'on' ? 'checked="checked"' : '' }}>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

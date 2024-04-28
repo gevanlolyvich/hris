@@ -144,7 +144,7 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="#" data-url="{{ route('payslip.pdf', ['id' => $payslip->employee_id, 'm' => $month]) }}" data-size="md-pdf"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Employee Payslip') }}">{{ __('Payslip') }}</a>
+                                            <a href="#" data-url="{{ route('payslip.pdf', ['id' => $payslip->employee_id, 'm' => $month]) }}" data-size="lg"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Employee Payslip') }}">{{ __('Payslip') }}</a>
                                     
                                             @if (\Auth::user()->type != 'employee')
                                                 @if ($payslip->status == 0)

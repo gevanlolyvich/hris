@@ -10,7 +10,8 @@ class Allowance extends Model
         'employee_id',
         'allowance_option',
         'title',
-        'date',
+        'is_recurring',
+        'period',
         'amount',
         'created_by',
     ];

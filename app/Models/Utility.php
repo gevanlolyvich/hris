@@ -140,6 +140,7 @@ class Utility extends Model
             "map_tile_url" => "",
             "signer_identification_type" => "",
             "signer_identification" => "",
+            "pph21_autocut" => "",
         ];
 
         foreach ($data as $row) {
@@ -231,7 +232,10 @@ class Utility extends Model
         $total_work_hours     = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
 
 
-        $earning['allowance'] = Allowance::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['allowance'] = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalAllowance = 0;
 
         foreach ($earning['allowance'] as $earn) {
@@ -243,7 +247,10 @@ class Utility extends Model
             $totalAllowance += $empall;
         }
 
-        $earning['commission']        = Commission::where('employee_id', $employeeId)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $earning['commission']        = Commission::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalCommission = 0;
 
         foreach ($earning['commission'] as $earn) {
@@ -255,7 +262,10 @@ class Utility extends Model
             $totalCommission += $empcom;
         }
 
-        $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->get();
+        $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalotherpayment = 0;
 
         foreach ($earning['otherPayment'] as $earn) {
@@ -302,7 +312,10 @@ class Utility extends Model
             $earning['totalOverTime'] += $amount;
         }
 
-        $deduction['loan']           = Loan::where('employee_id', $employeeId)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
+        $deduction['loan']           = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+                                            $query->orWhere('is_recurring', true)
+                                                ->orWhere('period', "{$year}-{$month}");
+                                        })->get();
         $totalloan = 0;
 
         foreach ($deduction['loan'] as $earn) {
@@ -314,7 +327,10 @@ class Utility extends Model
             $totalloan += $emploan;
         }
 
-        $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->get();
+        $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totaldeduction = 0;
 
         foreach ($deduction['deduction'] as $earn) {
