@@ -7,13 +7,14 @@ use App\Models\Allowance;
 use App\Models\Branch;
 use App\Models\Commission;
 use App\Models\Employee;
+use App\Models\DeductionOption;
 use App\Models\Loan;
 use App\Mail\InvoiceSend;
 use App\Mail\PayslipSend;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PaySlip;
-use App\Models\PaySlipType;
+use App\Models\Pph21;
 use App\Models\SaturationDeduction;
 use App\Models\Utility;
 use Illuminate\Http\Request;
@@ -173,8 +174,8 @@ class PaySlipController extends Controller
                 $payslipEmployee->allowance            = Employee::allowance($employee->id, $month, $year);
                 $payslipEmployee->commission           = Employee::commission($employee->id, $month, $year);
                 $payslipEmployee->loan                 = Employee::loan($employee->id, $month, $year);
-                $payslipEmployee->saturation_deduction = Employee::saturation_deduction($employee->id);
-                $payslipEmployee->other_payment        = Employee::other_payment($employee->id);
+                $payslipEmployee->saturation_deduction = Employee::saturation_deduction($employee->id, $month, $year);
+                $payslipEmployee->other_payment        = Employee::other_payment($employee->id, $month, $year);
                 $payslipEmployee->overtime             = Employee::get_overtime($employee->id, $month, $year);
                 $payslipEmployee->created_by           = \Auth::user()->id;
 
@@ -209,7 +210,7 @@ class PaySlipController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', __('Payslip successfully created.'));
+            return redirect()->back()->with('success', __('Payslip Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Payslip Already created.'));
         }
@@ -217,10 +218,27 @@ class PaySlipController extends Controller
 
     public function destroy($id)
     {
-        $payslip = PaySlip::find($id);
+        $settings   = Utility::settings();
+        $payslip    = PaySlip::find($id);
+        $month      = date('m', strtotime($payslip->salary_month));
+        $year       = date('Y', strtotime($payslip->salary_month));
+
         $payslip->delete();
 
-        return redirect()->back()->with('success', __('Payslip successfully deleted'));
+        $pph21      = Pph21::where('employee_id', $payslip->employee_id)->whereMonth('date', $month)->whereYear('date', $year)->first();
+        if ($pph21) {
+            if ($settings['pph21_autocut'] == 'on') {
+                $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+                $pph21_deduction        = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
+                if ($pph21_deduction) {
+                    $pph21_deduction->delete();
+                }
+            }
+
+            $pph21->delete();
+        }
+
+        return redirect()->back()->with('success', __('Payslip Successfully Deleted'));
     }
 
     public function showemployee($paySlip)
@@ -413,7 +431,7 @@ class PaySlipController extends Controller
             $employeePayslip->status = 1;
             $employeePayslip->save();
 
-            return redirect()->back()->with('success', __('Payslip Payment successfully.'));
+            return redirect()->back()->with('success', __('Pay Slip Successfully Paid'));
         } else {
             return redirect()->back()->with('error', __('Payslip Payment failed.'));
         }
@@ -491,7 +509,7 @@ class PaySlipController extends Controller
         $payslip        = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
         $employee       = Employee::find($payslip->employee_id);
 
-        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+        $salaryType     = $employee->salaryType?->name ?? '-';
 
         $payslipDetail  = Utility::employeePayslipDetail($id, $month);
 
@@ -534,7 +552,7 @@ class PaySlipController extends Controller
         $payslip  = PaySlip::where('id', $payslipId)->first();
         $employee = Employee::find($payslip->employee_id);
 
-        $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
+        $salaryType     = $employee->salaryType?->name ?? '-';
 
         $payslipDetail = Utility::employeePayslipDetail($payslip->employee_id, $month);
 
@@ -627,8 +645,8 @@ class PaySlipController extends Controller
         $payslipEmployee->allowance            = Employee::allowance($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->commission           = Employee::commission($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->loan                 = Employee::loan($payslipEmployee->employee_id, $month, $year);
-        $payslipEmployee->saturation_deduction = Employee::saturation_deduction($payslipEmployee->employee_id);
-        $payslipEmployee->other_payment        = Employee::other_payment($payslipEmployee->employee_id);
+        $payslipEmployee->saturation_deduction = Employee::saturation_deduction($payslipEmployee->employee_id, $month, $year);
+        $payslipEmployee->other_payment        = Employee::other_payment($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->overtime             = Employee::get_overtime($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->net_payble           = Employee::find($payslipEmployee->employee_id)->get_net_salary($month, $year);
         $payslipEmployee->bruto                = Employee::find($payslipEmployee->employee_id)->get_bruto_salary($month, $year);
@@ -663,16 +681,20 @@ class PaySlipController extends Controller
         }
 
         if (Hash::check($request->password, Auth::user()->password) && !empty($request->payslip_id)) {
-            $payslip        = PaySlip::find($request->payslip_id);
-            $employee       = Employee::find($payslip->employee_id);
-
-            $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
-
-            $salaryType     = PaySlipType::select('name')->find($employee->salary_type);
-
-            $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
-
-            return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
+            try {
+                $payslip        = PaySlip::find($request->payslip_id);
+                $employee       = Employee::find($payslip->employee_id);
+    
+                $payslipDetail  = Utility::employeePayslipDetail($employee->id, $payslip->salary_month);
+    
+                $salaryType     = $employee->salaryType?->name ?? '-';
+    
+                $company_name   = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+    
+                return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
+            } catch (\Throwable $th) {
+                return response()->json(['error' => __('Something Wrong Happened, Please Refresh The Page')]);
+            }
         } else {
             return response()->json(['error' => __('Wrong Password')]);
         }

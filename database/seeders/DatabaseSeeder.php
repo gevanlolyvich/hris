@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             NewFeatureLevel::class,
             NewFeatureGoal::class,
             ManagePerformanceTypeFeature::class,
+            NewSystemTaxSetting::class,
         ]);
     }
 }

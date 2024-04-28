@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Employee;
-use App\Models\Payslip;
+use App\Models\PaySlip;
 use App\Models\Pph21;
+use App\Models\SaturationDeduction;
+use App\Models\DeductionOption;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -116,6 +118,8 @@ class Pph21Controller extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
+        $settings = Utility::settings();
+
         $formate_month_year = $request->month ?? date('Y-m');
         $month = date('m', strtotime($request->month));
         $year = date('Y', strtotime($request->month));
@@ -146,6 +150,8 @@ class Pph21Controller extends Controller
         }
 
         if ($total_employee > count($exist_pph21)) {
+            $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+
             if ($request->branch) {
                 $employees = Employee::where('branch_id', $request->branch)->where('is_active', 1)->where('company_doj', '<=', date($year . '-' . $month . '-t'))->whereNotIn('employee_id', $exist_pph21)->get()->pluck('id');                 
             } else {
@@ -154,15 +160,13 @@ class Pph21Controller extends Controller
 
             // check if there employee missing payslip in the time frame
             $employeeHavePayslip = collect($employees)->every(function ($employee_id) use ($formate_month_year) {
-                return Payslip::where('employee_id', $employee_id)->where('salary_month', $formate_month_year)->exists();
+                return PaySlip::where('employee_id', $employee_id)->where('salary_month', $formate_month_year)->exists();
             });
-
-
             if (!$employeeHavePayslip) {
                 return redirect()->back()->with('error', __('Please Generate Employee Payslip First'));
             }
 
-            $payslips   = Payslip::whereIn('employee_id', $employees)->where('salary_month', $formate_month_year)->get();
+            $payslips   = PaySlip::whereIn('employee_id', $employees)->whereNotIn('employee_id', $exist_pph21)->where('salary_month', $formate_month_year)->get();
 
             $month_in_year             = [];
             for ($i=1; $i <= 12 ; $i++) { 
@@ -193,8 +197,8 @@ class Pph21Controller extends Controller
                     $pph21->bruto           = $payslip->bruto;
                     $pph21->rate            = 0;
 
-                    $deduction_in_year      = Payslip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->select('saturation_deduction')->get()->pluck('saturation_deduction');
-                    $total_bruto            = Payslip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->sum('bruto');
+                    $deduction_in_year      = PaySlip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->select('saturation_deduction')->get()->pluck('saturation_deduction');
+                    $total_bruto            = PaySlip::where('employee_id', $payslip->employee_id)->whereIn('salary_month', $month_in_year)->sum('bruto');
                     $total_pph21            = Pph21::where('employee_id', $payslip->employee_id)->whereYear('date', $year)->sum('pph21');
                     $total_zakat            = $this->calculate_total_zakat($deduction_in_year, "{$payslip->employees->salary}");
                     $position_cost          = bcmul('0.05', $total_bruto, 2);
@@ -217,11 +221,29 @@ class Pph21Controller extends Controller
                         $pph21->pph21           = $december_pph;
                     }
                 }
-
+                
                 $pph21->save();
+
+                if ($settings['pph21_autocut'] == 'on') {
+                    // Create new deduction based on PPh 21
+                    $deduction = new SaturationDeduction();
+                    $deduction->employee_id         = $payslip->employee_id;
+                    $deduction->deduction_option    = $pph21_deduction_option?->id ?? 0;
+                    $deduction->title               = 'PPh 21';
+                    $deduction->is_recurring        = false;
+                    $deduction->period              = $payslip->salary_month;
+                    $deduction->type                = 'fixed';
+                    $deduction->amount              = $pph21->pph21;
+                    $deduction->created_by          = \Auth::user()->id;
+                    $deduction->save();
+    
+                    // Update payslip net salary based on PPh 21
+                    $payslip->net_payble           = bcsub($payslip->net_payble, $pph21->pph21, 2);
+                    $payslip->save();
+                }
             }
 
-            return redirect()->back()->with('success', __('PPh 21 successfully created.'));
+            return redirect()->back()->with('success', __('PPh 21 Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('PPh 21 Already Created'));
         }
@@ -247,7 +269,26 @@ class Pph21Controller extends Controller
         if (\Auth::user()->type == 'company' // admin
             || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $pph21?->employee?->branch_id == \Auth::user()->branch_id)) // HR
         ) {
+            $month = date('m', strtotime($pph21->date));
+            $year  = date('Y', strtotime($pph21->date));
+            $settings = Utility::settings();
+
             $pph21->delete();
+
+            if ($settings['pph21_autocut'] == 'on') {
+                $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+                $pph21_deduction = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
+                if ($pph21_deduction) {
+                    $pph21_deduction->delete();
+
+                    $payslip    = PaySlip::where('employee_id', $pph21->employee_id)->where('salary_month', "$year-$month")->first();
+                    if ($payslip) {
+                        $payslip->net_payble    = bcadd($payslip->net_payble, $pph21->pph21, 2);
+                        $payslip->save();
+                    }
+                }
+            }
+
             return redirect()->back()->with('success', __('PPh 21 Successfully Deleted'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

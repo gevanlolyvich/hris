@@ -25,10 +25,11 @@ class AllowanceController extends Controller
             }
         }
 
-        $allowance_options = AllowanceOption::get()->pluck('name', 'id');
-        $employee          = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->find($id) : Employee::where('is_active', 1)->find($id);
+        $allowance_options  = AllowanceOption::get()->pluck('name', 'id');
+        $employee           = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->find($id) : Employee::where('is_active', 1)->find($id);
+        $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
 
-        return view('allowance.create', compact('employee', 'allowance_options'));
+        return view('allowance.create', compact('employee', 'allowance_options', 'recurringOptions'));
     }
 
     public function store(Request $request)
@@ -39,6 +40,7 @@ class AllowanceController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'allowance_option' => 'required',
+                                   'is_recurring' => 'required',
                                    'title' => 'required',
                                    'amount' => 'required',
                                ]
@@ -50,16 +52,17 @@ class AllowanceController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $allowance                   = new Allowance();
-            $allowance->employee_id      = $request->employee_id;
-            $allowance->allowance_option = $request->allowance_option;
-            $allowance->title            = $request->title;
-            $allowance->date             = $request->date;
-            $allowance->amount           = $request->amount;
-            $allowance->created_by       = \Auth::user()->creatorId();
+            $allowance                      = new Allowance();
+            $allowance->employee_id         = $request->employee_id;
+            $allowance->allowance_option    = $request->allowance_option;
+            $allowance->title               = $request->title;
+            $allowance->is_recurring        = $request->is_recurring;
+            $allowance->period              = $request->period;
+            $allowance->amount              = $request->amount;
+            $allowance->created_by          = \Auth::user()->id;
             $allowance->save();
 
-            return redirect()->back()->with('success', __('Allowance  successfully created.'));
+            return redirect()->back()->with('success', __('Allowance Successfully Created'));
         }
         else
         {
@@ -77,11 +80,12 @@ class AllowanceController extends Controller
         $allowance = Allowance::find($allowance);
         if(\Auth::user()->can('Edit Allowance'))
         {
-            if($allowance->created_by == \Auth::user()->creatorId())
+            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+                $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
 
-                return view('allowance.edit', compact('allowance', 'allowance_options'));
+                return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions'));
             }
             else
             {
@@ -98,12 +102,13 @@ class AllowanceController extends Controller
     {
         if(\Auth::user()->can('Edit Allowance'))
         {
-            if($allowance->created_by == \Auth::user()->creatorId())
+            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $validator = \Validator::make(
                     $request->all(), [
 
                                        'allowance_option' => 'required',
+                                       'is_recurring' => 'required',
                                        'title' => 'required',
                                        'amount' => 'required',
                                    ]
@@ -115,20 +120,14 @@ class AllowanceController extends Controller
                     return redirect()->back()->with('error', $messages->first());
                 }
 
-                $allowance->allowance_option = $request->allowance_option;
-                $allowance->title            = $request->title;
-                $allowance->date             = $request->date;
-                $allowance->amount           = $request->amount;
+                $allowance->allowance_option    = $request->allowance_option;
+                $allowance->title               = $request->title;
+                $allowance->is_recurring        = $request->is_recurring;
+                $allowance->period              = $request->period;
+                $allowance->amount              = $request->amount;
                 $allowance->save();
 
-                if(  $allowance->type == 'percentage' )
-                {
-                    $employee          = Employee::where('is_active', 1)->find($allowance->employee_id);
-                    $empsal  = $allowance->amount * $employee->salary / 100;
-                    
-                }
-
-                return redirect()->back()->with('success', __('Allowance successfully updated.'));
+                return redirect()->back()->with('success', __('Allowance Successfully Updated'));
             }
             else
             {
@@ -146,11 +145,11 @@ class AllowanceController extends Controller
 
         if(\Auth::user()->can('Delete Allowance'))
         {
-            if($allowance->created_by == \Auth::user()->creatorId())
+            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $allowance->delete();
 
-                return redirect()->back()->with('success', __('Allowance successfully deleted.'));
+                return redirect()->back()->with('success', __('Allowance Successfully Deleted'));
             }
             else
             {
