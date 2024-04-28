@@ -7,12 +7,14 @@ use App\Models\Allowance;
 use App\Models\Branch;
 use App\Models\Commission;
 use App\Models\Employee;
+use App\Models\DeductionOption;
 use App\Models\Loan;
 use App\Mail\InvoiceSend;
 use App\Mail\PayslipSend;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PaySlip;
+use App\Models\Pph21;
 use App\Models\SaturationDeduction;
 use App\Models\Utility;
 use Illuminate\Http\Request;
@@ -208,7 +210,7 @@ class PaySlipController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', __('Payslip successfully created.'));
+            return redirect()->back()->with('success', __('Payslip Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Payslip Already created.'));
         }
@@ -216,10 +218,25 @@ class PaySlipController extends Controller
 
     public function destroy($id)
     {
-        $payslip = PaySlip::find($id);
+        $settings   = Utility::settings();
+        $payslip    = PaySlip::find($id);
+        $month      = date('m', strtotime($payslip->salary_month));
+        $year       = date('Y', strtotime($payslip->salary_month));
+
         $payslip->delete();
 
-        return redirect()->back()->with('success', __('Payslip successfully deleted'));
+        $pph21      = Pph21::where('employee_id', $payslip->employee_id)->whereMonth('date', $month)->whereYear('date', $year)->first();
+        if ($pph21) {
+            if ($settings['pph21_autocut'] == 'on') {
+                $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+                $pph21_deduction        = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
+                $pph21_deduction->delete();
+            }
+
+            $pph21->delete();
+        }
+
+        return redirect()->back()->with('success', __('Payslip Successfully Deleted'));
     }
 
     public function showemployee($paySlip)
@@ -412,7 +429,7 @@ class PaySlipController extends Controller
             $employeePayslip->status = 1;
             $employeePayslip->save();
 
-            return redirect()->back()->with('success', __('Payslip Payment successfully.'));
+            return redirect()->back()->with('success', __('Pay Slip Successfully Paid'));
         } else {
             return redirect()->back()->with('error', __('Payslip Payment failed.'));
         }

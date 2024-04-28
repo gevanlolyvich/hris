@@ -118,6 +118,8 @@ class Pph21Controller extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
+        $settings = Utility::settings();
+
         $formate_month_year = $request->month ?? date('Y-m');
         $month = date('m', strtotime($request->month));
         $year = date('Y', strtotime($request->month));
@@ -222,24 +224,26 @@ class Pph21Controller extends Controller
                 
                 $pph21->save();
 
-                // Create new deduction based on PPh 21
-                $deduction = new SaturationDeduction();
-                $deduction->employee_id         = $payslip->employee_id;
-                $deduction->deduction_option    = $pph21_deduction_option?->id ?? 0;
-                $deduction->title               = 'PPh 21';
-                $deduction->is_recurring        = false;
-                $deduction->period              = $payslip->salary_month;
-                $deduction->type                = 'fixed';
-                $deduction->amount              = $pph21->pph21;
-                $deduction->created_by          = \Auth::user()->id;
-                $deduction->save();
-
-                // Update payslip net salary based on PPh 21
-                $payslip->net_payble           = bcsub($payslip->net_payble, $pph21->pph21, 2);
-                $payslip->save();
+                if ($settings['pph21_autocut'] == 'on') {
+                    // Create new deduction based on PPh 21
+                    $deduction = new SaturationDeduction();
+                    $deduction->employee_id         = $payslip->employee_id;
+                    $deduction->deduction_option    = $pph21_deduction_option?->id ?? 0;
+                    $deduction->title               = 'PPh 21';
+                    $deduction->is_recurring        = false;
+                    $deduction->period              = $payslip->salary_month;
+                    $deduction->type                = 'fixed';
+                    $deduction->amount              = $pph21->pph21;
+                    $deduction->created_by          = \Auth::user()->id;
+                    $deduction->save();
+    
+                    // Update payslip net salary based on PPh 21
+                    $payslip->net_payble           = bcsub($payslip->net_payble, $pph21->pph21, 2);
+                    $payslip->save();
+                }
             }
 
-            return redirect()->back()->with('success', __('PPh 21 successfully created.'));
+            return redirect()->back()->with('success', __('PPh 21 Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('PPh 21 Already Created'));
         }
@@ -267,12 +271,22 @@ class Pph21Controller extends Controller
         ) {
             $month = date('m', strtotime($pph21->date));
             $year  = date('Y', strtotime($pph21->date));
-
-            $pph21_deduction = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('name', 'PPh 21')->where('amount', $pph21->pph21)->first();
+            $settings = Utility::settings();
 
             $pph21->delete();
-            if ($pph21_deduction) {
-                $pph21_deduction->delete();
+
+            if ($settings['pph21_autocut'] == 'on') {
+                $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+                $pph21_deduction = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
+                if ($pph21_deduction) {
+                    $pph21_deduction->delete();
+
+                    $payslip    = PaySlip::where('employee_id', $pph21->employee_id)->where('salary_month', "$year-$month")->first();
+                    if ($payslip) {
+                        $payslip->net_payble    = bcadd($payslip->net_payble, $pph21->pph21, 2);
+                        $payslip->save();
+                    }
+                }
             }
 
             return redirect()->back()->with('success', __('PPh 21 Successfully Deleted'));

@@ -1240,8 +1240,8 @@
     "Payslip Already created.": "Payslip Already created.",
     "Payslip Bulk Payment successfully.": "Payslip Bulk Payment successfully.",
     "Payslip Payment failed.": "Payslip Payment failed.",
-    "Payslip Payment successfully.": "Payslip Payment successfully.",
-    "Payslip successfully created.": "Payslip successfully created.",
+    "Pay Slip Successfully Paid": "Pay Slip Successfully Paid",
+    "Payslip Successfully Created": "Payslip Successfully Created",
     "Payslip successfully sent.": "Payslip successfully sent.",
     "Payslip Type": "Payslip Type",
     "Payslip Type*": "Payslip Type*",
@@ -1745,7 +1745,7 @@
     "Valid Days": "Valid Days",
     "Total Main Salary": "Total Salary",
     "Birthdate": "Birthdate",
-    "Payslip successfully deleted": "Payslip successfully deleted",
+    "Payslip Successfully Deleted": "Payslip Successfully Deleted",
     "Bulk Payment Payslip": "Bulk Payment Payslip",
     "Request Attendance Successfully Approved / Rejeted": "Request Attendance Successfully Approved / Rejeted",
     "Permit Action": "Permit Action",
@@ -1965,5 +1965,6 @@
     "Tax Setting Successfully Updated": "Tax Setting Successfully Updated",
     "Email Setting Successfully Updated": "Email Setting Successfully Updated",
     "Company Setting Successfully Updated": "Company Setting Successfully Updated",
-    "System Setting Successfully Updated": "System Setting Successfully Updated"
+    "System Setting Successfully Updated": "System Setting Successfully Updated",
+    "PPh 21 Successfully Created": "PPh 21 Successfully Created"
 }

@@ -1243,8 +1243,8 @@
   "Payslip Already created." : "Slip Gaji sudah dibuat",
   "Payslip Bulk Payment successfully." : "Pembayaran Slip Gaji Massal Berhasil",
   "Payslip Payment failed." : "Pembayaran Slip Gaji Gagal",
-  "Payslip Payment successfully." : "Pembayaran Slip Gaji Berhasil",
-  "Payslip successfully created." : "Slip Gaji Berhasil Dibuat",
+  "Pay Slip Successfully Paid" : "Pembayaran Slip Gaji Berhasil",
+  "Payslip Successfully Created" : "Slip Gaji Berhasil Dibuat",
   "Payslip successfully sent." : "Slip Gaji Berhasil Dikirim",
   "Payslip Type" : "Tipe Slip Gaji",
   "Payslip Type*" : "Tipe Slip Gaji *",
@@ -1744,7 +1744,7 @@
   "Valid Days": "Hari Yang Valid",
   "Total Main Salary": "Total Gaji Utama",
   "Birthdate": "Tanggal Lahir",
-  "Payslip successfully deleted": "Slip Gaji Berhasil Dihapus",
+  "Payslip Successfully Deleted": "Slip Gaji Berhasil Dihapus",
   "Bulk Payment Payslip": "Pembayaran Masal Slip Gaji",
   "Request Attendance Successfully Approved / Rejeted": "Lupa Absen Berhasil Disetujui / Ditolak",
   "Permit Action": "Aksi Perizinan",
@@ -1964,5 +1964,6 @@
   "Tax Setting Successfully Updated": "Pengaturan Perpajakan Berhasil Dirubah",
   "Email Setting Successfully Updated": "Pengaturan Email Berhasil Dirubah",
   "Company Setting Successfully Updated": "Pengaturan Perusahaan Berhasil Dirubah",
-  "System Setting Successfully Updated": "Pengaturan Sistem Berhasil Dirubah"
+  "System Setting Successfully Updated": "Pengaturan Sistem Berhasil Dirubah",
+  "PPh 21 Successfully Created": "PPh 21 Berhasil Dibuat"
 }
