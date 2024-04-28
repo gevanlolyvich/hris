@@ -230,7 +230,9 @@ class PaySlipController extends Controller
             if ($settings['pph21_autocut'] == 'on') {
                 $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
                 $pph21_deduction        = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
-                $pph21_deduction->delete();
+                if ($pph21_deduction) {
+                    $pph21_deduction->delete();
+                }
             }
 
             $pph21->delete();
