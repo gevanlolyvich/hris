@@ -163,9 +163,8 @@
                                 <td>
                                     <span>
                                         <div class="action-btn bg-warning ms-2">
-                                            <a href="{{ route('employee-report.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
-                                                data-bs-toggle="tooltip" data-ajax-popup="true"
-                                                title="" data-title="{{ __('Report Detail') }}"
+                                            <a href="{{ route('employee-report.show', $report->id) }}" class="mx-3 btn btn-sm  align-items-center"
+                                                data-bs-toggle="tooltip" data-title="{{ __('Report Detail') }}"
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-eye text-white"></i>
                                             </a>
@@ -173,8 +172,7 @@
                                         @if (\Auth::user()->id == $report->created_by || \Auth::user()->type == 'company')
                                             <div class="action-btn bg-info ms-2">
                                                 <a href="{{ route('employee-report.edit', $report->id) }}" class="mx-3 btn btn-sm align-items-center" 
-                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Edit Report') }}"
+                                                    data-bs-toggle="tooltip" data-title="{{ __('Edit Report') }}"
                                                     data-bs-original-title="{{ __('Edit') }}">
                                                     <i class="ti ti-pencil text-white"></i>
                                                 </a>

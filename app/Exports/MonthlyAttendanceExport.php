@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use App\Models\LeaveType;
 use App\Models\ShiftTime;
 use App\Models\Utility;
+use App\Utilities\DistanceCalculator;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -113,7 +114,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
         foreach ($employees as $index => $employee) {
             $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', $employee?->branch?->name ?? '-', $employee?->employeeType?->name ?? '-'];
-            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id')->get();
+            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in')->get();
 
             $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
             $totalAttendance        = 0;
@@ -142,6 +143,20 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
                                 if ($attendance->is_valid && $attendance->attendance_type_id != '1') {
                                     $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                } else {
+                                    if ($attendance->coord_in) {
+                                        $coordinate         = explode(', ', $attendance->coord_in);
+                                        $latitude           = $coordinate[0];
+                                        $longitude          = $coordinate[1];
+                                        $accuracy           = $coordinate[2];
+
+                                        $branch_data        = Branch::where('id', $employee->branch_id)->first();
+                                        $distance           = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
+
+                                        if (($accuracy + (float)$branch_data['tolerance']) < $distance) {
+                                            $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                        }
+                                    }
                                 }
 
                                 if ($attendance_shift->is_working &&

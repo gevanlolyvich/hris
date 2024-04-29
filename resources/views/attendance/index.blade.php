@@ -240,21 +240,23 @@
             <div class="card-body">
             {{ Form::open(array('route' => array('attendanceemployee.index'),'method'=>'get','id'=>'attendanceemployee_filter')) }}
                 <div class="row align-items-center justify-content-end">
-                    <div class="col-2">
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2">
                         <div class="text-center">
                             <label>{{__('Type')}}</label>
                         </div>
-                        <div class="form-check form-check-inline mb-2 mt-2">
-                            <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
-                            <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
-                        </div>
                         <br>
-                        <div class="form-check form-check-inline">
-                            <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
-                            <label class="form-check-label" for="daily">{{__('Daily')}}</label>
+                        <div class="row">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-6 col-6 mb-2">
+                                <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
+                                <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
+                            </div>
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-6 col-6 mb-2">
+                                <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
+                                <label class="form-check-label" for="daily">{{__('Daily')}}</label>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 col-12 month">
+                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 month">
                         <div class="btn-box">
                             {{Form::label('month',__('Month'),['class'=>'form-label'])}}
                             {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
