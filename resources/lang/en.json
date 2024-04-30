@@ -1966,5 +1966,18 @@
     "Email Setting Successfully Updated": "Email Setting Successfully Updated",
     "Company Setting Successfully Updated": "Company Setting Successfully Updated",
     "System Setting Successfully Updated": "System Setting Successfully Updated",
-    "PPh 21 Successfully Created": "PPh 21 Successfully Created"
+    "PPh 21 Successfully Created": "PPh 21 Successfully Created",
+    "Vehicle Officer": "Vehicle Officer",
+    "Select Vehicle Officer": "Select Vehicle Officer",
+    "Manage Vehicle Officer": "Manage Vehicle Officer",
+    "Create Vehicle Officer": "Create Vehicle Officer",
+    "Update Vehicle Officer": "Update Vehicle Officer",
+    "Vehicle Officer Successfully Created": "Vehicle Officer Successfully Created",
+    "Vehicle Officer Successfully Updated": "Vehicle Officer Successfully Updated",
+    "Vehicle Officer Successfully Deleted": "Vehicle Officer Successfully Deleted",
+    "Full Access": "Full Access",
+    "Resricted Access": "Resricted Access",
+    "Access": "Access",
+    "Select Access": "Select Access",
+    "Total Excess Time": "Total Excess Time"
 }
