@@ -114,13 +114,14 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
         foreach ($employees as $index => $employee) {
             $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', $employee?->branch?->name ?? '-', $employee?->employeeType?->name ?? '-'];
-            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in')->get();
+            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in', 'work_hours')->get();
 
             $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
             $totalAttendance        = 0;
             $arrayAttendanceDate    = [];
             $totalLate              = 0;
             $totalLateTime          = 0;
+            $totalExcessTime        = 0;
             
             foreach ($dates as $d => $date) {
                 $dateFormat = $year . '-' . $month . '-' . $date;
@@ -136,6 +137,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                     if (sizeof($attendances_on_date) > 0) {
                         foreach ($attendances_on_date as $attendance) {
                             $attendance_shift   = $attendance->shift_type->shiftTimes->where('days', $day)->values()[0];
+                            
                             if ($attendance->status == 'Present') {
                                 $date_data          .= "{$attendance->clock_in}; ";
                                 $totalAttendance    += 1;
@@ -159,17 +161,43 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                     }
                                 }
 
-                                if ($attendance_shift->is_working &&
-                                    (strtotime($attendance->clock_in) > (strtotime($attendance_shift->start_time) + ((int)$settings['late_tolerance'] * 60)))) {
-                                    $totalLate += 1;
-                                    $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                if ($attendance_shift->is_working) {
+                                    if ((strtotime($attendance->clock_in) > (strtotime($attendance_shift->start_time) + ((int)$settings['late_tolerance'] * 60)))) {
+                                        $totalLate += 1;
+                                        $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+    
+                                        // Parse late time to extract hours, minutes, and seconds
+                                        list($hours, $minutes, $seconds) = explode(':', $attendance->late);
+                                        
+                                        // Convert time to seconds and add to total late time
+                                        $totalLateTime += $hours * 3600 + $minutes * 60 + $seconds;
+                                    }
 
-                                    // Parse late time to extract hours, minutes, and seconds
-                                    list($hours, $minutes, $seconds) = explode(':', $attendance->late);
-                                    
-                                    // Convert time to seconds and add to total late time
-                                    $totalLateTime += $hours * 3600 + $minutes * 60 + $seconds;
+                                    // Calculate required work hours based on shift
+                                    $startShift = strtotime($attendance_shift->start_time);
+                                    $endShift   = strtotime($attendance_shift->end_time);
+
+                                    if ($endShift < $startShift) {
+                                        // Shift spans two dates, consider hours on the next day
+                                        $endShift += 86400; // Add 24 hours
+                                    }
+
+                                    $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600, 2));
+
+                                     // Check if the work hours of attendance match the required work hours
+                                    if ($attendance->work_hours) {
+                                        list($hours, $minutes, $seconds) = explode(':', $attendance->work_hours);
+                                        $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600);
+                                    } else {
+                                        $attendanceWorkHours = 0;
+                                    }
+
+                                    if ($attendanceWorkHours > $requiredWorkHours) {
+                                        list($hours, $minutes, $seconds) = explode(':', $attendance->work_hours);
+                                        $totalExcessTime += ($hours * 3600 + $minutes * 60 + $seconds) - max(0, round($endShift - $startShift, 2));
+                                    }
                                 }
+
                             } else if ($attendance->status == 'Leave' && !$present) {
                                 $date_data          = __('Leave');
                                 $totalAttendance    += 1;
@@ -196,11 +224,17 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 }
             }
 
+            // calculating total late
             $totalLateHours     = floor($totalLateTime / 3600);
             $totalLateMinutes   = floor(($totalLateTime % 3600) / 60);
             $totalLateSeconds   = $totalLateTime % 60;
 
-            array_push($arrayAttendanceDate, $totalAttendance >= 1 ? $totalAttendance : '0', $totalLate >= 1 ? $totalLate : '0', sprintf("%02d:%02d:%02d", $totalLateHours, $totalLateMinutes, $totalLateSeconds));
+            // calculating excess time
+            $totalExcessHours     = floor($totalExcessTime / 3600);
+            $totalExcessMinutes   = floor(($totalExcessTime % 3600) / 60);
+            $totalExcessSeconds   = $totalExcessTime % 60;
+
+            array_push($arrayAttendanceDate, $totalAttendance >= 1 ? $totalAttendance : '0', $totalLate >= 1 ? $totalLate : '0', sprintf("%02d:%02d:%02d", $totalLateHours, $totalLateMinutes, $totalLateSeconds), sprintf("%02d:%02d:%02d", $totalExcessHours, $totalExcessMinutes, $totalExcessSeconds));
 
             $data->push(array_merge($employeeArray, $arrayAttendanceDate));
         }
@@ -235,14 +269,17 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 $sheet->mergeCells($relativeColomn['totalColomn']);
                 $sheet->mergeCells($relativeColomn['lateColomn']);
                 $sheet->mergeCells($relativeColomn['lateTimeColomn']);
+                $sheet->mergeCells($relativeColomn['excessTimeColomn']);
                 $sheet->setCellValue($relativeColomn['totalCell'], "Total");
                 $sheet->setCellValue($relativeColomn['lateCell'], __('Total Late'));
                 $sheet->setCellValue($relativeColomn['lateTimeCell'], __('Total Late Time'));
+                $sheet->setCellValue($relativeColomn['excessTimeCell'], __('Total Excess Time'));
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['dateColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['dateNumberColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['totalColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['lateColomn']);
                 $this->applyHeaderCellStyles($sheet, $relativeColomn['lateTimeColomn']);
+                $this->applyHeaderCellStyles($sheet, $relativeColomn['excessTimeColomn']);
                 
                 // Style Cells
                 $sheet->getStyle('B2:B3')->applyFromArray(['font' => ['bold' => true]]);
@@ -330,35 +367,40 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
     protected function getRelativeColumn(): array
     {
-        $lastDateColumn = 'AI';
-        $totalColumn    = 'AJ';
-        $lateColumn     = 'AK';
-        $lateTimeColumn = 'AL';
+        $lastDateColumn     = 'AI';
+        $totalColumn        = 'AJ';
+        $lateColumn         = 'AK';
+        $lateTimeColumn     = 'AL';
+        $excessTimeColumn   = 'AM';
 
         switch ($this->total_days) {
             case 28:
-                $lastDateColumn = 'AH';
-                $totalColumn    = 'AI';
-                $lateColumn     = 'AJ';
-                $lateTimeColumn = 'AK';
+                $lastDateColumn     = 'AH';
+                $totalColumn        = 'AI';
+                $lateColumn         = 'AJ';
+                $lateTimeColumn     = 'AK';
+                $excessTimeColumn   = 'AL';
                 break;
             case 29:
-                $lastDateColumn = 'AI';
-                $totalColumn    = 'AJ';
-                $lateColumn     = 'AK';
-                $lateTimeColumn = 'AL';
+                $lastDateColumn     = 'AI';
+                $totalColumn        = 'AJ';
+                $lateColumn         = 'AK';
+                $lateTimeColumn     = 'AL';
+                $excessTimeColumn   = 'AM';
                 break;
             case 30:
-                $lastDateColumn = 'AJ';
-                $totalColumn    = 'AK';
-                $lateColumn     = 'AL';
-                $lateTimeColumn = 'AM';
+                $lastDateColumn     = 'AJ';
+                $totalColumn        = 'AK';
+                $lateColumn         = 'AL';
+                $lateTimeColumn     = 'AM';
+                $excessTimeColumn   = 'AN';
                 break;
             case 31:
-                $lastDateColumn = 'AK';
-                $totalColumn    = 'AL';
-                $lateColumn     = 'AM';
-                $lateTimeColumn = 'AN';
+                $lastDateColumn     = 'AK';
+                $totalColumn        = 'AL';
+                $lateColumn         = 'AM';
+                $lateTimeColumn     = 'AN';
+                $excessTimeColumn   = 'AO';
                 break;
         }
         return [
@@ -370,8 +412,10 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             'lateCell'          => "{$lateColumn}5",
             'lateTimeColomn'    => "{$lateTimeColumn}5:{$lateTimeColumn}6",
             'lateTimeCell'      => "{$lateTimeColumn}5",
-            'lastColomn'        => $lateTimeColumn,
-            'lastCell'          => "{$lateTimeColumn}6",
+            'excessTimeColomn'  => "{$excessTimeColumn}5:{$excessTimeColumn}6",
+            'excessTimeCell'    => "{$excessTimeColumn}5",
+            'lastColomn'        => $excessTimeColumn,
+            'lastCell'          => "{$excessTimeColumn}6",
         ];
     }
 
