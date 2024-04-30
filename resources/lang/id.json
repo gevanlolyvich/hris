@@ -1965,5 +1965,18 @@
   "Email Setting Successfully Updated": "Pengaturan Email Berhasil Dirubah",
   "Company Setting Successfully Updated": "Pengaturan Perusahaan Berhasil Dirubah",
   "System Setting Successfully Updated": "Pengaturan Sistem Berhasil Dirubah",
-  "PPh 21 Successfully Created": "PPh 21 Berhasil Dibuat"
+  "PPh 21 Successfully Created": "PPh 21 Berhasil Dibuat",
+  "Vehicle Officer": "Petugas Kendaraan",
+  "Select Vehicle Officer": "Pilih Petugas Kendaraan",
+  "Manage Vehicle Officer": "Kelola Petugas Kendaraan",
+  "Create Vehicle Officer": "Buat Petugas Kendaraan",
+  "Update Vehicle Officer": "Rubah Petugas Kendaraan",
+  "Vehicle Officer Successfully Created": "Petugas Kendaraan Berhasil Dibuat",
+  "Vehicle Officer Successfully Updated": "Petugas Kendaraan Berhasil Dirubah",
+  "Vehicle Officer Successfully Deleted": "Petugas Kendaraan Berhasil Dihapus",
+  "Full Access": "Akes Penuh",
+  "Resricted Access": "Akses Terbatas",
+  "Access": "Akses",
+  "Select Access": "Pilih Akses",
+  "Total Excess Time": "Total Waktu Lebih"
 }
