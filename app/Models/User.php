@@ -2133,4 +2133,9 @@ class User extends Authenticatable implements MustVerifyEmail
         // Convert the numeric index into an alphabetical index
         return chr(65 + $index); // ASCII value for 'A' is 65
     }
+
+    public function vehicleOfficer()
+    {
+        return $this->hasOne(VehicleOfficer::class, 'user_id', 'id');
+    }
 }
