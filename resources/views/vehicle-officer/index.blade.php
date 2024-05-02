@@ -46,6 +46,15 @@
                                                     <i class="ti ti-eye text-white"></i>
                                                 </a>
                                             </div>
+                                            <div class="action-btn bg-info ms-2">
+                                                <a href="#" class="mx-3 btn btn-sm align-items-center" 
+                                                    data-url="{{  route('vehicle-officer.edit', $officer->id) }}"
+                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Edit Vehicle Officer') }}"
+                                                    data-bs-original-title="{{ __('Edit') }}">
+                                                    <i class="ti ti-pencil text-white"></i>
+                                                </a>
+                                            </div>
                                         </span>
                                     </td>
                                     {{-- <td>
@@ -123,9 +132,9 @@
             $('#commonModal').on('shown.bs.modal', function () {
                 let resricted_choice = document.getElementById('is_resricted').value;
 
-                if (resricted_choice) {
+                if (resricted_choice == 1) {
                     document.getElementById("branch_div").style.display = '';
-                } else if (resricted_choice) {
+                } else if (resricted_choice == 0) {
                     document.getElementById("branch_div").style.display = 'none';
                 }
             })
