@@ -2138,4 +2138,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(VehicleOfficer::class, 'user_id', 'id');
     }
+    
+    public function vehicleLendingRequest()
+    {
+        return $this->hasOne(VehicleLending::class, 'request_by', 'id');
+    }
+
+    public function vehicleLendingApproval()
+    {
+        return $this->hasOne(VehicleLending::class, 'approved_by', 'id');
+    }
 }
