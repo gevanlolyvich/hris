@@ -91,6 +91,7 @@ use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\Pph21Controller;
 use App\Http\Controllers\EmployeeReportController;
+use App\Http\Controllers\VehicleOfficerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -1593,6 +1594,13 @@ Route::resource('employee-report', EmployeeReportController::class)->middleware(
 );
 
 Route::post('employee-report/{id}/report', [EmployeeReportController::class, 'response'])->name('report.response')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-officer', VehicleOfficerController::class)->middleware(
     [
         'auth',
         'XSS',
