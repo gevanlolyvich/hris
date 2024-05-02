@@ -727,6 +727,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <a class="dash-link"
                                     href="{{ route('holiday.index') }}">{{ __('Holidays') }}</a>
                             </li>
+                            <li class="dash-item {{ Request::segment(1) == 'vehicle-officer' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('vehicle-officer.index') }}">{{ __('Vehicle Officer') }}</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
