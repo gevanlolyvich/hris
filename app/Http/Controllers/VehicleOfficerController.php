@@ -16,8 +16,26 @@ class VehicleOfficerController extends Controller
     public function index()
     {
         if (\Auth::user()->type != 'employee') {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
 
-            $officers     = VehicleOfficer::get();
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            if ($branch_id?->isNotEmpty()) {
+                $users          = User::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id');
+                $officers     = VehicleOfficer::whereIn('user_id', $users)->get();
+            } else {
+                $officers     = VehicleOfficer::get();
+            }
+
 
             return view('vehicle-officer.index', compact('officers'));
         } else {

@@ -113,13 +113,22 @@
                 let resricted_choice = $(this).val();
                 let branch_div = document.getElementById('branch_div');
 
-                console.log(document.getElementById("branch_id").value);
                 if (resricted_choice == 1) {
                     document.getElementById("branch_div").style.display = '';
                 } else if (resricted_choice == 0) {
                     document.getElementById("branch_div").style.display = 'none';
                 }
             });
+
+            $('#commonModal').on('shown.bs.modal', function () {
+                let resricted_choice = document.getElementById('is_resricted').value;
+
+                if (resricted_choice) {
+                    document.getElementById("branch_div").style.display = '';
+                } else if (resricted_choice) {
+                    document.getElementById("branch_div").style.display = 'none';
+                }
+            })
         });
     </script>
 @endpush
