@@ -55,49 +55,16 @@
                                                     <i class="ti ti-pencil text-white"></i>
                                                 </a>
                                             </div>
+                                            <div class="action-btn bg-danger ms-2">
+                                                {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-officer.destroy', $officer->id], 'id' => 'delete-form-' . $officer->id]) !!}
+                                                <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                    data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                    aria-label="Delete"><i
+                                                        class="ti ti-trash text-white text-white"></i></a>
+                                                </form>
+                                            </div>
                                         </span>
                                     </td>
-                                    {{-- <td>
-                                        <span>
-                                            @can('Manage Level')
-                                                <div class="action-btn bg-warning ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="xl"
-                                                        data-url="{{ route('level-designation.show', $level->id) }}"
-                                                        data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Level Detail') }}"
-                                                        data-bs-original-title="{{ __('View') }}">
-                                                        <i class="ti ti-eye text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-                                        </span>
-                                    </td>
-                                    <td class="Action">
-                                        <span>
-                                            @can('Edit Level')
-                                                <div class="action-btn bg-info ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center"
-                                                        data-url="{{  route('level-designation.edit', $level->id) }}"
-                                                        data-ajax-popup="true" data-size="xl" data-bs-toggle="tooltip" title=""
-                                                        data-title="{{ __('Edit Level') }}"
-                                                        data-bs-original-title="{{ __('Edit') }}">
-                                                        <i class="ti ti-pencil text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
-
-                                            @can('Delete Level')
-                                                <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['level-designation.destroy', $level->id], 'id' => 'delete-form-' . $level->id]) !!}
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                        data-bs-toggle="tooltip" title="" data-bs-original-title="{{__('Delete')}}"
-                                                        aria-label="Delete" data-title="{{ __('Delete Level') }}"><i
-                                                            class="ti ti-trash text-white text-white"></i></a>
-                                                    </form>
-                                                </div>
-                                            @endcan
-                                        </span>
-                                    </td> --}}
                                 </tr>
                             @endforeach
                         </tbody>

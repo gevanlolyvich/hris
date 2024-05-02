@@ -237,10 +237,17 @@ class VehicleOfficerController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\VehicleOfficer  $vehicleOfficer
-     * @return \Illuminate\Http\Response
      */
     public function destroy(VehicleOfficer $vehicleOfficer)
     {
-        //
+        if (\Auth::user()->type != 'employee') {
+
+            $vehicleOfficer->delete();
+
+            VehicleOfficerAccess::where('officer_id', $vehicleOfficer->id)->delete();
+            return redirect()->route('vehicle-officer.index')->with('success', __('Vehicle Officer Successfully Deleted'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
     }
 }
