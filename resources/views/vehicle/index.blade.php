@@ -66,14 +66,14 @@
                                                     <i class="ti ti-pencil text-white"></i>
                                                 </a>
                                             </div>
-                                            {{-- <div class="action-btn bg-danger ms-2">
-                                                {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-officer.destroy', $officer->id], 'id' => 'delete-form-' . $officer->id]) !!}
+                                            <div class="action-btn bg-danger ms-2">
+                                                {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle.destroy', $vehicle->id], 'id' => 'delete-form-' . $vehicle->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                    data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                    aria-label="Delete"><i
+                                                    data-bs-toggle="tooltip" title="" data-bs-original-title="{{__('Delete')}}"
+                                                    aria-label="{{__('Delete')}}"><i
                                                         class="ti ti-trash text-white text-white"></i></a>
                                                 </form>
-                                            </div> --}}
+                                            </div>
                                         </span>
                                     </td>
                                 </tr>

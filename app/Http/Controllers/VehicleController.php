@@ -242,10 +242,43 @@ class VehicleController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
      */
     public function destroy(Vehicle $vehicle)
     {
-        //
+        if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
+            // Access Validity Check
+            if (\Auth::user()->vehicleOfficer && \Auth::user()->vehicleOfficer->is_resricted) {
+                $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id')->toArray() ?? [];
+                $branches           = Branch::whereIn('id', $allowed_branches)->select('id', 'name')->get()->pluck('name', 'id');
+
+                if ($vehicle->branch_id && !in_array($vehicle->branch_id, $allowed_branches)) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+    
+            } else if (\Auth::user()->type != 'employee') {
+                $branch     = Branch::find(\Auth::user()->branch_id);
+                $branch_id  = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+    
+                $children   = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+    
+                if ($vehicle->branch_id && !in_array($vehicle->branch_id, $branch_id->toArray()) && $branch_id?->isNotEmpty()) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+            }
+
+            $vehicle->delete();
+
+            return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Deleted'));
+        } else {
+            return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
+        }
     }
 }
