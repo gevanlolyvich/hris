@@ -525,6 +525,28 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     </li>
                 @endcan --}}
 
+                <!-- Vehicle-->
+                <li class="dash-item dash-hasmenu {{ Request::segment(1) == 'vehicle' ? 'dash-trigger active' : '' }}">
+                    <a href="#!" class="dash-link ">
+                        <span class="dash-micon"><i class="ti ti-bus"></i></span>
+                        <span class="dash-mtext">{{ __('Vehicle') }}</span>
+                        <span class="dash-arrow"><i data-feather="chevron-right"></i></span>
+                    </a>
+                    <ul class="dash-submenu">
+                        @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
+                            <li class="dash-item {{ Request::segment(1) == 'vehicle' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('vehicle.index') }}">{{ __('Vehicle List') }}</a>
+                            </li>
+                            @endif
+                        <li class="dash-item {{ Request::segment(1) == 'vehicle-lending' ? ' active' : '' }}">
+                            <a class="dash-link"
+                                href="#">{{ __('Vehicle Lending') }}</a>
+                        </li>
+                    </ul>
+                </li>
+
+
                 <!-- Event-->
                 @can('Manage Event')
                     <li class="dash-item">
@@ -590,14 +612,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Company Policy') }}</span></a>
                     </li>
                 @endcan
-                     <!--chats-->
-                {{-- @if (\Auth::user()->type != 'super admin')
-                <li class="dash-item">
-                    <a href="{{ url('chats') }}" class="dash-link"><span class="dash-micon"><i
-                                class="ti ti-messages"></i></span><span
-                            class="dash-mtext">{{ __('Messenger') }}</span></a>
-                </li>
-                @endif --}}
                
                 @if (\Auth::user()->type == 'super admin')
                     <li class="dash-item ">
@@ -607,29 +621,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 class="dash-mtext">{{ __('Plan Request') }}</span></a>
 
                     </li>
-                @endif
-
-
-                @if (Auth::user()->type == 'super admin')
-                    @if (Gate::check('manage coupon'))
-                        <li class="dash-item ">
-                            <a href="{{ route('coupons.index') }}" class="dash-link"><span
-                                    class="dash-micon"><i class="ti ti-gift"></i></span><span
-                                    class="dash-mtext">{{ __('Coupon') }}</span></a>
-
-                        </li>
-                    @endif
-                @endif
-                @if (\Auth::user()->type == 'super admin')
-                    @if (Gate::check('Manage Order'))
-                        <li class="dash-item ">
-                            <a href="{{ route('order.index') }}"
-                                class="dash-link {{ request()->is('orders*') ? 'active' : '' }}"><span
-                                    class="dash-micon"><i class="ti ti-shopping-cart"></i></span><span
-                                    class="dash-mtext">{{ __('Order') }}</span></a>
-
-                        </li>
-                    @endif
                 @endif
 
                 <!--report-->
