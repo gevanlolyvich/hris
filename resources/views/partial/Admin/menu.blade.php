@@ -541,7 +541,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             @endif
                         <li class="dash-item {{ Request::segment(1) == 'vehicle-lending' ? ' active' : '' }}">
                             <a class="dash-link"
-                                href="#">{{ __('Vehicle Lending') }}</a>
+                                href="{{ route('vehicle-lending.index') }}">{{ __('Vehicle Lending') }}</a>
                         </li>
                     </ul>
                 </li>
