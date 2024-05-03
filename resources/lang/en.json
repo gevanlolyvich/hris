@@ -1980,5 +1980,20 @@
     "Access": "Access",
     "Select Access": "Select Access",
     "Total Excess Time": "Total Excess Time",
-    "Vehicle Officer Detail": "Vehicle Officer Detail"
+    "Vehicle Officer Detail": "Vehicle Officer Detail",
+    "Vehicle": "Vehicle",
+    "Vehicle List": "Vehicle List",
+    "Vehicle Lending": "Vehicle Lending",
+    "Police No": "Police No",
+    "History": "History",
+    "Vehicle Lending History": "Vehicle Lending History",
+    "Enter KM": "Enter KM",
+    "Enter Type": "Enter Type",
+    "Enter Police No": "Enter Police No",
+    "Create Vehicle": "Create Vehicle",
+    "Update Vehicle": "Update Vehicle",
+    "Delete Vehicle": "Delete Vehicle",
+    "Vehicle Successfully Created": "Vehicle Successfully Created",
+    "Vehicle Successfully Updated": "Vehicle Successfully Updated",
+    "Vehicle Successfully Deleted": "Vehicle Successfully Deleted"
 }

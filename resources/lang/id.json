@@ -1979,5 +1979,20 @@
   "Access": "Akses",
   "Select Access": "Pilih Akses",
   "Total Excess Time": "Total Waktu Lebih",
-  "Vehicle Officer Detail": "Detail Petugas Kendaraan"
+  "Vehicle Officer Detail": "Detail Petugas Kendaraan",
+  "Vehicle": "Kendaraan",
+  "Vehicle List": "Daftar Kendaraan",
+  "Vehicle Lending": "Peminjaman Kendaraan",
+  "Police No": "Nomor Polisi",
+  "History": "Sejarah",
+  "Vehicle Lending History": "Sejarah Peminjaman Kendaraan",
+  "Enter KM": "Masukkan KM",
+  "Enter Type": "Masukkan Tipe",
+  "Enter Police No": "Masukkan Nomor Polisi",
+  "Create Vehicle": "Buat Kendaraa",
+  "Update Vehicle": "Rubah Kendaraan",
+  "Delete Vehicle": "Hapus Kendaraan",
+  "Vehicle Successfully Created": "Kendaraan Berhasil Dibuat",
+  "Vehicle Successfully Updated": "Kendaraan Berhasil Dirubah",
+  "Vehicle Successfully Deleted": "Kendaraan Berhasil Dihapus"
 }
