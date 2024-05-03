@@ -1994,5 +1994,6 @@
   "Delete Vehicle": "Hapus Kendaraan",
   "Vehicle Successfully Created": "Kendaraan Berhasil Dibuat",
   "Vehicle Successfully Updated": "Kendaraan Berhasil Dirubah",
-  "Vehicle Successfully Deleted": "Kendaraan Berhasil Dihapus"
+  "Vehicle Successfully Deleted": "Kendaraan Berhasil Dihapus",
+  "Manage Vehicle": "Kelola Kendaraan"
 }

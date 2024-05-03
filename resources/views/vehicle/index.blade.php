@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Manage Vehicle Officer') }}
+    {{ __('Manage Vehicle') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Vehicle Officer') }}</li>
+    <li class="breadcrumb-item">{{ __('Vehicle') }}</li>
 @endsection
 
 @section('action-button')
