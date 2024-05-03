@@ -137,8 +137,8 @@
                                     @endif
                                 </td>
                                 <td class="action">
-                                    {{-- <span>
-                                        <div class="action-btn bg-warning ms-2">
+                                    <span>
+                                        {{-- <div class="action-btn bg-warning ms-2">
                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
                                                 data-url="{{ route('vehicle-officer.show', $officer->id) }}"
                                                 data-bs-toggle="tooltip" data-ajax-popup="true"
@@ -146,25 +146,30 @@
                                                 data-bs-original-title="{{ __('View') }}">
                                                 <i class="ti ti-eye text-white"></i>
                                             </a>
-                                        </div>
+                                        </div> --}}
+                                        @if ($lending->request_by == \Auth::user()->id || \Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
+                                            
+                                        @endif
                                         <div class="action-btn bg-info ms-2">
-                                            <a href="#" class="mx-3 btn btn-sm align-items-center" 
-                                                data-url="{{  route('vehicle-officer.edit', $officer->id) }}"
-                                                data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                title="" data-title="{{ __('Edit Vehicle Officer') }}"
-                                                data-bs-original-title="{{ __('Edit') }}">
-                                                <i class="ti ti-pencil text-white"></i>
-                                            </a>
+                                            @if ($lending->status != 'Approved')
+                                                <a href="#" class="mx-3 btn btn-sm align-items-center" 
+                                                    data-url="{{  route('vehicle-lending.edit', $lending->id) }}"
+                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Update Vehicle Lending') }}"
+                                                    data-bs-original-title="{{ __('Edit') }}">
+                                                    <i class="ti ti-pencil text-white"></i>
+                                                </a>
+                                            @endif
                                         </div>
-                                        <div class="action-btn bg-danger ms-2">
+                                        {{-- <div class="action-btn bg-danger ms-2">
                                             {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-officer.destroy', $officer->id], 'id' => 'delete-form-' . $officer->id]) !!}
                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                 data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                 aria-label="Delete"><i
                                                     class="ti ti-trash text-white text-white"></i></a>
                                             </form>
-                                        </div>
-                                    </span> --}}
+                                        </div> --}}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -177,37 +182,6 @@
 @endsection
 
 @push('script-page')
-    <script>
-        $(document).ready(function() {
-            $('.select2').select2({
-                multiple: true,
-            }); 
-        });
-    </script>
-    <script>
-        $(document).ready(function() {            
-            $(document).on('change', 'select[name=is_resricted]', function () {
-                let resricted_choice = $(this).val();
-                let branch_div = document.getElementById('branch_div');
-
-                if (resricted_choice == 1) {
-                    document.getElementById("branch_div").style.display = '';
-                } else if (resricted_choice == 0) {
-                    document.getElementById("branch_div").style.display = 'none';
-                }
-            });
-
-            $('#commonModal').on('shown.bs.modal', function () {
-                let resricted_choice = document.getElementById('is_resricted').value;
-
-                if (resricted_choice == 1) {
-                    document.getElementById("branch_div").style.display = '';
-                } else if (resricted_choice == 0) {
-                    document.getElementById("branch_div").style.display = 'none';
-                }
-            })
-        });
-    </script>
     <script>
         $('input[name="type"]:radio').on('change', function(e) {
             var type = $(this).val();

@@ -216,7 +216,6 @@ class VehicleLendingController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\VehicleLending  $vehicleLending
-     * @return \Illuminate\Http\Response
      */
     public function show(VehicleLending $vehicleLending)
     {
@@ -227,11 +226,57 @@ class VehicleLendingController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\VehicleLending  $vehicleLending
-     * @return \Illuminate\Http\Response
      */
     public function edit(VehicleLending $vehicleLending)
     {
-        //
+        if (\Auth::user()->vehicleOfficer) {
+            if (\Auth::user()->vehicleOfficer->is_resricted) {
+                $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
+                $vehicles   = Vehicle::whereIn('branch_id', $branch_ids)->get()->pluck('id');
+            } else {
+                $vehicles   = Vehicle::get();
+            }
+
+            foreach ($vehicles as $vehicle) {
+                $branch         = $vehicle?->branch?->name ?? '-';
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            }
+            $vehicles           = $vehicles->pluck('name', 'id');
+
+            return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
+        } else if (\Auth::user()->type != 'employee') {
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::get();
+            foreach ($vehicles as $vehicle) {
+                $branch         = $vehicle?->branch?->name ?? '-';
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            }
+            $vehicles           = $vehicles->pluck('name', 'id');
+
+            return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
+        } else {
+            $vehicles   = Vehicle::get();
+
+            foreach ($vehicles as $vehicle) {
+                $branch         = $vehicle?->branch?->name ?? '-';
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            }
+            $vehicles           = $vehicles->pluck('name', 'id');
+
+            return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
+        }
     }
 
     /**
@@ -239,11 +284,31 @@ class VehicleLendingController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\VehicleLending  $vehicleLending
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, VehicleLending $vehicleLending)
     {
-        //
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'vehicle_id' => 'required',
+                'date' => "required|date|after_or_equal:{$vehicleLending->date}",
+                'purpose' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return redirect()->back()->with('error', $messages->first());
+        }
+
+        // Create New Vehicle Officer
+        $vehicleLending->vehicle_id    = $request->vehicle_id;
+        $vehicleLending->date          = $request->date;
+        $vehicleLending->purpose       = $request->purpose;
+        $vehicleLending->save();
+
+        return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Updated'));
     }
 
     /**
@@ -254,6 +319,5 @@ class VehicleLendingController extends Controller
      */
     public function destroy(VehicleLending $vehicleLending)
     {
-        //
     }
 }
