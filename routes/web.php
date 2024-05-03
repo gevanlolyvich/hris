@@ -1616,6 +1616,12 @@ Route::resource('vehicle', VehicleController::class)->middleware(
     ]
 );
 
+Route::patch('vehicle-lending/{id}/approval/', [VehicleLendingController::class, 'approval'])->name('vehicle-lending.approval')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('vehicle-lending', VehicleLendingController::class)->middleware(
     [
         'auth',

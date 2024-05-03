@@ -2006,5 +2006,7 @@
   "Vehicle Lending Successfully Updated": "Peminjaman Kendaraan Berhasil Dirubah",
   "Vehicle Lending Successfully Deleted": "Peminjaman Kendaraan Berhasil Dihapus",
   "Pending Approval": "Menunggu Persetujuan",
-  "Purpose": "Tujuan"
+  "Purpose": "Tujuan",
+  "Vehicle Type": "Tipe Kendaraan",
+  "Vehicle Lending Status Successfully Updated": "Status Peminjaman Kendaraan Berhasil Dirubah"
 }

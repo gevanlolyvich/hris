@@ -219,7 +219,7 @@ class VehicleLendingController extends Controller
      */
     public function show(VehicleLending $vehicleLending)
     {
-        //
+        return view('vehicle-lending.show', compact('vehicleLending'));
     }
 
     /**
@@ -322,6 +322,21 @@ class VehicleLendingController extends Controller
             $vehicleLending->delete();
 
             return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Deleted'));
+        } else {
+            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+        }
+    }
+
+    public function approval(Request $request)
+    {
+        if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
+            $lending                = VehicleLending::find($request->lending_id);
+            if ($lending) {
+                $lending->status    = $request->status;
+                $lending->save();
+            }
+
+            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Status Successfully Updated'));
         } else {
             return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
         }

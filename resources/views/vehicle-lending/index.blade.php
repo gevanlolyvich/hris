@@ -93,6 +93,9 @@
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Approved By') }}</th>
                             <th>{{ __('Report') }}</th>
+                            @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
+                                <th>{{ __('Approval') }}</th>
+                            @endif
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
                     </thead>
@@ -107,13 +110,13 @@
                                     @if ($lending->status == 'Pending')
                                         <div class="badge bg-warning p-2 px-3 rounded">{{ __('Pending Approval') }}</div>
                                     @elseif($lending->status == 'Approved')
-                                        <div class="badge bg-success p-2 px-3 rounded">{{ $lending->status }}</div>
+                                        <div class="badge bg-success p-2 px-3 rounded">{{ __($lending->status) }}</div>
                                     @elseif($lending->status == "Reject")
-                                        <div class="badge bg-danger p-2 px-3 rounded">{{ $lending->status }}</div>
+                                        <div class="badge bg-danger p-2 px-3 rounded">{{ __($lending->status) }}</div>
                                     @endif
                                 </td>
                                 <td>{{ $lending?->approver?->name ?? '-' }}</td>
-                                <td>
+                                <td class="text-center">
                                     @if (\Auth::user()->type != 'employee')
                                         @if ($lending->pickup_file || $lending->return_file)
                                             <a href="#" class="btn btn-info btn-sm text-center">
@@ -136,17 +139,21 @@
                                         @endif
                                     @endif
                                 </td>
+                                @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
+                                <td class="text-center">
+                                    <div class="action-btn bg-warning ms-2">
+                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                            data-url="{{ route('vehicle-lending.show', $lending->id) }}"
+                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                            title="" data-title="{{ __('Vehicle Lending Approval') }}"
+                                            data-bs-original-title="{{ __('Approval') }}">
+                                            <i class="ti ti-caret-right text-white"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                @endif
                                 <td class="action">
                                     <span>
-                                        {{-- <div class="action-btn bg-warning ms-2">
-                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
-                                                data-url="{{ route('vehicle-officer.show', $officer->id) }}"
-                                                data-bs-toggle="tooltip" data-ajax-popup="true"
-                                                title="" data-title="{{ __('Vehicle Officer Detail') }}"
-                                                data-bs-original-title="{{ __('View') }}">
-                                                <i class="ti ti-eye text-white"></i>
-                                            </a>
-                                        </div> --}}
                                         @if ($lending->request_by == \Auth::user()->id || \Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
                                             @if ($lending->status != 'Approved')
                                                 <div class="action-btn bg-info ms-2">
@@ -199,5 +206,16 @@
         });
 
         $('input[name="type"]:radio:checked').trigger('change');
+
+        $(document).ready(function () {
+            $('#commonModal').on('shown.bs.modal', function () {
+                $('.status').on('click', function () {
+                    $('#commonModal').modal('hide');
+                    
+                    var buttonValue = $(this).data("status");
+                    $("#hiddenStatus").val(buttonValue);
+                })
+            });
+        });
     </script>
 @endpush
