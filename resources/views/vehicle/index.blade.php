@@ -56,34 +56,25 @@
                                         </span>
                                     </td>
                                     <td class="action">
-                                        {{-- <span>
-                                            <div class="action-btn bg-warning ms-2">
-                                                <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
-                                                    data-url="{{ route('vehicle-officer.show', $officer->id) }}"
-                                                    data-bs-toggle="tooltip" data-ajax-popup="true"
-                                                    title="" data-title="{{ __('Vehicle Officer Detail') }}"
-                                                    data-bs-original-title="{{ __('View') }}">
-                                                    <i class="ti ti-eye text-white"></i>
-                                                </a>
-                                            </div>
+                                        <span>
                                             <div class="action-btn bg-info ms-2">
                                                 <a href="#" class="mx-3 btn btn-sm align-items-center" 
-                                                    data-url="{{  route('vehicle-officer.edit', $officer->id) }}"
+                                                    data-url="{{  route('vehicle.edit', $vehicle->id) }}"
                                                     data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Edit Vehicle Officer') }}"
+                                                    title="" data-title="{{ __('Update Vehicle') }}"
                                                     data-bs-original-title="{{ __('Edit') }}">
                                                     <i class="ti ti-pencil text-white"></i>
                                                 </a>
                                             </div>
-                                            <div class="action-btn bg-danger ms-2">
+                                            {{-- <div class="action-btn bg-danger ms-2">
                                                 {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-officer.destroy', $officer->id], 'id' => 'delete-form-' . $officer->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                     data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                     aria-label="Delete"><i
                                                         class="ti ti-trash text-white text-white"></i></a>
                                                 </form>
-                                            </div>
-                                        </span> --}}
+                                            </div> --}}
+                                        </span>
                                     </td>
                                 </tr>
                             @endforeach

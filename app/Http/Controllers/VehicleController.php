@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VehicleController extends Controller
 {
@@ -118,7 +119,6 @@ class VehicleController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
      */
     public function show(Vehicle $vehicle)
     {
@@ -129,11 +129,46 @@ class VehicleController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
      */
     public function edit(Vehicle $vehicle)
     {
-        //
+        if (\Auth::user()->vehicleOfficer) {
+            if (\Auth::user()->vehicleOfficer->is_resricted) {
+                $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id')->toArray() ?? [];
+                $branches           = Branch::whereIn('id', $allowed_branches)->select('id', 'name')->get()->pluck('name', 'id');
+
+                if ($vehicle->branch_id && !in_array($vehicle->branch_id, $allowed_branches)) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+            } else {
+                $branches           = Branch::select('id', 'name')->get()->pluck('name', 'id');
+            }
+
+            return view('vehicle.edit', compact('branches', 'vehicle'));
+        } else if (\Auth::user()->type != 'employee') {
+            $branch     = Branch::find(\Auth::user()->branch_id);
+            $branch_id  = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children   = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            if ($vehicle->branch_id && !in_array($vehicle->branch_id, $branch_id->toArray()) && $branch_id?->isNotEmpty()) {
+                return redirect()->back()->with('error', __('Permission denied.'));
+            }
+
+            $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
+
+            return view('vehicle.edit', compact('branches', 'vehicle'));
+        } else {
+            return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
+        }
     }
 
     /**
@@ -141,11 +176,66 @@ class VehicleController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Vehicle $vehicle)
     {
-        //
+        if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
+            // Access Validity Check
+            if (\Auth::user()->vehicleOfficer && \Auth::user()->vehicleOfficer->is_resricted) {
+                $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id')->toArray() ?? [];
+                $branches           = Branch::whereIn('id', $allowed_branches)->select('id', 'name')->get()->pluck('name', 'id');
+
+                if ($vehicle->branch_id && !in_array($vehicle->branch_id, $allowed_branches)) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+    
+            } else if (\Auth::user()->type != 'employee') {
+                $branch     = Branch::find(\Auth::user()->branch_id);
+                $branch_id  = collect();
+                if ($branch) {
+                    $branch_id->push($branch?->id);
+                }
+    
+                $children   = $branch?->childBranchFlatten();
+                if ($children?->isNotEmpty()) {
+                    foreach ($children as $child) {
+                        $branch_id->push($child->id);
+                    }
+                }
+    
+                if ($vehicle->branch_id && !in_array($vehicle->branch_id, $branch_id->toArray()) && $branch_id?->isNotEmpty()) {
+                    return redirect()->back()->with('error', __('Permission denied.'));
+                }
+            }
+
+            // Request Validity Check
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'type' => 'required',
+                    'police_no' => 'required',
+                    'km' => 'required',
+                ]
+            );
+
+            if ($validator->fails()) {
+                $messages = $validator->getMessageBag();
+
+                return redirect()->back()->with('error', $messages->first());
+            }
+
+            $vehicle->name          = $request->name;
+            $vehicle->type          = strtoupper($request->type);
+            $vehicle->police_no     = strtoupper($request->police_no);
+            $vehicle->km            = $request->km;
+            $vehicle->branch_id     = $request->branch_id;
+            $vehicle->save();
+
+            return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Updated'));
+        } else {
+            return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
+        }
     }
 
     /**
