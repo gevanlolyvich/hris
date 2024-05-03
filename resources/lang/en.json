@@ -1996,5 +1996,15 @@
     "Vehicle Successfully Created": "Vehicle Successfully Created",
     "Vehicle Successfully Updated": "Vehicle Successfully Updated",
     "Vehicle Successfully Deleted": "Vehicle Successfully Deleted",
-    "Manage Vehicle": "Manage Vehicle"
+    "Manage Vehicle": "Manage Vehicle",
+    "Select Vehicle": "Select Vehicle",
+    "Enter Purposes Of Vehicle Lending Request": "Enter Purposes Of Vehicle Lending Request",
+    "Manage Vehicle Lending": "Manage Vehicle Lending",
+    "Create Vehicle Lending": "Create Vehicle Lending",
+    "Update Vehicle Lending": "Update Vehicle Lending",
+    "Delete Vehicle Lending": "Delete Vehicle Lending",
+    "Vehicle Lending Successfully Created": "Vehicle Lending Successfully Created",
+    "Vehicle Lending Successfully Updated": "Vehicle Lending Successfully Updated",
+    "Vehicle Lending Successfully Deleted": "Vehicle Lending Successfully Deleted",
+    "Pending Approval": "Pending Approval"
 }

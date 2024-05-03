@@ -1995,5 +1995,15 @@
   "Vehicle Successfully Created": "Kendaraan Berhasil Dibuat",
   "Vehicle Successfully Updated": "Kendaraan Berhasil Dirubah",
   "Vehicle Successfully Deleted": "Kendaraan Berhasil Dihapus",
-  "Manage Vehicle": "Kelola Kendaraan"
+  "Manage Vehicle": "Kelola Kendaraan",
+  "Select Vehicle": "Pilih Kendaraan",
+  "Enter Purposes Of Vehicle Lending Request": "Masukkan Tujuan Dari Peminjaman Kendaraan",
+  "Manage Vehicle Lending": "Kelola Peminjaman Kendaraan",
+  "Create Vehicle Lending": "Buat Peminjaman Kendaraan",
+  "Update Vehicle Lending": "Rubah Peminjaman Kendaraan",
+  "Delete Vehicle Lending": "Hapus Peminjaman Kendaraan",
+  "Vehicle Lending Successfully Created": "Peminjaman Kendaraan Berhasil Dibuat",
+  "Vehicle Lending Successfully Updated": "Peminjaman Kendaraan Berhasil Dirubah",
+  "Vehicle Lending Successfully Deleted": "Peminjaman Kendaraan Berhasil Dihapus",
+  "Pending Approval": "Menunggu Persetujuan"
 }
