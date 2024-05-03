@@ -14,7 +14,7 @@ class VehicleLending extends Model
         'vehicle_id',
         'date',
         'purpose',
-        'is_approved',
+        'status',
         'approved_by',
         'pickup_time',
         'return_time',
@@ -26,17 +26,17 @@ class VehicleLending extends Model
 
     public function requester()
     {
-        return $this->belongsTo(User::class, 'request_by', 'id');
+        return $this->belongsTo(User::class, 'request_by', 'id')->withTrashed();
     }
     
     public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'id');
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'id')->withTrashed();
     }
     
     public function approver()
     {
-        return $this->belongsTo(User::class, 'approved_by', 'id');
+        return $this->belongsTo(User::class, 'approved_by', 'id')->withTrashed();
     }
 
 }
