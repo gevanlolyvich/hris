@@ -315,9 +315,15 @@ class VehicleLendingController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\VehicleLending  $vehicleLending
-     * @return \Illuminate\Http\Response
      */
     public function destroy(VehicleLending $vehicleLending)
     {
+        if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee' || $vehicleLending->request_by == \Auth::user()->id) {
+            $vehicleLending->delete();
+
+            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Deleted'));
+        } else {
+            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+        }
     }
 }

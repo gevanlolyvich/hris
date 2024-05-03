@@ -148,27 +148,26 @@
                                             </a>
                                         </div> --}}
                                         @if ($lending->request_by == \Auth::user()->id || \Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
-                                            
-                                        @endif
-                                        <div class="action-btn bg-info ms-2">
                                             @if ($lending->status != 'Approved')
-                                                <a href="#" class="mx-3 btn btn-sm align-items-center" 
-                                                    data-url="{{  route('vehicle-lending.edit', $lending->id) }}"
-                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Update Vehicle Lending') }}"
-                                                    data-bs-original-title="{{ __('Edit') }}">
-                                                    <i class="ti ti-pencil text-white"></i>
-                                                </a>
+                                                <div class="action-btn bg-info ms-2">
+                                                    <a href="#" class="mx-3 btn btn-sm align-items-center" 
+                                                        data-url="{{  route('vehicle-lending.edit', $lending->id) }}"
+                                                        data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                        title="" data-title="{{ __('Update Vehicle Lending') }}"
+                                                        data-bs-original-title="{{ __('Edit') }}">
+                                                        <i class="ti ti-pencil text-white"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="action-btn bg-danger ms-2">
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-lending.destroy', $lending->id], 'id' => 'delete-form-' . $lending->id]) !!}
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                        data-bs-toggle="tooltip" title="" data-bs-original-title={{ __("Delete")}}
+                                                        aria-label="Delete"><i
+                                                            class="ti ti-trash text-white text-white"></i></a>
+                                                    </form>
+                                                </div>
                                             @endif
-                                        </div>
-                                        {{-- <div class="action-btn bg-danger ms-2">
-                                            {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-officer.destroy', $officer->id], 'id' => 'delete-form-' . $officer->id]) !!}
-                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                aria-label="Delete"><i
-                                                    class="ti ti-trash text-white text-white"></i></a>
-                                            </form>
-                                        </div> --}}
+                                        @endif
                                     </span>
                                 </td>
                             </tr>
