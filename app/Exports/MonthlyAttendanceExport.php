@@ -31,6 +31,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
     private $date_colomns;
     private $yellowed_cell;
     private $late_cell;
+    private $holiday_cell;
 
     // Modify the constructor to accept parameters
     public function __construct($query)
@@ -38,6 +39,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
         $this->query            = json_decode($query);
         $this->yellowed_cell    = collect();
         $this->late_cell        = collect();
+        $this->holiday_cell    = collect();
     }
 
     /**
@@ -71,7 +73,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             $formatted_date         = str_pad($i, 2, '0', STR_PAD_LEFT);
             $dates[]                = $formatted_date;
             $date                   = "{$year}-{$month}-{$formatted_date}";
-            $holiday                = Holiday::where('start_date', '>=', $date)->where('end_date', '<=', $date)->exists(); 
+            $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
             $holiday_date[$date]    = $holiday; 
         }
 
@@ -214,6 +216,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                 $permission         = true;
                             } else if (($holiday_date[$dateFormat] || !$attendance_shift->is_working) && !$leave && !$permission) {
                                 $date_data          = __('Holiday');
+                                $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
                             } else {
                                 $date_data          = '';
                             }
@@ -222,6 +225,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                         $arrayAttendanceDate[]  = $date_data;
                     } else if (($holiday_date[$dateFormat] || !$shift[date('l', strtotime($dateFormat))]) && !$leave && !$permission) {
                         $arrayAttendanceDate[]  = __('Holiday');
+                        $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
                     } else {
                         $arrayAttendanceDate[]  = '';
                     }
@@ -373,6 +377,16 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                         'fill' => [
                             'fillType' => Fill::FILL_SOLID,
                             'startColor' => ['rgb' => 'FEECD8'],
+                        ],
+                    ]);
+                }
+
+                // Marking holiday cell
+                foreach ($this->holiday_cell as $cell) {
+                    $sheet->getStyle($cell)->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'CFE1F8'],
                         ],
                     ]);
                 }
