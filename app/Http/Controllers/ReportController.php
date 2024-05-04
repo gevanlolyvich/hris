@@ -611,9 +611,10 @@ class ReportController extends Controller
                 $dates[]                = $formatted_date;
                 $formated_dates[]       = $year . '-' . $month . '-' . $formatted_date;
                 $date                   = "{$year}-{$month}-{$formatted_date}";
-                $holiday                = Holiday::where('start_date', '>=', $date)->where('end_date', '<=', $date)->exists(); 
+                $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
                 $holiday_date[$date]    = $holiday; 
             }
+            Log::info(json_encode($holiday_date, JSON_PRETTY_PRINT));
 
             $employeesAttendance        = [];
             $totalPresent               = $totalLeave = $totalEarlyLeave = 0;
