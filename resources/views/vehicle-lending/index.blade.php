@@ -126,7 +126,7 @@
                                                 <i class="ti ti-report"></i>
                                             </a>
                                     @else
-                                        <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning disabled'}} success btn-sm text-center" data-size="xl"
+                                        <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning'}} btn-sm text-center {{ $lending->status != 'Approved' ? 'disabled' : ''}}" data-size="xl"
                                             data-url="{{ route('vehicle-lending.getProof', $lending->id) }}"
                                             data-ajax-popup="true" data-bs-toggle="tooltip"
                                             title="" data-title="{{ __('Vehicle Lending Proof') }}"
