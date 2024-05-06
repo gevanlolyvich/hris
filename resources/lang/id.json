@@ -2009,5 +2009,17 @@
   "Purpose": "Tujuan",
   "Vehicle Type": "Tipe Kendaraan",
   "Vehicle Lending Status Successfully Updated": "Status Peminjaman Kendaraan Berhasil Dirubah",
-  "Total Work Time": "Total Jam Kerja"
+  "Total Work Time": "Total Jam Kerja",
+  "Pick Up": "Pengambilan",
+  "Pick Up Time": "Waktu Pengambilan",
+  "Pick Up KM": "KM Saat Pengambilan",
+  "Pick Up File": "Dokumentasi Pengambilan",
+  "Return": "Pengembalian",
+  "Return Time": "Waktu Pengembalian",
+  "Return KM": "KM Saat Pengembalian",
+  "Return File": "Dokumentasi Pengembalian",
+  "Enter Pick Up KM": "Masukkan KM Saat Pengambilan",
+  "Enter Return KM": "Masukkan KM Saat Pengembalian",
+  "Report It": "Laporkan",
+  "Vehicle Lending Report": "Laporan Peminjaman Kendaraan"
 }

@@ -117,23 +117,29 @@
                                 </td>
                                 <td>{{ $lending?->approver?->name ?? '-' }}</td>
                                 <td class="text-center">
-                                    @if (\Auth::user()->type != 'employee')
-                                        @if ($lending->pickup_file || $lending->return_file)
-                                            <a href="#" class="btn btn-info btn-sm text-center">
-                                                <i class="ti ti-breportus"></i>
-                                            </a>
-                                        @else
-                                            <a href="#" class="btn btn-info btn-sm text-center disabled">
+                                    @if (\Auth::user()->id != $lending->request_by)
+                                            <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'info' : 'danger disabled'}} btn-sm text-center" data-size="xl"
+                                                data-url="{{ route('vehicle-lending.getReport', $lending->id) }}"
+                                                data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Vehicle Lending Report') }}"
+                                                data-bs-original-title="{{ __('Report') }}">
                                                 <i class="ti ti-report"></i>
                                             </a>
-                                        @endif
                                     @else
                                         @if ($lending->pickup_file && $lending->return_file)
-                                            <a href="#" class="btn btn-success btn-sm text-center">
+                                            <a href="#" class="btn btn-success btn-sm text-center" data-size="xl"
+                                                data-url="{{ route('vehicle-lending.getReport', $lending->id) }}"
+                                                data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Vehicle Lending Report') }}"
+                                                data-bs-original-title="{{ __('Report') }}">
                                                 <i class="ti ti-report"></i>
                                             </a>
                                         @else
-                                            <a href="#" class="btn btn-warning btn-sm text-center">
+                                            <a href="#" class="btn btn-warning btn-sm text-center" data-size="xl"
+                                                data-url="{{ route('vehicle-lending.getReport', $lending->id) }}"
+                                                data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Vehicle Lending Report') }}"
+                                                data-bs-original-title="{{ __('Report') }}">
                                                 <i class="ti ti-report"></i>
                                             </a>
                                         @endif
