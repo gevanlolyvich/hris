@@ -330,9 +330,10 @@ class VehicleLendingController extends Controller
     public function approval(Request $request)
     {
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
-            $lending                = VehicleLending::find($request->lending_id);
+            $lending                    = VehicleLending::find($request->lending_id);
             if ($lending) {
-                $lending->status    = $request->status;
+                $lending->status        = $request->status;
+                $lending->approved_by   = \Auth::user()->id;
                 $lending->save();
             }
 
