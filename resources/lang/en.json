@@ -2010,5 +2010,20 @@
     "Purpose": "Purpose",
     "Vehicle Type": "Vehicle Type",
     "Vehicle Lending Status Successfully Updated": "Vehicle Lending Status Successfully Updated",
-    "Total Work Time": "Total Work Time"
+    "Total Work Time": "Total Work Time",
+    "Pick Up": "Pick Up",
+    "Pick Up Time": "Pick Up Time",
+    "Pick Up KM": "Pick Up KM",
+    "Pick Up File": "Pick Up File",
+    "Return": "Return",
+    "Return Time": "Return Time",
+    "Return KM": "Return KM",
+    "Return File": "Return File",
+    "Enter Pick Up KM": "Enter Pick Up KM",
+    "Enter Return KM": "Enter Return KM",
+    "Report It": "Report It",
+    "Vehicle Lending Report": "Vehicle Lending Report",
+    "Vehicle Lending Proof": "Vehicle Lending Proof",
+    "Lending Proof": "Lending Proof",
+    "Proof": "Proof"
 }
