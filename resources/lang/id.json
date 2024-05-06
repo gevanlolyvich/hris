@@ -2021,5 +2021,8 @@
   "Enter Pick Up KM": "Masukkan KM Saat Pengambilan",
   "Enter Return KM": "Masukkan KM Saat Pengembalian",
   "Report It": "Laporkan",
-  "Vehicle Lending Report": "Laporan Peminjaman Kendaraan"
+  "Vehicle Lending Report": "Laporan Peminjaman Kendaraan",
+  "Vehicle Lending Proof": "Bukti Peminjaman Kendaraan",
+  "Lending Proof": "Bukti Peminjaman",
+  "Proof": "Bukti"
 }

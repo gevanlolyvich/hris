@@ -344,17 +344,17 @@ class VehicleLendingController extends Controller
         }
     }
 
-    public function getReport($lending_id)
+    public function getProof($lending_id)
     {
         $vehicleLending = VehicleLending::find($lending_id);
         if ($vehicleLending) {
-            return view('vehicle-lending.report', compact('vehicleLending'));
+            return view('vehicle-lending.proof', compact('vehicleLending'));
         } else {
             return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
         }
     }
 
-    public function report(Request $request) {
+    public function proof(Request $request) {
         $vehicleLending = VehicleLending::find($request->lending_id);
         if ($vehicleLending) {
             $name                   = $vehicleLending->requester?->name ?? ' ';

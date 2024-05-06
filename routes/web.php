@@ -1622,13 +1622,13 @@ Route::patch('vehicle-lending/{id}/approval/', [VehicleLendingController::class,
         'XSS',
     ]
 );
-Route::get('vehicle-lending/{id}/report/', [VehicleLendingController::class, 'getReport'])->name('vehicle-lending.getReport')->middleware(
+Route::get('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'getProof'])->name('vehicle-lending.getProof')->middleware(
     [
         'auth',
         'XSS',
     ]
 );
-Route::patch('vehicle-lending/{id}/report/', [VehicleLendingController::class, 'report'])->name('vehicle-lending.report')->middleware(
+Route::patch('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'proof'])->name('vehicle-lending.proof')->middleware(
     [
         'auth',
         'XSS',

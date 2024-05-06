@@ -1,5 +1,5 @@
 
-{{ Form::model($vehicleLending, ['route' => ['vehicle-lending.report', $vehicleLending->id], 'method' => 'PATCH', 'enctype' => 'multipart/form-data']) }}
+{{ Form::model($vehicleLending, ['route' => ['vehicle-lending.proof', $vehicleLending->id], 'method' => 'PATCH', 'enctype' => 'multipart/form-data']) }}
     <div class="modal-body" style="padding-top: 0.35rem">
         <div class="row">
             <div class="col-sm-6 col-md-6 col-xl-6 mx-auto" id="pickup-data">
@@ -75,7 +75,7 @@
     @if ($vehicleLending->request_by == \Auth::user()->id)
         <div class="modal-footer">
             <input type="button" value="{{ __('Cancel') }}" class="btn btn-light" data-bs-dismiss="modal">
-            <input type="submit" value="{{ __('Report It') }}" class="btn btn-primary">
+            <input type="submit" value="{{ __('Send') }}" class="btn btn-primary">
         </div>
     @endif
 {{ Form::close() }}
