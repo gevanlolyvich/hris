@@ -59,9 +59,9 @@ class TestController extends Controller
                             'coordinate'        => $attendances['coordinate'] ?? $default_coordinate,
                             'coordinate_out'    => $attendances['coordinate'] ?? $default_coordinate,
                             'min'               => $data['first_time'],
-                            'max'               => $data['last_time'],
+                            'max'               => $data['last_source'] != 'Ruang Kantor Pusat' ? $data['last_time'] : $data['first_time'],
                             'min_source'        => $data['first_source'],
-                            'max_source'        => $data['last_source'],
+                            'max_source'        => $data['last_source'] != 'Ruang Kantor Pusat' ? $data['last_source'] : $data['first_source'],
                             'created_at'        => date('Y-m-d H:i:s'),
                             'updated_at'        => date('Y-m-d H:i:s'),
                         ];
