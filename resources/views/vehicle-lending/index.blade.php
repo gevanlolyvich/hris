@@ -92,7 +92,7 @@
                             <th>{{ __('Date') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Approved By') }}</th>
-                            <th>{{ __('Report') }}</th>
+                            <th>{{ __('Lending Proof') }}</th>
                             @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
                                 <th>{{ __('Approval') }}</th>
                             @endif
@@ -117,26 +117,22 @@
                                 </td>
                                 <td>{{ $lending?->approver?->name ?? '-' }}</td>
                                 <td class="text-center">
-                                    @if (\Auth::user()->type != 'employee')
-                                        @if ($lending->pickup_file || $lending->return_file)
-                                            <a href="#" class="btn btn-info btn-sm text-center">
-                                                <i class="ti ti-breportus"></i>
-                                            </a>
-                                        @else
-                                            <a href="#" class="btn btn-info btn-sm text-center disabled">
+                                    @if (\Auth::user()->id != $lending->request_by)
+                                            <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'info' : 'danger disabled'}} btn-sm text-center" data-size="xl"
+                                                data-url="{{ route('vehicle-lending.getProof', $lending->id) }}"
+                                                data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Vehicle Lending Proof') }}"
+                                                data-bs-original-title="{{ __('Proof') }}">
                                                 <i class="ti ti-report"></i>
                                             </a>
-                                        @endif
                                     @else
-                                        @if ($lending->pickup_file && $lending->return_file)
-                                            <a href="#" class="btn btn-success btn-sm text-center">
-                                                <i class="ti ti-report"></i>
-                                            </a>
-                                        @else
-                                            <a href="#" class="btn btn-warning btn-sm text-center">
-                                                <i class="ti ti-report"></i>
-                                            </a>
-                                        @endif
+                                        <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning disabled'}} success btn-sm text-center" data-size="xl"
+                                            data-url="{{ route('vehicle-lending.getProof', $lending->id) }}"
+                                            data-ajax-popup="true" data-bs-toggle="tooltip"
+                                            title="" data-title="{{ __('Vehicle Lending Proof') }}"
+                                            data-bs-original-title="{{ __('Proof') }}">
+                                            <i class="ti ti-report"></i>
+                                        </a>
                                     @endif
                                 </td>
                                 @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
