@@ -336,9 +336,18 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
             $lending                    = VehicleLending::find($request->lending_id);
             if ($lending) {
-                $lending->status        = $request->status;
-                $lending->approved_by   = \Auth::user()->id;
-                $lending->save();
+
+                // Check Vehicle Availability
+                $unavailable_vehicle_id = VehicleLending::where('date', $lending->date)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id')->toArray();
+
+                if (!in_array($lending->vehicle_id, $unavailable_vehicle_id)) {
+                    // Update Lending Status Data
+                    $lending->status        = $request->status;
+                    $lending->approved_by   = \Auth::user()->id;
+                    $lending->save();
+                } else {
+                    return redirect()->route('vehicle-lending.index')->with('error', __('Vehicle Unavailable'));
+                }
             }
 
             return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Status Successfully Updated'));
