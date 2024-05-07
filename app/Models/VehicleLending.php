@@ -20,8 +20,12 @@ class VehicleLending extends Model
         'return_time',
         'pickup_km',
         'return_km',
-        'pickup_file',
-        'return_file',
+        'pickup_emoney_balance',
+        'return_emoney_balance',
+        'pickup_file_1',
+        'return_file_1',
+        'pickup_file_2',
+        'return_file_2',
     ];
 
     public function requester()

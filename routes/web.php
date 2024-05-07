@@ -1609,6 +1609,12 @@ Route::resource('vehicle-officer', VehicleOfficerController::class)->middleware(
     ]
 );
 
+Route::get('vehicle-available', [VehicleLendingController::class, 'getVehicleAvailabilityByDate'])->name('vehicle-lending.getVehicleAvailabilityByDate')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('vehicle', VehicleController::class)->middleware(
     [
         'auth',
