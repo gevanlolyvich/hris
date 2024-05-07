@@ -30,6 +30,7 @@
                                 <th>{{ __('Police No') }}</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('KM') }}</th>
+                                <th>{{ __('Emoney Balance') }}</th>
                                 <th>{{ __('History') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
@@ -42,6 +43,7 @@
                                     <td>{{ $vehicle->police_no }}</td>
                                     <td>{{ $vehicle->branch?->name ?? '-' }}</td>
                                     <td>{{ $vehicle->km }}</td>
+                                    <td>{{ \Auth::user()->priceFormat($vehicle->emoney_balance) }}</td>
                                     <td>
                                         <span>
                                             {{-- <div class="action-btn bg-warning ms-2">

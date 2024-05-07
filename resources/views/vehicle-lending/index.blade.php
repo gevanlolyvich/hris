@@ -126,7 +126,7 @@
                                                 <i class="ti ti-report"></i>
                                             </a>
                                     @else
-                                        <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning disabled'}} success btn-sm text-center" data-size="xl"
+                                        <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning'}} btn-sm text-center {{ $lending->status != 'Approved' ? 'disabled' : ''}}" data-size="xl"
                                             data-url="{{ route('vehicle-lending.getProof', $lending->id) }}"
                                             data-ajax-popup="true" data-bs-toggle="tooltip"
                                             title="" data-title="{{ __('Vehicle Lending Proof') }}"
@@ -212,6 +212,36 @@
                     $("#hiddenStatus").val(buttonValue);
                 })
             });
+
+            $(document).on('change', '#date_input', function () {
+                let dateInput = $(this).val();
+                $.ajax({
+                    url: "{{ route('vehicle-lending.getVehicleAvailabilityByDate') }}",
+                    type: "GET",
+                    data: { date: dateInput },
+                    success: function(data) {
+                        // employee
+                        $('.vehicle_id').empty();
+                        var vehicle_selct = ` <select class="form-control select2  vehicle_id" name="vehicle_id" id="vehicle_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.vehicle_div').html(vehicle_selct);
+
+                        $('.vehicle_id').append('<option value="" disabled selected>{{ __('Select Vehicle') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.vehicle_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#vehicle_id', {
+                            removeItemButton: true,
+                        });
+
+                        // Enable the select element
+                        $('#vehicle_id').prop('disabled', false);
+                    }
+                });
+            });
         });
+
     </script>
 @endpush

@@ -15,12 +15,16 @@
                 {{ Form::text('police_no', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Police No')]) }}
             </div>
             <div class="form-group col-md-6 col-12">
-                {{ Form::label('km', __('KM'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-                {{ Form::number('km', null, ['class' => 'form-control ', 'required' => 'required', 'step' => '0.01', 'placeholder' => __('Enter KM')]) }}
-            </div>
-            <div class="form-group col-12">
                 {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
                 {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12">
+                {{ Form::label('km', __('KM'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::number('km', null, ['class' => 'form-control ', 'required' => 'required', 'step' => '1', 'placeholder' => __('Enter KM')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12">
+                {{ Form::label('emoney_balance', __('Emoney Balance'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::number('emoney_balance', null, ['class' => 'form-control ', 'required' => 'required', 'step' => '0.01', 'placeholder' => __('Enter Emoney Balance')]) }}
             </div>
         </div>
     </div>
