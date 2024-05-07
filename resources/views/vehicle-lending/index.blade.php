@@ -212,6 +212,36 @@
                     $("#hiddenStatus").val(buttonValue);
                 })
             });
+
+            $(document).on('change', '#date_input', function () {
+                let dateInput = $(this).val();
+                $.ajax({
+                    url: "{{ route('vehicle-lending.getVehicleAvailabilityByDate') }}",
+                    type: "GET",
+                    data: { date: dateInput },
+                    success: function(data) {
+                        // employee
+                        $('.vehicle_id').empty();
+                        var vehicle_selct = ` <select class="form-control select2  vehicle_id" name="vehicle_id" id="vehicle_id"
+                                                placeholder="Select Employee" >
+                                                </select>`;
+                        $('.vehicle_div').html(vehicle_selct);
+
+                        $('.vehicle_id').append('<option value="" disabled selected>{{ __('Select Vehicle') }}</option>');
+                        $.each(data, function(key, value) {
+                            $('.vehicle_id').append('<option value="' + key + '">' + value +
+                                '</option>');
+                        });
+                        new Choices('#vehicle_id', {
+                            removeItemButton: true,
+                        });
+
+                        // Enable the select element
+                        $('#vehicle_id').prop('disabled', false);
+                    }
+                });
+            });
         });
+
     </script>
 @endpush

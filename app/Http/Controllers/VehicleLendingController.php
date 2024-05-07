@@ -230,12 +230,13 @@ class VehicleLendingController extends Controller
      */
     public function edit(VehicleLending $vehicleLending)
     {
+        $unavailable_vehicle_id = VehicleLending::where('date', $vehicleLending->date)->whereNot('id', $vehicleLending->id)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('name', 'id');
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::whereIn('branch_id', $branch_ids)->get()->pluck('id');
+                $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_ids)->get()->pluck('id');
             } else {
-                $vehicles   = Vehicle::get();
+                $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
             }
 
             foreach ($vehicles as $vehicle) {
@@ -259,7 +260,9 @@ class VehicleLendingController extends Controller
                 }
             }
 
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::get();
+            $vehicles       = $branch_id?->isNotEmpty() ?
+                                Vehicle::whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_id)->get() :
+                                Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -268,7 +271,7 @@ class VehicleLendingController extends Controller
 
             return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
         } else {
-            $vehicles   = Vehicle::get();
+            $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
@@ -400,5 +403,18 @@ class VehicleLendingController extends Controller
         } else {
             return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
         }
+    }
+
+    public function getVehicleAvailabilityByDate(Request $request) {
+        $lendings       = VehicleLending::where('date', $request->date)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id');
+
+        $vehicles       = Vehicle::whereNotIn('id', $lendings)->get();
+        foreach ($vehicles as $vehicle) {
+            $branch         = $vehicle?->branch?->name ?? '-';
+            $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+        }
+        $vehicles       = $vehicles->pluck('name', 'id');
+
+        return $vehicles;
     }
 }
