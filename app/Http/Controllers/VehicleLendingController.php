@@ -408,7 +408,7 @@ class VehicleLendingController extends Controller
             $vehicleLending->return_file    = $return_document_path ? $return_document_path : $vehicleLending->return_file;
             $vehicleLending->save();
 
-            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Status Successfully Updated'));
+            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Proof Successfully Sent'));
         } else {
             return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
         }
