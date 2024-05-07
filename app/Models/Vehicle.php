@@ -16,6 +16,7 @@ class Vehicle extends Model
         'type',
         'police_no',
         'km',
+        'emoney_balance',
         'branch_id'
     ];
 
