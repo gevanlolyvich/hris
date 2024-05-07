@@ -11,7 +11,11 @@
                 <div class="row">
                     <div class="form-group col-12">
                         {{ Form::label('pickup_km', __('Pick Up KM'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-                        {{ Form::number('pickup_km', null, ['class' => 'form-control ', 'step' => '0.01','placeholder' => __('Enter Pick Up KM'), 'disabled' => $access]) }}
+                        {{ Form::number('pickup_km', $vehicleLending->pickup_km ?? $vehicle->km, ['class' => 'form-control ', 'step' => '1','placeholder' => __('Enter Pick Up KM'), 'disabled' => $access]) }}
+                    </div>
+                    <div class="form-group col-12">
+                        {{ Form::label('pickup_emoney_balance', __('Pick Up Emoney Balance'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                        {{ Form::number('pickup_emoney_balance', $vehicleLending->pickup_emoney_balance > 0 ? $vehicleLending->pickup_emoney_balance : $vehicle->emoney_balance, ['class' => 'form-control ', 'step' => '0.01','placeholder' => __('Enter Pick Up Emoney Balance'), 'disabled' => $access]) }}
                     </div>
                     <div class="form-group col-12">
                         {{ Form::label('pickup_time', __('Pick Up Time'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
@@ -20,19 +24,33 @@
                     <div class="form-group col-12">
                         {{ Form::label('pickup_file', __('Pick Up File'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
                         @if (\Auth::user()->id == $vehicleLending->request_by)
-                            {{ Form::file('pickup_file', ['class' => 'form-control', 'disabled' => $access]) }}
+                            {{ Form::file('pickup_file_1', ['class' => 'form-control mb-2', 'disabled' => $access]) }}
+                            {{ Form::file('pickup_file_2', ['class' => 'form-control mb-2', 'disabled' => $access]) }}
                             <span class="text-warning pl-1"><b>{{ __('Max Upload Size Per File: 10 MB')}}</b></span>
                         @endif
 
-                        @if ($vehicleLending->pickup_file)
+                        @if ($vehicleLending->pickup_file_1)
                             @php
-                                $pickup_temp_file      = explode('/', $vehicleLending->pickup_file);
-                                $pickup_filename       = array_pop($pickup_temp_file);
+                                $pickup_temp_file_1 = explode('/', $vehicleLending->pickup_file_1);
+                                $pickup_filename_1  = array_pop($pickup_temp_file_1);
                             @endphp
-                            <a href="{{ asset($vehicleLending->pickup_file) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                            <a href="{{ asset($vehicleLending->pickup_file_1) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
                                 data-bs-toggle="tooltip"
                                 data-bs-original-title="{{ __('View') }}">
-                                <i class="fas fa-file"></i> {{ $pickup_filename }}
+                                <i class="fas fa-file"></i> {{ $pickup_filename_1 }}
+                            </a>
+                            <br>
+                        @endif
+
+                        @if ($vehicleLending->pickup_file_2)
+                            @php
+                                $pickup_temp_file_2 = explode('/', $vehicleLending->pickup_file_2);
+                                $pickup_filename_2  = array_pop($pickup_temp_file_2);
+                            @endphp
+                            <a href="{{ asset($vehicleLending->pickup_file_2) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                                data-bs-toggle="tooltip"
+                                data-bs-original-title="{{ __('View') }}">
+                                <i class="fas fa-file"></i> {{ $pickup_filename_2 }}
                             </a>
                             <br>
                         @endif
@@ -48,25 +66,42 @@
                         {{ Form::number('return_km', null, ['class' => 'form-control ', 'step' => '0.01','placeholder' => __('Enter Return KM'), 'disabled' => $access]) }}
                     </div>
                     <div class="form-group col-12">
+                        {{ Form::label('return_emoney_balance', __('Return Emoney Balance'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                        {{ Form::number('return_emoney_balance', null, ['class' => 'form-control ', 'step' => '0.01','placeholder' => __('Enter Return Emoney Balance'), 'disabled' => $access]) }}
+                    </div>
+                    <div class="form-group col-12">
                         {{ Form::label('return_time', __('Return Time'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
                         {{ Form::datetimeLocal('return_time', null, ['class' => 'form-control datetime-local', 'disabled' => $access]) }}
                     </div>
                     <div class="form-group col-12">
                         {{ Form::label('return_file', __('Return File'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
                         @if (\Auth::user()->id == $vehicleLending->request_by)
-                            {{ Form::file('return_file', ['class' => 'form-control', 'disabled' => $access]) }}
+                            {{ Form::file('return_file_1', ['class' => 'form-control mb-2', 'disabled' => $access]) }}
+                            {{ Form::file('return_file_2', ['class' => 'form-control mb-2', 'disabled' => $access]) }}
                             <span class="text-warning pl-1"><b>{{ __('Max Upload Size Per File: 10 MB')}}</b></span>
                         @endif
 
-                        @if ($vehicleLending->return_file)
+                        @if ($vehicleLending->return_file_1)
                             @php
-                                $return_temp_file      = explode('/', $vehicleLending->return_file);
-                                $return_filename       = array_pop($return_temp_file);
+                                $return_temp_file_1      = explode('/', $vehicleLending->return_file_1);
+                                $return_filename_1       = array_pop($return_temp_file_1);
                             @endphp
-                            <a href="{{ asset($vehicleLending->return_file) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                            <a href="{{ asset($vehicleLending->return_file_1) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
                                 data-bs-toggle="tooltip"
                                 data-bs-original-title="{{ __('View') }}">
-                                <i class="fas fa-file"></i> {{ $return_filename }}
+                                <i class="fas fa-file"></i> {{ $return_filename_1 }}
+                            </a>
+                        @endif
+
+                        @if ($vehicleLending->return_file_2)
+                            @php
+                                $return_temp_file_2      = explode('/', $vehicleLending->return_file_2);
+                                $return_filename_2       = array_pop($return_temp_file_2);
+                            @endphp
+                            <a href="{{ asset($vehicleLending->return_file_2) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                                data-bs-toggle="tooltip"
+                                data-bs-original-title="{{ __('View') }}">
+                                <i class="fas fa-file"></i> {{ $return_filename_2 }}
                             </a>
                         @endif
                     </div>

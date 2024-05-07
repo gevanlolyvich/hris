@@ -2028,5 +2028,9 @@
   "Vehicle Unavailable": "Kendaraan Tidak Tersedia",
   "Vehicle Lending Proof Successfully Sent": "Bukti Peminjaman Kendaraan Berhasil Dikirim",
   "Emoney Balance": "Saldo Emoney",
-  "Enter Emoney Balance": "Masukkan Saldo Emoney"
+  "Enter Emoney Balance": "Masukkan Saldo Emoney",
+  "Pick Up Emoney Balance": "Saldo Emoney Saat Pengambilan",
+  "Return Emoney Balance": "Saldo Emoney Saat Pengembalian",
+  "Enter Pick Up Emoney Balance": "Masukkan Saldo Emoney Saat Pengambilan",
+  "Enter Return Emoney Balance": "Masukkan Saldo Emoney Saat Pengembalian"
 }

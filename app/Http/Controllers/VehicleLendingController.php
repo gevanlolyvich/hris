@@ -360,7 +360,8 @@ class VehicleLendingController extends Controller
     {
         $vehicleLending = VehicleLending::find($lending_id);
         if ($vehicleLending) {
-            return view('vehicle-lending.proof', compact('vehicleLending'));
+            $vehicle        = Vehicle::select('km', 'emoney_balance')->find($vehicleLending->vehicle_id);
+            return view('vehicle-lending.proof', compact('vehicleLending', 'vehicle'));
         } else {
             return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
         }
@@ -371,42 +372,82 @@ class VehicleLendingController extends Controller
         if ($vehicleLending) {
             $name                   = $vehicleLending->requester?->name ?? ' ';
             $emp_name               = preg_replace('/\s+/', '', $name);
-            $pickup_document_path   = null;
-            $return_document_path   = null;
+            $pickup_document_path_1 = null;
+            $return_document_path_1 = null;
+            $pickup_document_path_2 = null;
+            $return_document_path_2 = null;
 
             // Preaparing File From Request;
-            if ($request->hasFile('pickup_file')) {
-                $docs                   = $request->pickup_file;
-                $pickup_docName         = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_pickup'  . "." . $docs->getClientOriginalExtension();
-                $pickup_path            = $docs->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $pickup_docName, 'public');
-                $pickup_document_path   = env('APP_URL') . '/storage/' . $pickup_path;
+            // Pick Up Files
+            if ($request->hasFile('pickup_file_1')) {
+                $pickup_docs_1          = $request->pickup_file_1;
+                $pickup_docName_1       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_pickup_1'  . "." . $pickup_docs_1->getClientOriginalExtension();
+                $pickup_path_1          = $pickup_docs_1->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $pickup_docName_1, 'public');
+                $pickup_document_path_1 = env('APP_URL') . '/storage/' . $pickup_path_1;
 
                 // Delete Old file
-                $old_pickup_file_path = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->pickup_file);
-                if (File::exists($old_pickup_file_path)) {
-                    File::delete($old_pickup_file_path);
+                $old_pickup_file_path_1 = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->pickup_file_1);
+                if (File::exists($old_pickup_file_path_1)) {
+                    File::delete($old_pickup_file_path_1);
                 }
             }
-            if ($request->hasFile('return_file')) {
-                $docs                   = $request->return_file;
-                $return_docName         = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_return'  . "." . $docs->getClientOriginalExtension();
-                $return_path            = $docs->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $return_docName, 'public');
-                $return_document_path   = env('APP_URL') . '/storage/' . $return_path;
+            if ($request->hasFile('pickup_file_2')) {
+                $pickup_docs_2          = $request->pickup_file_2;
+                $pickup_docName_2       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_pickup_2'  . "." . $pickup_docs_2->getClientOriginalExtension();
+                $pickup_path_2          = $pickup_docs_2->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $pickup_docName_2, 'public');
+                $pickup_document_path_2 = env('APP_URL') . '/storage/' . $pickup_path_2;
 
                 // Delete Old file
-                $old_return_file_path = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->return_file);
-                if (File::exists($old_return_file_path)) {
-                    File::delete($old_return_file_path);
+                $old_pickup_file_path_2 = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->pickup_file_2);
+                if (File::exists($old_pickup_file_path_2)) {
+                    File::delete($old_pickup_file_path_2);
                 }
             }
 
-            $vehicleLending->pickup_km      = $request->pickup_km ? $request->pickup_km : $vehicleLending->pickup_km;
-            $vehicleLending->pickup_time    = $request->pickup_time ? $request->pickup_time : $vehicleLending->pickup_time;
-            $vehicleLending->pickup_file    = $pickup_document_path ? $pickup_document_path : $vehicleLending->pickup_file;
-            $vehicleLending->return_km      = $request->return_km ? $request->return_km : $vehicleLending->return_km;
-            $vehicleLending->return_time    = $request->return_time ? $request->return_time : $vehicleLending->return_time;
-            $vehicleLending->return_file    = $return_document_path ? $return_document_path : $vehicleLending->return_file;
+            // Return Files
+            if ($request->hasFile('return_file_1')) {
+                $return_docs_1            = $request->return_file_1;
+                $return_docName_1         = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_return_1'  . "." . $return_docs_1->getClientOriginalExtension();
+                $return_path_1            = $return_docs_1->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $return_docName_1, 'public');
+                $return_document_path_1   = env('APP_URL') . '/storage/' . $return_path_1;
+
+                // Delete Old file
+                $old_return_file_path_1 = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->return_file_1);
+                if (File::exists($old_return_file_path_1)) {
+                    File::delete($old_return_file_path_1);
+                }
+            }
+            if ($request->hasFile('return_file_2')) {
+                $return_docs_2            = $request->return_file_2;
+                $return_docName_2         = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_return_2'  . "." . $return_docs_2->getClientOriginalExtension();
+                $return_path_2            = $return_docs_2->storeAs("uploads/vehicle_lendings/{$request->lending_id}/" . $emp_name, $return_docName_2, 'public');
+                $return_document_path_2   = env('APP_URL') . '/storage/' . $return_path_2;
+
+                // Delete Old file
+                $old_return_file_path_2 = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->return_file_2);
+                if (File::exists($old_return_file_path_2)) {
+                    File::delete($old_return_file_path_2);
+                }
+            }
+
+            // Update Lending Data
+            $vehicleLending->pickup_km              = $request->pickup_km ? $request->pickup_km : $vehicleLending->pickup_km;
+            $vehicleLending->pickup_emoney_balance  = $request->pickup_emoney_balance ? $request->pickup_emoney_balance : $vehicleLending->pickup_emoney_balance;
+            $vehicleLending->pickup_time            = $request->pickup_time ? $request->pickup_time : $vehicleLending->pickup_time;
+            $vehicleLending->pickup_file_1          = $pickup_document_path_1 ? $pickup_document_path_1 : $vehicleLending->pickup_file_1;
+            $vehicleLending->pickup_file_2          = $pickup_document_path_2 ? $pickup_document_path_2 : $vehicleLending->pickup_file_2;
+            $vehicleLending->return_km              = $request->return_km ? $request->return_km : $vehicleLending->return_km;
+            $vehicleLending->return_emoney_balance  = $request->return_emoney_balance ? $request->return_emoney_balance : $vehicleLending->return_emoney_balance;
+            $vehicleLending->return_time            = $request->return_time ? $request->return_time : $vehicleLending->return_time;
+            $vehicleLending->return_file_1          = $return_document_path_1 ? $return_document_path_1 : $vehicleLending->return_file_1;
+            $vehicleLending->return_file_2          = $return_document_path_2 ? $return_document_path_2 : $vehicleLending->return_file_2;
             $vehicleLending->save();
+
+            // Update Vehicle Data
+            $vehicle                    = Vehicle::find($vehicleLending->vehicle_id);
+            $vehicle->km                = $request->return_km ? $request->return_km : $vehicle->km;
+            $vehicle->emoney_balance    = $request->return_emoney_balance && $request->return_km  ? $request->return_emoney_balance : $vehicle->emoney_balance;
+            $vehicle->save();
 
             return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Proof Successfully Sent'));
         } else {
