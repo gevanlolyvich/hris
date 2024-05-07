@@ -91,6 +91,7 @@ class VehicleController extends Controller
                     'type' => 'required',
                     'police_no' => 'required',
                     'km' => 'required',
+                    'emoney_balance' => 'required',
                 ]
             );
 
@@ -101,12 +102,13 @@ class VehicleController extends Controller
             }
 
             // Create New Vehicle
-            $vehicle                = new Vehicle();
-            $vehicle->name          = $request->name;
-            $vehicle->type          = strtoupper($request->type);
-            $vehicle->police_no     = strtoupper($request->police_no);
-            $vehicle->km            = $request->km;
-            $vehicle->branch_id     = $request->branch_id;
+            $vehicle                    = new Vehicle();
+            $vehicle->name              = $request->name;
+            $vehicle->type              = strtoupper($request->type);
+            $vehicle->police_no         = strtoupper($request->police_no);
+            $vehicle->km                = $request->km;
+            $vehicle->emoney_balance    = $request->emoney_balance;
+            $vehicle->branch_id         = $request->branch_id;
             $vehicle->save();
 
             return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Created'));
@@ -225,11 +227,12 @@ class VehicleController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $vehicle->name          = $request->name;
-            $vehicle->type          = strtoupper($request->type);
-            $vehicle->police_no     = strtoupper($request->police_no);
-            $vehicle->km            = $request->km;
-            $vehicle->branch_id     = $request->branch_id;
+            $vehicle->name              = $request->name;
+            $vehicle->type              = strtoupper($request->type);
+            $vehicle->police_no         = strtoupper($request->police_no);
+            $vehicle->km                = $request->km;
+            $vehicle->emoney_balance    = $request->emoney_balance;
+            $vehicle->branch_id         = $request->branch_id;
             $vehicle->save();
 
             return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Updated'));
