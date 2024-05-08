@@ -648,7 +648,7 @@ class ReportController extends Controller
 
                     if ($dateFormat <= date('Y-m-d')) {
                         if (isset($employee_attendances[$dateFormat])) {
-                            if ($employee_attendances[$dateFormat]->status == 'Present') {
+                            if (($employee_attendances[$dateFormat]->status == 'Present') || ($employee_attendances[$dateFormat]->status == 'No Working Hour')) {
                                 $attendanceStatus[$date] = 'H';
                                 $totalPresent            += 1;
                             } elseif ($employee_attendances[$dateFormat]->status == 'Leave') {
