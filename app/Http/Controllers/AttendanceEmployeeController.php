@@ -532,6 +532,14 @@ class AttendanceEmployeeController extends Controller
                     }
 
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds   = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours              = floor($totalWorkSeconds / 3600);
+                    $mins               = floor($totalWorkSeconds / 60 % 60);
+                    $secs               = floor($totalWorkSeconds % 60);
+                    $workhours          = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->employee_id   = $request->employee_id;
                     $attendanceEmployee->date          = $request->date;
                     $attendanceEmployee->clock_in      = $request->clock_in;
@@ -539,6 +547,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->late          = $late;
                     $attendanceEmployee->early_leaving = $earlyLeaving;
                     $attendanceEmployee->overtime      = $overtime;
+                    $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
@@ -553,12 +562,20 @@ class AttendanceEmployeeController extends Controller
                 $endTime   = Utility::getValByName('company_end_time');
                 if (Auth::user()->type == 'employee') {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds   = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours              = floor($totalWorkSeconds / 3600);
+                    $mins               = floor($totalWorkSeconds / 60 % 60);
+                    $secs               = floor($totalWorkSeconds % 60);
+                    $workhours          = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->clock_out     = $time;
                     $attendanceEmployee->early_leaving = '00:00:00';
                     $attendanceEmployee->overtime      = '00:00:00';
                     $attendanceEmployee->late          = '00:00:00';
                     $attendanceEmployee->total_rest    = '00:00:00';
-                    $attendanceEmployee->work_hours    = '00:00:00';
+                    $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->source_out    = 'Application';
@@ -582,6 +599,14 @@ class AttendanceEmployeeController extends Controller
                     ]);
                 } else {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds     = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours                = floor($totalWorkSeconds / 3600);
+                    $mins                 = floor($totalWorkSeconds / 60 % 60);
+                    $secs                 = floor($totalWorkSeconds % 60);
+                    $workhours            = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->employee_id   = $request->employee_id;
                     $attendanceEmployee->date          = $request->date;
                     $attendanceEmployee->clock_in      = $request->clock_in;
@@ -590,7 +615,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->early_leaving = '00:00:00';
                     $attendanceEmployee->overtime      = '00:00:00';
                     $attendanceEmployee->total_rest    = '00:00:00';
-                    $attendanceEmployee->work_hours    = '00:00:00';
+                    $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->source_out    = 'Application';
@@ -702,6 +727,14 @@ class AttendanceEmployeeController extends Controller
                     }
 
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds   = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours              = floor($totalWorkSeconds / 3600);
+                    $mins               = floor($totalWorkSeconds / 60 % 60);
+                    $secs               = floor($totalWorkSeconds % 60);
+                    $workhours          = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->employee_id   = $request->employee_id;
                     $attendanceEmployee->date          = $request->date;
                     $attendanceEmployee->clock_in      = $request->clock_in;
@@ -709,6 +742,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->late          = $late;
                     $attendanceEmployee->early_leaving = $earlyLeaving;
                     $attendanceEmployee->overtime      = $overtime;
+                    $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
@@ -723,12 +757,20 @@ class AttendanceEmployeeController extends Controller
                 $endTime   = Utility::getValByName('company_end_time');
                 if (Auth::user()->type == 'employee') {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours                = floor($totalWorkSeconds / 3600);
+                    $mins                 = floor($totalWorkSeconds / 60 % 60);
+                    $secs                 = floor($totalWorkSeconds % 60);
+                    $workhours            = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->clock_out     = $time;
                     $attendanceEmployee->early_leaving = '00:00:00';
                     $attendanceEmployee->overtime      = '00:00:00';
                     $attendanceEmployee->late          = '00:00:00';
                     $attendanceEmployee->total_rest    = '00:00:00';
-                    $attendanceEmployee->work_hours    = '00:00:00';
+                    $attendanceEmployee->work_hours    = $workhours;
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
                     $attendanceEmployee->source_out    = 'Application';
@@ -752,6 +794,14 @@ class AttendanceEmployeeController extends Controller
                     ]);
                 } else {
                     $attendanceEmployee                = AttendanceEmployee::find($id);
+
+                    // calculate work hours
+                    $totalWorkSeconds   = time() - strtotime($attendanceEmployee->clock_in);
+                    $hours              = floor($totalWorkSeconds / 3600);
+                    $mins               = floor($totalWorkSeconds / 60 % 60);
+                    $secs               = floor($totalWorkSeconds % 60);
+                    $workhours          = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
                     $attendanceEmployee->employee_id   = $request->employee_id;
                     $attendanceEmployee->date          = $request->date;
                     $attendanceEmployee->clock_in      = $request->clock_in;
@@ -759,6 +809,7 @@ class AttendanceEmployeeController extends Controller
                     $attendanceEmployee->late          = '00:00:00';
                     $attendanceEmployee->early_leaving = '00:00:00';
                     $attendanceEmployee->overtime      = '00:00:00';
+                    $attendanceEmployee->work_hours      = $workhours;
                     $attendanceEmployee->total_rest    = '00:00:00';
                     $attendanceEmployee->coord_out     = $coord_out;
                     $attendanceEmployee->picture_out   = $picture_path;
