@@ -17,7 +17,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('permit_type_id', __('Permit Type'), ['class' => 'col-form-label']) }}
-                <select name="permit_type_id" id="permit_type_id" class="form-control select">
+                <select name="permit_type_id" id="permit_type_id" class="form-control select2">
                      <option value="" >{{ __('Select Permit Type') }}</option>
                     @foreach ($permittypes as $permit)
                         <option value="{{ $permit->id }}">{{ $permit->name }}</option>
