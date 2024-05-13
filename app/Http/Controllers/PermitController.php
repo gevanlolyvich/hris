@@ -206,22 +206,24 @@ class PermitController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
+                
                 $branch = Branch::find(\Auth::user()->branch_id);
                 $branch_id = collect();
                 if ($branch) {
                     $branch_id->push($branch?->id);
                 }
 
+                
                 $children = $branch?->childBranchFlatten();
                 if ($children?->isNotEmpty()) {
                     foreach ($children as $child) {
                         $branch_id->push($child->id);
                     }
                 }
-
-                $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
-                $permittype = PermitType::get()->pluck('name', 'id');
                 
+                $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
+                $permittype = PermitType::get()->pluck('name', 'id');
+
                 return view('permit.edit', compact('permit', 'employees', 'permittype'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
