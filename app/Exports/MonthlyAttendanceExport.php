@@ -32,6 +32,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
     private $yellowed_cell;
     private $late_cell;
     private $holiday_cell;
+    private $face_recog_cell;
 
     // Modify the constructor to accept parameters
     public function __construct($query)
@@ -39,7 +40,8 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
         $this->query            = json_decode($query);
         $this->yellowed_cell    = collect();
         $this->late_cell        = collect();
-        $this->holiday_cell    = collect();
+        $this->holiday_cell     = collect();
+        $this->face_recog_cell  = collect();
     }
 
     /**
@@ -79,8 +81,8 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
         $settings   = Utility::settings();
 
-        $data->push([$settings['company_name'], '' , '' , '' , '' , __('Out Side Attendance')]);
-        $data->push([ "{$subTitle}  {$date}", '' , '' , '' , '' , __('Late')]);
+        $data->push([$settings['company_name'], '' , '' , '' , '' , __('Out Side Attendance'), '', '', '', '', '', '', __('Face Recognition')]);
+        $data->push([ "{$subTitle}  {$year}-{$month}", '' , '' , '' , '' , __('Late')]);
         $data->push(['']);
         $data->push(['No', __('Name'), __('Designation'), __('Branch'), __('Employee Type'), __('Date')]);
         $data->push(array_merge($tab_array, $dates));
@@ -116,7 +118,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
         foreach ($employees as $index => $employee) {
             $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', $employee?->branch?->name ?? '-', $employee?->employeeType?->name ?? '-'];
-            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'clock_out', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in', 'work_hours')->get();
+            $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'clock_out', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in', 'work_hours', 'source_in')->get();
 
             $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
             $totalAttendance        = 0;
@@ -161,6 +163,10 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
                                         if (($accuracy + (float)$branch_data['tolerance']) < $distance) {
                                             $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                        }
+
+                                        if (!in_array($attendance->source_in, ['Application', null])) {
+                                            $this->face_recog_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
                                         }
                                     }
                                 }
@@ -278,6 +284,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 $sheet->mergeCells('B2:F2');
                 $sheet->mergeCells('B3:F3');
                 $sheet->mergeCells('G2:M2');
+                $sheet->mergeCells('N2:T2');
 
                 // Setting Relative Colomn
                 $relativeColomn = $this->getRelativeColumn();
@@ -306,6 +313,12 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'D7F009'],
+                    ],
+                ]);
+                $sheet->getStyle('N2:T2')->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'D6F5CF'],
                     ],
                 ]);
                 $sheet->getStyle('G3:M3')->applyFromArray([
@@ -390,6 +403,17 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                         ],
                     ]);
                 }
+                
+                // Marking facerecog cell
+                foreach ($this->face_recog_cell as $cell) {
+                    $sheet->getStyle($cell)->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'D6F5CF'],
+                        ],
+                    ]);
+                }
+
             },
         ];
     }
