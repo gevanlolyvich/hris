@@ -1989,7 +1989,7 @@
   "Enter KM": "Masukkan KM",
   "Enter Type": "Masukkan Tipe",
   "Enter Police No": "Masukkan Nomor Polisi",
-  "Create Vehicle": "Buat Kendaraa",
+  "Create Vehicle": "Buat Kendaraan",
   "Update Vehicle": "Rubah Kendaraan",
   "Delete Vehicle": "Hapus Kendaraan",
   "Vehicle Successfully Created": "Kendaraan Berhasil Dibuat",
@@ -2033,5 +2033,6 @@
   "Return Emoney Balance": "Saldo Emoney Saat Pengembalian",
   "Enter Pick Up Emoney Balance": "Masukkan Saldo Emoney Saat Pengambilan",
   "Enter Return Emoney Balance": "Masukkan Saldo Emoney Saat Pengembalian",
-  "Face Recognition": "Face Recognition"
+  "Face Recognition": "Face Recognition",
+  "Vehicle Lending Approval": "Kelola Persetujuan Peminjaman Kendaraan"
 }
