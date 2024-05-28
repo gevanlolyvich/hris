@@ -232,7 +232,7 @@ if (!empty($mode_setting['theme_color'])) {
    
     <!--[if lt IE 11]>
   
-<![endif]-->
+    <![endif]-->
     <!-- Warning Section Ends -->
     <!-- Required Js -->
     <script src="{{ asset('assets/js/plugins/choices.min.js') }}"></script>
