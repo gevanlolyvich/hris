@@ -94,6 +94,7 @@ use App\Http\Controllers\Pph21Controller;
 use App\Http\Controllers\EmployeeReportController;
 use App\Http\Controllers\VehicleLendingController;
 use App\Http\Controllers\VehicleOfficerController;
+use App\Http\Controllers\PushSubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -188,12 +189,12 @@ Route::resource('email_template', EmailTemplateController::class)->middleware(
         'XSS',
     ]
 );
-Route::resource('email_template_lang', EmailTemplateLangController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+// Route::resource('email_template_lang', EmailTemplateLangController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::get(
     '/test',
 
@@ -1641,6 +1642,13 @@ Route::patch('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'p
     ]
 );
 Route::resource('vehicle-lending', VehicleLendingController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('push-subscription', PushSubscriptionController::class)->middleware(
     [
         'auth',
         'XSS',
