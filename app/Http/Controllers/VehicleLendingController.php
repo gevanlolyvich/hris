@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Vehicle;
 use App\Models\VehicleLending;
+use App\Models\VehicleOfficer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use File;
+use App\Notifications\VehicleRequest;
 
 class VehicleLendingController extends Controller
 {
@@ -209,6 +211,29 @@ class VehicleLendingController extends Controller
         $lending->date          = $request->date;
         $lending->purpose       = $request->purpose;
         $lending->save();
+
+        // Send Notification To Vehicle Officers
+        $vehicle = Vehicle::where('id', $request->vehicle_id)->first();
+        $officers = VehicleOfficer::where('is_resricted', 0)
+            ->orWhereHas('accesses', function ($query) use ($vehicle) {
+                $query->where('branch_id', $vehicle->branch_id);
+            })
+            ->get();
+        $subscriptions = [];
+        foreach ($officers as $officer) {
+            foreach ($officer?->user?->pushNotifications ?? [] as $sub) {
+                array_push($subscriptions, ['data' => $sub->data, 'name' => $officer->user->name]);
+            }
+        }
+
+        \Auth::user()->sendNotifications(
+            $subscriptions,
+            json_encode([
+                'title' => __('New Vehicle Lending Request'),
+                'body' => \Auth::user()->name . '  ' . __('Make Vehicle Lending Request') . "{$vehicle->name} [{$vehicle->police_no}] " . __('On Date') . ' ' . $request->date,
+                'url' => '/vehicle-lending'
+            ])
+        );
 
         return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Created'));
     }
