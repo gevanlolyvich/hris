@@ -2034,5 +2034,10 @@
   "Enter Pick Up Emoney Balance": "Masukkan Saldo Emoney Saat Pengambilan",
   "Enter Return Emoney Balance": "Masukkan Saldo Emoney Saat Pengembalian",
   "Face Recognition": "Face Recognition",
-  "Vehicle Lending Approval": "Kelola Persetujuan Peminjaman Kendaraan"
+  "Vehicle Lending Approval": "Kelola Persetujuan Peminjaman Kendaraan",
+  "New Vehicle Lending Request": "Permintaan Peminjaman Kendaraan Baru",
+  "Make Vehicle Lending Request": "Mengajukan Permintaan Peminjaman Kendaraan",
+  "For Date": "Untuk Tanggal",
+  "Vehicle Lending Request": "Permintaan Peminjaman Kendaraan",
+  "Rejected": "Ditolak"
 }
