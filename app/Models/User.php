@@ -2158,15 +2158,29 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PushSubscription::class, 'user_id');
     }
 
-    public function sendNotifications($subs, $data)
+    /**
+     * Sends notifications to a list of subscribers.
+     *
+     * @param array $subs List of subscribers.
+     * @param string $data The data to send in the notification in format of JSON, that consist of title, body, and url.
+     * @param string $urgency The urgency level of the notification. Possible values: 'very-low', 'low', 'normal', 'high'. Default is 'normal'.
+     *
+     * @return void
+     */
+    public function sendNotifications(array $subs, string $data, string $urgency = 'normal')
     {
-        $webPush = new WebPush([
-            "VAPID" => [
-                "publicKey" => env('PUSH_PUBLIC_KEY'),
-                "privateKey" => env('PUSH_PRIVATE_KEY'),
-                "subject" => env('APP_URL'),
+        $webPush = new WebPush(
+            [
+                "VAPID" => [
+                    "publicKey" => env('PUSH_PUBLIC_KEY'),
+                    "privateKey" => env('PUSH_PRIVATE_KEY'),
+                    "subject" => env('APP_URL'),
+                ]
+            ],
+            [
+                'urgency' => $urgency,
             ]
-        ]);
+        );
 
         // Sending Notification
         foreach ($subs as $sub) {
