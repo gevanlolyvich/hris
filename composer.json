@@ -21,6 +21,7 @@
         "mashape/unirest-php": "^3.0",
         "mercadopago/dx-php": "^2.5",
         "milon/barcode": "^9.0",
+        "minishlink/web-push": "^8.0",
         "mollie/mollie-api-php": "^2.48",
         "munafio/chatify": "^1.5",
         "obydul/laraskrill": "^1.2",
