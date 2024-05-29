@@ -213,6 +213,7 @@ class VehicleLendingController extends Controller
         $lending->save();
 
         // Send Notification To Vehicle Officers
+        // 1. Collect the reciever (subs) data that we need to send
         $vehicle = Vehicle::where('id', $request->vehicle_id)->first();
         $officers = VehicleOfficer::where('is_resricted', 0)
             ->orWhereHas('accesses', function ($query) use ($vehicle) {
@@ -226,13 +227,16 @@ class VehicleLendingController extends Controller
             }
         }
 
+        // 2. Send push notification to list of reciever (subs)
+        $date = substr($request->date,  0, 7);
         \Auth::user()->sendNotifications(
             $subscriptions,
             json_encode([
                 'title' => __('New Vehicle Lending Request'),
                 'body' => \Auth::user()->name . '  ' . __('Make Vehicle Lending Request') . "{$vehicle->name} [{$vehicle->police_no}] " . __('On Date') . ' ' . $request->date,
-                'url' => '/vehicle-lending'
-            ])
+                'url' => "/vehicle-lending?type=monthly&month={$date}&date=&branch="
+            ]),
+            'normal'
         );
 
         return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Created'));
@@ -375,9 +379,27 @@ class VehicleLendingController extends Controller
                 }
             }
 
-            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Status Successfully Updated'));
+            // Send push notification to requester
+            $subscriptions = [];
+            if ($lending->requester->pushNotifications) {
+                foreach ($lending->requester->pushNotifications ?? [] as $sub) {
+                    array_push($subscriptions, ['data' => $sub->data, 'name' => $lending->requester->name]);
+                }
+            }
+            $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
+            \Auth::user()->sendNotifications(
+                $subscriptions,
+                json_encode([
+                    'title' => __('Vehicle Lending Request') . ' ' . __($status),
+                    'body' => __('Vehicle Lending Request') . ' ' . $lending->vehicle->name . ' '. __('For Date') . ' ' . $lending->date . ' '. __($status),
+                    'url' => '/vehicle-lending'
+                ]),
+                'normal'
+            );
+
+            return redirect()->back()->with('success', __('Vehicle Lending Status Successfully Updated'));
         } else {
-            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
