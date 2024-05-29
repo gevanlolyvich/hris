@@ -4,7 +4,7 @@
         <div class="row">
             <div class="form-group col-12">
                 {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-                {{ Form::date('date', null, ['class' => 'form-control month-btn', 'autocomplete' => 'on', 'required' => 'required', 'id' => 'date_input']) }}
+                {{ Form::date('date', null, ['class' => 'form-control month-btn', 'autocomplete' => 'on', 'required' => 'required', 'id' => 'date_input', 'min' => date('Y-m-d')]) }}
             </div>
             <div class="form-group col-12">
                 {{ Form::label('vehicle_id', __('Vehicle'), ['class' => 'col-form-label']) }}
