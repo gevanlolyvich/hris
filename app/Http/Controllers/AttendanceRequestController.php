@@ -13,6 +13,7 @@ use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Utility;
 use App\Models\LogAttendance;
+use App\Models\PushSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -188,7 +189,31 @@ class AttendanceRequestController extends Controller
 
         //* Input to DB
         AttendanceRequest::create($form);
-        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Created'));
+
+        // Send Notification To HR
+        $subscriptions      = [];
+        $branch             = $employee->branch_id ?? '';
+        $departement        = $employee->department_id ?? '';
+        $pushSubscriptions  = PushSubscription::whereHas('user', function ($query) use ($employee) {
+            $query->where('type', 'hr')
+                ->where(function ($query) use ($employee) {
+                    $query->whereNull('branch_id')
+                            ->orWhere('branch_id', $employee->branch_id);
+                });
+        })->get();
+        foreach ($pushSubscriptions as $sub) {
+            array_push($subscriptions, ['data' => $sub->data, 'name' => $sub->user->name]);
+        }
+        \Auth::user()->sendNotifications(
+            $subscriptions,
+            json_encode([
+                'title' => __('New Attendance Request'),
+                'body' => $employee->name . ' ' . __('Make Attendance Request') . ' ' . __('For Date') . ' ' . $request->date,
+                'url' => "/attendancerequest?branch_id={$branch}&department_id={$departement}"
+            ]),
+            'high'
+        );
+        return redirect()->back()->with('success', __('Request Attendance Successfully Created'));
     }
 
     public function show(AttendanceRequest $attendance_request)
@@ -453,7 +478,25 @@ class AttendanceRequestController extends Controller
             }
         });
 
-        return redirect()->route('attendancerequest.index')->with('success', __('Request Attendance Successfully Approved / Rejeted'));
+        // Send push notification to requester
+        $subscriptions = [];
+        if ($attendance_request->employee?->user?->pushNotifications) {
+            foreach ($attendance_request->employee->user->pushNotifications ?? [] as $sub) {
+                array_push($subscriptions, ['data' => $sub->data, 'name' => $attendance_request->employee->name]);
+            }
+        }
+        $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
+        \Auth::user()->sendNotifications(
+            $subscriptions,
+            json_encode([
+                'title' => __('Attendance Request') . ' ' . __($status),
+                'body' => __('Attendance Request') . ' ' . __('For Date') . ' ' . $attendance_request->date . ' ' . __($status),
+                'url' => "/attendancerequest"
+            ]),
+            'high'
+        );
+        
+        return redirect()->back()->with('success', __('Request Attendance Successfully Approved / Rejeted'));
     }
 
     public function export(Request $request)

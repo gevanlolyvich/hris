@@ -2039,5 +2039,15 @@
   "Make Vehicle Lending Request": "Mengajukan Permintaan Peminjaman Kendaraan",
   "For Date": "Untuk Tanggal",
   "Vehicle Lending Request": "Permintaan Peminjaman Kendaraan",
-  "Rejected": "Ditolak"
+  "Rejected": "Ditolak",
+  "Leave Request": "Permintaan Cuti",
+  "New Leave Request": "Permintaan Cuti Baru",
+  "Make Leave Request": "Mengajukan Permintaan Cuti",
+  "To Date": "Sampai",
+  "Attendance Request": "Lupa Absen",
+  "New Attendance Request": "Permintaan Lupa Absen",
+  "Make Attendance Request": "Mengajukan Lupa Absen",
+  "Permit Request": "Permintaan Izin",
+  "New Permit Request": "Permintaan Izin Baru",
+  "Make Permit Request": "Mengajukan Permintaan Izin"
 }
