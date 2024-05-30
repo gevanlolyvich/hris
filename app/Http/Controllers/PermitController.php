@@ -9,6 +9,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Permit;
 use App\Models\PermitType;
+use App\Models\PushSubscription;
 use App\Models\ShiftTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -189,6 +190,31 @@ class PermitController extends Controller
             $permit->created_by         = Auth::user()->id;
 
             $permit->save();
+
+            // Send Notification To HR
+            $subscriptions      = [];
+            $branch             = $employee->branch_id ?? '';
+            $departement        = $employee->department_id ?? '';
+            $pushSubscriptions  = PushSubscription::whereHas('user', function ($query) use ($employee) {
+                $query->where('type', 'hr')
+                    ->where(function ($query) use ($employee) {
+                        $query->whereNull('branch_id')
+                                ->orWhere('branch_id', $employee->branch_id);
+                    });
+            })->get();
+            foreach ($pushSubscriptions as $sub) {
+                array_push($subscriptions, ['data' => $sub->data, 'name' => $sub->user->name]);
+            }
+            \Auth::user()->sendNotifications(
+                $subscriptions,
+                json_encode([
+                    'title' => __('New Permit Request'),
+                    'body' => $employee->name . ' ' . __('Make Permit Request') . ' [' .  $permit->permitType->name . '] ' . __('For Date') . ' ' . $request->start_date . ' ' . __('To Date') . ' ' . $request->end_date,
+                    'url' => "/permit?branch_id={$branch}&department_id={$departement}"
+                ]),
+                'high'
+            );
+            
             return redirect()->back()->with('success', __('Attendance Permit Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -398,6 +424,24 @@ class PermitController extends Controller
             Permit::where('id', $permit->id)->update($form);
             // AttendanceEmployee::create($form_attendance);
         });
+
+        // Send push notification to requester
+        $subscriptions = [];
+        if ($permit->employee?->user?->pushNotifications) {
+            foreach ($permit->employee->user->pushNotifications ?? [] as $sub) {
+                array_push($subscriptions, ['data' => $sub->data, 'name' => $permit->employee->name]);
+            }
+        }
+        $status = $request->is_approved ? 'Approved' : 'Rejected';
+        \Auth::user()->sendNotifications(
+            $subscriptions,
+            json_encode([
+                'title' => __('Permit Request') . ' ' . __($status),
+                'body' => __('Permit Request') . ' [' . $permit->permitType->name . '] ' . __('For Date') . ' ' . $permit->start_date . ' ' . __('To Date') . ' ' . $permit->end_date . ' ' . __($status),
+                'url' => "/permit"
+            ]),
+            'high'
+        );
 
         return redirect()->back()->with('success', __('Attendance Permit Successfully Updated'));
     }
