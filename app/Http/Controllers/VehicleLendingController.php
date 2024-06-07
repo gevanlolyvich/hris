@@ -8,6 +8,7 @@ use App\Models\VehicleLending;
 use App\Models\VehicleOfficer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use File;
 use App\Notifications\VehicleRequest;
 
@@ -203,6 +204,19 @@ class VehicleLendingController extends Controller
 
             return redirect()->back()->with('error', $messages->first());
         }
+            
+        $vehicle = Vehicle::where('is_active', true)->find($request->vehicle_id);
+        if (!$vehicle) {
+            return redirect()->back()->with('error', __('Vehicle Unavailable'));
+        }
+
+        // Optimistic Condition Based On Vehicle Version
+        $currentVersion = $vehicle->version;
+
+        $vehicle->incrementVersion();
+                
+        // Start A Transaction
+        DB::beginTransaction();
 
         // Create New Vehicle Officer
         $lending                = new VehicleLending();
@@ -212,9 +226,19 @@ class VehicleLendingController extends Controller
         $lending->purpose       = $request->purpose;
         $lending->save();
 
+
+        // Check Vehicle Version
+        $vehicle_reload = Vehicle::select('version')->where('is_active', true)->find($vehicle->id);
+        if ($vehicle_reload?->version !== $currentVersion + 1) { // When version not the same as we first retrieve rollback
+            DB::rollBack();
+            return redirect()->back()->with('error', __('Vehicle Unavailable'));
+        }
+        // Commit when the version match up
+        DB::commit();
+
+
         // Send Notification To Vehicle Officers
         // 1. Collect the reciever (subs) data that we need to send
-        $vehicle = Vehicle::where('id', $request->vehicle_id)->first();
         $officers = VehicleOfficer::where('is_resricted', 0)
             ->orWhereHas('accesses', function ($query) use ($vehicle) {
                 $query->where('branch_id', $vehicle->branch_id);
@@ -335,11 +359,33 @@ class VehicleLendingController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
+        $vehicle = Vehicle::where('is_active', true)->find($request->vehicle_id);
+        if (!$vehicle) {
+            return redirect()->back()->with('error', __('Vehicle Unavailable'));
+        }
+
+        // Optimistic Condition Based On Vehicle Version
+        $currentVersion = $vehicle->version;
+
+        $vehicle->incrementVersion();
+                
+        // Start A Transaction
+        DB::beginTransaction();
+
         // Create New Vehicle Officer
         $vehicleLending->vehicle_id    = $request->vehicle_id;
         $vehicleLending->date          = $request->date;
         $vehicleLending->purpose       = $request->purpose;
         $vehicleLending->save();
+
+        // Check Vehicle Version
+        $vehicle_reload = Vehicle::where('is_active', true)->select('version')->find($vehicle->id);
+        if ($vehicle_reload?->version !== $currentVersion + 1) { // When version not the same as we first retrieve rollback
+            DB::rollBack();
+            return redirect()->back()->with('error', __('Vehicle Unavailable'));
+        }
+        // Commit when the version match up
+        DB::commit();
 
         return redirect()->back()->with('success', __('Vehicle Lending Successfully Updated'));
     }
