@@ -134,6 +134,7 @@ class VehicleController extends Controller
      */
     public function edit(Vehicle $vehicle)
     {
+        $status = [0 => __('Inactive'), 1 => __('Active')];
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id')->toArray() ?? [];
@@ -146,7 +147,7 @@ class VehicleController extends Controller
                 $branches           = Branch::select('id', 'name')->get()->pluck('name', 'id');
             }
 
-            return view('vehicle.edit', compact('branches', 'vehicle'));
+            return view('vehicle.edit', compact('branches', 'vehicle', 'status'));
         } else if (\Auth::user()->type != 'employee') {
             $branch     = Branch::find(\Auth::user()->branch_id);
             $branch_id  = collect();
@@ -167,7 +168,7 @@ class VehicleController extends Controller
 
             $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
 
-            return view('vehicle.edit', compact('branches', 'vehicle'));
+            return view('vehicle.edit', compact('branches', 'vehicle', 'status'));
         } else {
             return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
         }
@@ -181,6 +182,7 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
+        Log::info($request);
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
             // Access Validity Check
             if (\Auth::user()->vehicleOfficer && \Auth::user()->vehicleOfficer->is_resricted) {
@@ -215,6 +217,7 @@ class VehicleController extends Controller
                 $request->all(),
                 [
                     'name' => 'required',
+                    'is_active' => 'required|boolean',
                     'type' => 'required',
                     'police_no' => 'required',
                     'km' => 'required',
@@ -228,6 +231,7 @@ class VehicleController extends Controller
             }
 
             $vehicle->name              = $request->name;
+            $vehicle->is_active         = $request->is_active;
             $vehicle->type              = strtoupper($request->type);
             $vehicle->police_no         = strtoupper($request->police_no);
             $vehicle->km                = $request->km;
