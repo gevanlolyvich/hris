@@ -13,6 +13,7 @@ class VehicleLending extends Model
         'request_by',
         'vehicle_id',
         'date',
+        'end_date',
         'purpose',
         'status',
         'approved_by',
