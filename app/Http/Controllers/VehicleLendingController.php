@@ -259,7 +259,7 @@ class VehicleLendingController extends Controller
      */
     public function edit(VehicleLending $vehicleLending)
     {
-        $unavailable_vehicle_id = VehicleLending::where('date', $vehicleLending->date)->whereNot('id', $vehicleLending->id)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id');
+        $unavailable_vehicle_id = VehicleLending::where('date', $vehicleLending->date)->whereNot('id', $vehicleLending->id)->select('vehicle_id')->get()->pluck('vehicle_id');
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
@@ -510,7 +510,7 @@ class VehicleLendingController extends Controller
     }
 
     public function getVehicleAvailabilityByDate(Request $request) {
-        $lendings       = VehicleLending::where('date', $request->date)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id');
+        $lendings       = VehicleLending::where('date', $request->date)->select('vehicle_id')->get()->pluck('vehicle_id');
 
         $vehicles       = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
