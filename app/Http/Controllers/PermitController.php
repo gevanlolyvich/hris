@@ -432,7 +432,7 @@ class PermitController extends Controller
                 array_push($subscriptions, ['data' => $sub->data, 'name' => $permit->employee->name]);
             }
         }
-        $status = $request->is_approved ? 'Approved' : 'Rejected';
+        $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
         \Auth::user()->sendNotifications(
             $subscriptions,
             json_encode([
