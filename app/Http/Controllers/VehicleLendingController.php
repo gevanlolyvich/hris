@@ -195,6 +195,7 @@ class VehicleLendingController extends Controller
             [
                 'vehicle_id' => 'required',
                 'date' => 'required|date|after_or_equal:today',
+                'end_date' => 'required|date|after_or_equal:date',
                 'purpose' => 'required',
             ]
         );
@@ -223,6 +224,7 @@ class VehicleLendingController extends Controller
         $lending->request_by    = \Auth::user()->id;
         $lending->vehicle_id    = $request->vehicle_id;
         $lending->date          = $request->date;
+        $lending->end_date      = $request->end_date;
         $lending->purpose       = $request->purpose;
         $lending->save();
 
@@ -283,7 +285,17 @@ class VehicleLendingController extends Controller
      */
     public function edit(VehicleLending $vehicleLending)
     {
-        $unavailable_vehicle_id = VehicleLending::where('date', $vehicleLending->date)->whereNot('id', $vehicleLending->id)->select('vehicle_id')->get()->pluck('vehicle_id');
+        $date       = $vehicleLending->date;
+        $end_date   = $vehicleLending->end_date;
+        $unavailable_vehicle_id = VehicleLending::whereNot('id', $vehicleLending->id)->where(function ($query) use ($date, $end_date) {
+            $query->whereBetween('date', [$date, $end_date])
+                ->orWhereBetween('end_date', [$date, $end_date])
+                ->orWhere(function ($query) use ($date, $end_date) {
+                    $query->where('date', '<=', $date)
+                            ->where('end_date', '>=', $end_date);
+                });
+        })->select('vehicle_id')->get()->pluck('vehicle_id');
+
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
@@ -349,6 +361,7 @@ class VehicleLendingController extends Controller
             [
                 'vehicle_id' => 'required',
                 'date' => "required|date|after_or_equal:{$vehicleLending->date}",
+                'end_date' => 'required|date|after_or_equal:date',
                 'purpose' => 'required',
             ]
         );
@@ -373,9 +386,10 @@ class VehicleLendingController extends Controller
         DB::beginTransaction();
 
         // Create New Vehicle Officer
-        $vehicleLending->vehicle_id    = $request->vehicle_id;
-        $vehicleLending->date          = $request->date;
-        $vehicleLending->purpose       = $request->purpose;
+        $vehicleLending->vehicle_id     = $request->vehicle_id;
+        $vehicleLending->date           = $request->date;
+        $vehicleLending->end_date       = $request->end_date;
+        $vehicleLending->purpose        = $request->purpose;
         $vehicleLending->save();
 
         // Check Vehicle Version
@@ -556,9 +570,19 @@ class VehicleLendingController extends Controller
     }
 
     public function getVehicleAvailabilityByDate(Request $request) {
-        $lendings       = VehicleLending::where('date', $request->date)->select('vehicle_id')->get()->pluck('vehicle_id');
+        // Getting blacklisted vehicle id
+        $date       = $request->date;
+        $end_date   = $request->end_date;
+        $lendings   = VehicleLending::where(function ($query) use ($date, $end_date) {
+            $query->whereBetween('date', [$date, $end_date])
+                ->orWhereBetween('end_date', [$date, $end_date])
+                ->orWhere(function ($query) use ($date, $end_date) {
+                    $query->where('date', '<=', $date)
+                            ->where('end_date', '>=', $end_date);
+                });
+        })->whereNot('vehicle_id', $request->choosen_vehicle)->select('vehicle_id')->get()->pluck('vehicle_id');
 
-        $vehicles       = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
+        $vehicles           = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
             $branch         = $vehicle?->branch?->name ?? '-';
             $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
