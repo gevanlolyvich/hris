@@ -26,6 +26,7 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Status') }}</th>
                                 <th>{{ __('Type') }}</th>
                                 <th>{{ __('Police No') }}</th>
                                 <th>{{ __('Branch') }}</th>
@@ -39,6 +40,13 @@
                             @foreach ($vehicles as $vehicle)
                                 <tr>
                                     <td>{{ $vehicle->name }}</td>
+                                    <td>
+                                        @if ($vehicle->is_active)
+                                            <div class="badge bg-success p-2 px-3 rounded">{{ __('Active') }}</div>
+                                        @else
+                                            <div class="badge bg-danger p-2 px-3 rounded">{{ __('Inactive') }}</div>
+                                        @endif
+                                    </td>
                                     <td>{{ $vehicle->type }}</td>
                                     <td>{{ $vehicle->police_no }}</td>
                                     <td>{{ $vehicle->branch?->name ?? '-' }}</td>

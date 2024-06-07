@@ -7,6 +7,10 @@
                 {{ Form::text('name', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Name')]) }}
             </div>
             <div class="form-group col-md-6 col-12">
+                {{ Form::label('is_active', __('Status'), ['class' => 'col-form-label']) }}
+                {{ Form::select('is_active', $status, null, ['class' => 'form-control select2', 'placeholder' => __('Select Vehicle Status')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12">
                 {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
                 {{ Form::text('type', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Type')]) }}
             </div>
