@@ -105,7 +105,11 @@
                                 <td>{{ $lending?->requester?->name ?? '-' }}</td>
                                 <td>{{ $lending?->vehicle?->name ?? '-' }}</td>
                                 <td>{{ $lending?->vehicle?->police_no ?? '-' }}</td>
-                                <td>{{ $lending?->date ?? '-' }}</td>
+                                @if ($lending->end_date == $lending->date)
+                                    <td>{{ $lending?->date ?? '-' }}</td>
+                                @else
+                                    <td>{{ $lending?->date ?? '-' }}  >>  {{ $lending->end_date ?? '-' }}</td>
+                                @endif
                                 <td>
                                     @if ($lending->status == 'Pending')
                                         <div class="badge bg-warning p-2 px-3 rounded">{{ __('Pending Approval') }}</div>
@@ -215,10 +219,25 @@
 
             $(document).on('change', '#date_input', function () {
                 let dateInput = $(this).val();
+
+                console.log(dateInput);
+
+                const end_date = document.getElementById('end_date_input');
+
+                end_date.disabled = false;
+                end_date.min = dateInput;
+                end_date.value = '';
+            })
+
+            $(document).on('change', '#end_date_input', function () {
+                let endDateInput = $(this).val();
+                const dateInput = document.getElementById('date_input');
+                const hiddenInput = document.getElementById('chosen_vehicle');
+
                 $.ajax({
                     url: "{{ route('vehicle-lending.getVehicleAvailabilityByDate') }}",
                     type: "GET",
-                    data: { date: dateInput },
+                    data: { date: dateInput.value, end_date: endDateInput, choosen_vehicle: hiddenInput?.value || 0 },
                     success: function(data) {
                         // employee
                         $('.vehicle_id').empty();

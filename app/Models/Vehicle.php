@@ -18,7 +18,8 @@ class Vehicle extends Model
         'police_no',
         'km',
         'emoney_balance',
-        'branch_id'
+        'branch_id',
+        'version'
     ];
 
     public function branch()
@@ -29,5 +30,11 @@ class Vehicle extends Model
     public function lendings(): HasMany
     {
         return $this->hasMany(VehicleLending::class, 'vehicle_id');
+    }
+
+    public function incrementVersion()
+    {
+        $this->version++;
+        $this->save();
     }
 }
