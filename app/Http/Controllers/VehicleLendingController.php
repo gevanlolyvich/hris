@@ -135,9 +135,9 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::whereIn('branch_id', $branch_ids)->get()->pluck('id');
+                $vehicles   = Vehicle::where('is_active', true)->whereIn('branch_id', $branch_ids)->get()->pluck('id');
             } else {
-                $vehicles   = Vehicle::get();
+                $vehicles   = Vehicle::where('is_active', true)->get();
             }
 
             foreach ($vehicles as $vehicle) {
@@ -161,7 +161,7 @@ class VehicleLendingController extends Controller
                 }
             }
 
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::get();
+            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::where('is_active', true)->whereIn('branch_id', $branch_id)->get() : Vehicle::where('is_active', true)->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -170,7 +170,7 @@ class VehicleLendingController extends Controller
 
             return view('vehicle-lending.create', compact('vehicles'));
         } else {
-            $vehicles   = Vehicle::get();
+            $vehicles   = Vehicle::where('is_active', true)->get();
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
@@ -239,7 +239,7 @@ class VehicleLendingController extends Controller
             'normal'
         );
 
-        return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Created'));
+        return redirect()->back()->with('success', __('Vehicle Lending Successfully Created'));
     }
 
     /**
@@ -263,9 +263,9 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_ids)->get();
+                $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_ids)->get();
             } else {
-                $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
+                $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
             }
 
             foreach ($vehicles as $vehicle) {
@@ -290,8 +290,8 @@ class VehicleLendingController extends Controller
             }
 
             $vehicles       = $branch_id?->isNotEmpty() ?
-                                Vehicle::whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_id)->get() :
-                                Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
+                                Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_id)->get() :
+                                Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -300,7 +300,7 @@ class VehicleLendingController extends Controller
 
             return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
         } else {
-            $vehicles   = Vehicle::whereNotIn('id', $unavailable_vehicle_id)->get();
+            $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
@@ -341,7 +341,7 @@ class VehicleLendingController extends Controller
         $vehicleLending->purpose       = $request->purpose;
         $vehicleLending->save();
 
-        return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Updated'));
+        return redirect()->back()->with('success', __('Vehicle Lending Successfully Updated'));
     }
 
     /**
@@ -354,9 +354,9 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee' || $vehicleLending->request_by == \Auth::user()->id) {
             $vehicleLending->delete();
 
-            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Successfully Deleted'));
+            return redirect()->back()->with('success', __('Vehicle Lending Successfully Deleted'));
         } else {
-            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
@@ -364,6 +364,13 @@ class VehicleLendingController extends Controller
     {
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
             $lending                    = VehicleLending::find($request->lending_id);
+
+            // Check Vehicle Availability
+            $vehicle = Vehicle::find($lending->vehicle_id);
+            if (!$vehicle->is_active) {
+                return redirect()->back()->with('error', __('Vehicle Unavailable'));
+            }
+
             if ($lending) {
 
                 // Check Vehicle Availability
@@ -375,7 +382,7 @@ class VehicleLendingController extends Controller
                     $lending->approved_by   = \Auth::user()->id;
                     $lending->save();
                 } else {
-                    return redirect()->route('vehicle-lending.index')->with('error', __('Vehicle Unavailable'));
+                    return redirect()->back()->with('error', __('Vehicle Unavailable'));
                 }
             }
 
@@ -410,7 +417,7 @@ class VehicleLendingController extends Controller
             $vehicle        = Vehicle::select('km', 'emoney_balance')->find($vehicleLending->vehicle_id);
             return view('vehicle-lending.proof', compact('vehicleLending', 'vehicle'));
         } else {
-            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
@@ -496,16 +503,16 @@ class VehicleLendingController extends Controller
             $vehicle->emoney_balance    = $request->return_emoney_balance && $request->return_km  ? $request->return_emoney_balance : $vehicle->emoney_balance;
             $vehicle->save();
 
-            return redirect()->route('vehicle-lending.index')->with('success', __('Vehicle Lending Proof Successfully Sent'));
+            return redirect()->back()->with('success', __('Vehicle Lending Proof Successfully Sent'));
         } else {
-            return redirect()->route('vehicle-lending.index')->with('error', __('Permission denied.'));
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function getVehicleAvailabilityByDate(Request $request) {
         $lendings       = VehicleLending::where('date', $request->date)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id');
 
-        $vehicles       = Vehicle::whereNotIn('id', $lendings)->get();
+        $vehicles       = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
             $branch         = $vehicle?->branch?->name ?? '-';
             $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
