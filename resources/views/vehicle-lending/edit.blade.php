@@ -8,7 +8,7 @@
             <div class="form-group col-12">
                 {{ Form::label('vehicle_id', __('Vehicle'), ['class' => 'col-form-label']) }}
                 <div class='vehicle_div'>
-                    {{ Form::select('vehicle_id', $vehicles, null, ['class' => 'form-control select2 vehicle_id', 'placeholder' => __('Select Vehicle'), 'id' => 'vehicle_id', 'disabled' => true]) }}
+                    {{ Form::select('vehicle_id', $vehicles, null, ['class' => 'form-control select2 vehicle_id', 'placeholder' => __('Select Vehicle'), 'id' => 'vehicle_id']) }}
                 </div>
             </div>
             <div class="form-group col-12">
