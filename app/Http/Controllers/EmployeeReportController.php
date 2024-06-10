@@ -253,7 +253,7 @@ class EmployeeReportController extends Controller
         $report = Report::find($report_id);
 
         // Set status to be read, if direct supervisor read the report
-        if (Auth::user()->employee?->id == $report->employee->managed_by) {
+        if (Auth::user()->employee?->id == $report?->employee?->managed_by) {
             $report->is_read = true;
             $report->save();
         }

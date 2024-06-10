@@ -29,6 +29,9 @@ class TestController extends Controller
         $employees = Employee::where('is_active', 1)->select('personel_id')->get();
         $presentAttendance = AttendanceStatus::where('id',1)->first();
 
+        $bot_token = env('TELEGRAM_BOT_TOKEN');
+        $group_id  = env('TELEGRAM_BOT_GROUP_ID');
+
         $settings = Utility::settings();
 
         for ($a=0; $a < count($apis); $a++) {
@@ -42,7 +45,8 @@ class TestController extends Controller
                 Log::info($th);
             }
 
-            if (!empty($responses)) {
+            // Check If API Request Is Successfull
+            if (!empty($responses?->json())) {
                 $parsed_responses = $responses->json();
                 $attendances = $parsed_responses['attendances'];
     
@@ -73,6 +77,10 @@ class TestController extends Controller
                 }));
 
                 LogAttendance::insert($parsed_data);
+            } else { // When error send message with telegram bot
+                $time = date('m-d-Y h:i:s', time());
+                $message = urlencode("[🔴 | {$time}]\nHRIS Sync Access Door Failed");
+                Http::get("https://api.telegram.org/bot{$bot_token}/sendMessage?chat_id={$group_id}&text={$message}");
             }
 
             $final_data = DB::table('log_attendances as la')
