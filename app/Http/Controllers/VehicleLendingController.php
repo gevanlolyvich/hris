@@ -580,7 +580,7 @@ class VehicleLendingController extends Controller
                     $query->where('date', '<=', $date)
                             ->where('end_date', '>=', $end_date);
                 });
-        })->whereNot('vehicle_id', $request->choosen_vehicle)->select('vehicle_id')->get()->pluck('vehicle_id');
+        })->whereNot('vehicle_id', $request->choosen_vehicle)->whereNull('return_km')->select('vehicle_id')->get()->pluck('vehicle_id');
 
         $vehicles           = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
