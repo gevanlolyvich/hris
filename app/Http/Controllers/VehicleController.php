@@ -182,7 +182,6 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
-        Log::info($request);
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') {
             // Access Validity Check
             if (\Auth::user()->vehicleOfficer && \Auth::user()->vehicleOfficer->is_resricted) {
