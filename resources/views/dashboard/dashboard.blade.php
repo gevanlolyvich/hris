@@ -290,7 +290,7 @@
                                 <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
                                 <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                            @elseif ($yesterdayEmployeeAttendance && ($yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in || $yesterdayEmployeeAttendance->source_out !== 'Application'))
+                            @elseif ($yesterdayEmployeeAttendance && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
