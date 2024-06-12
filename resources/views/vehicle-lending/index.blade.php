@@ -10,6 +10,12 @@
 @endsection
 
 @section('action-button')
+    @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
+        <a href="{{ route('vehicle-lending.exportLending', ['url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
+            data-bs-original-title="{{ __('Export') }}">
+            <i class="ti ti-file-export"></i>
+        </a>
+    @endif
     <a href="#" data-url="{{ route('vehicle-lending.create') }}" data-ajax-popup="true" data-size="xl"
         data-title="{{ __('Create Vehicle Lending') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create') }}">
@@ -48,7 +54,7 @@
                                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
                                         <div class="btn-box">
                                             {{ Form::label('date', __('Date'),['class'=>'col-form-label'])}}
-                                            {{ Form::date('date',isset($_GET['date'])?$_GET['date']:'', array('class' => 'form-control month-btn')) }}
+                                            {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
