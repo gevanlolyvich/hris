@@ -1641,6 +1641,12 @@ Route::patch('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'p
         'XSS',
     ]
 );
+Route::get('vehicle-lending/export', [VehicleLendingController::class, 'exportLendings'])->name('vehicle-lending.exportLending')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('vehicle-lending', VehicleLendingController::class)->middleware(
     [
         'auth',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\VehicleLendingExport;
 use App\Models\Branch;
 use App\Models\Vehicle;
 use App\Models\VehicleLending;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use File;
 use App\Notifications\VehicleRequest;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VehicleLendingController extends Controller
 {
@@ -590,5 +592,30 @@ class VehicleLendingController extends Controller
         $vehicles       = $vehicles->pluck('name', 'id');
 
         return $vehicles;
+    }
+
+    public function exportLendings(Request $request)
+    {
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                list($key, $value) = explode('=', $query);
+                $queryArray[$key] = $value;
+            }
+
+            if ($queryArray['type'] == 'daily') {
+                $queryArray['timeFrame'] = $queryArray['date'];
+            } elseif ($queryArray['type'] == 'monthly') {
+                $queryArray['timeFrame'] = $queryArray['month'];
+            }
+        } else {
+            $queryArray['timeFrame'] = date('Y-m');
+        }
+
+        $name = preg_replace('/\s+/', '_', __('Vehicle Lending')) . '_' . $queryArray['timeFrame'];
+        $data = Excel::download(new VehicleLendingExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
     }
 }
