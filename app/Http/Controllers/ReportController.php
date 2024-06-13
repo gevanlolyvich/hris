@@ -559,15 +559,10 @@ class ReportController extends Controller
                 }
             }
 
-            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
             
-            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
             
-            if (empty($branch_id)) {
-                $branch->prepend('All', '');
-                $department->prepend('All', '');
-            }
-
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
@@ -579,6 +574,8 @@ class ReportController extends Controller
                     $employees      = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
                 }
+
+                $department = $department->where('branch_id', $request->branch);
             }
 
             if (!empty($request->department)) {
@@ -682,6 +679,14 @@ class ReportController extends Controller
             $data['totalPresent']    = $totalPresent;
             $data['totalLeave']      = $totalLeave;
             $data['curMonth']        = $curMonth;
+
+            $department = $department->pluck('name', 'id');
+            $branch = $branch->pluck('name', 'id');
+
+            if (empty($branch_id)) {
+                $branch->prepend('All', '');
+                $department->prepend('All', '');
+            }
 
             $branch_count = 2;
             foreach ($branch as $index => $b) {
