@@ -8,7 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -2132,5 +2136,68 @@ class User extends Authenticatable implements MustVerifyEmail
     function alpbatize($index) {
         // Convert the numeric index into an alphabetical index
         return chr(65 + $index); // ASCII value for 'A' is 65
+    }
+
+    public function vehicleOfficer()
+    {
+        return $this->hasOne(VehicleOfficer::class, 'user_id', 'id');
+    }
+    
+    public function vehicleLendingRequest()
+    {
+        return $this->hasOne(VehicleLending::class, 'request_by', 'id');
+    }
+
+    public function vehicleLendingApproval()
+    {
+        return $this->hasOne(VehicleLending::class, 'approved_by', 'id');
+    }
+
+    public function pushNotifications(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class, 'user_id');
+    }
+
+    /**
+     * Sends notifications to a list of subscribers.
+     *
+     * @param array $subs List of subscribers.
+     * @param string $data The data to send in the notification in format of JSON, that consist of title, body, and url.
+     * @param string $urgency The urgency level of the notification. Possible values: 'very-low', 'low', 'normal', 'high'. Default is 'normal'.
+     *
+     * @return void
+     */
+    public function sendNotifications(array $subs, string $data, string $urgency = 'normal')
+    {
+        $webPush = new WebPush(
+            [
+                "VAPID" => [
+                    "publicKey" => env('PUSH_PUBLIC_KEY'),
+                    "privateKey" => env('PUSH_PRIVATE_KEY'),
+                    "subject" => env('APP_URL'),
+                ]
+            ],
+            [
+                'urgency' => $urgency,
+            ]
+        );
+
+        // Sending Notification
+        foreach ($subs as $sub) {
+            $webPush->queueNotification(
+                Subscription::create(json_decode($sub['data'], true)),
+                $data,
+            );
+        }
+
+        // Check Send Result
+        foreach ($webPush->flush() as $index => $report) {
+            if ($report->isSuccess()) {
+                Log::info("[V] Successfully Send Push Notification To {$subs[$index]['name']}");
+            } else {
+                Log::info("[X] Failed Send Push Notification To {$subs[$index]['name']}: {$report->getReason()}");
+            }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VehicleController;
 use App\Models\Employee;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -91,6 +92,9 @@ use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\Pph21Controller;
 use App\Http\Controllers\EmployeeReportController;
+use App\Http\Controllers\VehicleLendingController;
+use App\Http\Controllers\VehicleOfficerController;
+use App\Http\Controllers\PushSubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -185,12 +189,12 @@ Route::resource('email_template', EmailTemplateController::class)->middleware(
         'XSS',
     ]
 );
-Route::resource('email_template_lang', EmailTemplateLangController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+// Route::resource('email_template_lang', EmailTemplateLangController::class)->middleware(
+//     [
+//         'auth',
+//         'XSS',
+//     ]
+// );
 Route::get(
     '/test',
 
@@ -1593,6 +1597,64 @@ Route::resource('employee-report', EmployeeReportController::class)->middleware(
 );
 
 Route::post('employee-report/{id}/report', [EmployeeReportController::class, 'response'])->name('report.response')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-officer', VehicleOfficerController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('vehicle-available', [VehicleLendingController::class, 'getVehicleAvailabilityByDate'])->name('vehicle-lending.getVehicleAvailabilityByDate')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('vehicle', VehicleController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::patch('vehicle-lending/{id}/approval/', [VehicleLendingController::class, 'approval'])->name('vehicle-lending.approval')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'getProof'])->name('vehicle-lending.getProof')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('vehicle-lending/{id}/proof/', [VehicleLendingController::class, 'proof'])->name('vehicle-lending.proof')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('vehicle-lending/export', [VehicleLendingController::class, 'exportLendings'])->name('vehicle-lending.exportLending')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('vehicle-lending', VehicleLendingController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('push-subscription', PushSubscriptionController::class)->middleware(
     [
         'auth',
         'XSS',

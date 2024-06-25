@@ -21,6 +21,7 @@
         "mashape/unirest-php": "^3.0",
         "mercadopago/dx-php": "^2.5",
         "milon/barcode": "^9.0",
+        "minishlink/web-push": "^8.0",
         "mollie/mollie-api-php": "^2.48",
         "munafio/chatify": "^1.5",
         "obydul/laraskrill": "^1.2",
@@ -81,7 +82,8 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform-check": false
     },
     "minimum-stability": "dev",
     "prefer-stable": true

@@ -253,7 +253,7 @@ class EmployeeReportController extends Controller
         $report = Report::find($report_id);
 
         // Set status to be read, if direct supervisor read the report
-        if (Auth::user()->employee?->id == $report->employee->managed_by) {
+        if (Auth::user()->employee?->id == $report?->employee?->managed_by) {
             $report->is_read = true;
             $report->save();
         }
@@ -324,6 +324,9 @@ class EmployeeReportController extends Controller
         $perve_activity_id  = array_keys($request->activity ?? []);
 
         // updating old activity
+        if (!isset($request->activity)) {
+            $request['activity'] = [];
+        }
         foreach ($request->activity as $index => $activity) {
             if ($activity != null && $request->activity_date[$index] != null) {
                 $activity_instance           = ReportActivity::find($index);
@@ -347,6 +350,9 @@ class EmployeeReportController extends Controller
         
         //* Prepare Accomplishment
         $new_accomplishment = [];
+        if (!isset($request->new_accomplishment)) {
+            $request['new_accomplishment'] = [];
+        }
         foreach ($request->new_accomplishment as $accomplishment) {
             if ($accomplishment != null) {
                 $new_accomplishment[]  = ['accomplishment' => $accomplishment];
@@ -365,6 +371,9 @@ class EmployeeReportController extends Controller
         ReportAccomplishment::insert($new_accomplishment);
         
         // Update accomplishment
+        if (!isset($request->accomplishment)) {
+            $request['accomplishment'] = [];
+        }
         foreach ($request->accomplishment as $index => $accomplishment) {
             if ($accomplishment != null) {
                 $accomplishment_instance                  = ReportAccomplishment::find($index);
@@ -379,6 +388,9 @@ class EmployeeReportController extends Controller
 
         //* Prepare obstacles
         $new_obstacles = [];
+        if (!isset($request->new_obstacle)) {
+            $request['new_obstacle'] = [];
+        }
         foreach ($request->new_obstacle as $obstacle) {
             if ($obstacle != null) {
                 $new_obstacles[]  = ['obstacle' => $obstacle];
@@ -390,13 +402,16 @@ class EmployeeReportController extends Controller
 
         // Create new obstacle
         for ($i=0; $i < count($new_obstacles); $i++) { 
-            $new_obstacles[$i]['report_id'] = $report->id;
+            $new_obstacles[$i]['report_id']  = $report->id;
             $new_obstacles[$i]['created_at'] = date('Y-m-d H:i:s');
             $new_obstacles[$i]['updated_at'] = date('Y-m-d H:i:s');
         }
         ReportObstacle::insert($new_obstacles);
 
         // Update obstacle
+        if (!isset($request->obstacle)) {
+            $request['obstacle'] = [];
+        }
         foreach ($request->obstacle as $index => $obstacle) {
             if ($obstacle != null) {
                 $obstacle_instance              = ReportObstacle::find($index);
@@ -411,6 +426,9 @@ class EmployeeReportController extends Controller
 
         //* Prepare Plan
         $new_plans = [];
+        if (!isset($request->new_plan)) {
+            $request['new_plan'] = [];
+        }
         foreach ($request->new_plan as $plan) {
             if ($plan != null) {
                 $new_plans[]  = ['plan' => $plan];
@@ -429,6 +447,9 @@ class EmployeeReportController extends Controller
         ReportPlan::insert($new_plans);
 
         // update plan
+        if (!isset($request->plan)) {
+            $request['plan'] = [];
+        }
         foreach ($request->plan as $index => $plan) {
             if ($plan != null) {
                 $plan_instance              = ReportPlan::find($index);
@@ -448,6 +469,9 @@ class EmployeeReportController extends Controller
 
         // Create new attachment
         $new_attachments = [];
+        if (!isset($request->new_attachment)) {
+            $request['new_attachment'] = [];
+        }
         if ($request->hasFile('new_attachment')) {
             foreach ($request->new_attachment as $index => $new_attachment) {
                 $docs               = $new_attachment;
@@ -466,6 +490,9 @@ class EmployeeReportController extends Controller
 
         // Update attachment
         if ($request->hasFile('attachment')) {
+            if (!isset($request->attachment)) {
+                $request['attachment'] = [];
+            }
             foreach($request->attachment as $index => $attachment) {
                 $attachment_instance    = ReportAttachment::find($index);
 

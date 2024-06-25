@@ -772,7 +772,7 @@
                                 <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('overtime_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
                                     <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
                                 </a>
-                                <a href="{{route('attendanceemployee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                <a href="{{route('overtime.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
                                     <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
                                 </a>
                             </div>
