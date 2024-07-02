@@ -164,6 +164,10 @@
                     if(map.hasLayer(layer)){
                         layer.clearLayers();
                     }
+                    if (map.hasLayer(circleLayer)) {
+                        circleLayer.clearLayers();
+                    }
+                    
 
                     map.on('click', function (e) {
                         onMapClick(e, map)
@@ -248,6 +252,10 @@
                 if (layer !== null) {
                     layer.clearLayers();
                 }
+                if (circleLayer !== null) {
+                    circleLayer.clearLayers();
+                }
+
             });
         });
     </script>

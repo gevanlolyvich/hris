@@ -57,6 +57,9 @@
             <div class="dash-head-link">
                 <i class="ti ti-camera" style="color: grey" id="camera-permission"></i>
             </div>
+            <div class="dash-head-link" onclick="checkNotificationPermission()">
+                <i class="ti ti-bell-ringing" style="color: grey" id="notification-permission"></i>
+            </div>
             <ul class="list-unstyled">
 
                 {{-- @php
@@ -196,6 +199,58 @@
     </script>
 
     <script>
+        navigator.serviceWorker.register("service_worker.js");
+
+        function requestNotificationPermission(notifIcon) {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    // Service Worker
+                    navigator.serviceWorker.ready.then((sw) => {
+                        // Subs
+                        sw.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey:"{{ env('PUSH_PUBLIC_KEY')}}"
+                        }).then((subscription) => {
+
+                            // // subscription successful
+                            fetch("{{ route('push-subscription.store') }}", {
+                                method: "post",
+                                headers: {
+                                    "X-CSRF-Token": "{{ csrf_token() }}",
+                                    "Content-Type": "application/json"
+                                },
+                                credentials: "same-origin",
+                                body:JSON.stringify(subscription)
+                            }).then(() => {
+                                notifIcon.style.color = "Green";
+                            });
+                        });
+                    })
+                } else if (permission === 'denied') {
+                    notifIcon.style.color = "Red";
+                }
+            });
+        };
+
+        function checkNotificationPermission() {
+            let notifIcon = document.getElementById('notification-permission');
+
+            navigator.permissions.query({ name: 'notifications' }).then(function(permissionStatus) {
+                if (permissionStatus.state === 'granted') { // User already gave permission to notificitaion
+                    notifIcon.style.color = "Green";
+                } else if (permissionStatus.state === 'denied') { // User already decline permission to notification
+                    notifIcon.style.color = "Red";
+                } else if (permissionStatus.state === 'prompt') { // User have gaven prompt to accept / decline permission to notification
+                    requestNotificationPermission(notifIcon);
+                }
+            }).catch(function(error) {
+                notifIcon.style.color = "Red";
+                console.error('Failed to query notification permissions:', error);
+            });  
+        }
+    </script>
+
+    <script>
         $(document).ready(function () {
             // Location Notification
             let locationIcon = document.getElementById('location-permission');
@@ -231,6 +286,9 @@
             } else {
                 cameraIcon.style.color = "Red";
             }
+
+            // Notification Notifaction
+            checkNotificationPermission();
         });
     </script>
 @endpush

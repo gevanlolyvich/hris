@@ -132,10 +132,24 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" style="padding-top: 0.35rem">
-                        <div style="display: none;" id="modal-note">
-                            <div class="text-center mx-auto">
-                                <strong>{{__('Notes')}}</strong>
-                                <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                        <div class="row text-center mx-auto">
+                            <div class="col" style="display: none;" id="modal-note">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Notes')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="col" style="display: none;" id="modal-type">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Type')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="col" style="display: none;" id="modal-source">
+                                <div class="text-center mx-auto">
+                                    <strong>{{__('Source')}}</strong>
+                                    <textarea class="form-control mb-3 mt-1" name="source-value" id="source-value" rows="2" disabled></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
@@ -167,12 +181,14 @@
                             {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ')}} {{ $officeTime['endTime'] }} WIB
                         </p>
                         {{-- Condition for showing employee already clock in or not --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'])
+                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
                             <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
-                        @elseif (empty($employeeAttendance))
+                            {!! Form::hidden('source', $yesterdayEmployeeAttendance->source_out) !!}
+                            @elseif (empty($employeeAttendance))
                             {{-- DO Nothing --}}
-                        @else
+                            @else
                             <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
+                            {!! Form::hidden('source', $employeeAttendance->source_out) !!}
                         @endif
                     @else
                         <h6 class="text-muted pb-0-5">
@@ -234,17 +250,20 @@
                             {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                         </div>
                         <div class="col-md-6 text-center mx-auto mt-1">
-                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in || $yesterdayEmployeeAttendance->source_out !== 'Application') && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                                 <button type="button" value="0" name="in" id="clock_in"
                                     class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                             @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
                                 <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
                             @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
                                 <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                            @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
+                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                            @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in || $employeeAttendance->source_out !== 'Application'))
                                 <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
+                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                            @elseif (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
+                                <button type="button" value="0" name="in" id="clock_in"
                                     class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
                             @else
                                 <button type="button" value="0" name="in" id="clock_in"
@@ -253,7 +272,7 @@
                             {{ Form::close() }}
                         </div>                                                    
                         <div class="col-md-6 text-center mx-auto mt-3">
-                            @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in))
+                            @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in || $yesterdayEmployeeAttendance->source_out !== 'Application'))
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
@@ -262,13 +281,22 @@
                                 <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
                                 <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                            @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in))
-                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
+                            @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in || $employeeAttendance->source_out !== 'Application'))
+                                {{ Form::model($yesterdayEmployeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
                                 <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
+                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
+                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                            @elseif ($yesterdayEmployeeAttendance && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
+                                {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
+                                <input type="hidden" name="latitude" id="latitude_out" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out" value="0">
+                                <input type="hidden" name="picture_out" id="picture_out">
+                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
                                 <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
                                     class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
                             @else
@@ -301,7 +329,7 @@
                                             <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
                                             <td>
                                                 @if ($attendanceData->coord_in)
-                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}">
+                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}" data-source="{{ $attendanceData->source_in }}" data-type="{{ $attendanceData->attendance_type?->name ?? '-' }}">
                                                         <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
                                                     </a>
                                                 @else
@@ -312,12 +340,12 @@
                                             </td>
                                             <td>
                                                 @if ($attendanceData->coord_out)
-                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}" data-source="{{ $attendanceData->source_out }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @else
                                                     <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_out) : '00:00' }}
+                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @endif
                                             </td>
@@ -496,7 +524,7 @@
                                             </div>
                                             <div class="ms-3">
                                                 <small class="text-muted">{{ __('Total') }}</small>
-                                                <h6 class="m-0">{{ __('Staff') }}</h6>
+                                                <h6 class="m-0">{{ __('Employee') }}</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -880,6 +908,7 @@
 
             const clockInButton = document.getElementById("clock_in");
             const clockOutButton = document.getElementById("clock_out");
+            const sourceHidden = document.getElementById("source");
             // const clockInData = document.getElementById("clockInData");
 
             if (latitude !== 0 && longitude !== 0 && clockInButton) {
@@ -1066,10 +1095,13 @@
             var map = null;
             var imageSrc = null;
             var notes = null;
+            var sourceValue = null;
 
             $('body').on('click', '.map-link', function() {
                 var coordinates = $(this).data('coordinates').split(', ');
                 notes = $(this).data('note');
+                var attendanceType = $(this).data('type');
+                sourceValue = $(this).data('source');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -1095,6 +1127,23 @@
                         document.getElementById('modal-note').style.display = 'none';
                         document.getElementById('note-value').value = '';
                     }
+
+                    if (attendanceType) {
+                        document.getElementById('modal-type').style.display = '';
+                        document.getElementById('type-value').value = attendanceType;
+                    } else {
+                        document.getElementById('modal-type').style.display = 'none';
+                        document.getElementById('type-value').value = '';
+                    }
+
+                    if (sourceValue) {
+                        document.getElementById('modal-source').style.display = '';
+                        document.getElementById('source-value').value = sourceValue;
+                    } else {
+                        document.getElementById('modal-source').style.display = 'none';
+                        document.getElementById('source-value').value = '';
+                    }
+
                     // If a map already exists, remove it
                     if (map !== null) {
                         map.remove();

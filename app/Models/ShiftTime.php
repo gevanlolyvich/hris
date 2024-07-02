@@ -12,8 +12,16 @@ class ShiftTime extends Model
     use HasFactory,SoftDeletes;
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'shift_type_id',
+        'days',
+        'is_working',
+        'start_time',
+        'end_time',
+    ];
+
     public function shiftType(): BelongsTo
     {
-        return $this->belongsTo(ShiftType::class);
+        return $this->belongsTo(ShiftType::class)->withTrashed();
     }
 }

@@ -13,7 +13,7 @@
     @can('Create Competencies')
         <a href="#" data-url="{{ route('competencies.create') }}" data-ajax-popup="true"
             data-title="{{ __('Create New Competencies') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-            data-bs-original-title="{{ __('Create') }}">
+            data-size="lg" data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
         </a>
     @endcan
@@ -28,18 +28,22 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th width="10px">ID</th>
+                                {{-- <th width="10px">ID</th> --}}
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Performance Type') }}</th>
                                 <th>{{ __('Type') }}</th>
+                                <th>{{ __('Description') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($competencies as $competency)
                                 <tr>
-                                    <td>{{ $competency->id }}</td>
+                                    {{-- <td>{{ $competency->id }}</td> --}}
                                     <td>{{ $competency->name }}</td>
-                                    <td>{{ !empty($competency->getPerformance_type->name) ? $competency->getPerformance_type->name : '-' }}
+                                    <td>{{ $competency->performance_type?->name ?? '-' }}</td>
+                                    <td>{{ __($competency->type) }}</td>
+                                    <td>{{ $competency->description }}</td>
                                     <td class="Action">
                                         <span>
                                             @can('Edit Competencies')

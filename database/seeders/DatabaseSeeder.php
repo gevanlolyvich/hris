@@ -19,7 +19,11 @@ class DatabaseSeeder extends Seeder
             NewFeature::class,
             NewSystemSetting::class,
             BankSeeder::class,
-            NewFeatureBank::class
+            NewFeatureBank::class,
+            NewFeatureLevel::class,
+            NewFeatureGoal::class,
+            ManagePerformanceTypeFeature::class,
+            NewSystemTaxSetting::class,
         ]);
     }
 }

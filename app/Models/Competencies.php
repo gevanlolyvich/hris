@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Competencies extends Model
 {
@@ -10,16 +11,27 @@ class Competencies extends Model
         'name',
         'type',
         'created_by',
+        'performance_type_id',
+        'description'
     ];
 
-    // public static $types = [
-    //     'technical' => 'Technical',
-    //     'organizational' => 'Organizational',
-    //     'behavioural' => 'Behavioural',
-    // ];
+    public static $types = [
+        'Grade' => 'Grade',
+        'Essay' => 'Essay'
+    ];
 
-    public function getPerformance_type()
+    public function performance_type()
     {
-        return $this->hasOne('App\Models\Performance_Type', 'id', 'type');
+        return $this->belongsTo(Performance_Type::class, 'performance_type_id', 'id');
+    }
+
+    public function weights(): HasMany
+    {
+        return $this->hasMany(IndicatorWeight::class, 'competency_id');
+    }
+
+    public function Appraisals(): HasMany
+    {
+        return $this->hasMany(AppraisalRating::class, 'competency_id');
     }
 }

@@ -2,6 +2,7 @@
 @section('page-title')
     {{ __('Settings') }}
 @endsection
+
 @php
     // $logo = asset(Storage::url('uploads/logo/'));
     $logo = \App\Models\Utility::get_file('uploads/logo/');
@@ -29,8 +30,6 @@
     $wasabi_storage_validation = $setting['wasabi_storage_validation'];
     $wasabi_storage_validations = explode(',', $wasabi_storage_validation);
 @endphp
-
-
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
@@ -236,6 +235,7 @@
         });
     </script>
 @endpush
+
 @section('content')
     <div class="col-sm-12">
         <div class="row">
@@ -254,6 +254,10 @@
 
                         <a href="#system-settings" id="system-setting-tab"
                             class="list-group-item list-group-item-action border-0">{{ __('System Settings') }} <div
+                                class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+
+                        <a href="#tax-settings" id="tax-setting-tab"
+                            class="list-group-item list-group-item-action border-0">{{ __('Tax Settings') }} <div
                                 class="float-end"><i class="ti ti-chevron-right"></i></div></a>
 
                         <a href="#email-settings" id="email-setting-tab"
@@ -954,6 +958,44 @@
                             </div>
                         </div>
                         {!! Form::close() !!}
+                    </div>
+                </div>
+
+                <div class="" id="tax-settings">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>{{ __('Tax Settings') }}</h5>
+                        </div>
+                        {{ Form::model($settings, ['route' => 'tax.settings', 'method' => 'post']) }}
+                            <div class="card-body">
+                                <div class="row company-setting">
+                                    <div class="form-group col-md-6">
+                                        {{ Form::label('signer_identification_type', __('Signer Identification Type'), ['class' => 'col-form-label']) }}
+                                        {{ Form::select('signer_identification_type', ['NPWP'=>'NPWP', 'NIK'=>'NIK'], null, ['class' => 'form-control select2', 'placeholder' => __('Select Signer Identification Type')]) }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {{ Form::label('signer_identification', __('Signer Identification'), ['class' => 'col-form-label']) }}
+                                        {{ Form::text('signer_identification', null, ['class' => 'form-control', 'placeholder' => __('Enter Signer Identification')]) }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        {{ Form::label('pph21_autocut', __('Auto Deducting PPh 21'), ['class' => 'col-form-label']) }}
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class=" form-check-input" data-toggle="switchbutton"
+                                                data-onstyle="primary" name="pph21_autocut" id="pph21_autocut"
+                                                {{ $settings['pph21_autocut'] == 'on' ? 'checked="checked"' : '' }}>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer ">
+                                <div class="col-sm-12 px-2">
+                                    <div class="text-end">
+                                        {{ Form::submit(__('Save Changes'), ['class' => 'btn btn-xs btn-primary']) }}
+                                    </div>
+                                </div>
+                            </div>
+                        {{ Form::close() }}
                     </div>
                 </div>
 
@@ -2248,4 +2290,5 @@
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection

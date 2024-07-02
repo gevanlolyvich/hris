@@ -27,6 +27,7 @@ class Employee extends Model
         'address',
         'domicile_address',
         'marital_status',
+        'dependents',
         'emergency_contact_number',
         'emergency_contact_relation',
         'emergency_contact_photo',
@@ -53,7 +54,9 @@ class Employee extends Model
     function getTotalWorkdays($employeeWorkdays, $month, $year)
     {
         // Get the number of days in the month
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $daysInMonth    = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+        $holidays       = Holiday::whereMonth('start_date', '<=', $month)->whereMonth('end_date', '>=', $month)->whereYear('start_date', '<=', $year)->whereYear('end_date', '>=', $year)->get();
 
         // Initialize the total workdays count
         $totalWorkdays = 0;
@@ -62,9 +65,12 @@ class Employee extends Model
         for ($day = 1; $day <= $daysInMonth; $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
+            $date           = $day <= 9 ? "$year-$month-0$day" : "$year-$month-$day";
+
+            $holiday    = $holidays->where('start_date', '<=', $date)->where('end_date', '>=', $date)->values();
 
             // Check if the current day is a workday for the employee
-            if (in_array($currentDayName, $employeeWorkdays)) {
+            if (in_array($currentDayName, $employeeWorkdays) && $holiday->isEmpty()) {
                 $totalWorkdays++;
             }
         }
@@ -111,41 +117,39 @@ class Employee extends Model
         // Initialize the present days count
         $presentDaysCount = 0;
 
+        // Log::info(json_encode($attendanceData, JSON_PRETTY_PRINT));
         // Loop through each attendance entry
         foreach ($attendanceData as $attendance) {
             // Get the day of the week for the attendance date
-            $attendanceDayName = date('l', strtotime($attendance['date']));
+            $attendanceDayName = date('l', strtotime($attendance->date));
 
-            // Check if the attendance date is a workday based on shift times
-            $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
+            // Check if the attendance date is a work day based on shift times
+            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);            
 
-            if ($shift && $shift['is_working'] && $type == 'Fixed') {
+            if ($shift && $shift->is_working && $type == 'Fixed') {
                 // Calculate required work hours based on shift
-
-                $startShift = strtotime($shift['start_time']);
-                $endShift   = strtotime($shift['end_time']);
+                $startShift = strtotime($shift->start_time);
+                $endShift   = strtotime($shift->end_time);
 
                 if ($endShift < $startShift) {
                     // Shift spans two dates, consider hours on the next day
                     $endShift += 86400; // Add 24 hours
                 }
 
-                if ($shift['end_time'] < $shift['start_time']) {
-                    // Shift spans two dates, consider hours on the next day
-                    $shift['end_time'] += 86400; // Add 24 hours
-                }
-
-                $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
+                $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 2, 2));
 
                 // Check if the work hours of attendance match the required work hours
-                if ($attendance['work_hours']) {
-                    list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
-                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600) - 1;
+                if ($attendance->work_hours) {
+                    list($hours, $minutes, $seconds) = explode(':', $attendance->work_hours);
+                    $attendanceWorkHours = ($hours + $minutes / 60 + $seconds / 3600);
                 } else {
                     $attendanceWorkHours = 0;
                 }
 
-                if ($attendanceWorkHours >= $requiredWorkHours || $type != 'Fixed') {
+                if ($attendance->status != 'Present') {
+                    // Increment the present days count
+                    $presentDaysCount++;
+                } elseif ($attendanceWorkHours >= $requiredWorkHours) {
                     // Increment the present days count
                     $presentDaysCount++;
                 }
@@ -164,7 +168,7 @@ class Employee extends Model
 
     public function shift_type()
     {
-        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id')->withTrashed();
     }
 
     public function documents()
@@ -189,8 +193,9 @@ class Employee extends Model
     {
         $employee               = Employee::find($this->id);
         $total_work_days        = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days     = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
-        $normal_salary          = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * ($total_present_days / $total_work_days) : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
+        $total_present_days     = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $fixed_rate             = ($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1;
+        $normal_salary          = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
 
         return $normal_salary;
     }
@@ -202,31 +207,14 @@ class Employee extends Model
         $total_work_hours        = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
-        //allowance
-        $allowances      = Allowance::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-        $total_allowance = 0;
-        foreach ($allowances as $allowance) {
-            if ($allowance->type == 'percentage') {
-                $total_allowance  = $allowance->amount * $employee->salary / 100  + $total_allowance;
-            } else {
-                $total_allowance = $allowance->amount + $total_allowance;
-            }
-        }
-
-        //commission
-        $commissions      = Commission::where('employee_id', '=', $this->id)->whereMonth('date', $month)->whereYear('date', $year)->get();
-
-        $total_commission = 0;
-        foreach ($commissions as $commission) {
-            if ($commission->type == 'percentage') {
-                $total_commission  = $commission->amount * $employee->salary / 100 + $total_commission;
-            } else {
-                $total_commission = $commission->amount + $total_commission;
-            }
-        }
+        // Normal Salary Calculate
+        $normal_salary  = $this->get_bruto_salary($month, $year);
 
         //Loan
-        $loans      = Loan::where('employee_id', '=', $this->id)->whereMonth('end_date', $month)->whereYear('end_date', $year)->get();
+        $loans      = Loan::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                        $query->orWhere('is_recurring', true)
+                            ->orWhere('period', "{$year}-{$month}");
+                    })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             if ($loan->type == 'percentage') {
@@ -237,7 +225,10 @@ class Employee extends Model
         }
 
         //Saturation Deduction
-        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $this->id)->get();
+        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                        $query->orWhere('is_recurring', true)
+                                            ->orWhere('period', "{$year}-{$month}");
+                                    })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             if ($saturation_deduction->type == 'percentage') {
@@ -247,8 +238,54 @@ class Employee extends Model
             }
         }
 
+        //Net Salary Calculate
+        $deduction_salary = $total_loan + $total_saturation_deduction;
+
+        $net_salary     =  $normal_salary - $deduction_salary;
+
+        return $net_salary;
+    }
+
+    public function get_bruto_salary($month, $year)
+    {
+        $employee                = Employee::find($this->id);
+        // $total_work_days      = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_work_hours        = $this->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+        // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
+
+        //allowance
+        $allowances      = Allowance::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
+        $total_allowance = 0;
+        foreach ($allowances as $allowance) {
+            if ($allowance->type == 'percentage') {
+                $total_allowance  = $allowance->amount * $employee->salary / 100  + $total_allowance;
+            } else {
+                $total_allowance = $allowance->amount + $total_allowance;
+            }
+        }
+
+        //commission
+        $commissions      = Commission::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
+        $total_commission = 0;
+        foreach ($commissions as $commission) {
+            if ($commission->type == 'percentage') {
+                $total_commission  = $commission->amount * $employee->salary / 100 + $total_commission;
+            } else {
+                $total_commission = $commission->amount + $total_commission;
+            }
+        }
+
         //OtherPayment
-        $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->get();
+        $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             if ($other_payment->type == 'percentage') {
@@ -294,16 +331,19 @@ class Employee extends Model
         $normal_salary  = $this->get_salary($month, $year);
 
         //Net Salary Calculate
-        $advance_salary = $total_allowance + $total_commission + $total_other_payment + $total_over_time - $total_loan - $total_saturation_deduction;
+        $advance_salary = $total_allowance + $total_commission + $total_other_payment + $total_over_time;
 
-        $net_salary     =  $normal_salary + $advance_salary;
+        $bruto     =  $normal_salary + $advance_salary;
 
-        return $net_salary;
+        return $bruto;
     }
 
     public static function allowance($id, $month, $year)
     {
-        $allowances      = Allowance::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->get();
+        $allowances      = Allowance::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             $total_allowance = $allowance->amount + $total_allowance;
@@ -317,7 +357,10 @@ class Employee extends Model
     public static function commission($id, $month, $year)
     {
         //commission
-        $commissions      = Commission::where('employee_id', '=', $id)->whereMonth('date', $month ?? date('m'))->whereYear('date', $year ?? date('Y'))->get();
+        $commissions      = Commission::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                $query->orWhere('is_recurring', true)
+                                    ->orWhere('period', "{$year}-{$month}");
+                            })->get();
         // dd($commissions);
         $total_commission = 0;
 
@@ -332,7 +375,10 @@ class Employee extends Model
     public static function loan($id, $month, $year)
     {
         //Loan
-        $loans      = Loan::where('employee_id', '=', $id)->whereMonth('end_date', $month ?? date('m'))->whereYear('end_date', $year ?? date('Y'))->get();
+        $loans      = Loan::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                        $query->orWhere('is_recurring', true)
+                            ->orWhere('period', "{$year}-{$month}");
+                    })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             $total_loan = $loan->amount + $total_loan;
@@ -342,10 +388,13 @@ class Employee extends Model
         return $loan_json;
     }
 
-    public static function saturation_deduction($id)
+    public static function saturation_deduction($id, $month, $year)
     {
         //Saturation Deduction
-        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $id)->get();
+        $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                        $query->orWhere('is_recurring', true)
+                                            ->orWhere('period', "{$year}-{$month}");
+                                    })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             $total_saturation_deduction = $saturation_deduction->amount + $total_saturation_deduction;
@@ -355,10 +404,13 @@ class Employee extends Model
         return $saturation_deduction_json;
     }
 
-    public static function other_payment($id)
+    public static function other_payment($id, $month, $year)
     {
         //OtherPayment
-        $other_payments      = OtherPayment::where('employee_id', '=', $id)->get();
+        $other_payments      = OtherPayment::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
+                                    $query->orWhere('is_recurring', true)
+                                        ->orWhere('period', "{$year}-{$month}");
+                                })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             $total_other_payment = $other_payment->amount + $total_other_payment;

@@ -559,15 +559,10 @@ class ReportController extends Controller
                 }
             }
 
-            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+            $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
             
-            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
+            $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
             
-            if (empty($branch_id)) {
-                $branch->prepend('All', '');
-                $department->prepend('All', '');
-            }
-
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
@@ -579,6 +574,8 @@ class ReportController extends Controller
                     $employees      = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
                 }
+
+                $department = $department->where('branch_id', $request->branch);
             }
 
             if (!empty($request->department)) {
@@ -611,9 +608,10 @@ class ReportController extends Controller
                 $dates[]                = $formatted_date;
                 $formated_dates[]       = $year . '-' . $month . '-' . $formatted_date;
                 $date                   = "{$year}-{$month}-{$formatted_date}";
-                $holiday                = Holiday::where('start_date', '>=', $date)->where('end_date', '<=', $date)->exists(); 
+                $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
                 $holiday_date[$date]    = $holiday; 
             }
+            Log::info(json_encode($holiday_date, JSON_PRETTY_PRINT));
 
             $employeesAttendance        = [];
             $totalPresent               = $totalLeave = $totalEarlyLeave = 0;
@@ -647,7 +645,7 @@ class ReportController extends Controller
 
                     if ($dateFormat <= date('Y-m-d')) {
                         if (isset($employee_attendances[$dateFormat])) {
-                            if ($employee_attendances[$dateFormat]->status == 'Present') {
+                            if (($employee_attendances[$dateFormat]->status == 'Present') || ($employee_attendances[$dateFormat]->status == 'No Working Hour')) {
                                 $attendanceStatus[$date] = 'H';
                                 $totalPresent            += 1;
                             } elseif ($employee_attendances[$dateFormat]->status == 'Leave') {
@@ -681,6 +679,24 @@ class ReportController extends Controller
             $data['totalPresent']    = $totalPresent;
             $data['totalLeave']      = $totalLeave;
             $data['curMonth']        = $curMonth;
+
+            $department = $department->pluck('name', 'id');
+            $branch = $branch->pluck('name', 'id');
+
+            if (empty($branch_id)) {
+                $branch->prepend('All', '');
+                $department->prepend('All', '');
+            }
+
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
 
             return view('report.monthlyAttendance', compact('employeesAttendance', 'branch', 'department', 'dates', 'data'));
         } else {

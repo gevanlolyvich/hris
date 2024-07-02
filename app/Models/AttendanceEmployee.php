@@ -25,7 +25,9 @@ class AttendanceEmployee extends Model
         'coord_out',
         'is_valid',
         'validate_by',
-        'note'
+        'note',
+        'source_in',
+        'source_out'
     ];
 
     public function employees()

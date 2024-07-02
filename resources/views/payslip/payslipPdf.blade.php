@@ -65,7 +65,7 @@ $company_logo = Utility::getValByName('company_logo');
                                         </tr>
                                         <tr>
                                             <td>{{ __('Basic Salary') }}</td>
-                                            <td>{{ $salaryType->name }}</td>
+                                            <td>{{ $salaryType ?? '-' }}</td>
                                             <td class="text-right">
                                                 {{ \Auth::user()->priceFormat($payslip->basic_salary) }}</td>
                                         </tr>

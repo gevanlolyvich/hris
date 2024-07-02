@@ -26,7 +26,8 @@ class OtherPaymentController extends Controller
 
         $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->find($id) : Employee::where('is_active', 1)->find($id);
         $otherpaytype=OtherPayment::$otherPaymenttype;
-        return view('otherpayment.create', compact('employee','otherpaytype'));
+        $recurringOptions = [ 0 => __('No'), 1 => __('Recurring')];
+        return view('otherpayment.create', compact('employee','otherpaytype', 'recurringOptions'));
     }
 
     public function store(Request $request)
@@ -36,6 +37,7 @@ class OtherPaymentController extends Controller
             $validator = \Validator::make(
                 $request->all(), [
                                    'employee_id' => 'required',
+                                   'is_recurring' => 'required',
                                    'title' => 'required',
                                    'amount' => 'required',
                                ]
@@ -53,12 +55,14 @@ class OtherPaymentController extends Controller
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
 
-            $otherpayment              = new OtherPayment();
-            $otherpayment->employee_id = $request->employee_id;
-            $otherpayment->title       = $request->title;
-            $otherpayment->type        = $request->type;
-            $otherpayment->amount      = $request->amount;
-            $otherpayment->created_by  = \Auth::user()->creatorId();
+            $otherpayment               = new OtherPayment();
+            $otherpayment->employee_id  = $request->employee_id;
+            $otherpayment->title        = $request->title;
+            $otherpayment->is_recurring = $request->is_recurring;
+            $otherpayment->period       = $request->period;
+            $otherpayment->type         = $request->type;
+            $otherpayment->amount       = $request->amount;
+            $otherpayment->created_by   = \Auth::user()->id;
             $otherpayment->save();
 
             if(  $otherpayment->type == 'percentage' )
@@ -67,7 +71,7 @@ class OtherPaymentController extends Controller
                 
             }  
 
-            return redirect()->back()->with('success', __('OtherPayment  successfully created.'));
+            return redirect()->back()->with('success', __('Other Payment Successfully Created'));
         }
         else
         {
@@ -85,10 +89,11 @@ class OtherPaymentController extends Controller
         $otherpayment = OtherPayment::find($otherpayment);
         if(\Auth::user()->can('Edit Other Payment'))
         {
-            if($otherpayment->created_by == \Auth::user()->creatorId())
+            if($otherpayment->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {    
                 $otherpaytypes=OtherPayment::$otherPaymenttype;
-                return view('otherpayment.edit', compact('otherpayment','otherpaytypes'));
+                $recurringOptions = [ 0 => __('No'), 1 => __('Recurring')];
+                return view('otherpayment.edit', compact('otherpayment','otherpaytypes', 'recurringOptions'));
             }
             else
             {
@@ -105,13 +110,14 @@ class OtherPaymentController extends Controller
     {
         if(\Auth::user()->can('Edit Other Payment'))
         {
-            if($otherpayment->created_by == \Auth::user()->creatorId())
+            if($otherpayment->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $validator = \Validator::make(
                     $request->all(), [
 
                                        'title' => 'required',
                                        'amount' => 'required',
+                                       'is_recurring' => 'required',
                                    ]
                 );
                 if($validator->fails())
@@ -127,9 +133,11 @@ class OtherPaymentController extends Controller
                     return redirect()->back()->with('error', __('Permission denied.'));
                 }
 
-                $otherpayment->title  = $request->title;
-                $otherpayment->type   = $request->type;
-                $otherpayment->amount = $request->amount;
+                $otherpayment->title        = $request->title;
+                $otherpayment->is_recurring = $request->is_recurring;
+                $otherpayment->period       = $request->period;
+                $otherpayment->type         = $request->type;
+                $otherpayment->amount       = $request->amount;
                 $otherpayment->save();
 
                 if(  $otherpayment->type == 'percentage' )
@@ -138,7 +146,7 @@ class OtherPaymentController extends Controller
                     
                 }
 
-                return redirect()->back()->with('success', __('OtherPayment successfully updated.'));
+                return redirect()->back()->with('success', __('Other Payment Successfully Updated'));
             }
             else
             {
@@ -155,11 +163,11 @@ class OtherPaymentController extends Controller
     {
         if(\Auth::user()->can('Delete Other Payment'))
         {
-            if($otherpayment->created_by == \Auth::user()->creatorId())
+            if($otherpayment->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
             {
                 $otherpayment->delete();
 
-                return redirect()->back()->with('success', __('OtherPayment successfully deleted.'));
+                return redirect()->back()->with('success', __('Other Payment Successfully Deleted'));
             }
             else
             {

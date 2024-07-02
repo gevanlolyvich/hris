@@ -13,6 +13,7 @@ use App\Models\AttendanceEmployee;
 use App\Models\AttendanceRequest;
 use App\Models\AttendanceStatus;
 use App\Models\Utility;
+use App\Models\PushSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -77,6 +78,16 @@ class LeaveController extends Controller
             }
 
             $leaves = $leaves->orderBy('start_date', 'DESC')->get();
+
+            $branch_count = 2;
+            foreach ($branch as $index => $b) {
+                if ($b == 'Head Office') {
+                    $branch[$index] = '1. '.  $b;
+                } else {
+                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch_count += 1;
+                }
+            }
 
             return view('leave.index', compact('leaves', 'branch', 'department'));
         } else {
@@ -209,7 +220,29 @@ class LeaveController extends Controller
                     Utility::addCalendarData($request1, $type);
                 }
 
-                return redirect()->route('leave.index')->with('success', __('Leave  successfully created.'));
+                // Send Notification To HR
+                $subscriptions = [];
+                $pushSubscriptions = PushSubscription::whereHas('user', function ($query) use ($employee) {
+                    $query->where('type', 'hr')
+                        ->where(function ($query) use ($employee) {
+                            $query->whereNull('branch_id')
+                                    ->orWhere('branch_id', $employee->branch_id);
+                        });
+                })->get();
+                foreach ($pushSubscriptions as $sub) {
+                    array_push($subscriptions, ['data' => $sub->data, 'name' => $sub->user->name]);
+                }
+                \Auth::user()->sendNotifications(
+                    $subscriptions,
+                    json_encode([
+                        'title' => __('New Leave Request'),
+                        'body' => $employee->name . ' ' . __('Make Leave Request') . ' [' . $leave->leaveType->title . '] ' . __('For Date') . ' ' . $request->start_date . ' ' . __('To Date') . ' ' . $request->end_date,
+                        'url' => "/leave"
+                    ]),
+                    'high'
+                );
+
+                return redirect()->back()->with('success', __('Leave  successfully created.'));
             } else {
                 return redirect()->back()->with('error', __('Leave type ' . $leave_type->name . ' is provide maximum ' . $leave_type->days . "  days please make sure your selected days is under " . $leave_type->days . ' days.'));
             }
@@ -523,6 +556,24 @@ class LeaveController extends Controller
 
             ];
             $resp = Utility::sendEmailTemplate('leave_status', [$employee->email], $uArr);
+
+            // Send push notification to requester
+            $subscriptions = [];
+            if ($leave->employees?->user?->pushNotifications) {
+                foreach ($leave->employees->user->pushNotifications ?? [] as $sub) {
+                    array_push($subscriptions, ['data' => $sub->data, 'name' => $leave->employees->name]);
+                }
+            }
+            $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
+            \Auth::user()->sendNotifications(
+                $subscriptions,
+                json_encode([
+                    'title' => __('Leave') . ' ' . __($status),
+                    'body' => __('Leave Request') . ' [' . $leave->leaveType->title . '] ' . __('For Date') . ' ' . $leave->start_date . ' ' . __('To Date') . ' ' . $leave->end_date . ' ' . __($status),
+                    'url' => "/leave"
+                ]),
+                'high'
+            );
             return redirect()->back()->with('success', __('Leave status successfully updated.') . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
         }
 

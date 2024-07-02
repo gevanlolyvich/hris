@@ -43,6 +43,7 @@
             var map = null;
             var imageSrc = null;
             var notes = null;
+            var sourceValue = null;
 
             let customIcon = L.icon({
                 iconUrl: 'https://cdn4.iconfinder.com/data/icons/leto-most-searched-mix-8/64/__business_office_building-256.png',
@@ -63,6 +64,7 @@
                 var employeeName = $(this).data('employee');
                 notes = $(this).data('note');
                 var attendanceType = $(this).data('type');
+                sourceValue = $(this).data('source');
 
                 imageSrc = $(this).data('image');
                 if (imageSrc.length) {
@@ -95,6 +97,14 @@
                     } else {
                         document.getElementById('modal-type').style.display = 'none';
                         document.getElementById('type-value').value = '';
+                    }
+
+                    if (sourceValue) {
+                        document.getElementById('modal-source').style.display = '';
+                        document.getElementById('source-value').value = sourceValue;
+                    } else {
+                        document.getElementById('modal-source').style.display = 'none';
+                        document.getElementById('source-value').value = '';
                     }
 
                     // If a map already exists, remove it
@@ -133,6 +143,42 @@
             });
         });
     </script>
+
+    <script>
+        function getDepartment(branch_id) {
+            $.ajax({
+                url: '{{ route('department.employee.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.department').empty();
+                    var emp_selct = ` <select class="form-control select2  department" name="department" id="choices-multiple"
+                                            placeholder="Select Department" >
+                                            </select>`;
+                    $('.department_div').html(emp_selct);
+
+                    $('.department').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.department').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple', {
+                        removeItemButton: true,
+                    });
+
+
+                }
+            });
+        }
+
+        $(document).on('change', 'select[name=branch]', function() {
+            var branch_id = $(this).val();
+            getDepartment(branch_id);
+        });
+    </script>
 @endpush
 
 @section('action-button')
@@ -164,6 +210,12 @@
                             <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
                         </div>
                     </div>
+                    <div class="col" style="display: none;" id="modal-source">
+                        <div class="text-center mx-auto">
+                            <strong>{{__('Source')}}</strong>
+                            <textarea class="form-control mb-3 mt-1" name="source-value" id="source-value" rows="2" disabled></textarea>
+                        </div>
+                    </div>
                 </div>
                 <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
                     <div class="text-center mx-auto">
@@ -188,59 +240,60 @@
             <div class="card-body">
             {{ Form::open(array('route' => array('attendanceemployee.index'),'method'=>'get','id'=>'attendanceemployee_filter')) }}
                 <div class="row align-items-center justify-content-end">
-                    <div class="col-xl-10">
+                    <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2">
+                        <div class="text-center">
+                            <label>{{__('Type')}}</label>
+                        </div>
+                        <br>
                         <div class="row">
-                            <div class="col-3">
-                                <label class="form-label">{{__('Type')}}</label>
-                                <br>
-                                <div class="form-check form-check-inline form-group">
-                                    <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
-                                    <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
-                                </div>
-                                    <div class="form-check form-check-inline form-group">
-                                        <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
-                                        <label class="form-check-label" for="daily">{{__('Daily')}}</label>
-                                    </div>
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-6 col-6 mb-2">
+                                <input type="radio" id="monthly" value="monthly" name="type" class="form-check-input" {{isset($_GET['type']) && $_GET['type']=='monthly' ?'checked':''}}>
+                                <label class="form-check-label" for="monthly">{{__('Monthly')}}</label>
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 month">
-                                <div class="btn-box">
-                                    {{Form::label('month',__('Month'),['class'=>'form-label'])}}
-                                    {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
-                                </div>
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-6 col-6 mb-2">
+                                <input type="radio" id="daily" value="daily" name="type" class="form-check-input" {{(isset($_GET['type']) && $_GET['type']=='daily' ? 'checked': !isset($_GET['type']) ) ? 'checked' : ''}}>
+                                <label class="form-check-label" for="daily">{{__('Daily')}}</label>
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12 date">
-                                <div class="btn-box">
-                                    {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
-                                    {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
-                                </div>
-                            </div>
-                            @if(\Auth::user()->type != 'employee')
-                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('branch', __('Branch'),['class'=>'form-label'])}}
-                                        {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', array('class' => 'form-control select')) }}
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('department', __('Department'),['class'=>'form-label'])}}
-                                        {{ Form::select('department', $department,isset($_GET['department'])?$_GET['department']:'', array('class' => 'form-control select')) }}
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
-                    <div class="col-auto mt-4">
-                        <div class="row">
-                            <div class="col-auto">
-                                <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('attendanceemployee_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
-                                    <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
-                                </a>
-                                <a href="{{route('attendanceemployee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
-                                    <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
-                                </a>
+                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 month">
+                        <div class="btn-box">
+                            {{Form::label('month',__('Month'),['class'=>'form-label'])}}
+                            {{Form::month('month',isset($_GET['month'])?$_GET['month']:date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-lg-2 col-md-10 col-sm-12 col-12 date">
+                        <div class="btn-box">
+                            {{ Form::label('date', __('Date'),['class'=>'form-label'])}}
+                            {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
+                        </div>
+                    </div>
+                    @if(\Auth::user()->type != 'employee')
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="btn-box">
+                                {{ Form::label('branch', __('Branch'),['class'=>'form-label'])}}
+                                {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', ['class' => 'form-control select2 branch', 'placeholder' => __('Select Branch')]) }}
                             </div>
                         </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="btn-box">
+                                {{ Form::label('department', __('Department'),['class'=>'form-label'])}}
+                                <div class="department_div btn-box">
+                                    {{ Form::select('department', !empty($department) ? $department : [], isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <hr>
+                <div class="row align-items-center justify-content-end">
+                    <div class="col-auto">
+                        <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('attendanceemployee_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                            <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                        </a>
+                        <a href="{{route('attendanceemployee.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                            <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -276,9 +329,6 @@
                                         <th>{{ __('Early Leaving') }}</th>
                                         <th>{{ __('Work Hours') }}</th>
                                         <th>{{ __('Validation') }}</th>
-                                        @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')))
-                                            <th width="200px">{{ __('Action') }}</th>
-                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -300,6 +350,7 @@
                                                             data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                             data-near-name="{{ $attendance->location_in_address }}"
                                                             data-near-radius="{{ $attendance->location_in_radius }}"
+                                                            data-source="{{ $attendance->source_in }}"
                                                             data-note="{{ $attendance->note }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                         </a>
@@ -317,12 +368,13 @@
                                                             data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
+                                                            data-source="{{ $attendance->source_out }}"
                                                             data-image="{{ $attendance->picture_out }}">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @else
                                                         <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @endif
                                                 </td>
@@ -377,36 +429,6 @@
                                                         @endif
                                                     </span>
                                                 </td>
-                                                @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                                    <td class="Action">
-                                                        <span>
-                                                            @if ((Gate::check('Edit Attendance') || Gate::check('Delete Attendance')) && $emp !== $attendance->employee_id)
-                                                                {{-- @endcan --}}
-                                                                @can('Edit Attendance')
-                                                                    <div class="action-btn bg-warning ms-2">
-                                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                                            data-url="{{ URL::to('attendanceemployee/' . $attendance->id . '/edit') }}"
-                                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                            title="" data-title="{{ __('Edit Attendance') }}"
-                                                                            data-bs-original-title="{{ __('Edit') }}">
-                                                                            <i class="ti ti-pencil text-white"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                @endcan
-                                                                @can('Delete Attendance')
-                                                                    <div class="action-btn bg-danger ms-2">
-                                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['attendanceemployee.destroy', $attendance->id], 'id' => 'delete-form-' . $attendance->id]) !!}
-                                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                                            aria-label="Delete"><i
-                                                                                class="ti ti-trash text-white text-white"></i></a>
-                                                                        </form>
-                                                                    </div>
-                                                                @endcan
-                                                            @endif
-                                                        </span>
-                                                    </td>
-                                                @endif
                                             </tr>
                                         @endif
                                     @endforeach
@@ -452,6 +474,7 @@
                                                             data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                             data-near-name="{{ $attendance->location_in_address }}"
                                                             data-near-radius="{{ $attendance->location_in_radius }}"
+                                                            data-source="{{ $attendance->source_in }}"
                                                             data-note="{{ $attendance->note }}">
                                                             <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                         </a>
@@ -469,12 +492,13 @@
                                                             data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                             data-near-name="{{ $attendance->location_out_address }}"
                                                             data-near-radius="{{ $attendance->location_out_radius }}"
+                                                            data-source="{{ $attendance->source_out }}"
                                                             data-image="{{ $attendance->picture_out }}">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @else
                                                         <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                            <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                         </a>
                                                     @endif
                                                 </td>
@@ -609,6 +633,7 @@
                                                     data-near-coordinate="{{ $attendance->location_in_coordinate }}"
                                                     data-near-name="{{ $attendance->location_in_address }}"
                                                     data-near-radius="{{ $attendance->location_in_radius }}"
+                                                    data-source="{{ $attendance->source_in }}"
                                                     data-note="{{ $attendance->note }}">
                                                     <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_in) : '00:00' }}
                                                 </a>
@@ -626,17 +651,18 @@
                                                     data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                     data-near-name="{{ $attendance->location_out_address }}"
                                                     data-near-radius="{{ $attendance->location_out_radius }}"
+                                                    data-source="{{ $attendance->source_out }}"
                                                     data-image="{{ $attendance->picture_out }}">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                 </a>
                                             @else
                                                 <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != '00:00:00' ? \Auth::user()->timeFormat($attendance->clock_out) : '00:00' }}
+                                                    <i class="fa fa-solid fa-map-pin"></i> {{ $attendance->clock_out != $attendance->clock_in ? \Auth::user()->timeFormat($attendance->clock_out) : ' - ' }}
                                                 </a>
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <span @if($attendance->late != '00:00:00' && strpos($attendance->early_leaving, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            <span @if($attendance->late != '00:00:00' && strpos($attendance->late, '-') === false) class="btn btn-danger btn-sm text-center disabled" @endif>
                                                 {{ $attendance->late }}
                                             </span>
                                         </td>

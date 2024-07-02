@@ -8,19 +8,11 @@
             </div>
         </div>
     </div>
-    {{-- <div class="row">
-        <div class="col-md-12">
-            <div class="form-group">
-                {{ Form::label('permit_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                {{ Form::select('permit_type_id', $permittype, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
-            </div>
-        </div>
-    </div> --}}
     <div class="row">
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('permit_type_id', __('Leave Type'), ['class' => 'col-form-label']) }}
-                {{ Form::select('permit_type_id', $permittype, null, ['class' => 'form-control select', 'placeholder' => __('Select Leave Type')]) }}
+                {{ Form::select('permit_type_id', $permittype, null, ['class' => 'form-control select2', 'placeholder' => __('Select Leave Type')]) }}
             </div>
         </div>
         <div class="col-md-4">

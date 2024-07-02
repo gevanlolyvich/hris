@@ -9,7 +9,10 @@ class OtherPayment extends Model
     protected $fillable = [
         'employee_id',
         'title',
+        'is_recurring',
+        'period',
         'amount',
+        'type',
         'created_by',
     ];
 
