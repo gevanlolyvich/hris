@@ -353,6 +353,43 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif
                 <!--performance-->
 
+                <!-- healthy together-->
+                @if (
+                        Gate::check('Manage Healthy Target') || 
+                        Gate::check('Manage Healthy Steps') || 
+                        Gate::check('Manage Healthy Report') 
+                    )
+                    <li class="dash-item dash-hasmenu">
+                        <a href="#!" class="dash-link"><span class="dash-micon"><i
+                                    class="ti ti-activity"></i></span><span
+                                class="dash-mtext">{{ __('Healthy Together') }}</span><span class="dash-arrow"><i
+                                    data-feather="chevron-right"></i></span></a>
+                        <ul class="dash-submenu">
+                            @can('Manage Healthy Target')
+                                <li
+                                    class="dash-item {{ request()->is('healthy-targets') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('healthy-targets.index') }}">{{ __('Healthy Target') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Healthy Steps')
+                                <li class="dash-item {{ request()->is('competencies*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('competencies.index') }}">{{ __('Healthy Steps') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Healthy Report')
+                                <li class="dash-item">
+                                    <a class="dash-link"
+                                        href="{{ route('indicator.index') }}">{{ __('Health Report') }}</a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endif
+                <!--healthy together-->
+                
+
                 <!--fianance-->
                 {{-- @if (Gate::check('Manage Account List') || Gate::check('Manage Payee') || Gate::check('Manage Payer') || Gate::check('Manage Deposit') || Gate::check('Manage Expense') || Gate::check('Manage Transfer Balance'))
                     <li class="dash-item dash-hasmenu">
