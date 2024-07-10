@@ -367,15 +367,15 @@ $mode_setting = \App\Models\Utility::mode_layout();
                         <ul class="dash-submenu">
                             @can('Manage Healthy Target')
                                 <li
-                                    class="dash-item {{ request()->is('healthy-targets') ? 'active' : '' }}">
+                                    class="dash-item {{ request()->is('healthy-targets*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('healthy-targets.index') }}">{{ __('Healthy Target') }}</a>
                                 </li>
                             @endcan
                             @can('Manage Healthy Steps')
-                                <li class="dash-item {{ request()->is('competencies*') ? 'active' : '' }}">
+                                <li class="dash-item {{ request()->is('healthy-steps*') ? 'active' : '' }}">
                                     <a class="dash-link"
-                                        href="{{ route('competencies.index') }}">{{ __('Healthy Steps') }}</a>
+                                        href="{{ route('healthy-steps.index') }}">{{ __('Healthy Steps') }}</a>
                                 </li>
                             @endcan
                             @can('Manage Healthy Report')

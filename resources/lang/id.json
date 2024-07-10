@@ -2067,5 +2067,14 @@
   "Update Healthy Target": "Rubah Target Kesehatan",
   "Healthy Target Successfully Created": "Target Kesehatan Berhasil Dibuat",
   "Healthy Target Successfully Updated": "Target Kesehatan Berhasil Dirubah",
-  "Healthy Target Successfully Deleted": "Target Kesehatan Berhasil Dihapus"
+  "Healthy Target Successfully Deleted": "Target Kesehatan Berhasil Dihapus",
+  "Healthy Steps Already Exist":"Langkah Sehat Sudah Ada",
+  "Select Healthy Steps": "Pilih Langkah Sehat",
+  "Manage Healthy Steps": "Kelola Langkah Sehat",
+  "Create Healthy Steps": "Buat Langkah Sehat",
+  "Create New Healthy Steps": "Buat Langkah Sehat Baru",
+  "Update Healthy Steps": "Rubah Langkah Sehat",
+  "Healthy Steps Successfully Created": "Langkah Sehat Berhasil Dibuat",
+  "Healthy Steps Successfully Updated": "Langkah Sehat Berhasil Dirubah",
+  "Healthy Steps Successfully Deleted": "Langkah Sehat Berhasil Dihapus"
 }
