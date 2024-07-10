@@ -154,7 +154,9 @@
                                 <td>{{ __("$type") }}</td>
                                 <td>{{ $report->start_date }} - {{ $report->end_date }}</td>
                                 <td>
-                                    @if ($report->is_read)
+                                    @if ($report->is_read && $report->response)
+                                        <button type="button" class="btn btn-sm btn-warning disabled">{{ __('Already Seen')}} {{ __('And')}} {{ __('Reviewed')}}</button>
+                                    @elseif ($report->is_read)
                                         <button type="button" class="btn btn-sm btn-success disabled">{{ __('Already Seen')}}</button>
                                     @else
                                         <button type="button" class="btn btn-sm btn-danger disabled">{{ __('Not Seen')}}</button>
