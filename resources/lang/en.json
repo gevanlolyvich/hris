@@ -1875,6 +1875,7 @@
     "Goal Successfully Progressed": "Goal Successfully Progressed",
     "Evaluation": "Evaluation",
     "Target": "Target",
+    "Target/Day": "Target/Day",
     "Achievement": "Achievement",
     "Weight": "Weight",
     "Goal Weight": "Goal Weight",
@@ -1923,6 +1924,7 @@
     "Weekly": "Weekly",
     "Accomplishment": "Accomplishment",
     "Activity": "Activity",
+    "Select Activity": "Select Activity",
     "Obstacle": "Obstacle",
     "Work Plan": "Work Plan",
     "Select Report Type": "Select Report Type",
@@ -2053,5 +2055,19 @@
     "Make Permit Request": "Make Permit Request",
     "Select Vehicle Status": "Select Vehicle Status",
     "And": "And",
-    "Reviewed": "Reviewed"
+    "Reviewed": "Reviewed",
+    "Healthy Together":"Healthy Together",
+    "Healthy Steps":"Healthy Steps",
+    "Health Report":"Health Report",
+    "Healthy Target": "Healthy Target",
+    "Healthy Target Already Exist":"Healthy Target Already Exist",
+    "Select Healthy Target": "Select Healthy Target",
+    "Manage Healthy Target": "Manage Healthy Target",
+    "Create New Healthy Target": "Create New Healthy Target",
+    "Create Healthy Target": "Create Healthy Target",
+    "Update Healthy Target": "Update Healthy Target",
+    "Healthy Target Successfully Created": "Healthy Target Successfully Created",
+    "Healthy Target Successfully Updated": "Healthy Target Successfully Updated",
+    "Healthy Target Successfully Deleted": "Healthy Target Successfully Deleted"
+    
 }

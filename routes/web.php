@@ -92,6 +92,7 @@ use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\Pph21Controller;
 use App\Http\Controllers\EmployeeReportController;
+use App\Http\Controllers\HealthyTargetController;
 use App\Http\Controllers\VehicleLendingController;
 use App\Http\Controllers\VehicleOfficerController;
 use App\Http\Controllers\PushSubscriptionController;
@@ -1655,6 +1656,13 @@ Route::resource('vehicle-lending', VehicleLendingController::class)->middleware(
 );
 
 Route::resource('push-subscription', PushSubscriptionController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('healthy-targets', HealthyTargetController::class)->middleware(
     [
         'auth',
         'XSS',
