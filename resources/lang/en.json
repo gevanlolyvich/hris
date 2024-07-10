@@ -2051,5 +2051,7 @@
     "Permit Request": "Permit Request",
     "New Permit Request": "New Permit Request",
     "Make Permit Request": "Make Permit Request",
-    "Select Vehicle Status": "Select Vehicle Status"
+    "Select Vehicle Status": "Select Vehicle Status",
+    "And": "And",
+    "Reviewed": "Reviewed"
 }
