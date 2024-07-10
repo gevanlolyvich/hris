@@ -9,6 +9,7 @@
         "anandsiddharth/laravel-paytm-wallet": "^2.0",
         "anhskohbo/no-captcha": "^3.4",
         "arkitecht/laravel-twilio": "^1.0",
+        "barryvdh/laravel-ide-helper": "*",
         "coingate/coingate-php": "^4.1",
         "doctrine/dbal": "^3.5",
         "guzzlehttp/guzzle": "^7.2",
