@@ -2083,5 +2083,15 @@
   "Show File":"Tampilkan File",
   "View Existing File":"Tampilkan File Saat ini",
   "Steps":"Langkah",
-  "Healthy data still exists, target cannot be deleted":"Data Kesehatan Masih Ada, Target Tidak Bisa Dihapus"
+  "Healthy data still exists, target cannot be deleted":"Data Kesehatan Masih Ada, Target Tidak Bisa Dihapus",
+  "Healthy Report": "Laporan Kesehatan",
+  "Healthy Report Already Exist":"Laporan Kesehatan Sudah Ada",
+  "Select Healthy Report": "Pilih Laporan Kesehatan",
+  "Manage Healthy Report": "Kelola Laporan Kesehatan",
+  "Create Healthy Report": "Buat Laporan Kesehatan",
+  "Create New Healthy Report": "Buat Laporan Kesehatan Baru",
+  "Update Healthy Report": "Rubah Laporan Kesehatan",
+  "Healthy Report Successfully Created": "Laporan Kesehatan Berhasil Dibuat",
+  "Healthy Report Successfully Updated": "Laporan Kesehatan Berhasil Dirubah",
+  "Healthy Report Successfully Deleted": "Laporan Kesehatan Berhasil Dihapus"
 }

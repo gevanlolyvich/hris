@@ -2075,6 +2075,15 @@
     "Show File":"View File",
     "View Existing File":"View Existing File",
     "Steps":"Steps",
-    "Healthy data still exists, target cannot be deleted":"Healthy data still exists, target cannot be deleted"
-    
+    "Healthy data still exists, target cannot be deleted":"Healthy data still exists, target cannot be deleted",
+    "Healthy Report": "Healthy Report",
+    "Healthy Report Already Exist":"Healthy Report Already Exist",
+    "Select Healthy Report": "Select Healthy Report",
+    "Manage Healthy Report": "Manage Healthy Report",
+    "Create New Healthy Report": "Create New Healthy Report",
+    "Create Healthy Report": "Create Healthy Report",
+    "Update Healthy Report": "Update Healthy Report",
+    "Healthy Report Successfully Created": "Healthy Report Successfully Created",
+    "Healthy Report Successfully Updated": "Healthy Report Successfully Updated",
+    "Healthy Report Successfully Deleted": "Healthy Report Successfully Deleted"
 }
