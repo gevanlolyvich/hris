@@ -92,6 +92,7 @@ use App\Http\Controllers\LevelDesignationController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\Pph21Controller;
 use App\Http\Controllers\EmployeeReportController;
+use App\Http\Controllers\HealthyReportsController;
 use App\Http\Controllers\HealthyStepsController;
 use App\Http\Controllers\HealthyTargetController;
 use App\Http\Controllers\VehicleLendingController;
@@ -1671,6 +1672,13 @@ Route::resource('healthy-targets', HealthyTargetController::class)->middleware(
 );
 
 Route::resource('healthy-steps', HealthyStepsController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('healthy-reports', HealthyReportsController::class)->middleware(
     [
         'auth',
         'XSS',

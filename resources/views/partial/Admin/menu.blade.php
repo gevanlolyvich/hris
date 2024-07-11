@@ -379,9 +379,9 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
                             @endcan
                             @can('Manage Healthy Report')
-                                <li class="dash-item">
+                                <li class="dash-item {{ request()->is('healthy-reports*') ? 'active' : '' }}">
                                     <a class="dash-link"
-                                        href="{{ route('indicator.index') }}">{{ __('Health Report') }}</a>
+                                        href="{{ route('healthy-reports.index') }}">{{ __('Health Report') }}</a>
                                 </li>
                             @endcan
                         </ul>
