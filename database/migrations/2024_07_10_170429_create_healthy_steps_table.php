@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('healthy_steps', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('employee_id');
             $table->foreignId('target_id');
             $table->date('date');
             $table->integer('steps');
