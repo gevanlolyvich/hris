@@ -2082,5 +2082,6 @@
   "Healthy Steps Target Not Yet Set":"Target Langkah Sehat Belum Ditetapkan",
   "Show File":"Tampilkan File",
   "View Existing File":"Tampilkan File Saat ini",
-  "Steps":"Langkah"
+  "Steps":"Langkah",
+  "Healthy data still exists, target cannot be deleted":"Data Kesehatan Masih Ada, Target Tidak Bisa Dihapus"
 }

@@ -2074,6 +2074,7 @@
     "Healthy Steps Target Not Yet Set":"Healthy Steps Target Not Yet Set",
     "Show File":"View File",
     "View Existing File":"View Existing File",
-    "Steps":"Steps"
+    "Steps":"Steps",
+    "Healthy data still exists, target cannot be deleted":"Healthy data still exists, target cannot be deleted"
     
 }

@@ -1676,10 +1676,3 @@ Route::resource('healthy-steps', HealthyStepsController::class)->middleware(
         'XSS',
     ]
 );
-
-// Route::get('healthy-steps/show/{id}/show', HealthyStepsController::class, 'show')->middleware(
-//     [
-//         'auth',
-//         'XSS',
-//     ]
-// );

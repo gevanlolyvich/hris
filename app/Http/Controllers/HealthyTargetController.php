@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Competencies;
 use App\Models\HealthyTarget;
-use App\Models\Performance_Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -80,10 +78,10 @@ class HealthyTargetController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Performance_Type  $performance_Type
+     * @param  \App\Models\HealthyTarget  $healthy_target
      * @return \Illuminate\Http\Response
      */
-    public function show(Performance_Type $performance_Type)
+    public function show(HealthyTarget $healthy_target)
     {
         //
     }
@@ -91,7 +89,7 @@ class HealthyTargetController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Performance_Type  $performance_Type
+     * @param  \App\Models\HealthyTarget  $healthy_target
     //  * @return \Illuminate\Http\Response
      */
     public function edit(HealthyTarget $healthy_target)
@@ -111,7 +109,7 @@ class HealthyTargetController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Performance_Type  $performance_Type
+     * @param  \App\Models\HealthyTarget  $healthy_target
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, HealthyTarget $healthy_target)
@@ -145,14 +143,16 @@ class HealthyTargetController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Performance_Type  $performance_Type
+     * @param  \App\Models\HealthyTarget  $healthy_target
      * @return \Illuminate\Http\Response
      */
     public function destroy(HealthyTarget $healthy_target)
     {
         if (Auth::user()->can('Delete Healthy Target')) {
             if (Auth::user()->type != 'employee') {
-                //! CHECK DEPENDENCIES BEFORE DELETING
+                if (count($healthy_target->healthy_steps) > 0) {
+                    return redirect()->back()->with('error', __('Healthy data still exists, target cannot be deleted'));
+                }
                 $healthy_target->delete();
                 return redirect()->back()->with('success', __('Healthy Target Successfully Deleted'));
             } else {
