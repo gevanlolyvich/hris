@@ -2068,6 +2068,12 @@
     "Update Healthy Target": "Update Healthy Target",
     "Healthy Target Successfully Created": "Healthy Target Successfully Created",
     "Healthy Target Successfully Updated": "Healthy Target Successfully Updated",
-    "Healthy Target Successfully Deleted": "Healthy Target Successfully Deleted"
+    "Healthy Target Successfully Deleted": "Healthy Target Successfully Deleted",
+    "Number Of Steps" :"Number Of Steps",
+    "Enter Number Of Steps" :"Enter Number Of Steps",
+    "Healthy Steps Target Not Yet Set":"Healthy Steps Target Not Yet Set",
+    "Show File":"View File",
+    "View Existing File":"View Existing File",
+    "Steps":"Steps"
     
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Competencies;
+use App\Models\HealthyStep;
 use App\Models\HealthyTarget;
 use App\Models\Performance_Type;
 use Illuminate\Http\Request;
@@ -18,9 +19,10 @@ class HealthyStepsController extends Controller
      */
     public function index()
     {
-        if (Auth::user()->can('Create Healthy Target')) {
-            $healthy_targets = HealthyTarget::orderBy('activity_name', 'ASC')->get();
-            return view('healthy_step.index', compact('healthy_targets'));
+        if (Auth::user()->can('Create Healthy Steps')) {
+            $healthy_steps = HealthyStep::orderBy('date', 'DESC')
+                ->where('employee_id', Auth::user()->employee->id)->get();
+            return view('healthy_step.index', compact('healthy_steps'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -33,7 +35,7 @@ class HealthyStepsController extends Controller
      */
     public function create()
     {
-        if (Auth::user()->can('Create Healthy Target')) {
+        if (Auth::user()->can('Create Healthy Steps')) {
             $activities = [
                 'Healthy Steps' => __('Healthy Steps')
             ];
@@ -54,8 +56,9 @@ class HealthyStepsController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'activity_name' => 'required',
-                'target' => 'required'
+                'date' => 'required|date|before_or_equal:today',
+                'steps' => 'required',
+                'attachment' => 'required'
             ]
         );
 
@@ -64,29 +67,48 @@ class HealthyStepsController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
-        $availabilityCheck = HealthyTarget::where('activity_name', $request->activity_name)->first();
-        if ($availabilityCheck) {
-            return redirect()->back()->with('error', __('Healthy Target Already Exist'));
+        $healthy_steps_target = HealthyTarget::where('activity_name', "Healthy Steps")->first();
+        if (empty($healthy_steps_target)) {
+            return redirect()->back()->with('error', __('Healthy Steps Target Not Yet Set'));
         }
 
-        $healthy_target                   = new HealthyTarget();
-        $healthy_target->activity_name    = $request->activity_name;
-        $healthy_target->target           = $request->target;
-        $healthy_target->save();
+        $duplicateCheck = HealthyStep::where('date', $request->date)
+            ->where('employee_id', Auth::user()->employee->id)->first();
+        if ($duplicateCheck) {
+            return redirect()->back()->with('error', __('Healthy Steps Already Exist'));
+        }
 
-        return redirect()->back()->with('success', __('Healthy Target Successfully Created'));
+        $document_path = null;
+        if ($request->file('attachment')) {
+            $docs = $request->file('attachment');
+            $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', Auth::user()->name) . "." . $docs->getClientOriginalExtension();
+            $path = $docs->storeAs('uploads/healthy_steps', $docName, 'public');
+            $document_path = env('APP_URL') . '/storage/' . $path;
+        }
+
+        $healthy_step               = new HealthyStep();
+        $healthy_step->employee_id  = Auth::user()->employee->id;
+        $healthy_step->target_id    = $healthy_steps_target->id;
+        $healthy_step->date         = $request->date;
+        $healthy_step->steps        = $request->steps;
+        $healthy_step->attachment   = $document_path;
+        $healthy_step->save();
+
+
+        return redirect()->back()->with('success', __('Healthy Steps Successfully Created'));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Performance_Type  $performance_Type
+     * @param  \App\Models\HealthyStep  $performance_Type
      * @return \Illuminate\Http\Response
      */
-    public function show(Performance_Type $performance_Type)
+    public function show(HealthyStep $healthy_step)
     {
-        //
+        return view('healthy_step.show', compact('healthy_step'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -94,13 +116,10 @@ class HealthyStepsController extends Controller
      * @param  \App\Models\Performance_Type  $performance_Type
     //  * @return \Illuminate\Http\Response
      */
-    public function edit(HealthyTarget $healthy_target)
+    public function edit(HealthyStep $healthy_step)
     {
-        if (Auth::user()->can('Edit Healthy Target')) {
-            $activities = [
-                'Healthy Steps' => __('Healthy Steps')
-            ];
-            return view('healthy_step.edit', compact('healthy_target', 'activities'));
+        if (Auth::user()->can('Edit Healthy Steps')) {
+            return view('healthy_step.edit', compact('healthy_step'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -114,13 +133,12 @@ class HealthyStepsController extends Controller
      * @param  \App\Models\Performance_Type  $performance_Type
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, HealthyTarget $healthy_target)
+    public function update(Request $request, HealthyStep $healthy_step)
     {
         $validator = Validator::make(
             $request->all(),
             [
-                'activity_name' => 'required',
-                'target' => 'required'
+                'steps' => 'required'
             ]
         );
 
@@ -129,17 +147,19 @@ class HealthyStepsController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
-        $availabilityCheck = HealthyTarget::where('activity_name', $request->activity_name)
-            ->whereNot('id', $healthy_target->id)->first();
-        if ($availabilityCheck) {
-            return redirect()->back()->with('error', __('Healthy Target Already Exist'));
+        $document_path = null;
+        if ($request->file('attachment')) {
+            $docs = $request->file('attachment');
+            $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', Auth::user()->name) . "." . $docs->getClientOriginalExtension();
+            $path = $docs->storeAs('uploads/healthy_steps', $docName, 'public');
+            $document_path = env('APP_URL') . '/storage/' . $path;
         }
 
-        $healthy_target->activity_name    = $request->activity_name;
-        $healthy_target->target           = $request->target;
-        $healthy_target->save();
+        $healthy_step->steps      = $request->steps;
+        $healthy_step->attachment = empty($document_path) ? $healthy_step->attachment : $document_path;
+        $healthy_step->save();
 
-        return redirect()->back()->with('success', __('Healthy Target Successfully Updated'));
+        return redirect()->back()->with('success', __('Healthy Steps Successfully Updated'));
     }
 
     /**
@@ -148,16 +168,13 @@ class HealthyStepsController extends Controller
      * @param  \App\Models\Performance_Type  $performance_Type
      * @return \Illuminate\Http\Response
      */
-    public function destroy(HealthyTarget $healthy_target)
+    public function destroy(HealthyStep $healthy_step)
     {
-        if (Auth::user()->can('Delete Healthy Target')) {
-            if (Auth::user()->type != 'employee') {
-                //! CHECK DEPENDENCIES BEFORE DELETING
-                $healthy_target->delete();
-                return redirect()->back()->with('success', __('Healthy Target Successfully Deleted'));
-            } else {
-                return redirect()->back()->with('error', __('Permission denied.'));
-            }
+        if (Auth::user()->can('Delete Healthy Steps')) {
+            $healthy_step->delete();
+            return redirect()->back()->with('success', __('Healthy Steps Successfully Deleted'));
+        } else {
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 }

@@ -2076,5 +2076,11 @@
   "Update Healthy Steps": "Rubah Langkah Sehat",
   "Healthy Steps Successfully Created": "Langkah Sehat Berhasil Dibuat",
   "Healthy Steps Successfully Updated": "Langkah Sehat Berhasil Dirubah",
-  "Healthy Steps Successfully Deleted": "Langkah Sehat Berhasil Dihapus"
+  "Healthy Steps Successfully Deleted": "Langkah Sehat Berhasil Dihapus",
+  "Number Of Steps" :"Jumlah Langkah",
+  "Enter Number Of Steps" :"Masukkan Jumlah Langkah",
+  "Healthy Steps Target Not Yet Set":"Target Langkah Sehat Belum Ditetapkan",
+  "Show File":"Tampilkan File",
+  "View Existing File":"Tampilkan File Saat ini",
+  "Steps":"Langkah"
 }

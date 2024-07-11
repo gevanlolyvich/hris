@@ -12,7 +12,7 @@
 @section('action-button')
 
     @can('Create Healthy Steps')
-        <a href="#" data-url="{{ route('healthy-targets.create') }}" data-ajax-popup="true"
+        <a href="#" data-url="{{ route('healthy-steps.create') }}" data-ajax-popup="true"
             data-title="{{ __('Create New Healthy Steps') }}" data-bs-toggle="tooltip" title=""
             class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
@@ -32,23 +32,42 @@
                         <thead>
                             <tr>
                                 {{-- <th width="10px">ID</th> --}}
-                                <th>{{ __('Activity') }}</th>
+                                <th>{{ __('Date') }}</th>
+                                <th>{{ __('Number Of Steps') }}</th>
                                 <th>{{ __('Target/Day') }}</th>
+                                <th>{{ __('Attachment') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($healthy_targets as $target)
+                            @foreach ($healthy_steps as $step)
                                 <tr>
-                                    {{-- <td>{{ $target->id }}</td> --}}
-                                    <td>{{ __($target->activity_name) }}</td>
-                                    <td>{{ number_format($target->target, 0, ',', '.') }}</td>
+                                    {{-- <td>{{ $step->id }}</td> --}}
+                                    <td>{{ __($step->date) }}</td>
+                                    <td>
+                                        <span @if($step->steps <= $step->healthy_target->target) class="btn btn-danger btn-sm text-center disabled" @endif>
+                                            {{ number_format($step->steps, 0, ',', '.').' '.__("Steps") }} 
+                                        </span>
+                                    </td>
+                                    <td>{{ number_format($step->healthy_target->target, 0, ',', '.').' '.__("Steps") }} </td>
+                                    <td>
+                                        <div class="info">
+                                            <a href="#" class="btn btn-primary btn-sm  align-items-center"
+                                                data-url="{{ route('healthy-steps.show', $step->id) }}"
+                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip" title=""
+                                                data-title="{{ __('Show Healthy Steps') }}"
+                                                data-bs-original-title="{{ __('Show') }}">
+                                                <i class="ti ti-eye"></i> {{ __('Show File') }}</a>
+                                            </a>
+                                        </div>
+                                        
+                                    </td>
                                     <td class="Action">
                                         <span>
                                             @can('Edit Healthy Steps')
                                                 <div class="action-btn bg-info ms-2">
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center"
-                                                        data-url="{{ URL::to('healthy-targets/' . $target->id . '/edit') }}"
+                                                        data-url="{{ URL::to('healthy-steps/' . $step->id . '/edit') }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip" title=""
                                                         data-title="{{ __('Edit Healthy Steps') }}"
                                                         data-bs-original-title="{{ __('Edit') }}">
@@ -59,7 +78,7 @@
 
                                             @can('Delete Healthy Steps')
                                                 <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['healthy-targets.destroy', $target->id], 'id' => 'delete-form-' . $target->id]) !!}
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['healthy-steps.destroy', $step->id], 'id' => 'delete-form-' . $step->id]) !!}
                                                     <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
                                                         aria-label="Delete"><i
@@ -78,3 +97,16 @@
             </div>
         </div>
 @endsection
+
+@push('script-page')
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="attachment"]', function () {
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
+    </script>
+@endpush
