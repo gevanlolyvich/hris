@@ -14,4 +14,9 @@ class HealthyStep extends Model
     {
         return $this->belongsTo(HealthyTarget::class, 'target_id');
     }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 }

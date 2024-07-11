@@ -31,8 +31,10 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                {{-- <th width="10px">ID</th> --}}
                                 <th>{{ __('Date') }}</th>
+                                @if (empty(Auth::user()->employee_id))
+                                    <th>{{ __('Name') }}</th>
+                                @endif
                                 <th>{{ __('Number Of Steps') }}</th>
                                 <th>{{ __('Target/Day') }}</th>
                                 <th>{{ __('Attachment') }}</th>
@@ -42,8 +44,10 @@
                         <tbody>
                             @foreach ($healthy_steps as $step)
                                 <tr>
-                                    {{-- <td>{{ $step->id }}</td> --}}
-                                    <td>{{ __($step->date) }}</td>
+                                    <td>{{ $step->date }}</td>
+                                    @if (empty(Auth::user()->employee_id))
+                                        <td>{{ $step->employee->name  }}</td>
+                                    @endif
                                     <td>
                                         <span @if($step->steps <= $step->healthy_target->target) class="btn btn-danger btn-sm text-center disabled" @endif>
                                             {{ number_format($step->steps, 0, ',', '.').' '.__("Steps") }} 
