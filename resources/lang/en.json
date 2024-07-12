@@ -2085,5 +2085,11 @@
     "Update Healthy Report": "Update Healthy Report",
     "Healthy Report Successfully Created": "Healthy Report Successfully Created",
     "Healthy Report Successfully Updated": "Healthy Report Successfully Updated",
-    "Healthy Report Successfully Deleted": "Healthy Report Successfully Deleted"
+    "Healthy Report Successfully Deleted": "Healthy Report Successfully Deleted",
+    "Distance Covered":"Distance Covered",
+    "Calories Burned":"Calories Burned",
+    "Leaderboard":"Leaderboard",
+    "Your Healthy Step Performance":"Your Healthy Step Performance",
+    "Total Steps":"Total Steps",
+    "Daily Average":"Daily Average"
 }

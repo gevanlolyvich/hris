@@ -2093,5 +2093,13 @@
   "Update Healthy Report": "Rubah Laporan Kesehatan",
   "Healthy Report Successfully Created": "Laporan Kesehatan Berhasil Dibuat",
   "Healthy Report Successfully Updated": "Laporan Kesehatan Berhasil Dirubah",
-  "Healthy Report Successfully Deleted": "Laporan Kesehatan Berhasil Dihapus"
+  "Healthy Report Successfully Deleted": "Laporan Kesehatan Berhasil Dihapus",
+  "Distance Covered":"Jarak Tempuh",
+  "Calories Burned":"Kalori Terbakar",
+  "Leaderboard":"Papan Peringkat",
+  "Weekly Leaderboard":"Papan Peringkat Mingguan",
+  "Your Healthy Step Performance":"Performa Langkah Sehat Kamu",
+  "Total Steps":"Total Langkah",
+  "Daily Average":"Rata-rata Harian"
+
 }

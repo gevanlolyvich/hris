@@ -20,7 +20,7 @@ class HealthyStepsController extends Controller
     public function index()
     {
         if (Auth::user()->can('Create Healthy Steps')) {
-            $healthy_steps = !empty(Auth::user()->employee_id) ?
+            $healthy_steps = !empty(Auth::user()->employee->id) ?
                 HealthyStep::orderBy('date', 'DESC')->where('employee_id', Auth::user()->employee->id)->get() :
                 HealthyStep::orderBy('date', 'DESC')->get();
 
