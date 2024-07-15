@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\HealthyStep;
 use App\Models\HealthyTarget;
 use Carbon\Carbon;
@@ -32,6 +33,22 @@ class HealthyReportsController extends Controller
                 $messages = $validator->getMessageBag();
                 return redirect()->back()->with('error', $messages->first());
             }
+
+            $branches = Branch::find(Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branches) {
+                $branch_id->push($branches?->id);
+            }
+
+            $children = $branches?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+
+            $branches = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
+
             $calories_per_step = 0.04;
             $step_length = 0.75;
 
@@ -45,22 +62,40 @@ class HealthyReportsController extends Controller
                 ->groupBy('employee_id')
                 ->orderBy('total_steps', 'desc');
 
-            $employee_steps = HealthyStep::where('employee_id', Auth::user()->employee->id)
-                ->orderBy('date', 'desc');
+            $steps_report = HealthyStep::orderBy('date', 'desc');
 
-            $steps_report = HealthyStep::where('employee_id', Auth::user()->employee->id);
-            if ($request->start_date != $request->end_date) {
-                $leaderboard->whereBetween('date', [$startDate, $endDate]);
-                $employee_steps->whereBetween('date', [$startDate, $endDate]);
-                $steps_report->whereBetween('date', [$startDate, $endDate]);
+            if (Auth::user()->type == 'employee') {
+                $steps_report->where('employee_id', Auth::user()->employee->id);
             } else {
-                $leaderboard->where('date', $request->start_date);
-                $employee_steps->where('date', $request->start_date);
-                $steps_report->where('date', $request->start_date);
+                if (!empty($request->branch_id)) {
+
+                    $steps_report->whereHas('employee', function ($query) use ($request) {
+                        $query->where('branch_id', $request->branch_id);
+                    });
+                    $leaderboard->whereHas('employee', function ($query) use ($request) {
+                        $query->where('branch_id', $request->branch_id);
+                    });
+                }
             }
+
+            $start_date_str = $startDate->format('Y-m-d');
+            $end_date_str = $endDate->format('Y-m-d');
+
+            if ($request->start_date && $request->end_date) {
+                if ($request->start_date != $request->end_date) {
+                    $leaderboard->whereBetween('date', [$startDate, $endDate]);
+                    $steps_report->whereBetween('date', [$startDate, $endDate]);
+                } else {
+                    $leaderboard->where('date', $start_date_str);
+                    $steps_report->where('date', $start_date_str);
+                }
+            } else {
+                $leaderboard->whereBetween('date', [$startDate, $endDate]);
+                $steps_report->whereBetween('date', [$startDate, $endDate]);
+            }
+
             $steps_report = $steps_report->get();
             $leaderboard = $leaderboard->get();
-            $employee_steps = $employee_steps->get();
 
             $total_steps = $steps_report->sum('steps');
             $calories = $total_steps * $calories_per_step;
@@ -85,7 +120,7 @@ class HealthyReportsController extends Controller
                 $weekDates[$formattedDate] = Carbon::parse($formattedDate)->format('d');
             }
 
-            foreach ($employee_steps as $data) {
+            foreach ($steps_report as $data) {
                 $formattedDate = Carbon::parse($data->date)->format('Y-m-d');
                 $weeklySteps[$formattedDate] = $data->steps ? $data->steps : 0;
             }
@@ -93,8 +128,7 @@ class HealthyReportsController extends Controller
             $weekDays = array_values($weekDays);
             $weeklySteps = array_values($weeklySteps);
             $weekDates = array_values($weekDates);
-            $start_date_str = $startDate->format('Y-m-d');
-            $end_date_str = $endDate->format('Y-m-d');
+
 
 
             return view('healthy_report.index', compact(
@@ -108,7 +142,8 @@ class HealthyReportsController extends Controller
                 'weeklySteps',
                 'weekDates',
                 'start_date_str',
-                'end_date_str'
+                'end_date_str',
+                'branches'
             ));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);

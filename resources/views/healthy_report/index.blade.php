@@ -11,7 +11,6 @@
 
 
 @section('content')
-@if (Auth::user()->type=='employee')
     <div class="col-sm-12">
         <div class=" mt-2 " id="multiCollapseExample1">
             <div class="card">
@@ -20,28 +19,55 @@
                     <div class="row align-items-center justify-content-end">
                         <div class="col-12">
                             <div class="row">
-                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('start_date', __('Start Date'), ['class' => 'form-label']) }}
-                                        {{ Form::date('start_date', 
-                                            request('start_date') ? request('start_date') : Carbon\Carbon::now()->subWeek()->format('Y-m-d'), 
-                                            ['class' => 'form-control start_date']) 
-                                        }}
-                                    </div>
-                                </div>
-                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-                                    <div class="btn-box">
-                                        {{ Form::label('end_date', __('End Date'), ['class' => 'form-label']) }}
-                                        <div class="end_date_div btn-box">
-                                            {{ Form::date('end_date', 
-                                                request('end_date') ? request('end_date') : Carbon\Carbon::now()->format('Y-m-d'), 
-                                                ['class' => 'form-control end_date_id']) 
+                                @if (Auth::user()->type=='employee')
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                        <div class="btn-box">
+                                            {{ Form::label('start_date', __('Start Date'), ['class' => 'form-label']) }}
+                                            {{ Form::date('start_date', 
+                                                request('start_date') ? request('start_date') : Carbon\Carbon::now()->subWeek()->format('Y-m-d'), 
+                                                ['class' => 'form-control start_date']) 
                                             }}
                                         </div>
                                     </div>
-                                </div>
-                                
-                                
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                        <div class="btn-box">
+                                            {{ Form::label('end_date', __('End Date'), ['class' => 'form-label']) }}
+                                            <div class="end_date_div btn-box">
+                                                {{ Form::date('end_date', 
+                                                    request('end_date') ? request('end_date') : Carbon\Carbon::now()->format('Y-m-d'), 
+                                                    ['class' => 'form-control end_date_id']) 
+                                                }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                                        <div class="btn-box">
+                                            {{ Form::label('branch_id', __('Branch'),['class'=>'form-label'])}}
+                                            {{ Form::select('branch_id', $branches,isset($_GET['branch_id'])?$_GET['branch_id']:'', ['class' => 'form-control select2 branch', 'placeholder' => __('Select Branch')]) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                                        <div class="btn-box">
+                                            {{ Form::label('start_date', __('Start Date'), ['class' => 'form-label']) }}
+                                            {{ Form::date('start_date', 
+                                                request('start_date') ? request('start_date') : Carbon\Carbon::now()->subWeek()->format('Y-m-d'), 
+                                                ['class' => 'form-control select2 start_date']) 
+                                            }}
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+                                        <div class="btn-box">
+                                            {{ Form::label('end_date', __('End Date'), ['class' => 'form-label']) }}
+                                            <div class="end_date_div btn-box">
+                                                {{ Form::date('end_date', 
+                                                    request('end_date') ? request('end_date') : Carbon\Carbon::now()->format('Y-m-d'), 
+                                                    ['class' => 'form-control select2 end_date_id']) 
+                                                }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif      
                             </div>
                         </div>
                         <div class="col-auto mt-4">
@@ -235,10 +261,7 @@
             </div>
         </div>
     </div>
-@else
-    
-@endif  
-    
+        
 @endsection
 
 
