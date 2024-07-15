@@ -178,7 +178,7 @@
                                                 @endcan
 
                                                 @can('Delete Leave')
-                                                    @if ($leave->status != 'Approved')
+                                                    {{-- @if ($leave->status != 'Approved') --}}
                                                         <div class="action-btn bg-danger ms-2">
                                                             {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
@@ -187,7 +187,7 @@
                                                                     class="ti ti-trash text-white text-white"></i></a>
                                                             </form>
                                                         </div>
-                                                    @endif
+                                                    {{-- @endif --}}
                                             @endcan
                                             @endif
                                         </span>
