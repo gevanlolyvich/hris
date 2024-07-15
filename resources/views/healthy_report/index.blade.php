@@ -10,9 +10,58 @@
 @endsection
 
 
-
 @section('content')
 @if (Auth::user()->type=='employee')
+    <div class="col-sm-12">
+        <div class=" mt-2 " id="multiCollapseExample1">
+            <div class="card">
+                <div class="card-body">
+                    {{ Form::open(array('route' => array('healthy-reports.index'),'method'=>'get','id'=>'filter_of_healthy_report_employee')) }}
+                    <div class="row align-items-center justify-content-end">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div class="btn-box">
+                                        {{ Form::label('start_date', __('Start Date'), ['class' => 'form-label']) }}
+                                        {{ Form::date('start_date', 
+                                            request('start_date') ? request('start_date') : Carbon\Carbon::now()->subWeek()->format('Y-m-d'), 
+                                            ['class' => 'form-control start_date']) 
+                                        }}
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                                    <div class="btn-box">
+                                        {{ Form::label('end_date', __('End Date'), ['class' => 'form-label']) }}
+                                        <div class="end_date_div btn-box">
+                                            {{ Form::date('end_date', 
+                                                request('end_date') ? request('end_date') : Carbon\Carbon::now()->format('Y-m-d'), 
+                                                ['class' => 'form-control end_date_id']) 
+                                            }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        <div class="col-auto mt-4">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('filter_of_healthy_report_employee').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
+                                    </a>
+                                    <a href="{{route('healthy-reports.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                        <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{ Form::close() }}
+            </div>
+        </div>
+    </div>
     <div class="col-xxl-12">
         {{-- start --}}
         <div class="row">
@@ -27,13 +76,13 @@
                                     </div>
                                     <div class="ms-3">
                                         <small class="text-muted">{{ __('Date') }}</small>
-                                        <h6 class="m-0">{{ __('Last Report') }}</h6>
+                                        <h6 class="m-0">{{ __('Report') }}</h6>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-auto text-end">
                                 <h4 class="m-0 text-primary">
-                                    <span class="text-primary">{{ date('d M Y', strtotime($last_step->date)) }}</span>
+                                    <span class="text-primary">{{ date('d M Y', strtotime($start_date_str)) }} sd. {{ date('d M Y', strtotime($end_date_str)) }}</span>
 
                                 </h4>
                             </div>
@@ -58,9 +107,9 @@
                             </div>
                             <div class="col-auto text-end">
                                 <h4 class="m-0 text-primary">
-                                    <span class=" {{ $last_step->steps >= $last_step->healthy_target->target ? 'text-primary':'text-danger' }}">{{ $last_step->steps }}</span> </span>
+                                    <span class=" {{ $total_steps >= $steps_target ? 'text-primary':'text-danger' }}">{{ number_format($total_steps, 0, ',', '.') }}</span> </span>
                                 </h4>
-                                <span class="text-primary" style="font-size: 0.8rem">/ {{ $last_step->healthy_target->target }}</span>
+                                <span class="text-primary" style="font-size: 0.8rem">/ {{ number_format($steps_target, 0, ',', '.') }}</span>
                             </div>
                         </div>
                     </div>
@@ -82,7 +131,7 @@
                                 </div>
                             </div>
                             <div class="col-auto text-end">
-                                <h4 class="m-0 text-info">{{ number_format($last_step->distances, 1, ',', '.') }}</h4>
+                                <h4 class="m-0 text-info">{{ number_format($distances, 1, ',', '.') }}</h4>
                                 <span class="text-info" style="font-size: 0.8rem">KM</span>
                             </div>
                         </div>
@@ -105,7 +154,7 @@
                                 </div>
                             </div>
                             <div class="col-auto text-end">
-                                <h4 class="m-0 text-warning">{{ number_format($last_step->calories, 1, ',', '.') }}</h4>
+                                <h4 class="m-0 text-warning">{{ number_format($calories, 1, ',', '.') }}</h4>
                                 <span class="text-warning" style="font-size: 0.8rem">Cal</span>
                             </div>
                         </div>
@@ -162,6 +211,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>{{ __('Name') }}</th>
+                                        <th>{{ __('Branch') }}</th>
                                         <th>{{ __('Daily Average') }}</th>
                                         <th>{{ __('Total Steps') }}</th>
                                     </tr>
@@ -171,6 +221,7 @@
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $item->employee->name }}</td>
+                                            <td>{{ $item->employee->branch->name ?? "" }}</td>
                                             <td>{{ number_format($item->avg_steps, 0, ',', '.').' '.__('Steps') }}</td>
                                             <td>{{ number_format($item->total_steps, 0, ',', '.').' '.__('Steps') }}</td>
                                         </tr>
@@ -197,7 +248,7 @@
         const stepsChart = new Chart(ctx, {
             type: 'bar', // Bisa diganti menjadi 'bar', 'pie', dll.
             data: {
-                labels: {!! json_encode($weekDays) !!}, // Array nama hari
+                labels: {!! json_encode($weekDates) !!}, // Array nama hari
                 datasets: [{
                     label: 'Jumlah Langkah',
                     data: {!! json_encode($weeklySteps) !!}, // Array jumlah langkah per hari

@@ -16,35 +16,61 @@ class HealthyReportsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        // return $request;
         if (Auth::user()->can('Manage Healthy Report')) {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'start_date' => 'nullable|date|before_or_equal:end_date',
+                    'end_date' => 'nullable|date|after_or_equal:start_date',
+                ]
+            );
+
+            if ($validator->fails()) {
+                $messages = $validator->getMessageBag();
+                return redirect()->back()->with('error', $messages->first());
+            }
             $calories_per_step = 0.04;
             $step_length = 0.75;
 
-            $last_step = HealthyStep::orderBy('date', 'DESC')->first();
-            $last_step->calories = $last_step->steps * $calories_per_step;
-            $last_step->distances = $last_step->steps * $step_length / 1000;
-
-            // $startDate = Carbon::now()->subWeek()->startOfDay(); // 7 hari yang lalu
-            $startDate = Carbon::now()->previous(Carbon::MONDAY)->startOfDay(); // Hari Senin yang lalu
-            $endDate = Carbon::now()->endOfDay(); // Hari ini
+            $startDate = !empty($request?->start_date) ? Carbon::createFromFormat('Y-m-d', $request->start_date, 'Asia/Jakarta')->midDay() : Carbon::now()->subWeek()->startOfDay(); // 7 hari yang lalu
+            // $startDate = Carbon::now()->previous(Carbon::MONDAY)->startOfDay(); // Hari Senin yang lalu
+            $endDate = !empty($request?->end_date) ? Carbon::createFromFormat('Y-m-d', $request->end_date, 'Asia/Jakarta')->endOfDay() : Carbon::now()->endOfDay(); // Hari ini
             $daysInPeriod = $endDate->diffInDays($startDate) + 1; // Menghitung jumlah hari dalam periode
+            // return [$request->start_date, $request->end_date, $daysInPeriod, $startDate, $endDate];
 
-            $leaderboard = HealthyStep::whereBetween('date', [$startDate, $endDate])
-                ->selectRaw('employee_id, SUM(steps) as total_steps, SUM(steps) / ? as avg_steps', [$daysInPeriod])
+            $leaderboard = HealthyStep::selectRaw('employee_id, SUM(steps) as total_steps, SUM(steps) / ? as avg_steps', [$daysInPeriod])
                 ->groupBy('employee_id')
-                ->orderBy('total_steps', 'desc')
-                ->get();
+                ->orderBy('total_steps', 'desc');
 
-            $employee_steps = HealthyStep::whereBetween('date', [$startDate, $endDate])
-                ->where('employee_id', Auth::user()->employee->id)
-                ->orderBy('date', 'desc')
-                ->get();
+            $employee_steps = HealthyStep::where('employee_id', Auth::user()->employee->id)
+                ->orderBy('date', 'desc');
+
+            $steps_report = HealthyStep::where('employee_id', Auth::user()->employee->id);
+            if ($request->start_date != $request->end_date) {
+                $leaderboard->whereBetween('date', [$startDate, $endDate]);
+                $employee_steps->whereBetween('date', [$startDate, $endDate]);
+                $steps_report->whereBetween('date', [$startDate, $endDate]);
+            } else {
+                $leaderboard->where('date', $request->start_date);
+                $employee_steps->where('date', $request->start_date);
+                $steps_report->where('date', $request->start_date);
+            }
+            $steps_report = $steps_report->get();
+            $leaderboard = $leaderboard->get();
+            $employee_steps = $employee_steps->get();
+
+            $total_steps = $steps_report->sum('steps');
+            $calories = $total_steps * $calories_per_step;
+            $distances = $total_steps * $step_length / 1000;
+            $healthy_target = HealthyTarget::where('activity_name', 'Healthy Steps')->first();
+            $steps_target = $healthy_target->target * $daysInPeriod;
 
             $weekDays = [];
             $weeklySteps = [];
-
+            $weekDates = [];
 
             $period = new \DatePeriod($startDate, new \DateInterval('P1D'), $endDate);
 
@@ -54,6 +80,11 @@ class HealthyReportsController extends Controller
                 $weeklySteps[$formattedDate] = 0;
             }
 
+            foreach ($period as $date) {
+                $formattedDate = $date->format('Y-m-d');
+                $weekDates[$formattedDate] = Carbon::parse($formattedDate)->format('d');
+            }
+
             foreach ($employee_steps as $data) {
                 $formattedDate = Carbon::parse($data->date)->format('Y-m-d');
                 $weeklySteps[$formattedDate] = $data->steps ? $data->steps : 0;
@@ -61,8 +92,24 @@ class HealthyReportsController extends Controller
 
             $weekDays = array_values($weekDays);
             $weeklySteps = array_values($weeklySteps);
+            $weekDates = array_values($weekDates);
+            $start_date_str = $startDate->format('Y-m-d');
+            $end_date_str = $endDate->format('Y-m-d');
 
-            return view('healthy_report.index', compact('last_step', 'leaderboard', 'weekDays', 'weeklySteps'));
+
+            return view('healthy_report.index', compact(
+                'steps_report',
+                'total_steps',
+                'distances',
+                'calories',
+                'steps_target',
+                'leaderboard',
+                'weekDays',
+                'weeklySteps',
+                'weekDates',
+                'start_date_str',
+                'end_date_str'
+            ));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
