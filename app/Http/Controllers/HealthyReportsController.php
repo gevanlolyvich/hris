@@ -60,7 +60,7 @@ class HealthyReportsController extends Controller
 
             $leaderboard = HealthyStep::selectRaw('employee_id, SUM(steps) as total_steps, SUM(steps) / ? as avg_steps', [$daysInPeriod])
                 ->groupBy('employee_id')
-                ->orderBy('total_steps', 'desc');
+                ->orderBy('total_steps', 'desc')->limit(20);
 
             $steps_report = HealthyStep::orderBy('date', 'desc');
 

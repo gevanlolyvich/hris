@@ -237,7 +237,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>{{ __('Name') }}</th>
-                                        <th>{{ __('Branch') }}</th>
+                                        {{-- <th>{{ __('Branch') }}</th> --}}
                                         <th>{{ __('Daily Average') }}</th>
                                         <th>{{ __('Total Steps') }}</th>
                                     </tr>
@@ -246,8 +246,13 @@
                                     @foreach ($leaderboard as $item)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $item->employee->name }}</td>
-                                            <td>{{ $item->employee->branch->name ?? "" }}</td>
+                                            <td>
+                                                {{ $item->employee->name }}  <br> 
+                                                <span class="btn btn-primary btn-sm text-center disabled">
+                                                    {{ $item->employee->branch->name ?? "" }}
+                                                </span>
+                                            </td>
+                                            {{-- <td>{{ $item->employee->branch->name ?? "" }}</td> --}}
                                             <td>{{ number_format($item->avg_steps, 0, ',', '.').' '.__('Steps') }}</td>
                                             <td>{{ number_format($item->total_steps, 0, ',', '.').' '.__('Steps') }}</td>
                                         </tr>
