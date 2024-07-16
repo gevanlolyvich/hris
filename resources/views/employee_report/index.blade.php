@@ -50,7 +50,7 @@
 @endpush
 
 @section('action-button')
-    <a href="{{ route('employee-report.create') }}" data-ajax-popup="true"
+    <a href="{{ route('employee-report.create') }}" 
         data-title="{{ __('Create New Report') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create New Report') }}">
         <i class="ti ti-plus"></i>
