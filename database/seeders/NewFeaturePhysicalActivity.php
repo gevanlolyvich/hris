@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class NewFeatureHealthyReport extends Seeder
+class NewFeaturePhysicalActivity extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,10 +18,10 @@ class NewFeatureHealthyReport extends Seeder
     {
         $currentTimestamp = date('Y-m-d H:i:s');
         $featureNames = [
-            "Manage Healthy Report",
-            "Create Healthy Report",
-            "Edit Healthy Report",
-            "Delete Healthy Report"
+            "Manage Physical Activity",
+            "Create Physical Activity",
+            "Edit Physical Activity",
+            "Delete Physical Activity"
         ];
 
         $newFeature = array_map(function ($name) use ($currentTimestamp) {

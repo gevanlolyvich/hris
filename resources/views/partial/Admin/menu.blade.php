@@ -357,7 +357,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @if (
                         Gate::check('Manage Healthy Target') || 
                         Gate::check('Manage Healthy Steps') || 
-                        Gate::check('Manage Healthy Report') 
+                        Gate::check('Manage Physical Activity') 
                     )
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -378,10 +378,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('healthy-steps.index') }}">{{ __('Healthy Steps') }}</a>
                                 </li>
                             @endcan
-                            @can('Manage Healthy Report')
+                            @can('Manage Physical Activity')
                                 <li class="dash-item {{ request()->is('healthy-reports*') ? 'active' : '' }}">
                                     <a class="dash-link"
-                                        href="{{ route('healthy-reports.index') }}">{{ __('Health Report') }}</a>
+                                        href="{{ route('healthy-reports.index') }}">{{ __('Physical Activity') }}</a>
                                 </li>
                             @endcan
                         </ul>

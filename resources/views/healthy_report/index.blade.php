@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @section('page-title')
-   {{ __('Healthy Report') }}
+   {{ __('Physical Activity') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Healthy Report') }}</li>
+    <li class="breadcrumb-item">{{ __('Physical Activity') }}</li>
 @endsection
 
 
@@ -101,7 +101,7 @@
                                         <i class="ti ti-report"></i>
                                     </div>
                                     <div class="ms-3">
-                                        <small class="text-muted">{{ __('Date') }}</small>
+                                        <small class="text-muted">{{ __('Period') }}</small>
                                         <h6 class="m-0">{{ __('Report') }}</h6>
                                     </div>
                                 </div>
@@ -220,7 +220,7 @@
                     <div class="card-header card-body table-border-style">
                         <div class="row">
                             <div class="col-9">
-                                <h5>{{ __("Weekly Leaderboard") }}</h5>
+                                <h5>{{ __("Leaderboard") }}</h5>
                             </div>
                             <div class="col-2">
                                 <a href="{{ route('attendanceemployee.exportNotClockIn', ['date' => date('Y-m-d')]) }}" data-bs-toggle="tooltip"

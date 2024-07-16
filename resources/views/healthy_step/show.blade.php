@@ -11,7 +11,7 @@
         <div class="col-lg-6 col-md-6 col-sm-6">
             <div class="form-group">
                 {{ Form::label('steps', __('Number Of Steps'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                {{ Form::number('steps', $healthy_step->steps, ['class' => 'form-control', 'required' => 'required' , 'disabled'=>'disabled', 'placeholder'=> __('Enter Number Of Steps')]) }}
+                {{ Form::number('steps',  number_format($healthy_step->steps, 0, ',', '.') , ['class' => 'form-control', 'required' => 'required' , 'disabled'=>'disabled', 'placeholder'=> __('Enter Number Of Steps')]) }}
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12">

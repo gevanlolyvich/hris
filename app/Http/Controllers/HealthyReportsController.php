@@ -20,7 +20,7 @@ class HealthyReportsController extends Controller
     public function index(Request $request)
     {
         // return $request;
-        if (Auth::user()->can('Manage Healthy Report')) {
+        if (Auth::user()->can('Manage Physical Activity')) {
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -157,7 +157,7 @@ class HealthyReportsController extends Controller
      */
     public function create()
     {
-        if (Auth::user()->can('Manage Healthy Report')) {
+        if (Auth::user()->can('Manage Physical Activity')) {
             $activities = [
                 'Healthy Steps' => __('Healthy Steps')
             ];
@@ -190,7 +190,7 @@ class HealthyReportsController extends Controller
 
         $availabilityCheck = HealthyTarget::where('activity_name', $request->activity_name)->first();
         if ($availabilityCheck) {
-            return redirect()->back()->with('error', __('Healthy Report Already Exist'));
+            return redirect()->back()->with('error', __('Physical Activity Already Exist'));
         }
 
         $healthy_target                   = new HealthyTarget();
@@ -198,7 +198,7 @@ class HealthyReportsController extends Controller
         $healthy_target->target           = $request->target;
         $healthy_target->save();
 
-        return redirect()->back()->with('success', __('Healthy Report Successfully Created'));
+        return redirect()->back()->with('success', __('Physical Activity Successfully Created'));
     }
 
     /**
@@ -220,7 +220,7 @@ class HealthyReportsController extends Controller
      */
     public function edit(HealthyTarget $healthy_target)
     {
-        if (Auth::user()->can('Edit Healthy Report')) {
+        if (Auth::user()->can('Edit Physical Activity')) {
             $activities = [
                 'Healthy Steps' => __('Healthy Steps')
             ];
@@ -256,14 +256,14 @@ class HealthyReportsController extends Controller
         $availabilityCheck = HealthyTarget::where('activity_name', $request->activity_name)
             ->whereNot('id', $healthy_target->id)->first();
         if ($availabilityCheck) {
-            return redirect()->back()->with('error', __('Healthy Report Already Exist'));
+            return redirect()->back()->with('error', __('Physical Activity Already Exist'));
         }
 
         $healthy_target->activity_name    = $request->activity_name;
         $healthy_target->target           = $request->target;
         $healthy_target->save();
 
-        return redirect()->back()->with('success', __('Healthy Report Successfully Updated'));
+        return redirect()->back()->with('success', __('Physical Activity Successfully Updated'));
     }
 
     /**
@@ -274,13 +274,13 @@ class HealthyReportsController extends Controller
      */
     public function destroy(HealthyTarget $healthy_target)
     {
-        if (Auth::user()->can('Delete Healthy Report')) {
+        if (Auth::user()->can('Delete Physical Activity')) {
             if (Auth::user()->type != 'employee') {
                 if (count($healthy_target->healthy_steps) > 0) {
                     return redirect()->back()->with('error', __('Healthy data still exists, target cannot be deleted'));
                 }
                 $healthy_target->delete();
-                return redirect()->back()->with('success', __('Healthy Report Successfully Deleted'));
+                return redirect()->back()->with('success', __('Physical Activity Successfully Deleted'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
