@@ -172,17 +172,18 @@
                                                             </a>
                                                         </div>
                                                     @endcan
-                                                    @can('Delete Permit')
-                                                        <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['permit.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                                aria-label="Delete"><i
-                                                                    class="ti ti-trash text-white text-white"></i></a>
-                                                            </form>
-                                                        </div>
-                                                    @endcan
+                                                    
                                                 @endif
+                                                @can('Delete Permit')
+                                                    <div class="action-btn bg-danger ms-2">
+                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['permit.destroy', $permit->id], 'id' => 'delete-form-' . $permit->id]) !!}
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                            aria-label="Delete"><i
+                                                                class="ti ti-trash text-white text-white"></i></a>
+                                                        </form>
+                                                    </div>
+                                                @endcan
                                             @endif
                                         </span>
                                     </td>

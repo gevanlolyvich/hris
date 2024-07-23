@@ -347,6 +347,21 @@ class PermitController extends Controller
                     }
                 }
 
+                if ($permit->status == "Approved") {
+                    $dates = [];
+                    $period = new \DatePeriod(
+                        new \DateTime($permit->start_date),
+                        new \DateInterval('P1D'),
+                        new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($permit->end_date))))
+                    );
+
+                    foreach ($period as $key => $value) {
+                        array_push($dates, $value->format('Y-m-d'));
+                    }
+
+                    AttendanceEmployee::where('employee_id', $permit->employee_id)->whereIn('date', $dates)->where('status', 'Permission')->delete();
+                }
+
                 $permit->delete();
                 return redirect()->back()->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
