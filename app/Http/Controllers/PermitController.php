@@ -418,7 +418,7 @@ class PermitController extends Controller
                     'attendance_status_id'  => $permitAttendance->id,
                     'status'                => $permitAttendance->name,
                     'clock_in'              => '00:00:00',
-                    'clock_out'             => '00:00:00',
+                    'clock_out'             => '00:00:01',
                     'late'                  => '00:00:00',
                     'early_leaving'         => '00:00:00',
                     'work_hours'            => '00:00:00',
@@ -431,6 +431,8 @@ class PermitController extends Controller
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
                     'shift_type_id'         => $permit->employee->shift_type_id,
+                    'source_in'             => 'Application',
+                    'source_out'            => 'Application'
                 ]);
             }
         }
