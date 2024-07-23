@@ -347,6 +347,21 @@ class PermitController extends Controller
                     }
                 }
 
+                if ($permit->status == "Approved") {
+                    $dates = [];
+                    $period = new \DatePeriod(
+                        new \DateTime($permit->start_date),
+                        new \DateInterval('P1D'),
+                        new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($permit->end_date))))
+                    );
+
+                    foreach ($period as $key => $value) {
+                        array_push($dates, $value->format('Y-m-d'));
+                    }
+
+                    AttendanceEmployee::where('employee_id', $permit->employee_id)->whereIn('date', $dates)->where('status', 'Permission')->delete();
+                }
+
                 $permit->delete();
                 return redirect()->back()->with('success', __('Attendance Permit Successfully Deleted'));
             } else {
@@ -403,7 +418,7 @@ class PermitController extends Controller
                     'attendance_status_id'  => $permitAttendance->id,
                     'status'                => $permitAttendance->name,
                     'clock_in'              => '00:00:00',
-                    'clock_out'             => '00:00:00',
+                    'clock_out'             => '00:00:01',
                     'late'                  => '00:00:00',
                     'early_leaving'         => '00:00:00',
                     'work_hours'            => '00:00:00',
@@ -416,6 +431,8 @@ class PermitController extends Controller
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
                     'shift_type_id'         => $permit->employee->shift_type_id,
+                    'source_in'             => 'Application',
+                    'source_out'            => 'Application'
                 ]);
             }
         }
