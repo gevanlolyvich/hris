@@ -31,12 +31,16 @@
             {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'required' => 'required','placeholder'=>__('Select Employee')]) }}
         </div>
         <div class="form-group col-lg-6 col-md-6">
+            {{ Form::label('transfer_date', __('Transfer Date'), ['class' => 'col-form-label']) }}
+            {{ Form::date('transfer_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off' , 'required' => 'required']) }}
+        </div>
+        <div class="form-group col-lg-6 col-md-6">
             {{ Form::label('branch_id', __('Branch'), ['class' => 'col-form-label']) }}
             {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2' , 'required' => 'required','placeholder'=>__('Select Branch')]) }}
         </div>
 
         <div class="form-group col-lg-6 col-md-6">
-            {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
+            {{ Form::label('department_id', __('Select Department'), ['class' => 'col-form-label']) }}
 
             <div class="form-icon-user">
                 <div class="department_div">
@@ -52,20 +56,45 @@
         </div>
 
         <div class="form-group col-lg-6 col-md-6">
-            {{ Form::label('designation_id', __('Select Designation'), ['class' => 'form-label']) }}
+            {{ Form::label('designation_id', __('Select Designation'), ['class' => 'col-form-label']) }}
 
             <div class="form-icon-user">
                 <div class="designation_div">
                     <select class="form-control select2  designation_id" name="designation_id"
-                         placeholder="Select Designation">
-                         @if ($transfer->designation_id) 
+                        placeholder="Select Designation">
+                        @foreach ($designations as $designation_id => $designation)
+                            @if ($transfer->designation_id == $designation_id)
+                                <option value="{{ $designation_id }}" selected>{{  $designation }}</option>
+                            @else
+                                <option value="{{ $designation_id }}">{{  $designation }}</option>
+                            @endif
+                        @endforeach
+                        {{-- @if ($transfer->designation_id) 
                             <option value="{{ $transfer->designation_id }}" selected>{{ $transfer->designation->name }}</option>
-                         @endif
+                        @endif --}}
                     </select>
                 </div>
             </div>
         </div>
-        <div class="form-group col-lg-8 col-md-8">
+        <div class="form-group col-lg-6 col-md-6">
+            {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'col-form-label']) }}<span class="text-danger pl-1">*</span>
+
+            <div class="form-icon-user">
+                <div class="shift_type_id_div">
+                    <select class="form-control select2 shift_type_id" name="shift_type_id"
+                        placeholder="Select Shift">
+                        @foreach ($shifts as $shift_id => $shift)
+                            @if ($transfer->shift_type_id == $shift_id)
+                                <option value="{{ $shift_id }}" selected>{{  $shift }}</option>
+                            @else
+                                <option value="{{ $shift_id }}">{{  $shift }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-lg-12 col-md-12">
             {!! Form::label('managed_by', __('Select Direct Supervisor'), ['class' => 'col-form-label']) !!}
             <div class="form-icon-user">
                 <div class="managed_by_div">
@@ -78,10 +107,6 @@
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="form-group col-lg-4 col-md-4">
-            {{ Form::label('transfer_date', __('Transfer Date'), ['class' => 'col-form-label']) }}
-            {{ Form::date('transfer_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off' , 'required' => 'required']) }}
         </div>
         <div class="form-group col-lg-12">
             {{ Form::label('description', __('Description'), ['class' => 'col-form-label']) }}
