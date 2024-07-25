@@ -8,20 +8,28 @@
                     <td>{{ !empty($employee->name) ? $employee->name : '' }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Transfer Date') }}</th>
+                    <td>{{ \Auth::user()->dateFormat($transfer->transfer_date) }}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Branch') }}</th>
-                    <td>{{ !empty($employee->branch->name) ? $employee->branch->name : '' }}</td>
+                    <td>{{ !empty($transfer->branch->name) ? $transfer->branch->name : '' }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Department') }}</th>
-                    <td>{{ !empty($employee->department->name) ? $employee->department->name : '' }}</td>
+                    <td>{{ !empty($transfer->department->name) ? $transfer->department->name : '' }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Designation') }}</th>
-                    <td>{{ !empty($employee->designation->name) ? $employee->designation->name : '' }}</td>
+                    <td>{{ !empty($transfer->designation->name) ? $transfer->designation->name : '' }}</td>
                 </tr>
                 <tr>
-                    <th>{{ __('Transfer Date') }}</th>
-                    <td>{{ \Auth::user()->dateFormat($transfer->transfer_date) }}</td>
+                    <th>{{ __('Shift') }}</th>
+                    <td>{{ !empty($transfer->shift->name) ? $transfer->shift->name : '' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Supervisor') }}</th>
+                    <td>{{ !empty($transfer->managed->name) ? $transfer->managed->name : '' }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Document') }}</th>
@@ -42,7 +50,7 @@
                 <tr>
                     <th>{{ __('Note') }}</th>
                     <td>
-                        {{ Form::textarea('note', $transfer->note, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => __('Note'), 'rows' => '3']) }}
+                        {{ Form::textarea('note', $transfer->description, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => __('Note'), 'rows' => '3']) }}
                     </td>
                 </tr>
             </table>
