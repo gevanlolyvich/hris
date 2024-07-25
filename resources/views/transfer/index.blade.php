@@ -161,6 +161,7 @@
             // console.log({branch_id})
             // $('.designation_id').empty();
             getDepartment(branch_id);
+            getBranchShift(branch_id)
         });
 
         function getDepartment(branch_id) {
@@ -256,5 +257,42 @@
                 }
             });
         }
+
+        function getBranchShift(branch_id) {
+            $.ajax({
+                url: '{{ route('branch.shift.json') }}',
+                type: 'POST',
+                data: {
+                    "branch_id": branch_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    $('.shift_type_id').empty();
+                    var emp_selct = ` <select class="form-control select2  shift_type_id" name="shift_type_id" id="choices-multiple5"
+                                            placeholder={{ __('Select Shift') }} >
+                                            </select>`;
+                    $('.shift_type_id_div').html(emp_selct);
+
+                    $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                    $.each(data, function(key, value) {
+                        $('.shift_type_id').append('<option value="' + key + '">' + value +
+                            '</option>');
+                    });
+                    new Choices('#choices-multiple5', {
+                        removeItemButton: true,
+                    });
+                }
+            });
+        }
+    </script>
+    <script>
+        $(document).ready(() => {
+            $(document).on('change', '[name="myDocument"]', function () {
+                const file = document.getElementById('uploadFile');
+                file.style.display = '';
+                file.style['max-width'] = '';
+                document.getElementById('fileName').textContent = this.files[0].name;
+            });
+        })
     </script>
 @endpush

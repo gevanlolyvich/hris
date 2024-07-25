@@ -12,6 +12,7 @@ class Transfer extends Model
         'department_id',
         'designation_id',
         'managed_by',
+        'shift_type_id',
         'document_path',
         'transfer_date',
         'description',
@@ -38,6 +39,10 @@ class Transfer extends Model
         return $this->belongsTo('App\Models\Employee', 'managed_by', 'id');
     }
 
+    public function shift()
+    {
+        return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id');
+    }
 
     public function employee()
     {

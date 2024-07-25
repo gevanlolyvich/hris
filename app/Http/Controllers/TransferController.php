@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Department;
+use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\ShiftType;
 use App\Mail\TransferSend;
 use App\Models\Transfer;
 use App\Models\Utility;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class TransferController extends Controller
 {
@@ -21,9 +24,9 @@ class TransferController extends Controller
         if (\Auth::user()->can('Manage Transfer')) {
             if (Auth::user()->type == 'employee') {
                 $emp       = Employee::where('user_id', '=', \Auth::user()->id)->first();
-                $transfers = Transfer::where('employee_id', '=', $emp->id)->get();
+                $transfers = Transfer::where('employee_id', '=', $emp->id)->orderby('transfer_date', 'desc')->get();
             } else {
-                $transfers = Transfer::get();
+                $transfers = Transfer::orderby('transfer_date', 'desc')->get();
             }
 
             return view('transfer.index', compact('transfers'));
@@ -63,7 +66,8 @@ class TransferController extends Controller
                     'branch_id' => 'required',
                     'department_id' => 'required',
                     'designation_id' => 'required',
-                    'transfer_date' => 'required'
+                    'transfer_date' => 'required',
+                    'shift_type_id' => 'required'
                 ]
             );
             if ($validator->fails()) {
@@ -73,12 +77,6 @@ class TransferController extends Controller
             }
 
             $employee = Employee::find($request->employee_id);
-            // Update via cron
-            // $employee->branch_id     = $request->branch_id;
-            // $employee->department_id = $request->department_id;
-            // $employee->designation_id = $request->designation_id;
-            // $employee->managed_by    = $request->managed_by ?? null;
-            // $employee->save();
 
             $document_path = null;
             if ($request->file('myDocument')) {
@@ -88,16 +86,17 @@ class TransferController extends Controller
                 $document_path = env('APP_URL') . '/storage/' . $path;
             }
 
-            $transfer                = new Transfer();
-            $transfer->employee_id   = $request->employee_id;
-            $transfer->branch_id     = $request->branch_id;
-            $transfer->department_id = $request->department_id;
-            $transfer->designation_id = $request->designation_id;
-            $transfer->managed_by    = $request->managed_by ?? null;
-            $transfer->transfer_date = $request->transfer_date;
-            $transfer->document_path = $document_path;
-            $transfer->description   = $request->description;
-            $transfer->created_by    = \Auth::user()->id;
+            $transfer                   = new Transfer();
+            $transfer->employee_id      = $request->employee_id;
+            $transfer->branch_id        = $request->branch_id;
+            $transfer->department_id    = $request->department_id;
+            $transfer->designation_id   = $request->designation_id;
+            $transfer->managed_by       = $request->managed_by ?? null;
+            $transfer->shift_type_id    = $request->shift_type_id;
+            $transfer->transfer_date    = $request->transfer_date;
+            $transfer->document_path    = $document_path;
+            $transfer->description      = $request->description;
+            $transfer->created_by       = \Auth::user()->id;
             $transfer->save();
 
 
@@ -112,8 +111,6 @@ class TransferController extends Controller
                     'transfer_department' => $department->name,
                     'transfer_branch' => $branch->name,
                     'transfer_description' => $request->description,
-
-
                 ];
                 $resp = Utility::sendEmailTemplate('employee_transfer', [$employee->email], $uArr);
                 return redirect()->route('transfer.index')->with('success', __('Transfer  successfully created.') . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
@@ -133,11 +130,13 @@ class TransferController extends Controller
     public function edit(Transfer $transfer)
     {
         if (\Auth::user()->can('Edit Transfer')) {
-            $departments = Department::get()->pluck('name', 'id');
-            $branches    = Branch::get()->pluck('name', 'id');
-            $employees   = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $departments    = Department::get()->pluck('name', 'id');
+            $branches       = Branch::get()->pluck('name', 'id');
+            $employees      = Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $designations   = Designation::where('department_id', $transfer->department_id)->orderBy('name', 'asc')->get()->pluck('name', 'id');
+            $shifts         = ShiftType::where('branch_id', $transfer->branch_id)->orderby('name', 'asc')->select('id', 'name')->get()->pluck('name', 'id');
             if ($transfer->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
-                return view('transfer.edit', compact('transfer', 'employees', 'departments', 'branches'));
+                return view('transfer.edit', compact('transfer', 'employees', 'departments', 'branches', 'designations', 'shifts'));
             } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
@@ -173,16 +172,27 @@ class TransferController extends Controller
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $employee->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/transfers', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
+
+                    // Check if the file exists before attempting to delete
+                    if ($transfer->document_path) {
+                        $filepath_array = explode('/', $transfer->document_path);
+                        $filename = array_pop($filepath_array);
+
+                        if (Storage::disk('public')->exists("uploads/transfers/" . $filename)) {
+                            Storage::disk('public')->delete("uploads/transfers/" . $filename);
+                        }
+                    }
                 }
 
-                $transfer->employee_id   = $request->employee_id;
-                $transfer->branch_id     = $request->branch_id;
-                $transfer->department_id = $request->department_id;
-                $transfer->designation_id = $request->designation_id;
-                $transfer->managed_by    = $request->managed_by ?? null;
-                $transfer->transfer_date = $request->transfer_date;
-                $transfer->document_path = $document_path;
-                $transfer->description   = $request->description;
+                $transfer->employee_id      = $request->employee_id;
+                $transfer->branch_id        = $request->branch_id;
+                $transfer->department_id    = $request->department_id;
+                $transfer->designation_id   = $request->designation_id;
+                $transfer->managed_by       = $request->managed_by ?? null;
+                $transfer->shift_type_id    = $request->shift_type_id;
+                $transfer->transfer_date    = $request->transfer_date;
+                $transfer->document_path    = $document_path;
+                $transfer->description      = $request->description;
                 $transfer->save();
 
                 return redirect()->route('transfer.index')->with('success', __('Transfer successfully updated.'));
@@ -199,6 +209,16 @@ class TransferController extends Controller
         if (\Auth::user()->can('Delete Transfer')) {
             if ($transfer->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
                 $transfer->delete();
+
+                // Check if the file exists before attempting to delete
+                if ($transfer->document_path) {
+                    $filepath_array = explode('/', $transfer->document_path);
+                    $filename = array_pop($filepath_array);
+
+                    if (Storage::disk('public')->exists("uploads/transfers/" . $filename)) {
+                        Storage::disk('public')->delete("uploads/transfers/" . $filename);
+                    }
+                }
 
                 return redirect()->route('transfer.index')->with('success', __('Transfer successfully deleted.'));
             } else {
