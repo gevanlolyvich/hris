@@ -33,7 +33,7 @@ class TransferEmployeeCron extends Command
     {
         $today = now()->toDateString();
 
-        // Terminate employees with today as the termination date
+        // Transfer employees with today as the transfer date
         $transfers = Transfer::where('transfer_date', '<=', $today)->get();
         for ($i = 0; $i < count($transfers); $i++) {
             $transfer = $transfers[$i];
@@ -43,6 +43,7 @@ class TransferEmployeeCron extends Command
                 'department_id' => $transfer->department_id,
                 'designation_id' => $transfer->designation_id,
                 'managed_by' => $transfer->managed_by ?? null,
+                'shift_type_id' => $transfer->shift_type_id,
             ]);
 
             User::where('id', $emp->user_id)->update([
