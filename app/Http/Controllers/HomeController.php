@@ -146,7 +146,7 @@ class HomeController extends Controller
                 // return $employeeAttendance;
                 $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', $dateYesterday)->first();
 
-                $shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+                $shift_times = ShiftTime::where('shift_type_id', \Auth::user()?->employee?->shift_type?->id)
                     ->where('days', date('l'))
                     ->first();
                 $shift_type = ShiftType::where('id', \Auth::user()->employee->shift_type->id)

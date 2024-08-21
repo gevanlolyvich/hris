@@ -885,6 +885,12 @@ Route::patch('attendanceemployee/validate/{id}', [AttendanceEmployeeController::
         'XSS',
     ]
 );
+Route::put('attendanceemployee/edit-attendance/{id}', [AttendanceEmployeeController::class, 'updateAttendance'])->name('attendanceemployee.updateAttendance')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 
 Route::resource('attendanceemployee', AttendanceEmployeeController::class)->middleware(
