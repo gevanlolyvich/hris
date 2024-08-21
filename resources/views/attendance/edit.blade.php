@@ -1,4 +1,4 @@
-{{ Form::model($attendanceEmployee, ['route' => ['attendanceemployee.update', $attendanceEmployee->id], 'method' => 'PUT']) }}
+{{ Form::model($attendanceEmployee, ['route' => ['attendanceemployee.updateAttendance', $attendanceEmployee->id], 'method' => 'PUT']) }}
 <div class="modal-body">
 <div class="row">
     <div class="form-group col-lg-6 col-md-6 ">
@@ -20,6 +20,9 @@
         {{ Form::label('clock_out', __('Clock Out'), ['class' => 'col-form-label']) }}
         {{ Form::time('clock_out', null, ['class' => 'form-control', 'id'=>'clock_out']) }}
     </div>
+    <input type="hidden" name="shift_type_id" value="{{ $attendanceEmployee->shift_type_id }}">
+    <input type="hidden" name="coord_out" value="{{ $attendanceEmployee->coord_out }}">
+    <input type="hidden" name="type" value="edit-attendance">
 </div>
 </div>
 <div class="modal-footer">

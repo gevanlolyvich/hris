@@ -75,13 +75,9 @@ class BranchController extends Controller
     public function edit(Branch $branch)
     {
         if (\Auth::user()->can('Edit Branch')) {
-            if ($branch->created_by == \Auth::user()->id || \Auth::user()->type == 'company') {
-                $parent_branches = Branch::whereNot('id', $branch->id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $parent_branches = Branch::whereNot('id', $branch->id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
 
-                return view('branch.edit', compact('branch', 'parent_branches'));
-            } else {
-                return response()->json(['error' => __('Permission denied.')], 401);
-            }
+            return view('branch.edit', compact('branch', 'parent_branches'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -90,33 +86,29 @@ class BranchController extends Controller
     public function update(Request $request, Branch $branch)
     {
         if (\Auth::user()->can('Edit Branch')) {
-            if ($branch->created_by == \Auth::user()->creatorId()) {
-                $validator = \Validator::make(
-                    $request->all(),
-                    [
-                        'name' => 'required',
-                        'tolerance' => 'required',
-                        'latitude' => 'required',
-                        'longitude' => 'required',
-                    ]
-                );
-                if ($validator->fails()) {
-                    $messages = $validator->getMessageBag();
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'tolerance' => 'required',
+                    'latitude' => 'required',
+                    'longitude' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $messages = $validator->getMessageBag();
 
-                    return redirect()->back()->with('error', $messages->first());
-                }
-
-                $branch->name           = $request->name;
-                $branch->tolerance      = $request->tolerance;
-                $branch->parent_branch  = $request->parent_branch;
-                $branch->latitude       = $request->latitude;
-                $branch->longitude      = $request->longitude;
-                $branch->save();
-
-                return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));
-            } else {
-                return redirect()->back()->with('error', __('Permission denied.'));
+                return redirect()->back()->with('error', $messages->first());
             }
+
+            $branch->name           = $request->name;
+            $branch->tolerance      = $request->tolerance;
+            $branch->parent_branch  = $request->parent_branch;
+            $branch->latitude       = $request->latitude;
+            $branch->longitude      = $request->longitude;
+            $branch->save();
+
+            return redirect()->route('branch.index')->with('success', __('Branch successfully updated.'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

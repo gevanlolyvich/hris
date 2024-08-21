@@ -461,13 +461,13 @@
                                             <tr>
                                                 <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                                 <td>{{ !empty($attendance->employee) ? $attendance->employee?->branch?->name : '' }}</td>
-                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
+                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name }}</td>
                                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                                 <td>{{ $attendance->status }}</td>
                                                 <td>
                                                     @if ($attendance->coord_in)
                                                         <a href="#" class="btn btn-primary btn-sm map-link"
-                                                            data-employee="{{ $attendance->employee->name }}"
+                                                            data-employee="{{ $attendance->employee?->name }}"
                                                             data-coordinates="{{ $attendance->coord_in }}"
                                                             data-image="{{ $attendance->picture_in }}"
                                                             data-type="{{ $attendance->attendance_type?->name ?? '-' }}"
@@ -487,7 +487,7 @@
                                                 <td>
                                                     @if ($attendance->coord_out)
                                                         <a href="#" class="btn btn-info btn-sm map-link"
-                                                            data-employee="{{ $attendance->employee->name }}"
+                                                            data-employee="{{ $attendance->employee?->name }}"
                                                             data-coordinates="{{ $attendance->coord_out }}"
                                                             data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                             data-near-name="{{ $attendance->location_out_address }}"
@@ -618,15 +618,15 @@
                             @foreach ($attendanceEmployee as $attendance)
                                 @if ((session('employee') && session('employee')->name == (!empty($attendance->employee) ? $attendance->employee->name : '')) || empty(session('employee')))
                                     <tr>
-                                        <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
+                                        <td>{{ !empty($attendance->employee) ? $attendance->employee?->name : '' }}</td>
                                         <td>{{ !empty($attendance->employee) ? $attendance->employee?->branch?->name : '' }}</td>
-                                        <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
+                                        <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name }}</td>
                                         <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                         <td>{{ $attendance->status }}</td>
                                         <td>
                                             @if ($attendance->coord_in)
                                                 <a href="#" class="btn btn-primary btn-sm map-link"
-                                                    data-employee="{{ $attendance->employee->name }}"
+                                                    data-employee="{{ $attendance->employee?->name }}"
                                                     data-coordinates="{{ $attendance->coord_in }}"
                                                     data-image="{{ $attendance->picture_in }}"
                                                     data-type="{{ $attendance->attendance_type?->name ?? '-' }}"
@@ -646,7 +646,7 @@
                                         <td>
                                             @if ($attendance->coord_out)
                                                 <a href="#" class="btn btn-info btn-sm map-link"
-                                                    data-employee="{{ $attendance->employee->name }}"
+                                                    data-employee="{{ $attendance->employee?->name }}"
                                                     data-coordinates="{{ $attendance->coord_out }}"
                                                     data-near-coordinate="{{ $attendance->location_out_coordinate }}"
                                                     data-near-name="{{ $attendance->location_out_address }}"
