@@ -31,6 +31,7 @@
                                 <th width="10px">ID</th>
                                 <th>{{__('Branch')}}</th>
                                 <th>{{__('Main Branch')}}</th>
+                                <th>{{__('Radius')}}</th>
                                 <th width="200px">{{__('Action')}}</th>
                             </tr>
                             </thead>
@@ -40,6 +41,7 @@
                                     <td>{{ $branch->id }}</td>
                                     <td>{{ $branch->name }}</td>
                                     <td>{{ $branch->parentBranch?->name ?? '-' }}</td>
+                                    <td>{{ $branch->tolerance }} m</td>
                                     <td class="Action">
                                         <span>
                                             @can('Edit Branch')
