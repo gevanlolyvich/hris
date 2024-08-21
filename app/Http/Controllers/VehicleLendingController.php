@@ -436,7 +436,7 @@ class VehicleLendingController extends Controller
             if ($lending) {
 
                 // Check Vehicle Availability
-                $unavailable_vehicle_id = VehicleLending::where('date', $lending->date)->where('status', 'Approved')->select('vehicle_id')->get()->pluck('vehicle_id')->toArray();
+                $unavailable_vehicle_id = VehicleLending::where('date', $lending->date)->where('status', 'Approved')->whereNull('return_km')->select('vehicle_id')->get()->pluck('vehicle_id')->toArray();
 
                 if (!in_array($lending->vehicle_id, $unavailable_vehicle_id)) {
                     // Update Lending Status Data

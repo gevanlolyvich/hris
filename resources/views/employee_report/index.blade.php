@@ -50,7 +50,7 @@
 @endpush
 
 @section('action-button')
-    <a href="{{ route('employee-report.create') }}" data-ajax-popup="true"
+    <a href="{{ route('employee-report.create') }}" 
         data-title="{{ __('Create New Report') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create New Report') }}">
         <i class="ti ti-plus"></i>
@@ -121,6 +121,7 @@
                             <th>{{ __('Branch') }}</th>
                             <th>{{ __('Type') }}</th>
                             <th>{{ __('Time Period') }}</th>
+                            <th>{{ __('Created Date') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Action') }}</th> 
                         </tr>
@@ -153,8 +154,11 @@
                                 <td>{{ $report->employee->branch->name }}</td>
                                 <td>{{ __("$type") }}</td>
                                 <td>{{ $report->start_date }} - {{ $report->end_date }}</td>
+                                <td>{{ $report->created_at }}</td>
                                 <td>
-                                    @if ($report->is_read)
+                                    @if ($report->is_read && $report->response)
+                                        <button type="button" class="btn btn-sm btn-warning disabled">{{ __('Already Seen')}} {{ __('And')}} {{ __('Reviewed')}}</button>
+                                    @elseif ($report->is_read)
                                         <button type="button" class="btn btn-sm btn-success disabled">{{ __('Already Seen')}}</button>
                                     @else
                                         <button type="button" class="btn btn-sm btn-danger disabled">{{ __('Not Seen')}}</button>

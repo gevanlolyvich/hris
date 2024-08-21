@@ -424,7 +424,7 @@ class LeaveController extends Controller
     public function destroy(LocalLeave $leave)
     {
         if (\Auth::user()->can('Delete Leave')) {
-            if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != "Approved") {
+            if ((($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()?->employee?->id) && $leave->status != "Approved") || Auth::user()->type != 'employee') {
 
                 if ($leave->document_path) {
                     $filepath_array = explode('/', $leave->document_path);
@@ -434,6 +434,21 @@ class LeaveController extends Controller
                     if (Storage::disk('public')->exists("uploads/leaves/$filename")) {
                         Storage::disk('public')->delete("uploads/leaves/$filename");
                     }
+                }
+
+                if ($leave->status == "Approved") {
+                    $dates = [];
+                    $period = new \DatePeriod(
+                        new \DateTime($leave->start_date),
+                        new \DateInterval('P1D'),
+                        new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($leave->end_date))))
+                    );
+
+                    foreach ($period as $key => $value) {
+                        array_push($dates, $value->format('Y-m-d'));
+                    }
+
+                    AttendanceEmployee::where('employee_id', $leave->employee_id)->whereIn('date', $dates)->where('status', 'Leave')->delete();
                 }
 
                 $leave->delete();
@@ -505,7 +520,7 @@ class LeaveController extends Controller
                     'attendance_status_id'  => $leaveAttendance->id,
                     'status'                => $leaveAttendance->name,
                     'clock_in'              => '00:00:00',
-                    'clock_out'             => '00:00:00',
+                    'clock_out'             => '00:00:01',
                     'late'                  => '00:00:00',
                     'early_leaving'         => '00:00:00',
                     'work_hours'            => '00:00:00',
@@ -518,6 +533,8 @@ class LeaveController extends Controller
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
                     'shift_type_id'         => $leave->employees->shift_type_id,
+                    'source_in'             => 'Application',
+                    'source_out'            => 'Application'
                 ]);
             }
         }
