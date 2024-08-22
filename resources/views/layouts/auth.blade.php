@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 @php
-    $logos = \App\Models\Utility::get_file('uploads/logo/');
+$logos=\App\Models\Utility::get_file('uploads/logo/');
 
-    $logo = Utility::get_superadmin_logo();
-    $company_favicon = Utility::getValByName('company_favicon');
-    $company_name = Utility::getValByName('title_text');
+$logo = Utility::get_superadmin_logo();
+$company_favicon = Utility::getValByName('company_favicon');
+$company_name = Utility::getValByName('title_text');
 
-    $dark_mode = Utility::getValByName('dark_mode');
-    $theme_color = Utility::getValByName('theme_color');
-    $SITE_RTL = env('SITE_RTL');
+$dark_mode = Utility::getValByName('dark_mode');
+$theme_color = Utility::getValByName('theme_color');
+$SITE_RTL=env('SITE_RTL');
 
-    $setting = App\Models\Utility::colorset();
-    $mode_setting = App\Models\Utility::mode_layout();
-    $color = 'theme-3';
-    if (!empty($mode_setting['theme_color'])) {
-        $color = $mode_setting['theme_color'];
-    }
+$setting = App\Models\Utility::colorset();
+$mode_setting = App\Models\Utility::mode_layout();
+$color = 'theme-3';
+if (!empty($mode_setting['theme_color'])) {
+    $color = $mode_setting['theme_color'];
+}
 @endphp
 <html lang="en">
 <html dir="{{ env('SITE_RTL') == 'on' ? 'rtl' : '' }}">
@@ -60,7 +60,7 @@
     @if (env('SITE_RTL') == 'on')
         <link rel="stylesheet" href="{{ asset('assets/css/style-rtl.css') }}">
     @endif
-    @if (isset($mode_setting['dark_mode']) && $mode_setting['dark_mode'] == 'on')
+     @if (isset($mode_setting['dark_mode']) && $mode_setting['dark_mode'] == 'on')
         <link rel="stylesheet" href="{{ asset('assets/css/style-dark.css') }}">
     @else
         <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
@@ -68,26 +68,25 @@
 </head>
 
 <body class="{{ $color }}">
-    <div class="background-image-login">
-        <!-- [ auth-signup ] start -->
-        <div class="auth-wrapper auth-v3">
-            <div class="auth-content">
-                <div class="px-4 py-3 px-md-5 text-center text-lg-start bg-login-card">
-                    <nav class="navbar navbar-expand-md navbar-light default">
-                        <div class="container-fluid pe-2 no-pad">
-                            <a class="navbar-brand" href="#">
-                                <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}" class="logo logo-lg"
-                                    width="50"height="50" />
-                            </a>
-
-                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-                            <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="flex-grow: 0;">
-                                <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
-                                    {{-- <li class="nav-item">
+    <!-- [ auth-signup ] start -->
+    <div class="auth-wrapper auth-v3">
+        <div class="bg-auth-side bg-primary"></div>
+        <div class="auth-content">
+            <nav class="navbar navbar-expand-md navbar-light default">
+                <div class="container-fluid pe-2">
+                    <a class="navbar-brand" href="#">
+                        <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}"
+                            class="logo logo-lg" width="50"height="50"/>
+                    </a>
+                    <h4 style="margin-bottom: 0px">{{ env('APP_NAME') }}</h4>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarTogglerDemo01" style="flex-grow: 0;">
+                        <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link active" href="#">{{ __('Support') }}</a>
                             </li>
                             <li class="nav-item">
@@ -96,29 +95,26 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="#">{{ __('Privacy') }}</a>
                             </li> --}}
-                                    <li class="nav-item">
-                                        @yield('language-bar')
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </nav>
-                    <div class="card">
-                        <div class="row align-items-center text-start">
-                            @yield('content')
-
-                        </div>
-                    </div>
-                    <div class="auth-footer">
-                        <div class="container-fluid">
-                        </div>
+                            <li class="nav-item">
+                                @yield('language-bar')
+                            </li>
+                        </ul>
                     </div>
                 </div>
+            </nav>
+            <div class="card">
+                <div class="row align-items-center text-start">
+                    @yield('content')
 
+                </div>
+            </div>
+            <div class="auth-footer">
+                <div class="container-fluid">
+                </div>
             </div>
         </div>
-        <!-- [ auth-signup ] end -->
     </div>
+    <!-- [ auth-signup ] end -->
 
     <!-- Required Js -->
     <script src="{{ asset('js/jquery.min.js') }}"></script>
@@ -136,7 +132,7 @@
 
     <script src="{{ asset('js/custom.js') }}"></script>
     <script>
-        var toster_pos = "{{ $SITE_RTL == 'on' ? 'left' : 'right' }}";
+    var toster_pos="{{$SITE_RTL =='on' ?'left' : 'right'}}";
     </script>
     @stack('script')
     @stack('custom-scripts')
