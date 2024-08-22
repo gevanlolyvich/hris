@@ -76,7 +76,7 @@ class AllowanceController extends Controller
     {
         $allowance = Allowance::find($allowance);
         if (\Auth::user()->can('Edit Allowance')) {
-            $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $allowance_options = AllowanceOption::get()->pluck('name', 'id');
             $recurringOptions   = [0 => __('No'), 1 => __('Recurring')];
 
             return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions'));
