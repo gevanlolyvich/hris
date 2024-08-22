@@ -27,26 +27,25 @@ class AllowanceController extends Controller
 
         $allowance_options  = AllowanceOption::get()->pluck('name', 'id');
         $employee           = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->find($id) : Employee::where('is_active', 1)->find($id);
-        $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
+        $recurringOptions   = [0 => __('No'), 1 => __('Recurring')];
 
         return view('allowance.create', compact('employee', 'allowance_options', 'recurringOptions'));
     }
 
     public function store(Request $request)
     {
-        if(\Auth::user()->can('Create Allowance'))
-        {
+        if (\Auth::user()->can('Create Allowance')) {
             $validator = \Validator::make(
-                $request->all(), [
-                                   'employee_id' => 'required',
-                                   'allowance_option' => 'required',
-                                   'is_recurring' => 'required',
-                                   'title' => 'required',
-                                   'amount' => 'required',
-                               ]
+                $request->all(),
+                [
+                    'employee_id' => 'required',
+                    'allowance_option' => 'required',
+                    'is_recurring' => 'required',
+                    'title' => 'required',
+                    'amount' => 'required',
+                ]
             );
-            if($validator->fails())
-            {
+            if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->with('error', $messages->first());
@@ -63,9 +62,7 @@ class AllowanceController extends Controller
             $allowance->save();
 
             return redirect()->back()->with('success', __('Allowance Successfully Created'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -78,43 +75,31 @@ class AllowanceController extends Controller
     public function edit($allowance)
     {
         $allowance = Allowance::find($allowance);
-        if(\Auth::user()->can('Edit Allowance'))
-        {
-            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
-            {
-                $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $recurringOptions   = [ 0 => __('No'), 1 => __('Recurring')];
+        if (\Auth::user()->can('Edit Allowance')) {
+            $allowance_options = AllowanceOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
+            $recurringOptions   = [0 => __('No'), 1 => __('Recurring')];
 
-                return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions'));
-            }
-            else
-            {
-                return response()->json(['error' => __('Permission denied.')], 401);
-            }
-        }
-        else
-        {
+            return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions'));
+        } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
     }
 
     public function update(Request $request, Allowance $allowance)
     {
-        if(\Auth::user()->can('Edit Allowance'))
-        {
-            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
-            {
+        if (\Auth::user()->can('Edit Allowance')) {
+            if ($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $validator = \Validator::make(
-                    $request->all(), [
+                    $request->all(),
+                    [
 
-                                       'allowance_option' => 'required',
-                                       'is_recurring' => 'required',
-                                       'title' => 'required',
-                                       'amount' => 'required',
-                                   ]
+                        'allowance_option' => 'required',
+                        'is_recurring' => 'required',
+                        'title' => 'required',
+                        'amount' => 'required',
+                    ]
                 );
-                if($validator->fails())
-                {
+                if ($validator->fails()) {
                     $messages = $validator->getMessageBag();
 
                     return redirect()->back()->with('error', $messages->first());
@@ -128,14 +113,10 @@ class AllowanceController extends Controller
                 $allowance->save();
 
                 return redirect()->back()->with('success', __('Allowance Successfully Updated'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -143,21 +124,15 @@ class AllowanceController extends Controller
     public function destroy(Allowance $allowance)
     {
 
-        if(\Auth::user()->can('Delete Allowance'))
-        {
-            if($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee')
-            {
+        if (\Auth::user()->can('Delete Allowance')) {
+            if ($allowance->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $allowance->delete();
 
                 return redirect()->back()->with('success', __('Allowance Successfully Deleted'));
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with('error', __('Permission denied.'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
