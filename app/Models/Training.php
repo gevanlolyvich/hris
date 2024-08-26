@@ -8,7 +8,7 @@ class Training extends Model
 {
     protected $fillable = [
         'name',
-        'trainer_option',
+        'organizer',
         'training_type',
         'training_cost',
         'employee',
@@ -16,11 +16,6 @@ class Training extends Model
         'end_date',
         'description',
         'created_by',
-    ];
-
-    public static $options = [
-        'Internal',
-        'External',
     ];
 
     public function types()
@@ -41,26 +36,5 @@ class Training extends Model
     public function employee_ref()
     {
         return $this->belongsTo(Employee::class, 'employee', 'id');
-    }
-
-    public static function status($status)
-    {
-        if($status=='0')
-        {
-            return 'Pending';
-        }
-        if($status=='1')
-        {
-            return 'Started';
-        }
-        if($status=="2")
-        {
-            return "Completed";
-        }
-        if($status=="3")
-        {
-            return "Terminated";
-        }
-
     }
 }
