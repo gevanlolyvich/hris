@@ -12,16 +12,24 @@
                     <td>{{ $training->name }}</td>
                 </tr>
                 <tr>
-                    <th>{{ __('Training Organizer') }}</th>
-                    <td>{{ $training->organizer }}</td>
-                </tr>
-                <tr>
                     <th>{{ __('Training Type') }}</th>
                     <td>{{ $training?->type?->name ?? '-' }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Training Organizer') }}</th>
+                    <td>{{ $training->organizer }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Organizer Type') }}</th>
+                    <td>{{ $training?->organizer_type ?? '-' }}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Date') }}</th>
                     <td>{{ \Auth::user()->dateFormat($training->start_date) . ' To ' . \Auth::user()->dateFormat($training->end_date) }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Related Project') }}</th>
+                    <td>{{ $training?->related_to ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Description') }}</th>
@@ -39,6 +47,22 @@
                         @elseif($training->status == "Reject")
                             <div class="badge bg-danger p-2 px-3 rounded">{{ __($training->status) }}</div>
                         @endif
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ __('File') }}</th>
+                    <td>
+                        @if ($training->file)
+                            <div class="action-btn bg-info ms-2">
+                                <a href="{{ asset($training->file) }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-original-title="{{ __('View') }}">
+                                    <i class="fas fa-file text-white"></i>
+                                </a>
+                            </div>
+                        @else
+                        -
+                        @endif 
                     </td>
                 </tr>
                 @if ($training->status == 'Approved')

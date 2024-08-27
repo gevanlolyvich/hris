@@ -101,7 +101,12 @@ class TrainingController extends Controller {
 
             $trainingTypes = TrainingType::orderBy('name', 'asc')->get()->pluck('name', 'id');
 
-            return view('training.create', compact('trainingTypes', 'employees'));
+            $organizerTypes = [
+                "Internal" => "Internal",
+                "External" => "External"
+            ];
+
+            return view('training.create', compact('trainingTypes', 'employees', 'organizerTypes'));
         }
         else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -116,10 +121,12 @@ class TrainingController extends Controller {
                     'employee' => 'required',
                     'name' => 'required',
                     'organizer' => 'required',
+                    'organizer_type' => 'required',
                     'training_type' => 'required',
                     'training_cost' => 'required',
                     'start_date' => 'required',
                     'end_date' => 'required',
+                    'file' => 'nullable|mimes:jpeg,png,jpg,gif,svg,pdf,doc,zip,docx,xls,xlsx,ppt,pptx|max:10480'
                 ]
             );
             if($validator->fails()) {
@@ -131,13 +138,27 @@ class TrainingController extends Controller {
             $training                   = new Training();
             $training->name             = $request->name;
             $training->organizer        = $request->organizer;
+            $training->organizer_type   = $request->organizer_type;
             $training->training_type    = $request->training_type;
             $training->training_cost    = $request->training_cost;
             $training->employee         = $request->employee;
             $training->start_date       = $request->start_date;
             $training->end_date         = $request->end_date;
+            $training->related_to       = $request->related_to;
             $training->description      = $request->description;
             $training->created_by       = \Auth::user()->id;
+
+            // Preaparing File From Request;
+            if ($request->hasFile('file')) {
+                $employee       = Employee::find($request->employee);
+                $emp_name       = preg_replace('/\s+/', '', $employee?->name);
+            
+                $file           = $request->file;
+                $filename       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_training'  . "." . $file->getClientOriginalExtension();
+                $filepath       = $file->storeAs("uploads/trainings/{$emp_name}", $filename, 'public');
+                $training->file = env('APP_URL') . '/storage/' . $filepath;
+            }
+
             $training->save();
 
             // Send Notification To HR
@@ -205,7 +226,12 @@ class TrainingController extends Controller {
 
             $trainingTypes = TrainingType::orderBy('name', 'asc')->get()->pluck('name', 'id');
 
-            return view('training.edit', compact('trainingTypes', 'training', 'employees'));
+            $organizerTypes = [
+                "Internal" => "Internal",
+                "External" => "External"
+            ];
+
+            return view('training.edit', compact('trainingTypes', 'training', 'employees', 'organizerTypes'));
         }
         else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -214,16 +240,17 @@ class TrainingController extends Controller {
 
     public function update(Request $request, Training $training) {
         if(\Auth::user()->can('Edit Training')) {
-
             $validator = \Validator::make(
                 $request->all(), [
                     'employee' => 'required',
                     'name' => 'required',
                     'organizer' => 'required',
+                    'organizer_type' => 'required',
                     'training_type' => 'required',
                     'training_cost' => 'required',
                     'start_date' => 'required',
                     'end_date' => 'required',
+                    'file' => 'nullable|mimes:jpeg,png,jpg,gif,svg,pdf,doc,zip,docx,xls,xlsx,ppt,pptx|max:10480'
                 ]
             );
             if($validator->fails()) {
@@ -232,13 +259,33 @@ class TrainingController extends Controller {
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            // Preaparing File From Request;
+            if ($request->hasFile('file')) {
+                $employee       = Employee::find($request->employee);
+                $emp_name       = preg_replace('/\s+/', '', $employee?->name);
+            
+                $file           = $request->file;
+                $filename       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_training'  . "." . $file->getClientOriginalExtension();
+                $filepath       = $file->storeAs("uploads/trainings/{$emp_name}", $filename, 'public');
+                
+                // Delete Old file
+                $old_file = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $training->file);
+                if (File::exists($old_file)) {
+                    File::delete($old_file);
+                }
+
+                $training->file = env('APP_URL') . '/storage/' . $filepath;
+            }
+
             $training->name             = $request->name;
             $training->organizer        = $request->organizer;
+            $training->organizer_type   = $request->organizer_type;
             $training->training_type    = $request->training_type;
             $training->training_cost    = $request->training_cost;
             $training->employee         = $request->employee;
             $training->start_date       = $request->start_date;
             $training->end_date         = $request->end_date;
+            $training->related_to       = $request->related_to;
             $training->description      = $request->description;
             $training->save();
 
@@ -335,8 +382,8 @@ class TrainingController extends Controller {
             // Preaparing File From Request;
             if ($request->hasFile('result_file')) {
                 $file          = $request->result_file;
-                $filename       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_pickup_1'  . "." . $file->getClientOriginalExtension();
-                $filepath          = $file->storeAs("uploads/trainings/{$request->training_id}/{$emp_name}", $filename, 'public');
+                $filename       = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_training'  . "." . $file->getClientOriginalExtension();
+                $filepath          = $file->storeAs("uploads/trainings/{$emp_name}", $filename, 'public');
                 $result_file_path = env('APP_URL') . '/storage/' . $filepath;
 
                 // Delete Old file
