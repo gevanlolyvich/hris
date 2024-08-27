@@ -2100,6 +2100,16 @@
   "Weekly Leaderboard":"Papan Peringkat Mingguan",
   "Your Healthy Step Performance":"Performa Langkah Sehat Kamu",
   "Total Steps":"Total Langkah",
-  "Daily Average":"Rata-rata Harian"
-
+  "Daily Average":"Rata-rata Harian",
+  "Training Name": "Nama Pelatihan",
+  "Training Organizer": "Penyelenggara Pelatihan",
+  "Enter Training Name": "Masukkan Nama Pelatihan",
+  "Enter Training Organizer": "Masukkan Penyelenggara Pelatihan",
+  "Training Approval": "Persetujuan Pelatihan",
+  "Result File": "File Hasil",
+  "Training Request": "Permintaan Pelatihan",
+  "New training Request": "Permintaan Pelatihan Baru",
+  "Make Training Request": "Membuat Permintaan Pelatihan",
+  "Result": "Hasil",
+  "Training Result": "Hasil Pelatihan"
 }

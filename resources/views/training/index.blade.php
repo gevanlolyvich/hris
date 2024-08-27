@@ -11,12 +11,10 @@
 
 
 @section('action-button')
-    <a href="{{ route('training.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
+    {{-- <a href="{{ route('training.export') }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
         data-bs-original-title="{{ __('Export') }}">
         <i class="ti ti-file-export"></i>
-    </a>
-
-
+    </a> --}}
 
     @can('Create Training')
         <a href="#" data-url="{{ route('training.create') }}" data-ajax-popup="true" data-size="lg"
@@ -37,13 +35,20 @@
                     <table class="table" id="pc-dt-simple">
                         <thead>
                             <tr>
-                                <th>{{ __('Branch') }}</th>
+                                <th>{{ __('Name') }}</th>
                                 <th>{{ __('Training Type') }}</th>
                                 <th>{{ __('Status')}}</th>
                                 <th>{{ __('Employee') }}</th>
-                                <th>{{ __('Trainer') }}</th>
                                 <th>{{ __('Training Duration') }}</th>
                                 <th>{{ __('Cost') }}</th>
+                                @if (\Auth::user()->type == 'employee')
+                                    <th>{{ __('Result') }}</th>
+                                @endif
+                                @if (\Auth::user()->type != 'employee')
+                                    <th>{{ __('Approval') }}</th>
+                                @else
+                                    <th>{{ __('Detail') }}</th>
+                                @endif
                                 @if (Gate::check('Edit Training') || Gate::check('Delete Training') || Gate::check('Show Training'))
                                     <th width="200px">{{ __('Action') }}</th>
                                 @endif
@@ -54,42 +59,52 @@
 
                             @foreach ($trainings as $training)
                                 <tr>
-                                    <td>{{ !empty($training->branches) ? $training->branches->name : '' }}</td>
+                                    <td>{{ $training?->name }}</td>
                                     <td>{{ !empty($training->types) ? $training->types->name : '' }} <br></td>
                                     <td>
-                                         @if ($training->status == 0)
-                                            <span class="badge bg-warning p-2 px-3 rounded mt-1 status-badge6">{{ __($status[$training->status]) }}</span>
-                                        @elseif($training->status == 1)
-                                            <span class="badge bg-primary p-2 px-3 rounded mt-1 status-badge6">{{ __($status[$training->status]) }}</span>
-                                        @elseif($training->status == 2)
-                                            <span class="badge bg-success p-2 px-3 rounded mt-1 status-badge6">{{ __($status[$training->status]) }}</span>
-                                        @elseif($training->status == 3)
-                                            <span class="badge bg-danger p-2 px-3 rounded mt-1 status-badge6">{{ __($status[$training->status]) }}</span>
+                                        @if ($training->status == 'Pending')
+                                            <div class="badge bg-warning p-2 px-3 rounded">{{ __('Pending Approval') }}</div>
+                                        @elseif($training->status == 'Approved')
+                                            <div class="badge bg-success p-2 px-3 rounded">{{ __($training->status) }}</div>
+                                        @elseif($training->status == "Reject")
+                                            <div class="badge bg-danger p-2 px-3 rounded">{{ __($training->status) }}</div>
                                         @endif
-
                                     </td>
                                     <td>{{ !empty($training->employees) ? $training->employees->name : '' }} </td>
-                                    <td>{{ !empty($training->trainers) ? $training->trainers->firstname : '' }}</td>
                                     <td>{{ \Auth::user()->dateFormat($training->start_date) . ' to ' . \Auth::user()->dateFormat($training->end_date) }}
                                     </td>
                                     <td>{{ \Auth::user()->priceFormat($training->training_cost) }}</td>
+                                    @if (\Auth::user()->type == 'employee')
+                                        <td class="text-center">
+                                            <div class="action-btn bg-success ms-2">
+                                                <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                    data-url="{{ route('training.getResult', $training->id) }}"
+                                                    data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Training Result') }}"
+                                                    data-bs-original-title="{{ __('Result') }}">
+                                                    @if ($training->result_file)
+                                                        <i class="fas fa-file text-white"></i>
+                                                    @else
+                                                        <i class="ti ti-file text-white"></i>
+                                                    @endif
+                                                </a>
+                                            </div>
+                                        </td>
+                                    @endif
+                                    <td class="text-center">
+                                        <div class="action-btn bg-warning ms-2">
+                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                data-url="{{ route('training.show', $training->id) }}"
+                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ \Auth::user()->type != 'employee' ? __('Training Approval') : __('Trainig Details')}}"
+                                                data-bs-original-title="{{ \Auth::user()->type != 'employee' ? __('Approval') : __('Detail') }}">
+                                                <i class="ti ti-eye text-white"></i>
+                                            </a>
+                                        </div>
+                                    </td>
                                     <td class="Action">
                                         @if (Gate::check('Edit Training') || Gate::check('Delete Training') || Gate::check('Show Training'))
                                             <span>
-
-                                                @can('Show Training')
-                                                    <div class="action-btn bg-warning ms-2">
-                                                        <a href="{{ route('training.show', \Illuminate\Support\Facades\Crypt::encrypt($training->id)) }}" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                                            data-url=""
-                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Show Trainer') }}"
-                                                            data-bs-original-title="{{ __('Show') }}">
-                                                            <i class="ti ti-eye text-white"></i>
-                                                        </a>
-                                                    </div>
-                                                @endcan
-
-
                                                 @can('Edit Training')
                                                     <div class="action-btn bg-info ms-2">
                                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
@@ -126,3 +141,30 @@
         </div>
     </div>
 @endsection
+
+@push('script-page')
+    <script>
+        $(document).ready(function () {
+            $('#commonModal').on('shown.bs.modal', function () {
+                $('.status').on('click', function () {
+                    $('#commonModal').modal('hide');
+                    
+                    var buttonValue = $(this).data("status");
+                    $("#hiddenStatus").val(buttonValue);
+                })
+            });
+
+            $(document).on('change', '#date_input', function () {
+                let dateInput = $(this).val();
+
+                console.log(dateInput);
+
+                const end_date = document.getElementById('end_date_input');
+
+                end_date.disabled = false;
+                end_date.min = dateInput;
+                end_date.value = '';
+            })
+        });
+    </script>
+@endpush

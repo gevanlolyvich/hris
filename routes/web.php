@@ -1106,12 +1106,26 @@ Route::resource('trainer', TrainerController::class)->middleware(
     ]
 );
 
-Route::post('training/status', [TrainingController::class, 'updateStatus'])->name('training.status')->middleware(
+Route::patch('training/{id}/approval/', [TrainingController::class, 'approval'])->name('training.approval')->middleware(
     [
         'auth',
         'XSS',
     ]
 );
+
+Route::get('training/{id}/result/', [TrainingController::class, 'getResult'])->name('training.getResult')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('training/{id}/result/', [TrainingController::class, 'uploadResult'])->name('training.result')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::resource('training', TrainingController::class)->middleware(
     [
         'auth',
