@@ -55,8 +55,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                           
-
                             @foreach ($trainings as $training)
                                 <tr>
                                     <td>{{ $training?->name }}</td>
@@ -74,7 +72,7 @@
                                     <td>{{ \Auth::user()->dateFormat($training->start_date) . ' to ' . \Auth::user()->dateFormat($training->end_date) }}
                                     </td>
                                     <td>{{ \Auth::user()->priceFormat($training->training_cost) }}</td>
-                                    @if (\Auth::user()->type == 'employee')
+                                    @if (\Auth::user()->type == 'employee' && $training->status == 'Approved')
                                         <td class="text-center">
                                             <div class="action-btn bg-success ms-2">
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
@@ -90,6 +88,8 @@
                                                 </a>
                                             </div>
                                         </td>
+                                    @else
+                                        <td></td>
                                     @endif
                                     <td class="text-center">
                                         <div class="action-btn bg-warning ms-2">
