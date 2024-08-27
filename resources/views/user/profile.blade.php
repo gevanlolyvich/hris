@@ -178,6 +178,9 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             <a href="#useradd-5"
                                 class="list-group-item list-group-item-action border-0">{{ __('Document') }} <div
                                     class="float-end"><i class="ti ti-chevron-right"></i></div></a>
+                            <a href="#useradd-6"
+                                class="list-group-item list-group-item-action border-0">{{ __('Certifications') }} <div
+                                    class="float-end"><i class="ti ti-chevron-right"></i></div></a>
                             
                         @endif
                         <a href="#useradd-2"
@@ -537,6 +540,52 @@ $profile = \App\Models\Utility::get_file('uploads/avatar/');
                             </div>
                             @endif
                             {{ Form::close() }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="useradd-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">{{ __('Certifications') }}</h5>
+                                <small> {{ __('Details about your certification information') }}</small>
+                            </div>
+                            <div class="card-body">
+                                @foreach ($certifications as $key => $certification)
+                                @php
+                                    $result_file    = explode('.', $certification->result_file);
+                                    $fileExtension  = array_pop($result_file);
+                                @endphp
+                                <div class="row">
+                                    <div class="col-4 d-flex">
+                                        <label for="certification"
+                                            class="float-left pt-1 form-label">{{ $certification->name }}
+                                        </label>
+                                    </div>
+                                    <div class="col-5 d-flex">
+                                        <div class="text-center align-items-center">
+                                            <a href="{{ asset($certification->result_file) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-original-title="{{ __('View') }}">
+                                                <i class="fas fa-file"></i> {{ $certification->name }}.{{ $fileExtension }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 d-flex">
+                                        <label for="certification"
+                                            class="float-left pt-1 form-label">{{ $certification->updated_at }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr>
+                            @endforeach
+
+                            
+                            @if (count($certifications))
+                        
+                            <div class="modal-footer pr-0">
+                            </div>
+                            @endif
                             </div>
                         </div>
                     </div>
