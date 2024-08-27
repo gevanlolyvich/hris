@@ -450,7 +450,8 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!-- fianance-->
 
                 <!--trainning-->
-                @if (Gate::check('Manage Trainer') || Gate::check('Manage Training'))
+                @if (Gate::check('Manage Training'))
+                {{-- @if (Gate::check('Manage Trainer') || Gate::check('Manage Training')) --}}
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'training' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link "><span class="dash-micon"><i
@@ -465,12 +466,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 </li>
                             @endcan
 
-                            @can('Manage Trainer')
+                            {{-- @can('Manage Trainer')
                                 <li class="dash-item ">
                                     <a class="dash-link"
                                         href="{{ route('trainer.index') }}">{{ __('Trainer') }}</a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                         </ul>
                     </li>
                 @endif
