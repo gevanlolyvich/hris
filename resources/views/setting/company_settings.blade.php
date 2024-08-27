@@ -892,6 +892,9 @@
                                         <option value="M j, Y"
                                             @if (@$settings['site_date_format'] == 'M j, Y') selected="selected" @endif>
                                             Jan 1,2015</option>
+                                        <option value="j M, Y"
+                                            @if (@$settings['site_date_format'] == 'j M, Y') selected="selected" @endif>
+                                            1 Jan,2015</option>
                                         <option value="d-m-Y"
                                             @if (@$settings['site_date_format'] == 'd-m-Y') selected="selected" @endif>
                                             d-m-y</option>
