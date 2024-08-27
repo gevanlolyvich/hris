@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Utility;
 use App\Models\Branch;
 use App\Models\Document;
+use App\Models\Training;
 use App\Models\EmployeeDocument;
 use App\Models\EmployeeHomeHistory;
 use File;
@@ -253,7 +254,12 @@ class UserController extends Controller
         $documents        = Document::get();
         // return $documents;
 
-        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents'));
+        $certifications = collect();
+        if (\Auth::user()->type == 'employee') {
+            $certifications = Training::where('employee', \Auth::user()->employee->id)->whereNotNull('result_file')->select(['id', 'name', 'employee', 'result_file', 'updated_at'])->get();
+        }
+
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents', 'certifications'));
     }
 
     public function editprofile(Request $request)
