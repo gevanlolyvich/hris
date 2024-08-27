@@ -2091,5 +2091,16 @@
     "Leaderboard":"Leaderboard",
     "Your Healthy Step Performance":"Your Healthy Step Performance",
     "Total Steps":"Total Steps",
-    "Daily Average":"Daily Average"
+    "Daily Average":"Daily Average",
+    "Training Name": "Training Name",
+    "Training Organizer": "Training Organizer",
+    "Enter Training Name": "Enter Training Name",
+    "Enter Training Organizer": "Enter Training Organizer",
+    "Training Approval": "Training Approval",
+    "Result File": "Result File",
+    "Training Request": "Training Request",
+    "New training Request": "New training Request",
+    "Make Training Request": "Make Training Request",
+    "Result": "Result",
+    "Training Result": "Training Result"
 }
