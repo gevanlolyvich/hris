@@ -1,114 +1,76 @@
- @extends('layouts.admin')
- @section('page-title')
-     {{ __('Trainig Details') }}
- @endsection
-
- @section('breadcrumb')
-     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-     <li class="breadcrumb-item"><a href="{{ route('training.index') }}">{{ __('Training List') }}</a></li>
-     <li class="breadcrumb-item">{{ __('Trainig Details') }}</li>
- @endsection
- @section('content')
-     <div class="col-md-4">
-         <div class="card">
-             <div class="card-body table-border-style">
-                 <div class="table-responsive ">
-                     <table class="table ">
-                         <tbody>
-                             <tr>
-                                 <td>{{ __('Training Type') }}</td>
-                                 <td class="text-right">{{ !empty($training->types) ? $training->types->name : '' }}
-                                 </td>
-                             </tr>
-                             <tr>
-                                 <td>{{ __('Trainer') }}</td>
-                                 <td class="text-right">
-                                     {{ !empty($training->trainers) ? $training->trainers->firstname : '--' }}</td>
-                             </tr>
-                             <tr>
-                                 <td>{{ __('Training Cost') }}</td>
-                                 <td class="text-right">{{ \Auth::user()->priceFormat($training->training_cost) }}
-                                 </td>
-                             </tr>
-                             <tr>
-                                 <td>{{ __('Start Date') }}</td>
-                                 <td class="text-right">{{ \Auth::user()->dateFormat($training->start_date) }}</td>
-                             </tr>
-                             <tr>
-                                 <td>{{ __('End Date') }}</td>
-                                 <td class="text-right">{{ \Auth::user()->dateFormat($training->end_date) }}</td>
-                             </tr>
-                             <tr>
-                                 <td>{{ __('Date') }}</td>
-                                 <td class="text-right">{{ \Auth::user()->dateFormat($training->created_at) }}</td>
-                             </tr>
-                         </tbody>
-                     </table>
-                     <div class="text-sm mt-4 p-2"> {{ $training->description }}</div>
-                 </div>
-             </div>
-         </div>
-     </div>
-     <div class="col-md-8">
-         <div class="card">
-             <div class="card-header card-body">
-                 <div class="row">
-                     <div class="col-md-12">
-                         <h6>{{ __('Training Employee') }}</h6>
-                         <hr>
-                         <ul class="list-group list-group-flush">
-                             <li class="list-group-item" style="border:0px;">
-                                 <div class="d-flex align-items-center">
-                                     <a href="{{ !empty($training->employees) ? (!empty($training->employees->user->avatar) ? asset(Storage::url('uploads/avatar')) . '/' . $training->employees->user->avatar : asset(Storage::url('uploads/avatar')) . '/avatar.png') : asset(Storage::url('uploads/avatar')) . '/avatar.png' }}" target="_blank">
-                                     <img src="{{ !empty($training->employees) ? (!empty($training->employees->user->avatar) ? asset(Storage::url('uploads/avatar')) . '/' . $training->employees->user->avatar : asset(Storage::url('uploads/avatar')) . '/avatar.png') : asset(Storage::url('uploads/avatar')) . '/avatar.png' }}"
-                                         class="user-image-hr-prj ui-w-30 rounded-circle" width="50px" height="50px">
-                                     </a>
-                                     <div class="media-body px-2 text-sm">
-                                         <a href="{{ route('employee.show', !empty($training->employees) ? \Illuminate\Support\Facades\Crypt::encrypt($training->employees->id) : 0) }}"
-                                             class="text-dark">
-                                             {{ !empty($training->employees) ? $training->employees->name : '' }}
-                                        
-                                         {{ !empty($training->employees) ? (!empty($training->employees->designation) ? $training->employees->designation->name : '') : '' }}
-                                          </a>
-                                         <br>
-                                     </div>
-                                 </div>
-                             </li>
-                         </ul>
-                     </div>
-                 </div>
-                <div class="row">
-                    {{ Form::model($training, ['route' => ['training.status', $training->id], 'method' => 'post']) }}
-                         <h6>{{ __('Update Status') }}</h6>
-                         <hr>
-                        <div class="row col-md-12">
-                            <div class="col-md-6">
-                                <input type="hidden" value="{{ $training->id }}" name="id">
-                                <div class="form-group">
-                                 {{ Form::label('performance', __('Performance'), ['class' => 'col-form-label text-dark']) }}
-                                 {{ Form::select('performance', $performance, null, ['class' => 'form-control select']) }}
+{{ Form::model($training, ['route' => ['training.approval', $training->id], 'method' => 'PATCH', 'enctype' => 'multipart/form-data']) }}
+<div class="modal-body">
+    <div class="row">
+        <div class="col-12">
+            <table class="table modal-table" id="pc-dt-simple">
+                <tr role="row">
+                    <th>{{ __('Employee') }}</th>
+                    <td>{{ $training->employee_ref->name ?? '' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Training Name') }}</th>
+                    <td>{{ $training->name }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Training Organizer') }}</th>
+                    <td>{{ $training->organizer }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Training Type') }}</th>
+                    <td>{{ $training?->type?->name ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Date') }}</th>
+                    <td>{{ \Auth::user()->dateFormat($training->start_date) . ' To ' . \Auth::user()->dateFormat($training->end_date) }}</td>
+                </tr>
+                <tr>
+                    <th>{{ __('Description') }}</th>
+                    <td>
+                        {{ Form::textarea('description', $training->description, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => '-', 'rows' => '7']) }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ __('Status') }}</th>
+                    <td>
+                        @if ($training->status == 'Pending')
+                            <div class="badge bg-warning p-2 px-3 rounded">{{ __('Pending Approval') }}</div>
+                        @elseif($training->status == 'Approved')
+                            <div class="badge bg-success p-2 px-3 rounded">{{ __($training->status) }}</div>
+                        @elseif($training->status == "Reject")
+                            <div class="badge bg-danger p-2 px-3 rounded">{{ __($training->status) }}</div>
+                        @endif
+                    </td>
+                </tr>
+                @if ($training->status == 'Approved')
+                    <tr>
+                        <th>{{ __('Result File') }}</th>
+                        <td>
+                            @if ($training->result_file)
+                                <div class="action-btn bg-info ms-2">
+                                    <a href="{{ asset($training->result_file) }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-original-title="{{ __('View') }}">
+                                        <i class="fas fa-file text-white"></i>
+                                    </a>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                {{ Form::label('status', __('Status'), ['class' => 'col-form-label text-dark']) }}
-                                {{ Form::select('status', $status, null, ['class' => 'form-control select']) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row col-md-12">
-
-                        <div class="form-group">
-                             {{ Form::label('remarks', __('Remarks'), ['class' => 'col-form-label text-dark']) }}
-                             {{ Form::textarea('remarks', null, ['class' => 'form-control', 'placeholder' => __('Remarks'), 'rows' => '3']) }}
-                        </div>
-                        <div class="form-group text-end">
-                            <input type="submit" value="{{ __('Save') }}" class="btn  btn-primary">
-                        </div>
-                    </div>
-                    {{ Form::close() }}
-                </div>
-            </div>
+                            @else
+                            -
+                            @endif 
+                        </td>
+                    </tr>
+                @endif
+                <input type="hidden" value="{{ $training->id }}" name="training_id">
+            </table>
         </div>
     </div>
- @endsection
+</div>
+
+@if (Auth::user()->type != 'employee')
+<div class="modal-footer">
+    <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $training->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
+    <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $training->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>
+    <input type="hidden" name="status" id="hiddenStatus">
+</div>
+@endif
+
+{{ Form::close() }}
