@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\AttendanceMultipleExport;
 use App\Models\AttendanceEmployee;
 use App\Models\AttendanceStatus;
+use App\Models\ShiftType;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
@@ -328,7 +329,8 @@ class AttendanceEmployeeController extends Controller
     public function edit($id)
     {
         if (\Auth::user()->can('Edit Attendance')) {
-            $branch = Branch::find(\Auth::user()->branch_id);
+            $attendanceEmployee = AttendanceEmployee::where('id', $id)->first();
+            $branch = Branch::find($attendanceEmployee->employee->branch_id);
             $branch_id = collect();
             if ($branch) {
                 $branch_id->push($branch?->id);
@@ -341,10 +343,29 @@ class AttendanceEmployeeController extends Controller
                 }
             }
 
-            $attendanceEmployee = AttendanceEmployee::where('id', $id)->first();
-            $employees          = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $shift_types    = ShiftType::whereIn('branch_id', $branch_id)
+                ->with(['shiftTimes' => function ($query) {
+                    $query->where('days', date('l'));
+                }])
+                ->whereHas('shiftTimes', function ($q) {
+                    $q->where('days', date('l'));
+                })->get();
 
-            return view('attendance.edit', compact('attendanceEmployee', 'employees'));
+            // return $shift_types;
+            for ($i = 0; $i < count($shift_types); $i++) {
+                $today_shift_times = ShiftTime::where('shift_type_id', $shift_types[$i]->id)
+                    ->where('days', date('l'))->first();
+
+                if ($today_shift_times->is_working) {
+                    $shift_types[$i]['name'] = substr($today_shift_times['start_time'], 0, 5) . '-' . substr($today_shift_times['end_time'], 0, 5) . ' | ' . $shift_types[$i]['name'];
+                } else {
+                    $shift_types[$i]['name'] = __('Holidays') . ' | ' . $shift_types[$i]['name'];
+                }
+            }
+            // return $shift_types;
+            $shift_types    = $shift_types->pluck('name', 'id')->toArray();
+
+            return view('attendance.edit', compact('attendanceEmployee', 'shift_types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -1347,6 +1368,7 @@ class AttendanceEmployeeController extends Controller
 
     public function updateAttendance(Request $request, $id)
     {
+        // return $request;
         $picture_path = null;
         $employee = Employee::where('user_id', Auth::user()->id)->first();
 
@@ -1363,28 +1385,28 @@ class AttendanceEmployeeController extends Controller
             ->where('shift_type_id', $request->shift_type_id)
             ->first();
 
-        $shift_times = ShiftTime::where('shift_type_id', $todayAttendance?->shift_type_id)
+        $shift_times = ShiftTime::where('shift_type_id', $request?->shift_type_id)
             ->where('days', date('l'))
             ->first();
 
         $settings = Utility::settings();
 
         // yesterday shift and attendance for cross day attendance operation
-        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
-        $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance?->shift_type_id)
-            ->where('days', date('l', strtotime('yesterday')))
+        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime($yesterday_date)))->first();
+        $yesterday_shift_times = ShiftTime::where('shift_type_id', $request?->shift_type_id)
+            ->where('days', date('l', strtotime($yesterday_date)))
             ->first();
 
         // tomorrow shift
         $tomorrow_shift_times = ShiftTime::where('shift_type_id', $employee->shift_type->id)
-            ->where('days', date('l', strtotime('tomorrow')))
+            ->where('days', date('l', strtotime($tomorrow_date)))
             ->first();
 
         // calculate default clock out for cross day shift
-        $today_clock_in_second       = strtotime($shift_times?->start_time) - strtotime($date) - 3600;
-        $today_hours                  = floor($today_clock_in_second / 3600);
-        $today_mins                   = floor($today_clock_in_second / 60 % 60);
-        $today_secs                   = floor($today_clock_in_second % 60);
+        $today_clock_in_second      = strtotime($shift_times?->start_time) - strtotime($date) - 3600;
+        $today_hours                = floor($today_clock_in_second / 3600);
+        $today_mins                 = floor($today_clock_in_second / 60 % 60);
+        $today_secs                 = floor($today_clock_in_second % 60);
         // $default_clock_out            = sprintf('%02d:%02d:%02d', $today_hours, $today_mins, $today_secs);
 
         // calculate default clock out for cross day shift
@@ -1459,6 +1481,7 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee->date          = $request->date;
                 $attendanceEmployee->clock_in      = $request->clock_in;
                 $attendanceEmployee->clock_out     = $request->clock_out;
+                $attendanceEmployee->shift_type_id = $request->shift_type_id;
                 $attendanceEmployee->late          = $late;
                 $attendanceEmployee->early_leaving = $earlyLeaving;
                 $attendanceEmployee->overtime      = $overtime;
@@ -1499,6 +1522,7 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee->date          = $request->date;
                 $attendanceEmployee->clock_in      = $request->clock_in;
                 $attendanceEmployee->clock_out     = $request->clock_out;
+                $attendanceEmployee->shift_type_id = $request->shift_type_id;
                 $attendanceEmployee->late          = $late;
                 $attendanceEmployee->early_leaving = '00:00:00';
                 $attendanceEmployee->overtime      = '00:00:00';
@@ -1526,19 +1550,18 @@ class AttendanceEmployeeController extends Controller
 
                 //late
                 if ((strtotime("{$date} {$request->clock_in}") > strtotime("{$date} {$startTime}") + (int)$settings['late_tolerance'] * 60) && !$crossDay) {
-                    Log::info("AAAAAAAAAAAA");
                     $totalLateSeconds = strtotime("{$date} {$request->clock_in}") - (strtotime("{$date} {$startTime}") + (int)$settings['late_tolerance'] * 60);
                     $hours = floor($totalLateSeconds / 3600);
                     $mins  = floor($totalLateSeconds / 60 % 60);
                     $secs  = floor($totalLateSeconds % 60);
-                    $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    $late  = $totalLateSeconds > 0 ? sprintf('%02d:%02d:%02d', $hours, $mins, $secs) : '00:00:00';
+
                 } elseif ((strtotime("{$date} {$request->clock_in}") < strtotime("{$date} {$startTime}") + (int)$settings['late_tolerance'] * 60) && strtotime("{$date} {$request->clock_in}") < strtotime("{$date} {$endTime}") && $crossDay) {
-                    Log::info("BBBBBBBBBBB");
                     $totalLateSeconds = strtotime("{$date} {$request->clock_in}") - (strtotime("{$yesterday_date} {$startTime}") + (int)$settings['late_tolerance'] * 60);
                     $hours = floor($totalLateSeconds / 3600);
                     $mins  = floor($totalLateSeconds / 60 % 60);
                     $secs  = floor($totalLateSeconds % 60);
-                    $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    $late  = $totalLateSeconds > 0 ? sprintf('%02d:%02d:%02d', $hours, $mins, $secs) : '00:00:00';
                 }
                  else {
                     $late  = '00:00:00';
@@ -1588,6 +1611,7 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee->date          = $request->date;
                 $attendanceEmployee->clock_in      = $request->clock_in;
                 $attendanceEmployee->clock_out     = $request->clock_out;
+                $attendanceEmployee->shift_type_id = $request->shift_type_id;
                 $attendanceEmployee->late          = $late;
                 $attendanceEmployee->early_leaving = $earlyLeaving;
                 $attendanceEmployee->overtime      = $overtime;
@@ -1634,10 +1658,11 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee->date          = $request->date;
                 $attendanceEmployee->clock_in      = $request->clock_in;
                 $attendanceEmployee->clock_out     = $request->clock_out;
+                $attendanceEmployee->shift_type_id = $request->shift_type_id;
                 $attendanceEmployee->late          = $late;
                 $attendanceEmployee->early_leaving = '00:00:00';
                 $attendanceEmployee->overtime      = '00:00:00';
-                $attendanceEmployee->work_hours      = $workhours;
+                $attendanceEmployee->work_hours    = $workhours;
                 $attendanceEmployee->total_rest    = '00:00:00';
                 $attendanceEmployee->coord_out     = null;
                 $attendanceEmployee->picture_out   = $picture_path;
