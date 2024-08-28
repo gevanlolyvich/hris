@@ -1,26 +1,21 @@
 {{ Form::model($attendanceEmployee, ['route' => ['attendanceemployee.updateAttendance', $attendanceEmployee->id], 'method' => 'PUT']) }}
 <div class="modal-body">
 <div class="row">
-    <div class="form-group col-lg-6 col-md-6 ">
-        {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-        {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2']) }}
+    <div class="form-group col-12">
+        {{ Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label']) }}
+        {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2']) }}
     </div>
-    <div class="form-group col-lg-6 col-md-6">
-        {{ Form::label('date', __('Date'), ['class' => 'col-form-label']) }}
-        {{ Form::text('date', null, ['class' => 'form-control d_week','autocomplete'=>'off']) }}
-    </div>
-
     <div class="form-group col-lg-6 col-md-6">
         {{ Form::label('clock_in', __('Clock In'), ['class' => 'col-form-label']) }}
         {{ Form::time('clock_in', null, ['class' => 'form-control', 'id'=>'clock_in']) }}
-        {{-- {{ Form::text('clock_in', null, ['class' => 'form-control d_clock','id'=>'clock_in']) }} --}}
     </div>
 
     <div class="form-group col-lg-6 col-md-6">
         {{ Form::label('clock_out', __('Clock Out'), ['class' => 'col-form-label']) }}
         {{ Form::time('clock_out', null, ['class' => 'form-control', 'id'=>'clock_out']) }}
     </div>
-    <input type="hidden" name="shift_type_id" value="{{ $attendanceEmployee->shift_type_id }}">
+    <input type="hidden" name="date" value="{{ $attendanceEmployee->date }}">
+    <input type="hidden" name="employee_id" value="{{ $attendanceEmployee->employee_id }}">
     <input type="hidden" name="coord_out" value="{{ $attendanceEmployee->coord_out }}">
     <input type="hidden" name="type" value="edit-attendance">
 </div>
