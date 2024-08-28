@@ -35,10 +35,7 @@ class VehicleLendingController extends Controller
     
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
-                // old date
-                // $end_date   = date($year . '-' . $month . '-t');
-    
+
                 $lendings->whereBetween(
                     'date',
                     [
@@ -53,9 +50,6 @@ class VehicleLendingController extends Controller
                 $year       = date('Y');
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
-                // old date
-                // $end_date   = date($year . '-' . $month . '-t');
     
                 $lendings->whereBetween(
                     'date',
