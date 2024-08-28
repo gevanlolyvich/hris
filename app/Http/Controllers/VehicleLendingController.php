@@ -35,10 +35,7 @@ class VehicleLendingController extends Controller
     
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
-                // old date
-                // $end_date   = date($year . '-' . $month . '-t');
-    
+
                 $lendings->whereBetween(
                     'date',
                     [
@@ -53,9 +50,6 @@ class VehicleLendingController extends Controller
                 $year       = date('Y');
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
-                // old date
-                // $end_date   = date($year . '-' . $month . '-t');
     
                 $lendings->whereBetween(
                     'date',
@@ -138,7 +132,7 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::where('is_active', true)->whereIn('branch_id', $branch_ids)->get()->pluck('id');
+                $vehicles   = Vehicle::where('is_active', true)->whereIn('branch_id', $branch_ids)->get();
             } else {
                 $vehicles   = Vehicle::where('is_active', true)->get();
             }
@@ -436,7 +430,7 @@ class VehicleLendingController extends Controller
             if ($lending) {
 
                 // Check Vehicle Availability
-                $unavailable_vehicle_id = VehicleLending::where('date', $lending->date)->where('status', 'Approved')->whereNull('return_km')->select('vehicle_id')->get()->pluck('vehicle_id')->toArray();
+                $unavailable_vehicle_id = VehicleLending::whereNot('id', $request->lending_id)->where('date', $lending->date)->where('status', 'Approved')->whereNull('return_km')->select('vehicle_id')->get()->pluck('vehicle_id')->toArray();
 
                 if (!in_array($lending->vehicle_id, $unavailable_vehicle_id)) {
                     // Update Lending Status Data

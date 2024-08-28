@@ -135,7 +135,7 @@
                                                 data-bs-original-title="{{ __('Proof') }}">
                                                 <i class="ti ti-report"></i>
                                             </a>
-                                    @else
+                                    @elseif ($lending->status == 'Approved')
                                         <a href="#" class="btn btn-{{ $lending->pickup_file || $lending->pickup_km || $lending->pickup_time || $lending->return_file || $lending->return_km || $lending->return_time ? 'success' : 'warning'}} btn-sm text-center {{ $lending->status != 'Approved' ? 'disabled' : ''}}" data-size="xl"
                                             data-url="{{ route('vehicle-lending.getProof', $lending->id) }}"
                                             data-ajax-popup="true" data-bs-toggle="tooltip"
@@ -143,20 +143,21 @@
                                             data-bs-original-title="{{ __('Proof') }}">
                                             <i class="ti ti-report"></i>
                                         </a>
+                                    @else
                                     @endif
                                 </td>
                                 @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
-                                <td class="text-center">
-                                    <div class="action-btn bg-warning ms-2">
-                                        <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
-                                            data-url="{{ route('vehicle-lending.show', $lending->id) }}"
-                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                            title="" data-title="{{ __('Vehicle Lending Approval') }}"
-                                            data-bs-original-title="{{ __('Approval') }}">
-                                            <i class="ti ti-caret-right text-white"></i>
-                                        </a>
-                                    </div>
-                                </td>
+                                    <td class="text-center">
+                                        <div class="action-btn bg-warning ms-2">
+                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                data-url="{{ route('vehicle-lending.show', $lending->id) }}"
+                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
+                                                title="" data-title="{{ __('Vehicle Lending Approval') }}"
+                                                data-bs-original-title="{{ __('Approval') }}">
+                                                <i class="ti ti-caret-right text-white"></i>
+                                            </a>
+                                        </div>
+                                    </td>
                                 @endif
                                 <td class="action">
                                     <span>
