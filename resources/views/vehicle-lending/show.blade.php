@@ -54,7 +54,7 @@
 @if (Auth::user()->type != 'employee' || Auth::user()->vehicleOfficer)
 <div class="modal-footer">
     <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $vehicleLending->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
-    <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $vehicleLending->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>
+    <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $vehicleLending->pickup_time && $vehicleLending->pickup_km ? 'disabled' : ''}}>{{ __('Reject') }}</button>
     <input type="hidden" name="status" id="hiddenStatus">
 </div>
 @endif
