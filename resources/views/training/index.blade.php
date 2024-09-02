@@ -88,8 +88,6 @@
                                                 </a>
                                             </div>
                                         </td>
-                                    @else
-                                        <td></td>
                                     @endif
                                     <td class="text-center">
                                         <div class="action-btn bg-warning ms-2">
