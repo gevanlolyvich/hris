@@ -2118,9 +2118,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'IV' => 4,
             'I'  => 1
         );
-        
+
         $romanNumeral = '';
-        
+
         // Iterate through the symbols and subtract their values from the number
         foreach ($romanSymbols as $symbol => $value) {
             // Repeat the symbol until the value is less than or equal to the number
@@ -2129,20 +2129,26 @@ class User extends Authenticatable implements MustVerifyEmail
                 $number -= $value;
             }
         }
-        
+
         return $romanNumeral;
     }
 
-    function alpbatize($index) {
+    function alpbatize($index)
+    {
         // Convert the numeric index into an alphabetical index
         return chr(65 + $index); // ASCII value for 'A' is 65
+    }
+
+    public function isCompany()
+    {
+        return $this->type == 'company';
     }
 
     public function vehicleOfficer()
     {
         return $this->hasOne(VehicleOfficer::class, 'user_id', 'id');
     }
-    
+
     public function vehicleLendingRequest()
     {
         return $this->hasOne(VehicleLending::class, 'request_by', 'id');
@@ -2198,6 +2204,5 @@ class User extends Authenticatable implements MustVerifyEmail
                 Log::info("[X] Failed Send Push Notification To {$subs[$index]['name']}: {$report->getReason()}");
             }
         }
-
     }
 }
