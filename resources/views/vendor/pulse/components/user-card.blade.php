@@ -2,11 +2,16 @@
 
 <div {{ $attributes->merge(['class' => 'flex items-center justify-between p-3 gap-3 bg-gray-50 dark:bg-gray-800/50 rounded']) }}>
     <div class="flex items-center gap-3 overflow-hidden">
-        @if (isset($avatar))
-            {{ $avatar }}
-        @elseif ($user->avatar ?? false)
-            <img src="{{ url('storage/uploads/avatar/' . $user->avatar) }}" alt="{{ $user->name }}" loading="lazy" class="rounded-full w-8 h-8 object-cover">
+        @if ($user->avatar ?? false)
+            @if (filter_var($user->avatar, FILTER_VALIDATE_URL))
+                <img src="{{ $user->avatar }}" alt="{{ $user->name }}" loading="lazy" class="rounded-full w-8 h-8 object-cover">
+            @else
+                <img src="{{ url('storage/uploads/avatar/' . $user->avatar) }}" alt="{{ $user->name }}" loading="lazy" class="rounded-full w-8 h-8 object-cover">
+            @endif
+        @else
+            <img src="{{ url('storage/uploads/avatar/avatar.png') }}" alt="Default Avatar" loading="lazy" class="rounded-full w-8 h-8 object-cover">
         @endif
+
 
         <div class="overflow-hidden">
             <div class="text-sm text-gray-900 dark:text-gray-100 font-medium truncate" title="{{ $user->name ?? $name }}">
