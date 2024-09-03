@@ -25,7 +25,7 @@ class LeaveOffice extends Model
         'purpose'
     ];
 
-    public function employees()
+    public function employee()
     {
         return $this->belongsTo(Employee::class, 'employee_id', 'id')->withTrashed();
     }
