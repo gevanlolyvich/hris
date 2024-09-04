@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\LeaveOffice;
+use App\Models\PushSubscription;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,7 +66,7 @@ class LeaveOfficeController extends Controller
 
                 $employee = $employee?->orderby('name', 'asc')?->get()?->pluck('id');
 
-                $leaves = $leaves->whereIn('employee_id', $employee);
+                $leaves = $leaves->whereIn('employee_id', $employee)->whereNotIn('status', ['Pending', 'Waiting Superior Approval']);
             }
 
             // Filter by optional query
@@ -133,6 +134,7 @@ class LeaveOfficeController extends Controller
                 $request->all(),
                 [
                     'date' => 'required|date|after_or_equal:today',
+                    'location' => 'nullable|string',
                     'purpose' => 'required',
                 ]
             );
@@ -147,10 +149,10 @@ class LeaveOfficeController extends Controller
             $leave                  = new LeaveOffice();
             $leave->employee_id     = \Auth::user()?->employee?->id;
             $leave->date            = $request->date;
+            $leave->location        = $request->location;
             $leave->purpose         = $request->purpose;
             $leave->status          = 'Waiting Superior Approval';
             $leave->save();
-            
 
             // Send Notification To Superior
             // 1. Collect the reciever (subs) data that we need to send
@@ -214,7 +216,32 @@ class LeaveOfficeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $leave = LeaveOffice::find($id);
+        if (\Auth::user()->can('Edit Leave Office') && \Auth::user()?->employee?->id == $leave?->employee_id) {
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'date' => 'required|date',
+                    'location' => 'nullable|string',
+                    'purpose' => 'required',
+                ]
+            );
+    
+            if ($validator->fails()) {
+                $messages = $validator->getMessageBag();
+    
+                return response()->json(['error' => $messages->first()], 400);
+            }
+
+            $leave->date            = $request->date;
+            $leave->location        = $request->location;
+            $leave->purpose         = $request->purpose;
+            $leave->save();
+
+            return redirect()->back()->with('success', __('Leave Office Successfully Updated'));
+        } else {
+            return response()->json(['error' => __('Permission denied.')], 401);
+        }
     }
 
     /**
@@ -235,37 +262,55 @@ class LeaveOfficeController extends Controller
     public function approval(Request $request)
     {
         // return $request;
-        if (\Auth::user()->can('Approval Leave Office')) {
-            $leave                    = LeaveOffice::find($request->leave_id);
+        $subscriptions = [];
 
+        if (\Auth::user()->can('Approval Leave Office')) {
+            $leave      = LeaveOffice::find($request->leave_id);
+            $by         = '';
             // Update leave Status Data
             if (\Auth::user()->type == 'employee') {
                 $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR Approval';
                 $leave->superior_approval_by    = \Auth::user()->employee->id;
                 $leave->save();
+
+                $by = 'Superior';
+
+                // send push notification to HR
+                $employee = Employee::find($leave->employee_id);
+                $pushSubscriptions = PushSubscription::whereHas('user', function ($query) use ($employee) {
+                    $query->where('type', 'hr')
+                        ->where(function ($query) use ($employee) {
+                            $query->whereNull('branch_id')
+                                    ->orWhere('branch_id', $employee->branch_id);
+                        });
+                })->get();
+                foreach ($pushSubscriptions as $sub) {
+                    array_push($subscriptions, ['data' => $sub->data, 'name' => $sub->user->name]);
+                }
             } else  {
                 $leave->status          = $request->status == 'Reject' ? 'Rejected By HR' : 'Approved';
                 $leave->hr_approval_by  = \Auth::user()->id;
-                $leave->save();                
+                $leave->save();        
+                
+                $by = 'HR';
+
+                // send push notification to employee
+                foreach ($leave?->employee?->user?->pushNotifications ?? [] as $sub) {
+                    array_push($subscriptions, ['data' => $sub->data, 'name' => $leave->employee->name]);
+                }
             }
 
             // Send push notification to requester
-            // $subscriptions = [];
-            // if ($leave->requester->pushNotifications) {
-            //     foreach ($leave->requester->pushNotifications ?? [] as $sub) {
-            //         array_push($subscriptions, ['data' => $sub->data, 'name' => $leave->requester->name]);
-            //     }
-            // }
-            // $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
-            // \Auth::user()->sendNotifications(
-            //     $subscriptions,
-            //     json_encode([
-            //         'title' => __('Vehicle leave Request') . ' ' . __($status),
-            //         'body' => __('Vehicle leave Request') . ' ' . $leave->vehicle->name . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status),
-            //         'url' => '/vehicle-leave'
-            //     ]),
-            //     'normal'
-            // );
+            $status = $request->status == 'Approved' ? 'Approved' : 'Rejected';
+            \Auth::user()->sendNotifications(
+                $subscriptions,
+                json_encode([
+                    'title' => __('Leave Office Request') . ' ' . __($status),
+                    'body' => __('Leave Office Request') . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status) . ' ' . __('By') . ' ' . __("$by"),
+                    'url' => "/leave-office?type=daily&month=&date={$leave->date}&branch="
+                ]),
+                'normal'
+            );
 
             return redirect()->back()->with('success', __('Leave Office Status Successfully Updated'));
         } else {

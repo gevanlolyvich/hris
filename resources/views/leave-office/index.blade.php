@@ -92,6 +92,7 @@
                         <tr>
                             <th>{{ __('Employee') }}</th>
                             <th>{{ __('Date') }}</th>
+                            <th>{{ __('Location') }}</th>
                             <th>{{ __('Purpose') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Proof') }}</th>
@@ -104,7 +105,8 @@
                             <tr>
                                 <td>{{ $leave?->employee?->name ?? '-' }}</td>
                                 <td>{{ $leave?->date ?? '-' }}</td>
-                                <td>{{ Str::limit($leave?->purpose ?? '-', 15) }}</td>
+                                <td>{{ Str::limit($leave?->location ?? '-', 20) }}</td>
+                                <td>{{ Str::limit($leave?->purpose ?? '-', 20) }}</td>
                                 <td>
                                     @if ($leave->status == 'Pending' || $leave->status == 'Waiting Superior Approval' || $leave->status == 'Waiting HR Approval')
                                         <div class="badge bg-warning p-2 px-3 rounded">{{ __($leave->status) }}</div>
@@ -146,19 +148,21 @@
                                         </a>
                                     </div>
                                 </td>
-                                <td class="action">
+                                <td class="action text-center">
                                     <span>
-                                        @if ($leave->status != 'Approved' && (\Auth::user()->employee?->id == $leave->employee_id || \Auth::user()->type != 'employee'))
+                                        @if (\Auth::user()->employee?->id == $leave->employee_id || \Auth::user()->type != 'employee')
                                             @can('Edit Leave Office')
-                                                <div class="action-btn bg-info ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm align-items-center" 
-                                                        data-url="{{  route('leave-office.edit', $leave->id) }}"
-                                                        data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                        title="" data-title="{{ __('Update Leave Office') }}"
-                                                        data-bs-original-title="{{ __('Edit') }}">
-                                                        <i class="ti ti-pencil text-white"></i>
-                                                    </a>
-                                                </div>
+                                                @if ($leave->status != 'Approved')
+                                                    <div class="action-btn bg-info ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm align-items-center" 
+                                                            data-url="{{  route('leave-office.edit', $leave->id) }}"
+                                                            data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                            title="" data-title="{{ __('Update Leave Office') }}"
+                                                            data-bs-original-title="{{ __('Edit') }}">
+                                                            <i class="ti ti-pencil text-white"></i>
+                                                        </a>
+                                                    </div>
+                                                @endif
                                             @endcan
                                             @can('Delete Leave Office')
                                                 <div class="action-btn bg-danger ms-2">

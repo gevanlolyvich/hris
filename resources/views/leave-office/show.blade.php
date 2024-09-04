@@ -20,6 +20,10 @@
                     <td>{{ \Auth::user()->dateFormat($leave->date) }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Location') }}</th>
+                    <td>{{ $leave->location ?? '-' }}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Purpose') }}</th>
                     <td>
                         {{ Form::textarea('purpose', $leave->purpose, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => '-', 'rows' => '5']) }}
