@@ -17,6 +17,7 @@ use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\AttendanceEmployeeController;
 use App\Http\Controllers\AttendanceRequestController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\LeaveOfficeController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\AccountListController;
 use App\Http\Controllers\TimeSheetController;
@@ -1699,6 +1700,37 @@ Route::resource('healthy-steps', HealthyStepsController::class)->middleware(
 );
 
 Route::resource('healthy-reports', HealthyReportsController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('leave-office/export', [LeaveOfficeController::class, 'export'])->name('leave-office.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('leave-office', LeaveOfficeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('leave-office/{id}/approval/', [LeaveOfficeController::class, 'approval'])->name('leave-office.approval')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('leave-office/{id}/get-time/', [LeaveOfficeController::class, 'getTime'])->name('leave-office.getTime')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('leave-office/{id}/set-time/', [LeaveOfficeController::class, 'setTime'])->name('leave-office.setTime')->middleware(
     [
         'auth',
         'XSS',
