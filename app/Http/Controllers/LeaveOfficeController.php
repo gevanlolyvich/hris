@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class LeaveOfficeController extends Controller
 {
@@ -195,7 +196,6 @@ class LeaveOfficeController extends Controller
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
-        
     }
 
     /**
@@ -316,5 +316,58 @@ class LeaveOfficeController extends Controller
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
+    }
+
+    public function getTime($leave_id)
+    {
+        if (\Auth::user()->can('Manage Leave Office')) {
+            $leave = LeaveOffice::find($leave_id);
+            return view('leave-office.time', compact('leave'));
+        } else {
+            return response()->json(['error' => __('Permission denied.')], 401);
+        }
+    }
+
+    public function setTime(Request $request, $leave_id)
+    {
+        // return $request;
+        $leave = LeaveOffice::find($leave_id);
+        if (\Auth::user()->employee->id == $leave->employee_id) {
+            $employee = Employee::find($leave->employee_id);
+            $picture_path = null;
+            if ($request->type == 'leave') {
+                if ($request->input('picture')) {
+                    $base64ImageData = $request->input('picture');
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_leave' . '.png';
+                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
+                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
+                }
+                
+                $leave->leave       = date('Y-m-d H:i:s');
+                $leave->leave_coord = "$request->latitude, $request->longitude, $request->accuracy";
+                $leave->leave_pict  = $picture_path;
+
+            } elseif ($request->type == 'return') {
+                if ($request->input('picture')) {
+                    $base64ImageData = $request->input('picture');
+                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_return' . '.png';
+                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
+                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
+                }
+
+                $leave->return          = date('Y-m-d H:i:s');
+                $leave->return_coord    = "$request->latitude, $request->longitude, $request->accuracy";
+                $leave->return_pict     = $picture_path;
+            }
+
+            $leave->save();
+
+            return redirect()->back()->with('success', __('Leave Office Successfully Updated'));
+        } else {
+            return response()->json(['error' => __('Permission denied.')], 401);
+        }
+        
     }
 }

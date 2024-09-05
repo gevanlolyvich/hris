@@ -1718,3 +1718,15 @@ Route::patch('leave-office/{id}/approval/', [LeaveOfficeController::class, 'appr
         'XSS',
     ]
 );
+Route::get('leave-office/{id}/get-time/', [LeaveOfficeController::class, 'getTime'])->name('leave-office.getTime')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::patch('leave-office/{id}/set-time/', [LeaveOfficeController::class, 'setTime'])->name('leave-office.setTime')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
