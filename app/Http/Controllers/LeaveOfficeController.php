@@ -375,7 +375,7 @@ class LeaveOfficeController extends Controller
 
     public function export(Request $request)
     {
-        if (\Auth::user()->can('Manage Report')) {
+        if (\Auth::user()->can('Manage Leave Office')) {
             $urlQuery = parse_url($request->url, PHP_URL_QUERY);
             $queryArray = [];
             if (!empty($urlQuery)) {
@@ -397,7 +397,7 @@ class LeaveOfficeController extends Controller
     
             return $data;
         } else {
-            return response()->json(['error' => __('Permission denied.')], 401);
+            return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 }
