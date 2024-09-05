@@ -10,12 +10,11 @@
 @endsection
 
 @section('action-button')
-    {{-- @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
-        <a href="{{ route('leave-office.exportLending', ['url' => url()->full()]) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip"
-            data-bs-original-title="{{ __('Export') }}">
-            <i class="ti ti-file-export"></i>
-        </a>
-    @endif --}}
+    <a href="{{ route('leave-office.export', ['url' => url()->full()]) }}" class="btn btn-sm btn-success mx-2" data-bs-toggle="tooltip"
+        data-bs-original-title="{{ __('Export') }}">
+        <i class="ti ti-file-export"></i>
+    </a>
+
     <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
         data-title="{{ __('Create Leave Office') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create') }}">
