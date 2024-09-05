@@ -114,7 +114,8 @@
                                 'Request Attendance',
                                 'Bank',
                                 'Level',
-                                'Goal'
+                                'Goal',
+                                'Leave Office'
                             ];
                             if (Auth::user()->type == 'super admin') {
                                 $modules[] = 'Language';
