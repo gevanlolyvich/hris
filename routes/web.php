@@ -1706,6 +1706,12 @@ Route::resource('healthy-reports', HealthyReportsController::class)->middleware(
     ]
 );
 
+Route::get('leave-office/export', [LeaveOfficeController::class, 'export'])->name('leave-office.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('leave-office', LeaveOfficeController::class)->middleware(
     [
         'auth',
