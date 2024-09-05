@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LeaveOfficeExport;
 use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\LeaveOffice;
@@ -11,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LeaveOfficeController extends Controller
 {
@@ -67,7 +69,7 @@ class LeaveOfficeController extends Controller
 
                 $employee = $employee?->orderby('name', 'asc')?->get()?->pluck('id');
 
-                $leaves = $leaves->whereIn('employee_id', $employee)->whereNotIn('status', ['Pending', 'Waiting Superior Approval']);
+                $leaves = $leaves->whereIn('employee_id', $employee);
             }
 
             // Filter by optional query
@@ -369,5 +371,33 @@ class LeaveOfficeController extends Controller
             return response()->json(['error' => __('Permission denied.')], 401);
         }
         
+    }
+
+    public function export(Request $request)
+    {
+        if (\Auth::user()->can('Manage Report')) {
+            $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+            $queryArray = [];
+            if (!empty($urlQuery)) {
+                foreach (explode('&', $urlQuery) as $query) {
+                    list($key, $value) = explode('=', $query);
+                    $queryArray[$key] = $value;
+                }
+            }
+
+            if (sizeof($queryArray) == 0) {
+                $queryArray["branch"] = '';
+                $queryArray["date"] = date('Y-m-d');
+                $queryArray["month"] = date('Y-m');
+                $queryArray["type"] = 'monthly';
+            }
+
+            $name = 'Leave_Office_' . date('Y-m-d H:i:s');
+            $data = Excel::download(new LeaveOfficeExport(json_encode($queryArray)), $name . '.xlsx');
+    
+            return $data;
+        } else {
+            return response()->json(['error' => __('Permission denied.')], 401);
+        }
     }
 }
