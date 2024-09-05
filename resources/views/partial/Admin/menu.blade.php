@@ -240,7 +240,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif --}}
 
                 <!-- timesheet-->
-                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet'))
+                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet') || Gate::check('Manage Leave Office'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-clock"></i></span><span
@@ -288,6 +288,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                                 href="{{ route('permit.index') }}">{{ __('Permit Attendance') }}</a>
                                         </li>
                                     </ul>
+                                </li>
+                            @endcan
+                            @can('Manage Leave Office')
+                                <li class="dash-item">
+                                    <a class="dash-link"
+                                        href="{{ route('leave-office.index') }}">{{ __('Leave Office') }}</a>
                                 </li>
                             @endcan
                         </ul>
