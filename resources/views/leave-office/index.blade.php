@@ -15,11 +15,13 @@
         <i class="ti ti-file-export"></i>
     </a>
 
-    <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
-        data-title="{{ __('Create Leave Office Permit') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-        data-bs-original-title="{{ __('Create') }}">
-        <i class="ti ti-plus"></i>
-    </a>
+    @can("Create Leave Office")
+        <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
+            data-title="{{ __('Create Leave Office Permit') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+            data-bs-original-title="{{ __('Create') }}">
+            <i class="ti ti-plus"></i>
+        </a>
+    @endcan
 @endsection
 
 @section('content')
