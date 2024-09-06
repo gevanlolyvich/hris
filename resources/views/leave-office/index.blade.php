@@ -92,7 +92,7 @@
                             <th>{{ __('Employee') }}</th>
                             <th>{{ __('Date') }}</th>
                             <th>{{ __('Location') }}</th>
-                            <th>{{ __('Purpose') }}</th>
+                            <th>{{ __('Need') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Leave Time') }}</th>
                             <th>{{ __('Return Time') }}</th>
@@ -106,7 +106,7 @@
                                 <td>{{ $leave?->employee?->name ?? '-' }}</td>
                                 <td>{{ $leave?->date ?? '-' }}</td>
                                 <td>{{ Str::limit($leave?->location ?? '-', 20) }}</td>
-                                <td>{{ Str::limit($leave?->purpose ?? '-', 20) }}</td>
+                                <td>{{ Str::limit($leave?->need ?? '-', 20) }}</td>
                                 <td>
                                     @if ($leave->status == 'Pending' || $leave->status == 'Waiting Superior' || $leave->status == 'Waiting HR')
                                         <div class="badge bg-warning p-2 px-3 rounded">{{ __($leave->status) }}</div>
