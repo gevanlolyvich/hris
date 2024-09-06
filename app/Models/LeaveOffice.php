@@ -15,15 +15,16 @@ class LeaveOffice extends Model
         'date',
         'superior_approval_by',
         'hr_approval_by',
+        'superior_note',
+        'hr_note',
         'leave',
-        'leave_coord',
-        'leave_pict',
         'return',
         'return_coord',
         'return_pict',
         'status',
         'location',
-        'purpose'
+        'purpose',
+        'description'
     ];
 
     public function employee()
@@ -43,9 +44,9 @@ class LeaveOffice extends Model
 
     public static $status = [
         'Pending'=>'Pending',
-        'Waiting Superior Approval' => 'Waiting Superior Approval',
+        'Waiting Approval' => 'Waiting Approval',
         'Rejected By Superior'=> 'Rejected By Superior',
-        'Waiting HR Approval'=> 'Waiting HR Approval',
+        'Waiting HR'=> 'Waiting HR',
         'Rejected By HR'=> 'Rejected By HR',
         'Approved' => 'Approved'
     ];
