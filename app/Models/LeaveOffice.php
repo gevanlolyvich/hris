@@ -44,7 +44,7 @@ class LeaveOffice extends Model
 
     public static $status = [
         'Pending'=>'Pending',
-        'Waiting Approval' => 'Waiting Approval',
+        'Waiting Superior' => 'Waiting Superior',
         'Rejected By Superior'=> 'Rejected By Superior',
         'Waiting HR'=> 'Waiting HR',
         'Rejected By HR'=> 'Rejected By HR',
