@@ -24,6 +24,14 @@
                     <td>{{ \Auth::user()->dateFormat($leave->date) }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Leave Time') }}</th>
+                    <td>
+                        <button class="btn btn-primary btn-sm" disabled="disabled">
+                            {{ $leave->leave }}
+                        </button>
+                    </td>
+                </tr>
+                <tr>
                     <th>{{ __('Location') }}</th>
                     <td>{{ $leave->location ?? '-' }}</td>
                 </tr>
