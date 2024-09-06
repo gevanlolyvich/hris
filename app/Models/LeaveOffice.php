@@ -23,7 +23,7 @@ class LeaveOffice extends Model
         'return_pict',
         'status',
         'location',
-        'purpose',
+        'need',
         'description'
     ];
 
