@@ -138,7 +138,9 @@ class LeaveOfficeController extends Controller
                 [
                     'date' => 'required|date|after_or_equal:today',
                     'location' => 'nullable|string',
-                    'purpose' => 'required',
+                    'leave' => 'required',
+                    'need' => 'required',
+                    'description' => 'nullable|string',
                 ]
             );
     
@@ -153,8 +155,10 @@ class LeaveOfficeController extends Controller
             $leave->employee_id     = \Auth::user()?->employee?->id;
             $leave->date            = $request->date;
             $leave->location        = $request->location;
-            $leave->purpose         = $request->purpose;
-            $leave->status          = 'Waiting Superior Approval';
+            $leave->leave           = $request->leave;
+            $leave->need            = $request->need;
+            $leave->description     = $request->description;
+            $leave->status          = 'Waiting Superior';
             $leave->save();
 
             // Send Notification To Superior
@@ -271,7 +275,7 @@ class LeaveOfficeController extends Controller
             $by         = '';
             // Update leave Status Data
             if (\Auth::user()->type == 'employee') {
-                $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR Approval';
+                $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR';
                 $leave->superior_approval_by    = \Auth::user()->employee->id;
                 $leave->save();
 
