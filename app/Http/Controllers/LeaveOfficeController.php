@@ -345,32 +345,18 @@ class LeaveOfficeController extends Controller
         if (\Auth::user()->employee->id == $leave->employee_id) {
             $employee = Employee::find($leave->employee_id);
             $picture_path = null;
-            if ($request->type == 'leave') {
-                if ($request->input('picture')) {
-                    $base64ImageData = $request->input('picture');
-                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_leave' . '.png';
-                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
-                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
-                }
-                
-                $leave->leave       = date('Y-m-d H:i:s');
-                $leave->leave_coord = "$request->latitude, $request->longitude, $request->accuracy";
-                $leave->leave_pict  = $picture_path;
-
-            } elseif ($request->type == 'return') {
-                if ($request->input('picture')) {
-                    $base64ImageData = $request->input('picture');
-                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_return' . '.png';
-                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
-                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
-                }
-
-                $leave->return          = date('Y-m-d H:i:s');
-                $leave->return_coord    = "$request->latitude, $request->longitude, $request->accuracy";
-                $leave->return_pict     = $picture_path;
+    
+            if ($request->input('picture')) {
+                $base64ImageData = $request->input('picture');
+                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+                $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_return' . '.png';
+                Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
+                $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
             }
+
+            $leave->return          = date('Y-m-d H:i:s');
+            $leave->return_coord    = "$request->latitude, $request->longitude, $request->accuracy";
+            $leave->return_pict     = $picture_path;
 
             $leave->save();
 

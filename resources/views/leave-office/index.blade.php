@@ -149,10 +149,10 @@
                                     <span>
                                         @if ($leave->status == 'Approved' || $leave->status == 'Waiting HR')
                                             <div class="action-btn bg-warning ms-2">
-                                                <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input" data-bs-toggle="tooltip" data-size="xl"
+                                                <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input"
+                                                    data-bs-toggle="tooltip" data-size="lg"
                                                     data-url="{{ route('leave-office.getTime', $leave->id) }}"
-                                                    data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Return Office Time') }}"
+                                                    data-ajax-popup="true" title="" data-title="{{ __('Return Office Time') }}"
                                                     data-bs-original-title="{{ __('Return Office Time') }}">
                                                     <i class="fa fa-solid fa-clock"></i>
                                                 </button>
@@ -611,7 +611,7 @@
             border-bottom-left-radius: 10px;
         }
         #openStreetMapContainerLeave {
-            height: 200px;
+            height: 300px;
             width: 100%;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
@@ -619,7 +619,7 @@
             border-bottom-left-radius: 10px;
         }
         #openStreetMapContainerReturn {
-            height: 200px;
+            height: 300px;
             width: 100%;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
