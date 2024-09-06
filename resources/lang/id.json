@@ -2143,5 +2143,10 @@
   "Leave Time": "Waktu Keluar",
   "Waiting Superior": "Menunggu Atasan",
   "Waiting HR": "Menunggu HR",
-  "Need": "Keperluan"
+  "Need": "Keperluan",
+  "Enter Need": "Masukkan Keperluan",
+  "Create Leave Office Permit": "Buat Izin Keluar Kantor",
+  "Manage Leave Office Permit": "Kelola Izin Keluar Kantor",
+  "Return Office Time": "Waktu Kembali Ke Kantor",
+  "Update Leave Office Permit": "Perbarui Izin Keluar Kantor"
 }

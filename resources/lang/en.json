@@ -2134,5 +2134,10 @@
     "Leave Time": "Leave Time",
     "Waiting Superior": "Waiting Superior",
     "Waiting HR": "Waiting HR",
-    "Need": "Need"
+    "Need": "Need",
+    "Enter Need": "Enter Need",
+    "Create Leave Office Permit": "Create Leave Office Permit",
+    "Manage Leave Office Permit": "Manage Leave Office Permit",
+    "Return Office Time": "Return Office Time",
+    "Update Leave Office Permit": "Update Leave Office Permit"
 }

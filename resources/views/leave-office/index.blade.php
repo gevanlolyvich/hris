@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Manage Leave Office') }}
+    {{ __('Manage Leave Office Permit') }}
 @endsection
 
 @section('breadcrumb')
@@ -16,7 +16,7 @@
     </a>
 
     <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
-        data-title="{{ __('Create Leave Office') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+        data-title="{{ __('Create Leave Office Permit') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create') }}">
         <i class="ti ti-plus"></i>
     </a>
@@ -118,7 +118,7 @@
                                 </td>
                                 <td class="text-center">
                                     @if ($leave->leave)
-                                        <button type="button" class="btn btn-primary btn-sm">
+                                        <button type="button" class="btn btn-primary btn-sm" disabled="disabled">
                                             {{ $leave->leave}}
                                         </button>
                                     @endif
@@ -129,7 +129,7 @@
                                         $leaveReturnParts = explode(' ', $leave->return);
                                         $return_time = array_pop($leaveReturnParts);
                                     @endphp
-                                        <button type="button" class="btn btn-info btn-sm">
+                                        <button type="button" class="btn btn-info btn-sm" disabled="disabled">
                                             {{ $return_time }}
                                         </button>
                                     @endif
@@ -152,17 +152,16 @@
                                                 <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input" data-bs-toggle="tooltip" data-size="xl"
                                                     data-url="{{ route('leave-office.getTime', $leave->id) }}"
                                                     data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Leave Office Time') }}"
-                                                    data-bs-original-title="{{ __('Leave Office Time') }}">
+                                                    title="" data-title="{{ __('Return Office Time') }}"
+                                                    data-bs-original-title="{{ __('Return Office Time') }}">
                                                     <i class="fa fa-solid fa-clock"></i>
                                                 </button>
                                             </div>
                                         @else
                                             <div class="action-btn ms-2">
                                                 <button class="btn btn-secondary btn-sm leave-input" disabled="disabled" data-bs-toggle="tooltip" data-size="xl"
-                                                    data-url="{{ route('leave-office.getTime', $leave->id) }}"
-                                                    data-ajax-popup="true" title="" data-title="{{ __('Leave Office Time') }}"
-                                                    data-bs-original-title="{{ __('Leave Office Time') }}">
+                                                    data-ajax-popup="true"
+                                                    data-bs-original-title="{{ __('Return Office Time') }}">
                                                     <i class="fa fa-solid fa-clock"></i>
                                                 </button>
                                             </div>
@@ -174,7 +173,7 @@
                                                         <a href="#" class="mx-3 btn btn-info btn-sm align-items-center" 
                                                             data-url="{{  route('leave-office.edit', $leave->id) }}"
                                                             data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Update Leave Office') }}"
+                                                            title="" data-title="{{ __('Update Leave Office Permit') }}"
                                                             data-bs-original-title="{{ __('Edit') }}">
                                                             <i class="ti ti-pencil text-white"></i>
                                                         </a>
