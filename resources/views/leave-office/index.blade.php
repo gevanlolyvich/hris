@@ -141,7 +141,7 @@
                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                             data-url="{{ route('leave-office.show', $leave->id) }}"
                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                            title="" data-title="{{ __('Leave Office Approval') }}"
+                                            title="" data-title="{{ __('Leave Office Permit Approval') }}"
                                             data-bs-original-title="{{ __('Approval') }}">
                                             <i class="ti ti-caret-right text-white"></i>
                                         </a>

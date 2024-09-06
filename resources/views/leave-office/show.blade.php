@@ -91,16 +91,46 @@
                         @endif
                     </td>
                 </tr>
+                @if ($leave->superior_note)
+                    <tr>
+                        <th>{{ __('Note From Superior')}}</th>
+                        <td>
+                            {{ Form::textarea('superior_note', $leave->superior_note, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => '-', 'rows' => '3']) }}
+                        </td>
+                    </tr>
+                @endif
+                @if ($leave->hr_note)
+                    <tr>
+                        <th>{{ __('Note From HR')}}</th>
+                        <td>
+                            {{ Form::textarea('hr_note', $leave->hr_note, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => '-', 'rows' => '3']) }}
+                        </td>
+                    </tr>
+                @endif
                 <input type="hidden" value="{{ $leave->id }}" name="leave_id">
             </table>
         </div>
     </div>
+    @if (
+        (Auth::user()->employee?->id != $leave->employee_id && (($leave->status == 'Waiting Superior' && in_array($leave->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? [])) || ($leave->status == 'Waiting HR' && Auth::user()->type != 'employee')))
+        &&
+        (Auth::user()->type != 'employee' || (Auth::user()->employee?->id != $leave->employee_id && in_array($leave->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? [])))
+        )
+        <div class="row">
+            <div class="form-group col-12">
+                {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
+                {{ Form::textarea('note', null, ['class' => 'form-control', 'placeholder' => __('Enter Note'),'rows'=>'3']) }}
+            </div>
+        </div>
+    @endif
+    
 </div>
 
 @if (
-Auth::user()->employee?->id != $leave->employee_id &&
+    Auth::user()->employee?->id != $leave->employee_id &&
     (($leave->status == 'Waiting Superior' && in_array($leave->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? [])) ||
-    ($leave->status == 'Waiting HR' && Auth::user()->type != 'employee')))
+    ($leave->status == 'Waiting HR' && Auth::user()->type != 'employee'))
+)
 <div class="modal-footer">
     <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $leave->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
     @if (Auth::user()->type == 'employee')

@@ -176,8 +176,8 @@ class LeaveOfficeController extends Controller
             \Auth::user()->sendNotifications(
                 $subscriptions,
                 json_encode([
-                    'title' => __('New Leave Office Request'),
-                    'body' => \Auth::user()->name . '  ' . __('Make Leave Office Request') . ' ' . __('On Date') . ' ' . $request->date,
+                    'title' => __('New Leave Office Permit'),
+                    'body' => \Auth::user()->name . '  ' . __('Make Leave Office Permit') . ' ' . __('On Date') . ' ' . $request->date,
                     'url' => "/leave-office?type=daily&month=&date={$request->date}&branch="
                 ]),
                 'normal'
@@ -281,6 +281,7 @@ class LeaveOfficeController extends Controller
             if (\Auth::user()->type == 'employee') {
                 $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR';
                 $leave->superior_approval_by    = \Auth::user()->employee->id;
+                $leave->superior_note           = $request->note;
                 $leave->save();
 
                 $by = 'Superior';
@@ -300,6 +301,7 @@ class LeaveOfficeController extends Controller
             } else  {
                 $leave->status          = $request->status == 'Reject' ? 'Rejected By HR' : 'Approved';
                 $leave->hr_approval_by  = \Auth::user()->id;
+                $leave->hr_note         = $request->note;
                 $leave->save();        
                 
                 $by = 'HR';
@@ -315,8 +317,8 @@ class LeaveOfficeController extends Controller
             \Auth::user()->sendNotifications(
                 $subscriptions,
                 json_encode([
-                    'title' => __('Leave Office Request') . ' ' . __($status),
-                    'body' => __('Leave Office Request') . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status) . ' ' . __('By') . ' ' . __("$by"),
+                    'title' => __('Leave Office Permit') . ' ' . __($status),
+                    'body' => __('Leave Office Permit') . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status) . ' ' . __('By') . ' ' . __("$by"),
                     'url' => "/leave-office?type=daily&month=&date={$leave->date}&branch="
                 ]),
                 'normal'
