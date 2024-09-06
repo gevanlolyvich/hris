@@ -227,9 +227,11 @@ class LeaveOfficeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'date' => 'required|date',
+                    'date' => 'required|date|after_or_equal:today',
                     'location' => 'nullable|string',
-                    'purpose' => 'required',
+                    'leave' => 'required',
+                    'need' => 'required',
+                    'description' => 'nullable|string',
                 ]
             );
     
@@ -241,7 +243,9 @@ class LeaveOfficeController extends Controller
 
             $leave->date            = $request->date;
             $leave->location        = $request->location;
-            $leave->purpose         = $request->purpose;
+            $leave->need            = $request->need;
+            $leave->leave           = $request->leave;
+            $leave->description     = $request->description;
             $leave->save();
 
             return redirect()->back()->with('success', __('Leave Office Successfully Updated'));
