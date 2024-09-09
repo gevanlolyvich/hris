@@ -1,6 +1,6 @@
 {{ Form::model($leave, ['route' => ['leave-office.setTime', $leave->id], 'method' => 'PATCH', 'enctype' => 'multipart/form-data', 'id' => 'leave-form']) }} 
     <div class="modal-body" style="padding-top: 0.35rem">
-        @if (empty($leave->leave) || empty($leave->return))
+        @if (empty($leave->return) && $leave->employee_id == Auth::user()->employee?->id)
             <div class="row d-flex flex-column align-items-center">
                 <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
                     <button type="button" class="btn btn-info btn-lg btn-block" id="load"><i
@@ -30,40 +30,11 @@
         @endif
 
         <div class="row">
-            <div class="col-sm-6 col-md-6 col-xl-6 text-center mx-auto" id="clock-in-data">
-                <h5 class="bg-primary btn-sm text-white mt-2" style="font-size: 15px">{{__('Leave Office')}}</h5>
-                <hr>
-                @if (!empty($leave->leave))
-                    <div class="btn btn-primary btn-sm disabled" id="clock-in-hours">
-                        {{ $leave->leave}}
-                    </div>
-                    <div class="clock-images mx-d-flex flex-column align-items-center mt-2" id="photosIn">
-                        <div class="text-center mx-auto">
-                            <strong>{{__('Leave Office Image Capture')}}</strong>
-                            <br>
-                            <img id="clockImageIn" src="{{ $leave->leave_pict}}" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-2 mt-1">
-                            <br>
-                        </div>
-                    </div>
-                    <div class="text-center mx-auto mt-2" id="mapLeave">
-                        <strong>{{__('Leave Office Location')}}</strong>
-                        <div id="openStreetMapContainerLeave" style="border-radius: 5%" class="mt-1"></div>
-                    </div>
-                @elseif(Auth::user()->employee?->id == $leave->employee_id)
-                    <input type="hidden" name="type" id="accuracy" value="leave">
-                    <button type="button" id="time-input" onclick="handleLocationAndSubmit()"
-                        class="btn btn-primary btn-lg btn-block">
-                            {{ __('Leave Office') }}
-                    </button>
-                @else
-                    -
-                @endif
-            </div>
-            <div class="col-sm-6 col-md-6 col-xl-6 text-center mx-auto" id="clock-out-data">
-                <h5 class="bg-info btn-sm text-white mt-2" style="font-size: 15px">{{__('Return Office')}}</h5>
+            <div class="col-sm-12 col-md-12 col-xl-12 text-center mx-auto" id="clock-out-data">
+                <h5 class="bg-primary btn-sm text-white mt-2" style="font-size: 15px">{{__('Return Office')}}</h5>
                 <hr>
                 @if (!empty($leave->return))
-                    <div class="btn btn-info btn-sm disabled" id="clock-out-hours">
+                    <div class="btn btn-primary btn-sm disabled" id="clock-out-hours">
                         {{$leave->return}}
                     </div>
                     <div class="clock-images mx-d-flex flex-column align-items-center mt-2" id="photosOut">
@@ -81,7 +52,7 @@
                 @elseif (!empty($leave->leave) && Auth::user()->employee?->id == $leave->employee_id)
                     <input type="hidden" name="type" id="accuracy" value="return">
                     <button type="button" id="time-input" onclick="handleLocationAndSubmit()"
-                        class="btn btn-info btn-lg btn-block">
+                        class="btn btn-primary btn-lg btn-block">
                             {{ __('Return Office') }}
                     </button>
                 @else

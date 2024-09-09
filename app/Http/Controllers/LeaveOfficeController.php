@@ -138,7 +138,9 @@ class LeaveOfficeController extends Controller
                 [
                     'date' => 'required|date|after_or_equal:today',
                     'location' => 'nullable|string',
-                    'purpose' => 'required',
+                    'leave' => 'required',
+                    'need' => 'required',
+                    'description' => 'nullable|string',
                 ]
             );
     
@@ -153,8 +155,10 @@ class LeaveOfficeController extends Controller
             $leave->employee_id     = \Auth::user()?->employee?->id;
             $leave->date            = $request->date;
             $leave->location        = $request->location;
-            $leave->purpose         = $request->purpose;
-            $leave->status          = 'Waiting Superior Approval';
+            $leave->leave           = $request->leave;
+            $leave->need            = $request->need;
+            $leave->description     = $request->description;
+            $leave->status          = 'Waiting Superior';
             $leave->save();
 
             // Send Notification To Superior
@@ -172,8 +176,8 @@ class LeaveOfficeController extends Controller
             \Auth::user()->sendNotifications(
                 $subscriptions,
                 json_encode([
-                    'title' => __('New Leave Office Request'),
-                    'body' => \Auth::user()->name . '  ' . __('Make Leave Office Request') . ' ' . __('On Date') . ' ' . $request->date,
+                    'title' => __('New Leave Office Permit'),
+                    'body' => \Auth::user()->name . '  ' . __('Make Leave Office Permit') . ' ' . __('On Date') . ' ' . $request->date,
                     'url' => "/leave-office?type=daily&month=&date={$request->date}&branch="
                 ]),
                 'normal'
@@ -223,9 +227,11 @@ class LeaveOfficeController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'date' => 'required|date',
+                    'date' => 'required|date|after_or_equal:today',
                     'location' => 'nullable|string',
-                    'purpose' => 'required',
+                    'leave' => 'required',
+                    'need' => 'required',
+                    'description' => 'nullable|string',
                 ]
             );
     
@@ -237,7 +243,9 @@ class LeaveOfficeController extends Controller
 
             $leave->date            = $request->date;
             $leave->location        = $request->location;
-            $leave->purpose         = $request->purpose;
+            $leave->need            = $request->need;
+            $leave->leave           = $request->leave;
+            $leave->description     = $request->description;
             $leave->save();
 
             return redirect()->back()->with('success', __('Leave Office Successfully Updated'));
@@ -271,8 +279,9 @@ class LeaveOfficeController extends Controller
             $by         = '';
             // Update leave Status Data
             if (\Auth::user()->type == 'employee') {
-                $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR Approval';
+                $leave->status                  = $request->status == 'Reject' ? 'Rejected By Superior' : 'Waiting HR';
                 $leave->superior_approval_by    = \Auth::user()->employee->id;
+                $leave->superior_note           = $request->note;
                 $leave->save();
 
                 $by = 'Superior';
@@ -292,6 +301,7 @@ class LeaveOfficeController extends Controller
             } else  {
                 $leave->status          = $request->status == 'Reject' ? 'Rejected By HR' : 'Approved';
                 $leave->hr_approval_by  = \Auth::user()->id;
+                $leave->hr_note         = $request->note;
                 $leave->save();        
                 
                 $by = 'HR';
@@ -307,8 +317,8 @@ class LeaveOfficeController extends Controller
             \Auth::user()->sendNotifications(
                 $subscriptions,
                 json_encode([
-                    'title' => __('Leave Office Request') . ' ' . __($status),
-                    'body' => __('Leave Office Request') . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status) . ' ' . __('By') . ' ' . __("$by"),
+                    'title' => __('Leave Office Permit') . ' ' . __($status),
+                    'body' => __('Leave Office Permit') . ' '. __('For Date') . ' ' . $leave->date . ' '. __($status) . ' ' . __('By') . ' ' . __("$by"),
                     'url' => "/leave-office?type=daily&month=&date={$leave->date}&branch="
                 ]),
                 'normal'
@@ -337,32 +347,18 @@ class LeaveOfficeController extends Controller
         if (\Auth::user()->employee->id == $leave->employee_id) {
             $employee = Employee::find($leave->employee_id);
             $picture_path = null;
-            if ($request->type == 'leave') {
-                if ($request->input('picture')) {
-                    $base64ImageData = $request->input('picture');
-                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_leave' . '.png';
-                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
-                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
-                }
-                
-                $leave->leave       = date('Y-m-d H:i:s');
-                $leave->leave_coord = "$request->latitude, $request->longitude, $request->accuracy";
-                $leave->leave_pict  = $picture_path;
-
-            } elseif ($request->type == 'return') {
-                if ($request->input('picture')) {
-                    $base64ImageData = $request->input('picture');
-                    $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
-                    $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_return' . '.png';
-                    Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
-                    $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
-                }
-
-                $leave->return          = date('Y-m-d H:i:s');
-                $leave->return_coord    = "$request->latitude, $request->longitude, $request->accuracy";
-                $leave->return_pict     = $picture_path;
+    
+            if ($request->input('picture')) {
+                $base64ImageData = $request->input('picture');
+                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+                $pictureName = 'leave_office_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '_return' . '.png';
+                Storage::disk('public')->put("uploads/leave_office/$leave_id/$pictureName", $imageData);
+                $picture_path = env('APP_URL') . "/storage/uploads/leave_office/$leave_id/$pictureName";
             }
+
+            $leave->return          = date('Y-m-d H:i:s');
+            $leave->return_coord    = "$request->latitude, $request->longitude, $request->accuracy";
+            $leave->return_pict     = $picture_path;
 
             $leave->save();
 

@@ -2129,5 +2129,19 @@
     "Status From HR": "Status From HR",
     "By": "By",
     "Leave Office Time": "Leave Office Time",
-    "Return Office": "Return Office"
+    "Return Office": "Return Office",
+    "Leave Office Permit": "Leave Office Permit",
+    "Leave Time": "Leave Time",
+    "Waiting Superior": "Waiting Superior",
+    "Waiting HR": "Waiting HR",
+    "Need": "Need",
+    "Enter Need": "Enter Need",
+    "Create Leave Office Permit": "Create Leave Office Permit",
+    "Manage Leave Office Permit": "Manage Leave Office Permit",
+    "Return Office Time": "Return Office Time",
+    "Update Leave Office Permit": "Update Leave Office Permit",
+    "Enter Note": "Enter Note",
+    "Note From Superior": "Note From Superior",
+    "Note From HR": "Note From HR",
+    "Leave Office Permit Approval": "Leave Office Permit Approval"
 }

@@ -2138,5 +2138,19 @@
   "Status From HR": "Status Dari HR",
   "By": "Oleh",
   "Leave Office Time": "Waktu Keluar Kantor",
-  "Return Office": "Kembali Ke Kantor"
+  "Return Office": "Kembali Ke Kantor",
+  "Leave Office Permit": "Izin Keluar Kantor",
+  "Leave Time": "Waktu Keluar",
+  "Waiting Superior": "Menunggu Atasan",
+  "Waiting HR": "Menunggu HR",
+  "Need": "Keperluan",
+  "Enter Need": "Masukkan Keperluan",
+  "Create Leave Office Permit": "Buat Izin Keluar Kantor",
+  "Manage Leave Office Permit": "Kelola Izin Keluar Kantor",
+  "Return Office Time": "Waktu Kembali Ke Kantor",
+  "Update Leave Office Permit": "Perbarui Izin Keluar Kantor",
+  "Enter Note": "Masukkan Catatan",
+  "Note From Superior": "Catatan Dari Atasan",
+  "Note From HR": "Catatan Dari HR",
+  "Leave Office Permit Approval": "Persetujuan Izin Keluar Kantor"
 }
