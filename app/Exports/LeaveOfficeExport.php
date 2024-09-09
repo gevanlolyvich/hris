@@ -54,15 +54,15 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
             $time     = $this->query?->date;
         }
 
-        $subTitle   =  __('Leave Office') . ' ';
+        $subTitle   =  __('Leave Office Permit') . ' ';
 
         $settings   = Utility::settings();
 
         $data->push([$settings['company_name'], '' , '' , '' , '', __('')]);
         $data->push([ "{$subTitle}  {$time}", '' , '' , '' , '' , __('')]);
         $data->push(['', __('')]);
-        $data->push(['No', __('Date'), __('Name'), __('Designation'), __('Branch'), __('Department'), __('Location'), __('Purpose'), __('Status'), __('Leave Office'), '', '', __('Return Office'), '', '' ]);
-        $data->push(['', '', '', '', '', '', '', '', '', __('Time'), __('Picture'), __('Location'), __('Time'), __('Picture'), __('Location')]);
+        $data->push(['No', __('Date'), __('Name'), __('Designation'), __('Branch'), __('Department'), __('Location'), __('Need'), __('Description'), __('Status'), __('Leave Office Time'), __('Return Office'), '', '' ]);
+        $data->push(['', '', '', '', '', '', '', '', '', '', '', __('Time'), __('Picture'), __('Location')]);
         
         // Loading Real Data
         $branch = Branch::find(\Auth::user()->branch_id);
@@ -159,11 +159,10 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
                 $leave->employee?->branch?->name,
                 $leave->employee?->department?->name,
                 $leave->location,
-                $leave->purpose,
+                $leave->need,
+                $leave->description,
                 __($leave->status),
                 $leave->leave,
-                !empty($leave->leave_coord) ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $leave->leave_coord), 0, -1)) : '-',
-                $leave->leave_pict,
                 $leave->return,
                 !empty($leave->return_coord) ? "https://www.google.co.id/maps/search/" . implode(',', array_slice(explode(', ', $leave->return_coord), 0, -1)) : '-',
                 $leave->return_pict,
@@ -180,7 +179,7 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
 
     public function title(): string
     {
-        return __('Leave Office');
+        return __('Leave Office Permit');
     }
 
     public function registerEvents(): array
@@ -203,8 +202,9 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
                 $sheet->mergeCells('I5:I6');
                 $sheet->mergeCells('G5:G6');
                 $sheet->mergeCells('J5:J6');
-                $sheet->mergeCells('K5:M5');
-                $sheet->mergeCells('N5:P5');
+                $sheet->mergeCells('K5:K6');
+                $sheet->mergeCells('L5:L6');
+                $sheet->mergeCells('M5:O5');
 
                 // Apply Header Style
                 $this->applyHeaderCellStyles($sheet, 'B5:B6');
@@ -217,29 +217,25 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
                 $this->applyHeaderCellStyles($sheet, 'I5:I6');
                 $this->applyHeaderCellStyles($sheet, 'J5:J6');
                 $this->applyHeaderCellStyles($sheet, 'K5:K6');
-                $this->applyHeaderCellStyles($sheet, 'K5:M5');
-                $this->applyHeaderCellStyles($sheet, 'N5:P5');
-                $this->applyHeaderCellStyles($sheet, 'K6');
-                $this->applyHeaderCellStyles($sheet, 'L6');
+                $this->applyHeaderCellStyles($sheet, 'L5:L6');
+                $this->applyHeaderCellStyles($sheet, 'M5:O5');
                 $this->applyHeaderCellStyles($sheet, 'M6');
                 $this->applyHeaderCellStyles($sheet, 'N6');
                 $this->applyHeaderCellStyles($sheet, 'O6');
-                $this->applyHeaderCellStyles($sheet, 'P6');
 
                 
                 // Style Cells
                 $sheet->getStyle('B2:B3')->applyFromArray(['font' => ['bold' => true]]);
-                $sheet->getColumnDimension('L')->setAutoSize(false);
-                $sheet->getColumnDimension('M')->setAutoSize(false);
+                $sheet->getColumnDimension('J')->setAutoSize(false);
+                $sheet->getColumnDimension('N')->setAutoSize(false);
                 $sheet->getColumnDimension('O')->setAutoSize(false);
-                $sheet->getColumnDimension('P')->setAutoSize(false);
-                $sheet->getStyle("K7:K{$this->total_data}")->applyFromArray([
+                $sheet->getStyle("L7:L{$this->total_data}")->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'E0EFFC'],
                     ],
                 ]);
-                $sheet->getStyle("N7:N{$this->total_data}")->applyFromArray([
+                $sheet->getStyle("M7:M{$this->total_data}")->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         'startColor' => ['rgb' => 'E0EFFC'],
@@ -250,14 +246,14 @@ class LeaveOfficeExport implements FromCollection, WithEvents, ShouldAutoSize, W
                 $sheet->freezePane('E7');
 
                 // make border for all data
-                $sheet->getStyle("B7:P{$this->total_data}")->applyFromArray([
+                $sheet->getStyle("B7:O{$this->total_data}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
                         ]
                     ],
                 ]);
-                $sheet->getStyle("P7:P{$this->total_data}")->applyFromArray([
+                $sheet->getStyle("L7:M{$this->total_data}")->applyFromArray([
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                     ]

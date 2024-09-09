@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Manage Leave Office') }}
+    {{ __('Manage Leave Office Permit') }}
 @endsection
 
 @section('breadcrumb')
@@ -15,11 +15,13 @@
         <i class="ti ti-file-export"></i>
     </a>
 
-    <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
-        data-title="{{ __('Create Leave Office') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-        data-bs-original-title="{{ __('Create') }}">
-        <i class="ti ti-plus"></i>
-    </a>
+    @can("Create Leave Office")
+        <a href="#" data-url="{{ route('leave-office.create') }}" data-ajax-popup="true" data-size="lg"
+            data-title="{{ __('Create Leave Office Permit') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+            data-bs-original-title="{{ __('Create') }}">
+            <i class="ti ti-plus"></i>
+        </a>
+    @endcan
 @endsection
 
 @section('content')
@@ -92,9 +94,10 @@
                             <th>{{ __('Employee') }}</th>
                             <th>{{ __('Date') }}</th>
                             <th>{{ __('Location') }}</th>
-                            <th>{{ __('Purpose') }}</th>
+                            <th>{{ __('Need') }}</th>
                             <th>{{ __('Status') }}</th>
-                            <th>{{ __('Proof') }}</th>
+                            <th>{{ __('Leave Time') }}</th>
+                            <th>{{ __('Return Time') }}</th>
                             <th>{{ __('Approval') }}</th>
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
@@ -105,9 +108,9 @@
                                 <td>{{ $leave?->employee?->name ?? '-' }}</td>
                                 <td>{{ $leave?->date ?? '-' }}</td>
                                 <td>{{ Str::limit($leave?->location ?? '-', 20) }}</td>
-                                <td>{{ Str::limit($leave?->purpose ?? '-', 20) }}</td>
+                                <td>{{ Str::limit($leave?->need ?? '-', 20) }}</td>
                                 <td>
-                                    @if ($leave->status == 'Pending' || $leave->status == 'Waiting Superior Approval' || $leave->status == 'Waiting HR Approval')
+                                    @if ($leave->status == 'Pending' || $leave->status == 'Waiting Superior' || $leave->status == 'Waiting HR')
                                         <div class="badge bg-warning p-2 px-3 rounded">{{ __($leave->status) }}</div>
                                     @elseif($leave->status == 'Approved')
                                         <div class="badge bg-success p-2 px-3 rounded">{{ __($leave->status) }}</div>
@@ -116,18 +119,21 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    @if ($leave->status == 'Approved')
-                                        <div class="action-btn bg-warning ms-2">
-                                            <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input" data-bs-toggle="tooltip" data-size="xl"
-                                                data-url="{{ route('leave-office.getTime', $leave->id) }}"
-                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                title="" data-title="{{ __('Leave Office Time') }}"
-                                                data-bs-original-title="{{ __('Leave Office Time') }}">
-                                                <i class="fa fa-solid fa-clock"></i>
-                                            </button>
-                                        </div>
-                                    @else
-                                        -
+                                    @if ($leave->leave)
+                                        <button type="button" class="btn btn-primary btn-sm" disabled="disabled">
+                                            {{ $leave->leave}}
+                                        </button>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($leave->return)
+                                    @php
+                                        $leaveReturnParts = explode(' ', $leave->return);
+                                        $return_time = array_pop($leaveReturnParts);
+                                    @endphp
+                                        <button type="button" class="btn btn-info btn-sm" disabled="disabled">
+                                            {{ $return_time }}
+                                        </button>
                                     @endif
                                 </td>
                                 <td class="text-center">
@@ -135,22 +141,41 @@
                                         <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
                                             data-url="{{ route('leave-office.show', $leave->id) }}"
                                             data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                            title="" data-title="{{ __('Leave Office Approval') }}"
+                                            title="" data-title="{{ __('Leave Office Permit Approval') }}"
                                             data-bs-original-title="{{ __('Approval') }}">
                                             <i class="ti ti-caret-right text-white"></i>
                                         </a>
                                     </div>
                                 </td>
-                                <td class="action text-center">
+                                <td class="action">
                                     <span>
+                                        @if ($leave->status == 'Approved' || $leave->status == 'Waiting HR')
+                                            <div class="action-btn bg-warning ms-2">
+                                                <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input"
+                                                    data-bs-toggle="tooltip" data-size="lg"
+                                                    data-url="{{ route('leave-office.getTime', $leave->id) }}"
+                                                    data-ajax-popup="true" title="" data-title="{{ __('Return Office Time') }}"
+                                                    data-bs-original-title="{{ __('Return Office Time') }}">
+                                                    <i class="fa fa-solid fa-clock"></i>
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div class="action-btn ms-2">
+                                                <button class="btn btn-secondary btn-sm leave-input" disabled="disabled" data-bs-toggle="tooltip" data-size="xl"
+                                                    data-ajax-popup="true"
+                                                    data-bs-original-title="{{ __('Return Office Time') }}">
+                                                    <i class="fa fa-solid fa-clock"></i>
+                                                </button>
+                                            </div>
+                                        @endif
                                         @if (\Auth::user()->employee?->id == $leave->employee_id || \Auth::user()->type != 'employee')
                                             @can('Edit Leave Office')
                                                 @if ($leave->status != 'Approved')
-                                                    <div class="action-btn bg-info ms-2">
-                                                        <a href="#" class="mx-3 btn btn-sm align-items-center" 
+                                                    <div class="action-btn ms-2">
+                                                        <a href="#" class="mx-3 btn btn-info btn-sm align-items-center" 
                                                             data-url="{{  route('leave-office.edit', $leave->id) }}"
                                                             data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                            title="" data-title="{{ __('Update Leave Office') }}"
+                                                            title="" data-title="{{ __('Update Leave Office Permit') }}"
                                                             data-bs-original-title="{{ __('Edit') }}">
                                                             <i class="ti ti-pencil text-white"></i>
                                                         </a>
@@ -158,9 +183,9 @@
                                                 @endif
                                             @endcan
                                             @can('Delete Leave Office')
-                                                <div class="action-btn bg-danger ms-2">
+                                                <div class="action-btn ms-2">
                                                     {!! Form::open(['method' => 'DELETE', 'route' => ['leave-office.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                    <a href="#" class="mx-3 btn btn-danger btn-sm  align-items-center bs-pass-para"
                                                         data-bs-toggle="tooltip" title="" data-bs-original-title={{ __("Delete")}}
                                                         aria-label="Delete"><i
                                                             class="ti ti-trash text-white text-white"></i></a>
@@ -588,7 +613,7 @@
             border-bottom-left-radius: 10px;
         }
         #openStreetMapContainerLeave {
-            height: 200px;
+            height: 300px;
             width: 100%;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
@@ -596,7 +621,7 @@
             border-bottom-left-radius: 10px;
         }
         #openStreetMapContainerReturn {
-            height: 200px;
+            height: 300px;
             width: 100%;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
