@@ -97,7 +97,7 @@
                             <th>{{ __('Need') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Leave Time') }}</th>
-                            <th>{{ __('Return Time') }}</th>
+                            <th>{{ __('Back Time') }}</th>
                             <th>{{ __('Approval') }}</th>
                             <th width="200px">{{ __('Action') }}</th>
                         </tr>
