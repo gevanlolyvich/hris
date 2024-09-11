@@ -24,7 +24,7 @@
 
     @can('Create Request Attendance')
         <a href="#" data-url="{{ route('attendancerequest.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Request Attendance') }}"
-            data-size="lg" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+            data-size="xl" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
         </a>
@@ -141,7 +141,7 @@
                                                     @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
-                                                                data-size="lg"
+                                                                data-size="xl"
                                                                 data-url="{{ URL::to('attendancerequest/' . $attendance_request->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                                 title="" data-title="{{ __('Edit Attendance Request') }}"
