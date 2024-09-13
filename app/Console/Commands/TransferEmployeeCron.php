@@ -67,7 +67,7 @@ class TransferEmployeeCron extends Command
             ]);
 
             User::where('id', $emp->user_id)->update([
-                'branch_id' => $transfer->branch_id,
+                'branch_id' => $old_transfer->branch_id,
             ]);
         }
 
