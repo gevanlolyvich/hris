@@ -35,12 +35,13 @@ class TransferEmployeeCron extends Command
 
         // Transfer employees with today as the transfer date
         $transfers = Transfer::where('transfer_date', $today)
-            ->where('sync', '!=', true)
+            ->where('sync', null)
             ->orderBy('transfer_date', 'ASC')->get();
         $old_transfers = Transfer::where('transfer_date', '<', $today)
-            ->where('sync', '!=', true)
+            ->where('sync', null)
             ->orderBy('transfer_date', 'ASC')->get();
 
+        // echo json_encode($old_transfers, JSON_PRETTY_PRINT);
         for ($i = 0; $i < count($transfers); $i++) {
             $transfer   = $transfers[$i];
             $emp        = Employee::where('id', $transfer->employee_id)->first();
