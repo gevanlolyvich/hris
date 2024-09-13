@@ -17,13 +17,14 @@ class Transfer extends Model
         'transfer_date',
         'description',
         'created_by',
+        'sync'
     ];
 
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id', 'id');
     }
-    
+
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id', 'id');
