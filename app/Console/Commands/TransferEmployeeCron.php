@@ -34,8 +34,12 @@ class TransferEmployeeCron extends Command
         $today = now()->toDateString();
 
         // Transfer employees with today as the transfer date
-        $transfers = Transfer::where('transfer_date', $today)->get();
-        $old_transfers = Transfer::where('transfer_date', '<', $today)->orderBy('transfer_date', 'ASC')->get();
+        $transfers = Transfer::where('transfer_date', $today)
+            ->where('sync', '!=', true)
+            ->orderBy('transfer_date', 'ASC')->get();
+        $old_transfers = Transfer::where('transfer_date', '<', $today)
+            ->where('sync', '!=', true)
+            ->orderBy('transfer_date', 'ASC')->get();
 
         for ($i = 0; $i < count($transfers); $i++) {
             $transfer   = $transfers[$i];
@@ -52,6 +56,8 @@ class TransferEmployeeCron extends Command
             User::where('id', $emp->user_id)->update([
                 'branch_id' => $transfer->branch_id,
             ]);
+
+            Transfer::where('id', $transfer->id)->update(['sync' => true]);
         }
 
         for ($i = 0; $i < count($old_transfers); $i++) {
@@ -69,6 +75,8 @@ class TransferEmployeeCron extends Command
             User::where('id', $emp->user_id)->update([
                 'branch_id' => $old_transfer->branch_id,
             ]);
+
+            Transfer::where('id', $old_transfer->id)->update(['sync' => true]);
         }
 
         $this->info('Employee transfer process completed.');
