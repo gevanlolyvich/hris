@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MonthlyAttendanceExport;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -588,8 +589,6 @@ class ReportController extends Controller
                 }
             }
 
-            $employees = $employees->get();
-
             if (!empty($request->month)) {
                 $currentdate = strtotime($request->month);
                 $month       = date('m', $currentdate);
@@ -601,6 +600,13 @@ class ReportController extends Controller
                 $curMonth = date('M-Y', strtotime($year . '-' . $month));
             }
 
+            $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->format('Y-m-d');
+
+            $employees = Employee::whereDoesntHave('terminations', function ($query) use ($startDate) {
+                // Exclude employees whose termination date is before the start of the given month
+                $query->whereDate('termination_date', '<', $startDate);
+            })->get();
+
             $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
             $holiday_date = [];
             for ($i = 1; $i <= $num_of_days; $i++) {
@@ -611,7 +617,6 @@ class ReportController extends Controller
                 $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
                 $holiday_date[$date]    = $holiday; 
             }
-            Log::info(json_encode($holiday_date, JSON_PRETTY_PRINT));
 
             $employeesAttendance        = [];
             $totalPresent               = $totalLeave = $totalEarlyLeave = 0;

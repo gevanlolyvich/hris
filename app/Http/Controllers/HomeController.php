@@ -14,6 +14,7 @@ use App\Models\LandingPageSection;
 use App\Models\Meeting;
 use App\Models\Job;
 use App\Models\Leave;
+use App\Models\LeaveOffice;
 use App\Models\Payees;
 use App\Models\Payer;
 use App\Models\Permit;
@@ -238,12 +239,18 @@ class HomeController extends Controller
                 $requestAttendanceCount = $branch_id?->isNotEmpty() ? AttendanceRequest::whereHas('employee', function ($query) use ($branch_id){
                     $query->whereIn('branch_id', $branch_id);
                 })->whereNull('is_approved')->count() : AttendanceRequest::whereNull('is_approved')->count();
+                
                 $permitCount            = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id){
                     $query->whereIn('branch_id', $branch_id);
                 })->whereNull('is_approved')->count() : Permit::whereNull('is_approved')->count();
+
                 $leaveCount             = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id){
                     $query->whereIn('branch_id', $branch_id);
                 })->where('status', 'Pending')->count() : Leave::where('status', 'Pending')->count();
+
+                $leaveOfficeCount       = $branch_id?->isNotEmpty() ? LeaveOffice::whereHas('employee', function ($query) use ($branch_id, $today){
+                    $query->whereIn('branch_id', $branch_id);
+                })->where('date', $today)->count() : LeaveOffice::where('date', $today)->count();
 
                 $notClockIns    = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
@@ -274,7 +281,7 @@ class HomeController extends Controller
 
                 // $announcements = $announcements->sortByDesc('start_date');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount', 'settings'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount', 'leaveOfficeCount', 'settings'));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {
