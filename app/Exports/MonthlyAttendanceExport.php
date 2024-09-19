@@ -22,6 +22,7 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Carbon\Carbon;
 
 class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoSize, WithTitle, WithCustomStartCell
 {
@@ -112,7 +113,12 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             $employees          = $employees->where('department_id', $this->query->department);
         }
 
-        $employees = $employees->get();
+        $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->format('Y-m-d');
+
+        $employees = Employee::whereDoesntHave('terminations', function ($query) use ($startDate) {
+            // Exclude employees whose termination date is before the start of the given month
+            $query->whereDate('termination_date', '<', $startDate);
+        })->get();
 
         $this->total_data = count($employees) + 6;
 
