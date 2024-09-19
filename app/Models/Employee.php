@@ -594,4 +594,9 @@ class Employee extends Model
     {
         return $this->hasMany(AttendanceEmployee::class, 'employee_id', 'id');
     }
+
+    public function terminations()
+    {
+        return $this->hasMany(Termination::class, 'employee_id', 'id');
+    }
 }

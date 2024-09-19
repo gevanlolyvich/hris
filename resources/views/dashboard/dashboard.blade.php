@@ -513,23 +513,23 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
-                    <a href="{{ route('employee.index') }}">
+                    <a href="{{ route('leave-office.index', ['type' => 'daily', 'month' => date('Y-m'), 'date' => date('Y-m-d'), 'branch' => '']) }}">
                         <div class="card">
                             <div class="card-body">
                                 <div class="row align-items-center justify-content-between">
                                     <div class="col-auto mb-3 mb-sm-0">
                                         <div class="d-flex align-items-center">
                                             <div class="theme-avtar bg-primary">
-                                                <i class="ti ti-users"></i>
+                                                <i class="ti ti-route"></i>
                                             </div>
                                             <div class="ms-3">
                                                 <small class="text-muted">{{ __('Total') }}</small>
-                                                <h6 class="m-0">{{ __('Employee') }}</h6>
+                                                <h6 class="m-0">{{ __('Leave Office Permit') }}</h6>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-auto text-end">
-                                        <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                        <h4 class="m-0 text-primary">{{ $leaveOfficeCount }}</h4>
                                     </div>
                                 </div>
                             </div>
