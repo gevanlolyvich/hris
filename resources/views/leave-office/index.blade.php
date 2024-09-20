@@ -149,25 +149,15 @@
                                 </td>
                                 <td class="action">
                                     <span>
-                                        @if ($leave->status == 'Approved' || $leave->status == 'Waiting HR')
-                                            <div class="action-btn bg-warning ms-2">
-                                                <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input"
-                                                    data-bs-toggle="tooltip" data-size="lg"
-                                                    data-url="{{ route('leave-office.getTime', $leave->id) }}"
-                                                    data-ajax-popup="true" title="" data-title="{{ __('Return Office Time') }}"
-                                                    data-bs-original-title="{{ __('Return Office Time') }}">
-                                                    <i class="fa fa-solid fa-clock"></i>
-                                                </button>
-                                            </div>
-                                        @else
-                                            <div class="action-btn ms-2">
-                                                <button class="btn btn-secondary btn-sm leave-input" disabled="disabled" data-bs-toggle="tooltip" data-size="xl"
-                                                    data-ajax-popup="true"
-                                                    data-bs-original-title="{{ __('Return Office Time') }}">
-                                                    <i class="fa fa-solid fa-clock"></i>
-                                                </button>
-                                            </div>
-                                        @endif
+                                        <div class="action-btn bg-warning ms-2">
+                                            <button class="btn @if ($leave->return) btn-success @else btn-primary @endif btn-sm leave-input"
+                                                data-bs-toggle="tooltip" data-size="lg"
+                                                data-url="{{ route('leave-office.getTime', $leave->id) }}"
+                                                data-ajax-popup="true" title="" data-title="{{ __('Return Office Time') }}"
+                                                data-bs-original-title="{{ __('Return Office Time') }}">
+                                                <i class="fa fa-solid fa-clock"></i>
+                                            </button>
+                                        </div>
                                         @if (\Auth::user()->employee?->id == $leave->employee_id || \Auth::user()->type != 'employee')
                                             @can('Edit Leave Office')
                                                 @if ($leave->status != 'Approved')
@@ -247,12 +237,6 @@
                     if (accElement) {
                         accElement.value = accuracy;
                     }
-
-                    console.log('--------------------------------');
-                    console.log(latElement.value);
-                    console.log(longElement.value);
-                    console.log(accElement.value);
-                    console.log('--------------------------------');
 
                     resolve({ latitude, longitude, accuracy });
                     },
