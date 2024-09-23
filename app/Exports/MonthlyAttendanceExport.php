@@ -115,7 +115,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
         $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->format('Y-m-d');
 
-        $employees = Employee::whereDoesntHave('terminations', function ($query) use ($startDate) {
+        $employees = $employees->whereDoesntHave('terminations', function ($query) use ($startDate) {
             // Exclude employees whose termination date is before the start of the given month
             $query->whereDate('termination_date', '<', $startDate);
         })->get();
