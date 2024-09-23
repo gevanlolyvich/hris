@@ -567,6 +567,8 @@ class ReportController extends Controller
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
+            
+
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
                 // $employees->where('branch_id', $request->branch);
@@ -602,7 +604,7 @@ class ReportController extends Controller
 
             $startDate = Carbon::createFromFormat('Y-m', $year . '-' . $month)->startOfMonth()->format('Y-m-d');
 
-            $employees = Employee::whereDoesntHave('terminations', function ($query) use ($startDate) {
+            $employees = $employees->whereDoesntHave('terminations', function ($query) use ($startDate) {
                 // Exclude employees whose termination date is before the start of the given month
                 $query->whereDate('termination_date', '<', $startDate);
             })->get();
