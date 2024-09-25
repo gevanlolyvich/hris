@@ -2144,5 +2144,12 @@
     "Note From Superior": "Note From Superior",
     "Note From HR": "Note From HR",
     "Leave Office Permit Approval": "Leave Office Permit Approval",
-    "Back Time": "Back Time"
+    "Back Time": "Back Time",
+    "Vehicle Maintenance Type":"Vehicle Maintenance Type",
+    "Manage Vehicle Maintenance Type":"Manage Vehicle Maintenance Type",
+    "Create Vehicle Maintenance Type":"Create Vehicle Maintenance Type",
+    "Update Vehicle Maintenance Type":"Update Vehicle Maintenance Type",
+    "Vehicle Maintenance Type Successfully Created": "Vehicle Maintenance Type Successfully Created",
+    "Vehicle Maintenance Type Successfully Updated": "Vehicle Maintenance Type Successfully Updated",
+    "Vehicle Maintenance Type Successfully Deleted": "Vehicle Maintenance Type Successfully Deleted"
 }
