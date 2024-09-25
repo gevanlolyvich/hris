@@ -2160,5 +2160,12 @@
   "Update Vehicle Maintenance Type":"Perbarui Tipe Pemeliharaan Kendaraan",
   "Vehicle Maintenance Type Successfully Created": "Tipe Pemeliharaan Kendaraan Berhasil Dibuat",
   "Vehicle Maintenance Type Successfully Updated": "Tipe Pemeliharaan Kendaraan Berhasil Diperbarui",
-  "Vehicle Maintenance Type Successfully Deleted": "Tipe Pemeliharaan Kendaraan Berhasil Dihapus"
+  "Vehicle Maintenance Type Successfully Deleted": "Tipe Pemeliharaan Kendaraan Berhasil Dihapus",
+  "Vehicle Maintenance":"Pemeliharaan Kendaraan",
+  "Manage Vehicle Maintenance":"Kelola Pemeliharaan Kendaraan",
+  "Create Vehicle Maintenance":"Buat Pemeliharaan Kendaraan",
+  "Update Vehicle Maintenance":"Perbarui Pemeliharaan Kendaraan",
+  "Vehicle Maintenance Successfully Created": "Pemeliharaan Kendaraan Berhasil Dibuat",
+  "Vehicle Maintenance Successfully Updated": "Pemeliharaan Kendaraan Berhasil Diperbarui",
+  "Vehicle Maintenance Successfully Deleted": "Pemeliharaan Kendaraan Berhasil Dihapus"
 }
