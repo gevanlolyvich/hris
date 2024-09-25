@@ -99,6 +99,7 @@ use App\Http\Controllers\HealthyTargetController;
 use App\Http\Controllers\VehicleLendingController;
 use App\Http\Controllers\VehicleOfficerController;
 use App\Http\Controllers\VehicleMaintenanceTypeController;
+use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\PushSubscriptionController;
 
 /*
@@ -1739,6 +1740,13 @@ Route::patch('leave-office/{id}/set-time/', [LeaveOfficeController::class, 'setT
 );
 
 Route::resource('vehicle-maintenance-type', VehicleMaintenanceTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->middleware(
     [
         'auth',
         'XSS',
