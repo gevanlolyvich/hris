@@ -789,6 +789,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     Gate::check('Manage Leave Type') ||
                     Gate::check('Manage Training Type') ||
                     Gate::check('Manage Job Category') ||
+                    Gate::check('Manage Vehicle Maitenance Type') ||
                     Gate::check('Manage Job Stage'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -935,6 +936,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <li class="dash-item {{ request()->is('job-stage*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('job-stage.index') }}">{{ __('Job Stage') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Vehicle Maintenance Type')
+                                <li class="dash-item {{ request()->is('vehicle-maintenance-type*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('vehicle-maintenance-type.index') }}">{{ __('Vehicle Maintenance Type') }}</a>
                                 </li>
                             @endcan
 
