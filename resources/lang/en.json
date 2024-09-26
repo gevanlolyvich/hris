@@ -2158,5 +2158,8 @@
     "Update Vehicle Maintenance":"Update Vehicle Maintenance",
     "Vehicle Maintenance Successfully Created": "Vehicle Maintenance Successfully Created",
     "Vehicle Maintenance Successfully Updated": "Vehicle Maintenance Successfully Updated",
-    "Vehicle Maintenance Successfully Deleted": "Vehicle Maintenance Successfully Deleted"
+    "Vehicle Maintenance Successfully Deleted": "Vehicle Maintenance Successfully Deleted",
+    "Detail Vehicle Maintenance": "Detail Vehicle Maintenance",
+    "Maintenance Name": "Maintenance Name",
+    "Maintenance Type": "Maintenance Type"
 }

@@ -2167,5 +2167,8 @@
   "Update Vehicle Maintenance":"Perbarui Pemeliharaan Kendaraan",
   "Vehicle Maintenance Successfully Created": "Pemeliharaan Kendaraan Berhasil Dibuat",
   "Vehicle Maintenance Successfully Updated": "Pemeliharaan Kendaraan Berhasil Diperbarui",
-  "Vehicle Maintenance Successfully Deleted": "Pemeliharaan Kendaraan Berhasil Dihapus"
+  "Vehicle Maintenance Successfully Deleted": "Pemeliharaan Kendaraan Berhasil Dihapus",
+  "Detail Vehicle Maintenance": "Detail Pemeliharaan Kendaraan",
+  "Maintenance Name": "Nama Pemeliharaan",
+  "Maintenance Type": "Tipe Pemeliharaan"
 }
