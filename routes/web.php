@@ -1649,6 +1649,13 @@ Route::resource('vehicle', VehicleController::class)->middleware(
     ]
 );
 
+Route::get('vehicle/{id}/maintenance/', [VehicleController::class, 'getMaintenanceHistory'])->name('vehicle.getMaintenanceHistory')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::patch('vehicle-lending/{id}/approval/', [VehicleLendingController::class, 'approval'])->name('vehicle-lending.approval')->middleware(
     [
         'auth',

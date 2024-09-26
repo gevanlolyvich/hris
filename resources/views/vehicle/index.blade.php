@@ -32,7 +32,7 @@
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('KM') }}</th>
                                 <th>{{ __('Emoney Balance') }}</th>
-                                <th>{{ __('History') }}</th>
+                                <th>{{ __('Maintenance') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
@@ -54,15 +54,13 @@
                                     <td>{{ \Auth::user()->priceFormat($vehicle->emoney_balance) }}</td>
                                     <td>
                                         <span>
-                                            {{-- <div class="action-btn bg-warning ms-2">
-                                                <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg" 
-                                                    data-url="#"
-                                                    data-bs-toggle="tooltip" data-ajax-popup="true"
-                                                    title="" data-title="{{ __('Vehicle Lending History') }}"
+                                            <div class="action-btn bg-success ms-2">
+                                                <a href="{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}" class="mx-3 btn btn-sm  align-items-center"
+                                                    data-bs-toggle="tooltip" data-title="{{ __('Report Detail') }}"
                                                     data-bs-original-title="{{ __('View') }}">
-                                                    <i class="ti ti-eye text-white"></i>
+                                                    <i class="ti ti-tool text-white"></i>
                                                 </a>
-                                            </div> --}}
+                                            </div>
                                         </span>
                                     </td>
                                     <td class="action">
