@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             ManagePerformanceTypeFeature::class,
             NewSystemTaxSetting::class,
             NewFeatureLeaveOffice::class,
+            NewFeatureVehicleMaintenance::class,
         ]);
     }
 }
