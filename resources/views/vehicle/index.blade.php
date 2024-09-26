@@ -54,13 +54,14 @@
                                     <td>{{ \Auth::user()->priceFormat($vehicle->emoney_balance) }}</td>
                                     <td>
                                         <span>
-                                            <div class="action-btn bg-success ms-2">
-                                                <a href="{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}" class="mx-3 btn btn-sm  align-items-center"
-                                                    data-bs-toggle="tooltip" data-title="{{ __('Report Detail') }}"
-                                                    data-bs-original-title="{{ __('View') }}">
-                                                    <i class="ti ti-tool text-white"></i>
-                                                </a>
-                                            </div>
+                                            <button class="mx-3 btn btn-primary btn-sm align-items-center"
+                                                data-bs-toggle="tooltip" 
+                                                data-title="{{ __('Report Detail') }}"
+                                                data-url="{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}"
+                                                data-bs-original-title="{{ __('View') }}"
+                                                onclick="window.location.href='{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}'">
+                                                <i class="ti ti-tool text-white"></i>
+                                            </button>
                                         </span>
                                     </td>
                                     <td class="action">
