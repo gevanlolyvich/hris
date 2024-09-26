@@ -2161,5 +2161,7 @@
     "Vehicle Maintenance Successfully Deleted": "Vehicle Maintenance Successfully Deleted",
     "Detail Vehicle Maintenance": "Detail Vehicle Maintenance",
     "Maintenance Name": "Maintenance Name",
-    "Maintenance Type": "Maintenance Type"
+    "Maintenance Type": "Maintenance Type",
+    "Maintenance": "Maintenance",
+    "Vehicle Maintenance History": "Vehicle Maintenance History"
 }

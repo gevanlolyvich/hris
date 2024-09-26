@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
 @section('page-title')
-   {{ __('Create New Report') }}
+   {{ __('Vehicle Maintenance History') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
     <li class="breadcrumb-item"><a href="{{ url('vehicle') }}">{{ __('Manage Vehicle') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Vehice Maintenance History') }}</li>
+    <li class="breadcrumb-item">{{ __('Vehicle Maintenance History') }}</li>
 @endsection
 
 @push('script-page')

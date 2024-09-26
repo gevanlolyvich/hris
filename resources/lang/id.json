@@ -2170,5 +2170,7 @@
   "Vehicle Maintenance Successfully Deleted": "Pemeliharaan Kendaraan Berhasil Dihapus",
   "Detail Vehicle Maintenance": "Detail Pemeliharaan Kendaraan",
   "Maintenance Name": "Nama Pemeliharaan",
-  "Maintenance Type": "Tipe Pemeliharaan"
+  "Maintenance Type": "Tipe Pemeliharaan",
+  "Maintenance": "Pemeliharaan",
+  "Vehicle Maintenance History": "Sejarah Pemeliharaan Kendaraan"
 }
