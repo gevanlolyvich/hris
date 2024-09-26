@@ -19,13 +19,21 @@ class VehicleMaintenanceController extends Controller
     {
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
-                $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $branch     = Branch::whereIn('id', $branch_ids)->select('id', 'name')->get()->pluck('name', 'id');
-                $vehicles   = Vehicle::whereIn('branch_id', $branch_ids)->get()->pluck('id');
+                $branch_ids         = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
+                $branch             = Branch::whereIn('id', $branch_ids)->select('id', 'name')->get()->pluck('name', 'id');
+                $vehicles           = Vehicle::whereIn('branch_id', $branch_ids)->get()->pluck('id');
+                $vehicles_choices   = Vehicle::whereIn('branch_id', $branch_ids)->get();
             } else {
-                $branch     = Branch::select('id', 'name')->get()->pluck('name', 'id');
-                $vehicles   = Vehicle::get()->pluck('id');
+                $branch             = Branch::select('id', 'name')->get()->pluck('name', 'id');
+                $vehicles           = Vehicle::get()->pluck('id');
+                $vehicles_choices   = Vehicle::get();
             }
+
+            foreach ($vehicles_choices as $vehicle) {
+                $branch         = $vehicle?->branch?->name ?? '-';
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            }
+            $vehicles_choices           = $vehicles_choices->pluck('name', 'id');
 
             $maintenances       = VehicleMaintenance::whereIn('vehicle_id', $vehicles)->orderby('start_date', 'DESC');
             if ($request->type == 'monthly' && !empty($request->month)) {
@@ -58,9 +66,13 @@ class VehicleMaintenanceController extends Controller
                     ]
                 );
             }
+
+            if (!empty($request->vehicle)) {
+                $maintenances   = $maintenances->where('vehicle_id', $request->vehicle);
+            }
             $maintenances   = $maintenances->get();
 
-            return view('vehicle-maintenance.index', compact('maintenances', 'branch'));
+            return view('vehicle-maintenance.index', compact('maintenances', 'vehicles_choices'));
         } else if (\Auth::user()->type != 'employee') {
             $branch = Branch::find(\Auth::user()->branch_id);
             $branch_id = collect();
@@ -75,9 +87,16 @@ class VehicleMaintenanceController extends Controller
                 }
             }
 
-            $branch         = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get()->pluck('id') : Vehicle::get()->pluck('id');
+            $branch             = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
+            $vehicles           = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get()->pluck('id') : Vehicle::get()->pluck('id');
+            $vehicles_choices   = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::get();
             $maintenances       = VehicleMaintenance::whereIn('vehicle_id', $vehicles)->orderby('start_date', 'DESC');
+
+            foreach ($vehicles_choices as $vehicle) {
+                $branch         = $vehicle?->branch?->name ?? '-';
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            }
+            $vehicles_choices           = $vehicles_choices->pluck('name', 'id');
 
             if ($request->type == 'monthly' && !empty($request->month)) {
                 $month = date('m', strtotime($request->month));
@@ -116,9 +135,13 @@ class VehicleMaintenanceController extends Controller
                 );
             }
 
+            if (!empty($request->vehicle)) {
+                $maintenances   = $maintenances->where('vehicle_id', $request->vehicle);
+            }
+
             $maintenances   = $maintenances->get();
 
-            return view('vehicle-maintenance.index', compact('maintenances', 'branch'));
+            return view('vehicle-maintenance.index', compact('maintenances', 'vehicles_choices'));
         } else if (\Auth::user()->can('Manage Vehicle Maintenance')) {
             $maintenannces = VehicleMaintenance::orderby('start_date', 'DESC')->get();
             

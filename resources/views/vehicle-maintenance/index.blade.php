@@ -32,7 +32,7 @@
                     <div class="row align-items-center justify-content-end">
                         <div class="col-xl-10">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-2">
                                     <label class="col-form-label">{{__('Type')}}</label>
                                     <br>
                                     <div class="form-check form-check-inline form-group">
@@ -56,15 +56,15 @@
                                         {{ Form::date('date',isset($_GET['date'])?$_GET['date']:date('Y-m-d'), array('class' => 'form-control month-btn')) }}
                                     </div>
                                 </div>
-                                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
+                                <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12 col-12">
                                     <div class="btn-box">
-                                        {{ Form::label('branch', __('Branch'),['class'=>'col-form-label'])}}
-                                        {{ Form::select('branch', $branch,isset($_GET['branch'])?$_GET['branch']:'', ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                        {{ Form::label('vehicle', __('Vehicle'),['class'=>'col-form-label'])}}
+                                        {{ Form::select('vehicle', $vehicles_choices,isset($_GET['vehicle'])?$_GET['vehicle']:'', ['class' => 'form-control select2', 'placeholder' => __('Select Vehicle')]) }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-auto mt-4">
+                        <div class="col-auto mt-1">
                             <div class="row">
                                 <div class="col-auto">
                                     <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
