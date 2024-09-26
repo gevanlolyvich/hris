@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
 @section('page-title')
-    {{ __('Manage Vehicle') }}
+    {{ __('Manage Vehicle Maintenance Type') }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item">{{ __('Vehicle') }}</li>
+    <li class="breadcrumb-item">{{ __('Vehicle Maintenance Type') }}</li>
 @endsection
 
 @section('action-button')
-    <a href="#" data-url="{{ route('vehicle.create') }}" data-ajax-popup="true" data-size="xl"
-        data-title="{{ __('Create Vehicle') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+    <a href="#" data-url="{{ route('vehicle-maintenance-type.create') }}" data-ajax-popup="true" data-size="md"
+        data-title="{{ __('Create Vehicle Maintenance Type') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
         data-bs-original-title="{{ __('Create') }}">
         <i class="ti ti-plus"></i>
     </a>
@@ -26,57 +26,26 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Name') }}</th>
-                                <th>{{ __('Status') }}</th>
-                                <th>{{ __('Type') }}</th>
-                                <th>{{ __('Police No') }}</th>
-                                <th>{{ __('Branch') }}</th>
-                                <th>{{ __('KM') }}</th>
-                                <th>{{ __('Emoney Balance') }}</th>
-                                <th>{{ __('Maintenance') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($vehicles as $vehicle)
+                            @foreach ($types as $type)
                                 <tr>
-                                    <td>{{ $vehicle->name }}</td>
-                                    <td>
-                                        @if ($vehicle->is_active)
-                                            <div class="badge bg-success p-2 px-3 rounded">{{ __('Active') }}</div>
-                                        @else
-                                            <div class="badge bg-danger p-2 px-3 rounded">{{ __('Inactive') }}</div>
-                                        @endif
-                                    </td>
-                                    <td>{{ $vehicle->type }}</td>
-                                    <td>{{ $vehicle->police_no }}</td>
-                                    <td>{{ $vehicle->branch?->name ?? '-' }}</td>
-                                    <td>{{ $vehicle->km }}</td>
-                                    <td>{{ \Auth::user()->priceFormat($vehicle->emoney_balance) }}</td>
-                                    <td>
-                                        <span>
-                                            <button class="mx-3 btn btn-primary btn-sm align-items-center"
-                                                data-bs-toggle="tooltip" 
-                                                data-title="{{ __('Report Detail') }}"
-                                                data-url="{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}"
-                                                data-bs-original-title="{{ __('View') }}"
-                                                onclick="window.location.href='{{ route('vehicle.getMaintenanceHistory', $vehicle->id) }}'">
-                                                <i class="ti ti-tool text-white"></i>
-                                            </button>
-                                        </span>
-                                    </td>
+                                    <td>{{ $type->name }}</td>
                                     <td class="action">
                                         <span>
                                             <div class="action-btn bg-info ms-2">
                                                 <a href="#" class="mx-3 btn btn-sm align-items-center" 
-                                                    data-url="{{  route('vehicle.edit', $vehicle->id) }}"
-                                                    data-size="lg" data-ajax-popup="true" data-bs-toggle="tooltip"
-                                                    title="" data-title="{{ __('Update Vehicle') }}"
+                                                    data-url="{{  route('vehicle-maintenance-type.edit', $type->id) }}"
+                                                    data-size="md" data-ajax-popup="true" data-bs-toggle="tooltip"
+                                                    title="" data-title="{{ __('Update Vehicle Maintenance Type') }}"
                                                     data-bs-original-title="{{ __('Edit') }}">
                                                     <i class="ti ti-pencil text-white"></i>
                                                 </a>
                                             </div>
                                             <div class="action-btn bg-danger ms-2">
-                                                {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle.destroy', $vehicle->id], 'id' => 'delete-form-' . $vehicle->id]) !!}
+                                                {!! Form::open(['method' => 'DELETE', 'route' => ['vehicle-maintenance-type.destroy', $type->id], 'id' => 'delete-form-' . $type->id]) !!}
                                                 <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                     data-bs-toggle="tooltip" title="" data-bs-original-title="{{__('Delete')}}"
                                                     aria-label="{{__('Delete')}}"><i

@@ -115,7 +115,9 @@
                                 'Bank',
                                 'Level',
                                 'Goal',
-                                'Leave Office'
+                                'Leave Office',
+                                'Vehicle Maintenance',
+                                'Vehicle Maintenance Type',
                             ];
                             if (Auth::user()->type == 'super admin') {
                                 $modules[] = 'Language';

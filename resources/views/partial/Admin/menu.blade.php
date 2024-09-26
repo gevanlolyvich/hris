@@ -582,7 +582,13 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <a class="dash-link"
                                     href="{{ route('vehicle.index') }}">{{ __('Vehicle List') }}</a>
                             </li>
-                            @endif
+                        @endif
+                        @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Manage Vehicle Maintenance'))
+                            <li class="dash-item {{ Request::segment(1) == 'vehicle-maintenance' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('vehicle-maintenance.index') }}">{{ __('Vehicle Maintenance') }}</a>
+                            </li>
+                        @endif
                         <li class="dash-item {{ Request::segment(1) == 'vehicle-lending' ? ' active' : '' }}">
                             <a class="dash-link"
                                 href="{{ route('vehicle-lending.index') }}">{{ __('Vehicle Lending') }}</a>
@@ -789,6 +795,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     Gate::check('Manage Leave Type') ||
                     Gate::check('Manage Training Type') ||
                     Gate::check('Manage Job Category') ||
+                    Gate::check('Manage Vehicle Maitenance Type') ||
                     Gate::check('Manage Job Stage'))
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -935,6 +942,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <li class="dash-item {{ request()->is('job-stage*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('job-stage.index') }}">{{ __('Job Stage') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Vehicle Maintenance Type')
+                                <li class="dash-item {{ request()->is('vehicle-maintenance-type*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('vehicle-maintenance-type.index') }}">{{ __('Vehicle Maintenance Type') }}</a>
                                 </li>
                             @endcan
 

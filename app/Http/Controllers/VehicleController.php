@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Vehicle;
+use App\Models\VehicleMaintenance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -286,5 +287,13 @@ class VehicleController extends Controller
         } else {
             return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
         }
+    }
+
+    public function getMaintenanceHistory($id)
+    {
+        $vehicle = Vehicle::find($id);
+        $maintenances = VehicleMaintenance::where('vehicle_id', $id)->orderBy('start_date', 'DESC')->get();
+
+        return view('vehicle.maintenance', compact('vehicle', 'maintenances'));
     }
 }

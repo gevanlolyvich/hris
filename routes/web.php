@@ -98,6 +98,8 @@ use App\Http\Controllers\HealthyStepsController;
 use App\Http\Controllers\HealthyTargetController;
 use App\Http\Controllers\VehicleLendingController;
 use App\Http\Controllers\VehicleOfficerController;
+use App\Http\Controllers\VehicleMaintenanceTypeController;
+use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\PushSubscriptionController;
 
 /*
@@ -1647,6 +1649,13 @@ Route::resource('vehicle', VehicleController::class)->middleware(
     ]
 );
 
+Route::get('vehicle/{id}/maintenance/', [VehicleController::class, 'getMaintenanceHistory'])->name('vehicle.getMaintenanceHistory')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::patch('vehicle-lending/{id}/approval/', [VehicleLendingController::class, 'approval'])->name('vehicle-lending.approval')->middleware(
     [
         'auth',
@@ -1731,6 +1740,20 @@ Route::get('leave-office/{id}/get-time/', [LeaveOfficeController::class, 'getTim
     ]
 );
 Route::patch('leave-office/{id}/set-time/', [LeaveOfficeController::class, 'setTime'])->name('leave-office.setTime')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-maintenance-type', VehicleMaintenanceTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->middleware(
     [
         'auth',
         'XSS',
