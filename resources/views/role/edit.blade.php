@@ -118,6 +118,8 @@
                                 'Leave Office',
                                 'Vehicle Maintenance',
                                 'Vehicle Maintenance Type',
+                                'Vehicle Workshop',
+                                'Vehicle Type',
                             ];
                             if (Auth::user()->type == 'super admin') {
                                 $modules[] = 'Language';
