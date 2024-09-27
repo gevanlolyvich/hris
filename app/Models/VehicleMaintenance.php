@@ -16,6 +16,7 @@ class VehicleMaintenance extends Model
         'name',
         'start_date',
         'end_date',
+        'next_date',
         'location',
         'cost',
         'file',
