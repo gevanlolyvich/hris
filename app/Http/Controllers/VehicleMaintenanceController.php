@@ -213,6 +213,7 @@ class VehicleMaintenanceController extends Controller
                     'maintenance_type_id' => 'required',
                     'start_date' => 'required|date',
                     'end_date' => 'nullable|date|after_or_equal:start_date',
+                    'next_date' => 'nullable|date|after_or_equal:start_date',
                     'name' => 'required',
                     'location' => 'required',
                     'file' => 'nullable|mimes:jpeg,png,jpg,pdf,doc,docx,xls,xlsx|max:10480'
@@ -241,6 +242,7 @@ class VehicleMaintenanceController extends Controller
             $maintenance->maintenance_type_id   = $request->maintenance_type_id;
             $maintenance->start_date            = $request->start_date;
             $maintenance->end_date              = $request->end_date;
+            $maintenance->next_date             = $request->next_date;
             $maintenance->name                  = $request->name;
             $maintenance->location              = $request->location;
             $maintenance->cost                  = $request->cost;
@@ -334,6 +336,7 @@ class VehicleMaintenanceController extends Controller
                     'maintenance_type_id' => 'required',
                     'start_date' => 'required|date',
                     'end_date' => 'nullable|date|after_or_equal:start_date',
+                    'next_date' => 'nullable|date|after_or_equal:start_date',
                     'name' => 'required',
                     'location' => 'required',
                     'file' => 'nullable|mimes:jpeg,png,jpg,pdf,doc,docx,xls,xlsx|max:10480'
@@ -366,6 +369,7 @@ class VehicleMaintenanceController extends Controller
             $vehicleMaintenance->maintenance_type_id   = $request->maintenance_type_id;
             $vehicleMaintenance->start_date            = $request->start_date;
             $vehicleMaintenance->end_date              = $request->end_date;
+            $vehicleMaintenance->next_date             = $request->next_date;
             $vehicleMaintenance->name                  = $request->name;
             $vehicleMaintenance->location              = $request->location;
             $vehicleMaintenance->cost                  = $request->cost;

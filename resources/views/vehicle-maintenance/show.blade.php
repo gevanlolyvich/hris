@@ -27,6 +27,10 @@
                     @endif
                 </tr>
                 <tr>
+                    <th>{{ __('Next Maintenance Date')}}</th>
+                    <td>{{ $vehicleMaintenance?->next_date ?? '-' }}</td>
+                </tr>
+                <tr>
                     <th>{{ __('Location')}}</th>
                     <td>{{ $vehicleMaintenance->location }}</td>
                 </tr>

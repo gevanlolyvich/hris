@@ -51,6 +51,10 @@
                 {{ Form::label('description', __('Description'), ['class' => 'col-form-label']) }}
                 {{ Form::textarea('description', null, ['class' => 'form-control', 'placeholder' => __('Enter Description'),'rows'=>'7']) }}
             </div>
+            <div class="form-group col-12">
+                {{ Form::label('next_date', __('Next Maintenance Date'), ['class' => 'col-form-label']) }}
+                {{ Form::date('next_date', null, ['class' => 'form-control month-btn', 'autocomplete' => 'on', 'id' => 'next_date_input', 'disabled' => true]) }}
+            </div>
         </div>
     </div>
     <div class="modal-footer">

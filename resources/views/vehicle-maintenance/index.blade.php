@@ -190,10 +190,14 @@
                 console.log(dateInput);
 
                 const end_date = document.getElementById('end_date_input');
-
                 end_date.disabled = false;
                 end_date.min = dateInput;
                 end_date.value = '';
+
+                const next_date = document.getElementById('next_date_input');
+                next_date.disabled = false;
+                next_date.min = dateInput;
+                next_date.value = '';
             })
         });
 
