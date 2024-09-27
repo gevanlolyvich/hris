@@ -2173,5 +2173,11 @@
     "Update Vehicle Workshop":"Update Vehicle Workshop",
     "Vehicle Workshop Successfully Created": "Vehicle Workshop Successfully Created",
     "Vehicle Workshop Successfully Updated": "Vehicle Workshop Successfully Updated",
-    "Vehicle Workshop Successfully Deleted": "Vehicle Workshop Successfully Deleted"
+    "Vehicle Workshop Successfully Deleted": "Vehicle Workshop Successfully Deleted",
+    "Manage Vehicle Type":"Manage Vehicle Type",
+    "Create Vehicle Type":"Create Vehicle Type",
+    "Update Vehicle Type":"Update Vehicle Type",
+    "Vehicle Type Successfully Created": "Vehicle Type Successfully Created",
+    "Vehicle Type Successfully Updated": "Vehicle Type Successfully Updated",
+    "Vehicle Type Successfully Deleted": "Vehicle Type Successfully Deleted"
 }

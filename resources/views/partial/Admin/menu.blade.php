@@ -577,6 +577,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                         <span class="dash-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="dash-submenu">
+                        @can('Manage Vehicle Type')
+                            <li class="dash-item {{ Request::segment(1) == 'vehicle-type' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('vehicle-type.index') }}">{{ __('Vehicle Type') }}</a>
+                            </li>
+                        @endcan
                         @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
                             <li class="dash-item {{ Request::segment(1) == 'vehicle' ? ' active' : '' }}">
                                 <a class="dash-link"

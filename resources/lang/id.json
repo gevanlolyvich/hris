@@ -2182,5 +2182,11 @@
   "Update Vehicle Workshop":"Perbarui Bengkel Kendaraan",
   "Vehicle Workshop Successfully Created": "Bengkel Kendaraan Berhasil Dibuat",
   "Vehicle Workshop Successfully Updated": "Bengkel Kendaraan Berhasil Diperbarui",
-  "Vehicle Workshop Successfully Deleted": "Bengkel Kendaraan Berhasil Dihapus"
+  "Vehicle Workshop Successfully Deleted": "Bengkel Kendaraan Berhasil Dihapus",
+  "Manage Vehicle Type":"Kelola Tipe Kendaraan",
+  "Create Vehicle Type":"Buat Tipe Kendaraan",
+  "Update Vehicle Type":"Perbarui Tipe Kendaraan",
+  "Vehicle Type Successfully Created": "Tipe Kendaraan Berhasil Dibuat",
+  "Vehicle Type Successfully Updated": "Tipe Kendaraan Berhasil Diperbarui",
+  "Vehicle Type Successfully Deleted": "Tipe Kendaraan Berhasil Dihapus"
 }
