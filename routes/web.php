@@ -101,6 +101,7 @@ use App\Http\Controllers\VehicleOfficerController;
 use App\Http\Controllers\VehicleMaintenanceTypeController;
 use App\Http\Controllers\VehicleMaintenanceController;
 use App\Http\Controllers\VehicleWorkshopController;
+use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\PushSubscriptionController;
 
 /*
@@ -1762,6 +1763,13 @@ Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->mid
 );
 
 Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-type', VehicleTypeController::class)->middleware(
     [
         'auth',
         'XSS',
