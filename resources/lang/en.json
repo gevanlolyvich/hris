@@ -2166,5 +2166,12 @@
     "Vehicle Maintenance History": "Vehicle Maintenance History",
     "Next Maintenance Date": "Next Maintenance Date",
     "With Name": "With Name",
-    "Need To Maintenance Today": "Need To Maintenance Today"
+    "Need To Maintenance Today": "Need To Maintenance Today",
+    "Vehicle Workshop":"Vehicle Workshop",
+    "Manage Vehicle Workshop":"Manage Vehicle Workshop",
+    "Create Vehicle Workshop":"Create Vehicle Workshop",
+    "Update Vehicle Workshop":"Update Vehicle Workshop",
+    "Vehicle Workshop Successfully Created": "Vehicle Workshop Successfully Created",
+    "Vehicle Workshop Successfully Updated": "Vehicle Workshop Successfully Updated",
+    "Vehicle Workshop Successfully Deleted": "Vehicle Workshop Successfully Deleted"
 }

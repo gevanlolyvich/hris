@@ -78,7 +78,7 @@
   "Add to Job OnBoard" : "Tambahkan ke OnBoard Job",
   "Added By" : "Ditambahkan oleh",
   "Additional Details" : "Rincian Tambahan",
-  "Address" : "Alamat KTP",
+  "Address" : "Alamat",
   "All" : "Semua",
   "All Branch" : "Semua Cabang",
   "All Employee" : "Semua karyawan",
@@ -2175,5 +2175,12 @@
   "Vehicle Maintenance History": "Sejarah Pemeliharaan Kendaraan",
   "Next Maintenance Date": "Tanggal Pemeliharaan Selanjutnya",
   "With Name": "Dengan Nama",
-  "Need To Maintenance Today": "Perlu Dipelihara Hari Ini"
+  "Need To Maintenance Today": "Perlu Dipelihara Hari Ini",
+  "Vehicle Workshop":"Bengkel Kendaraan",
+  "Manage Vehicle Workshop":"Kelola Bengkel Kendaraan",
+  "Create Vehicle Workshop":"Buat Bengkel Kendaraan",
+  "Update Vehicle Workshop":"Perbarui Bengkel Kendaraan",
+  "Vehicle Workshop Successfully Created": "Bengkel Kendaraan Berhasil Dibuat",
+  "Vehicle Workshop Successfully Updated": "Bengkel Kendaraan Berhasil Diperbarui",
+  "Vehicle Workshop Successfully Deleted": "Bengkel Kendaraan Berhasil Dihapus"
 }

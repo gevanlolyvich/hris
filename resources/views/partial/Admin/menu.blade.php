@@ -583,6 +583,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                     href="{{ route('vehicle.index') }}">{{ __('Vehicle List') }}</a>
                             </li>
                         @endif
+                        @can('Manage Vehicle Workshop')
+                            <li class="dash-item {{ Request::segment(1) == 'vehicle-workshop' ? ' active' : '' }}">
+                                <a class="dash-link"
+                                    href="{{ route('vehicle-workshop.index') }}">{{ __('Vehicle Workshop') }}</a>
+                            </li>
+                        @endcan
                         @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Manage Vehicle Maintenance'))
                             <li class="dash-item {{ Request::segment(1) == 'vehicle-maintenance' ? ' active' : '' }}">
                                 <a class="dash-link"
