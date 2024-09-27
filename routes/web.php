@@ -1761,7 +1761,7 @@ Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->mid
     ]
 );
 
-Route::resource('vehicle-workshop', VehicleWrokshopController::class)->middleware(
+Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middleware(
     [
         'auth',
         'XSS',
