@@ -15,6 +15,7 @@ class VehicleLending extends Model
         'date',
         'end_date',
         'purpose',
+        'sim',
         'status',
         'approved_by',
         'pickup_time',
