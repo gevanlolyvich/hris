@@ -193,6 +193,7 @@ class VehicleLendingController extends Controller
                 'date' => 'required|date|after_or_equal:today',
                 'end_date' => 'required|date|after_or_equal:date',
                 'purpose' => 'required',
+                'sim' => 'nullable|mimes:jpeg,png,jpg,pdf|max:10480'
             ]
         );
 
@@ -215,12 +216,21 @@ class VehicleLendingController extends Controller
         // Start A Transaction
         DB::beginTransaction();
 
+        $document_path = null;
+        if ($request->file('sim')) {
+            $docs = $request->file('sim');
+            $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', \Auth::user()->name) . "." . $docs->getClientOriginalExtension();
+            $path = $docs->storeAs('uploads/sim', $docName, 'public');
+            $document_path = env('APP_URL') . '/storage/' . $path;
+        }
+
         // Create New Vehicle Officer
         $lending                = new VehicleLending();
         $lending->request_by    = \Auth::user()->id;
         $lending->vehicle_id    = $request->vehicle_id;
         $lending->date          = $request->date;
         $lending->end_date      = $request->end_date;
+        $lending->sim           = $document_path;
         $lending->purpose       = $request->purpose;
         $lending->save();
 
@@ -381,11 +391,26 @@ class VehicleLendingController extends Controller
         // Start A Transaction
         DB::beginTransaction();
 
+        $document_path = null;
+        if ($request->file('sim')) {
+            $docs = $request->file('sim');
+            $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', \Auth::user()->name) . "." . $docs->getClientOriginalExtension();
+            $path = $docs->storeAs('uploads/sim', $docName, 'public');
+            $document_path = env('APP_URL') . '/storage/' . $path;
+
+            // Delete Old file
+            $old_filepath = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->sim);
+            if (File::exists($old_filepath)) {
+                File::delete($old_filepath);
+            }
+        }
+
         // Create New Vehicle Officer
         $vehicleLending->vehicle_id     = $request->vehicle_id;
         $vehicleLending->date           = $request->date;
         $vehicleLending->end_date       = $request->end_date;
         $vehicleLending->purpose        = $request->purpose;
+        $vehicleLending->sim            = $document_path ?: $vehicleLending->sim;
         $vehicleLending->save();
 
         // Check Vehicle Version
@@ -409,6 +434,12 @@ class VehicleLendingController extends Controller
     {
         if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee' || $vehicleLending->request_by == \Auth::user()->id) {
             $vehicleLending->delete();
+
+            // Delete Old file
+            $old_filepath = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleLending->sim);
+            if (File::exists($old_filepath)) {
+                File::delete($old_filepath);
+            }
 
             return redirect()->back()->with('success', __('Vehicle Lending Successfully Deleted'));
         } else {
