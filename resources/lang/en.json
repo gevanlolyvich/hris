@@ -2180,5 +2180,7 @@
     "Vehicle Type Successfully Created": "Vehicle Type Successfully Created",
     "Vehicle Type Successfully Updated": "Vehicle Type Successfully Updated",
     "Vehicle Type Successfully Deleted": "Vehicle Type Successfully Deleted",
-    "Driving License": "Driving License"
+    "Driving License": "Driving License",
+    "Under Maintenance": "Under Maintenance",
+    "under maintenance": "Under Maintenance"
 }

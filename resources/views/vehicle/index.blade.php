@@ -41,10 +41,12 @@
                                 <tr>
                                     <td>{{ $vehicle->name }}</td>
                                     <td>
-                                        @if ($vehicle->is_active)
+                                        @if ($vehicle->status == 'active')
                                             <div class="badge bg-success p-2 px-3 rounded">{{ __('Active') }}</div>
-                                        @else
+                                        @elseif ($vehicle->status == 'inactive')
                                             <div class="badge bg-danger p-2 px-3 rounded">{{ __('Inactive') }}</div>
+                                        @else
+                                            <div class="badge bg-warning p-2 px-3 rounded">{{ __($vehicle->status) }}</div>
                                         @endif
                                     </td>
                                     <td>{{ $vehicle->type }}</td>

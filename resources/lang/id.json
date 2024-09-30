@@ -2189,5 +2189,7 @@
   "Vehicle Type Successfully Created": "Tipe Kendaraan Berhasil Dibuat",
   "Vehicle Type Successfully Updated": "Tipe Kendaraan Berhasil Diperbarui",
   "Vehicle Type Successfully Deleted": "Tipe Kendaraan Berhasil Dihapus",
-  "Driving License": "Surat Izin Mengemudi"
+  "Driving License": "Surat Izin Mengemudi",
+  "Under Maintenance": "Dalam Pemeliharaan",
+  "under maintenance": "Dalam Pemeliharaan"
 }
