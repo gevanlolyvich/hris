@@ -37,4 +37,13 @@ class Vehicle extends Model
         $this->version++;
         $this->save();
     }
+
+    public static function getVehicleStatuses()
+    {
+        return [
+            'active' => __('Active'),
+            'inactive' => __('Inactive'),
+            'under maintenance' => __('Under Maintenance')
+        ];
+    }
 }
