@@ -186,7 +186,7 @@ class VehicleMaintenanceController extends Controller
                 }
             }
 
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::where('is_active', true)->get();
+            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::where('status', 'active')->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -252,7 +252,7 @@ class VehicleMaintenanceController extends Controller
     
             if (($request->end_date == null && Carbon::today()->equalTo(Carbon::parse($request->start_date))) || // Check if start date same as today when user doesn't input endate
                 (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))){ // Check today is between two date
-                $vehicle->is_active = false;
+                $vehicle->status = 'inactive';
                 $vehicle->save();
             }
     
@@ -309,7 +309,7 @@ class VehicleMaintenanceController extends Controller
                 }
             }
 
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::where('is_active', true)->get();
+            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::whereIn('branch_id', $branch_id)->get() : Vehicle::where('status', 'active')->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -379,7 +379,7 @@ class VehicleMaintenanceController extends Controller
     
             if (($request->end_date == null && Carbon::today()->equalTo(Carbon::parse($request->start_date))) || // Check if start date same as today when user doesn't input endate
                 (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))){ // Check today is between two date
-                $vehicle->is_active = false;
+                $vehicle->status = 'inactive';
                 $vehicle->save();
             }
     

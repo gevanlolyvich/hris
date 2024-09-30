@@ -132,9 +132,9 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::where('is_active', true)->whereIn('branch_id', $branch_ids)->get();
+                $vehicles   = Vehicle::where('status', 'active')->whereIn('branch_id', $branch_ids)->get();
             } else {
-                $vehicles   = Vehicle::where('is_active', true)->get();
+                $vehicles   = Vehicle::where('status', 'active')->get();
             }
 
             foreach ($vehicles as $vehicle) {
@@ -158,7 +158,7 @@ class VehicleLendingController extends Controller
                 }
             }
 
-            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::where('is_active', true)->whereIn('branch_id', $branch_id)->get() : Vehicle::where('is_active', true)->get();
+            $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::where('status', 'active')->whereIn('branch_id', $branch_id)->get() : Vehicle::where('status', 'active')->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -167,7 +167,7 @@ class VehicleLendingController extends Controller
 
             return view('vehicle-lending.create', compact('vehicles'));
         } else {
-            $vehicles   = Vehicle::where('is_active', true)->get();
+            $vehicles   = Vehicle::where('status', 'active')->get();
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
@@ -203,7 +203,7 @@ class VehicleLendingController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
             
-        $vehicle = Vehicle::where('is_active', true)->find($request->vehicle_id);
+        $vehicle = Vehicle::where('status', 'active')->find($request->vehicle_id);
         if (!$vehicle) {
             return redirect()->back()->with('error', __('Vehicle Unavailable'));
         }
@@ -236,7 +236,7 @@ class VehicleLendingController extends Controller
 
 
         // Check Vehicle Version
-        $vehicle_reload = Vehicle::select('version')->where('is_active', true)->find($vehicle->id);
+        $vehicle_reload = Vehicle::select('version')->where('status', 'active')->find($vehicle->id);
         if ($vehicle_reload?->version !== $currentVersion + 1) { // When version not the same as we first retrieve rollback
             DB::rollBack();
             return redirect()->back()->with('error', __('Vehicle Unavailable'));
@@ -305,9 +305,9 @@ class VehicleLendingController extends Controller
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $branch_ids = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
-                $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_ids)->get();
+                $vehicles   = Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_ids)->get();
             } else {
-                $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
+                $vehicles   = Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->get();
             }
 
             foreach ($vehicles as $vehicle) {
@@ -332,8 +332,8 @@ class VehicleLendingController extends Controller
             }
 
             $vehicles       = $branch_id?->isNotEmpty() ?
-                                Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_id)->get() :
-                                Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
+                                Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->whereIn('branch_id', $branch_id)->get() :
+                                Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
                 $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
@@ -342,7 +342,7 @@ class VehicleLendingController extends Controller
 
             return view('vehicle-lending.edit', compact('vehicles', 'vehicleLending'));
         } else {
-            $vehicles   = Vehicle::where('is_active', true)->whereNotIn('id', $unavailable_vehicle_id)->get();
+            $vehicles   = Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->get();
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
@@ -378,7 +378,7 @@ class VehicleLendingController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
 
-        $vehicle = Vehicle::where('is_active', true)->find($request->vehicle_id);
+        $vehicle = Vehicle::where('status', 'active')->find($request->vehicle_id);
         if (!$vehicle) {
             return redirect()->back()->with('error', __('Vehicle Unavailable'));
         }
@@ -414,7 +414,7 @@ class VehicleLendingController extends Controller
         $vehicleLending->save();
 
         // Check Vehicle Version
-        $vehicle_reload = Vehicle::where('is_active', true)->select('version')->find($vehicle->id);
+        $vehicle_reload = Vehicle::where('status', 'active')->select('version')->find($vehicle->id);
         if ($vehicle_reload?->version !== $currentVersion + 1) { // When version not the same as we first retrieve rollback
             DB::rollBack();
             return redirect()->back()->with('error', __('Vehicle Unavailable'));
@@ -454,7 +454,7 @@ class VehicleLendingController extends Controller
 
             // Check Vehicle Availability
             $vehicle = Vehicle::find($lending->vehicle_id);
-            if (!$vehicle->is_active) {
+            if ($vehicle->status != 'active') {
                 return redirect()->back()->with('error', __('Vehicle Unavailable'));
             }
 
@@ -609,7 +609,7 @@ class VehicleLendingController extends Controller
                 });
         })->whereNot('vehicle_id', $request->choosen_vehicle)->whereNull('return_km')->whereNot('status', 'Reject')->select('vehicle_id')->get()->pluck('vehicle_id');
 
-        $vehicles           = Vehicle::where('is_active', true)->whereNotIn('id', $lendings)->get();
+        $vehicles           = Vehicle::where('status', 'active')->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
             $branch         = $vehicle?->branch?->name ?? '-';
             $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
