@@ -32,7 +32,13 @@
                 </tr>
                 <tr>
                     <th>{{ __('Location')}}</th>
-                    <td>{{ $vehicleMaintenance->location }}</td>
+                    <td>
+                        @if ($vehicleMaintenance?->workshop)
+                            {{ $vehicleMaintenance?->workshop?->name ?: '-'}}
+                            <br>
+                            {{ $vehicleMaintenance?->workshop?->address ?: '-'}}
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <th>{{ __('Cost')}}</th>

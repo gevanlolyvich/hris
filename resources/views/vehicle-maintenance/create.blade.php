@@ -23,12 +23,22 @@
                 {{ Form::text('name', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Name')]) }}
             </div>
             <div class="form-group col-6">
-                {{ Form::label('location', __('Location'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-                {{ Form::text('location', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Location')]) }}
-            </div>
-            <div class="form-group col-6">
                 {{ Form::label('cost', __('Cost'), ['class' => 'col-form-label']) }}
                 {{ Form::number('cost', null, ['class' => 'form-control', 'step' => '0.01', 'placeholder' => __('Enter Cost')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12">
+                {{ Form::label('workshop_id', __('Vehicle Workshop'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::select('workshop_id', $workshops, null, ['class' => 'form-control select2', 'id' => 'workshop', 'placeholder' => __('Select Vehicle Workshop')]) }}
+            </div>
+            <div class="row" style="display: none" id="new_workshop_form">
+                <div class="form-group col-md-6 col-12">
+                    {{ Form::label('new_workshop_name', __('Vehicle Workshop Name'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                    {{ Form::text('new_workshop_name', null, ['class' => 'form-control', 'id' => 'new_workshop_name', 'placeholder' => __('Enter Vehicle Workshop Name')]) }}
+                </div>
+                <div class="form-group col-md-6 col-12">
+                    {{ Form::label('new_workshop_address', __('Vehicle Workshop Address'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                    {{ Form::text('new_workshop_address', null, ['class' => 'form-control', 'id' => 'new_workshop_address', 'placeholder' => __('Enter Vehicle Workshop Address')]) }}
+                </div>
             </div>
             <div class="form-group col-12">
                 {{ Form::label('file', __('Receipt File'), ['class' => 'col-form-label']) }}

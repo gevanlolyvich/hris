@@ -2194,5 +2194,11 @@
   "under maintenance": "Dalam Pemeliharaan",
   "Other": "Lainnya",
   "New Type": "Tipe Baru",
-  "Enter New Type": "Masukkan Tipe baru"
+  "Enter New Type": "Masukkan Tipe baru",
+  "Select Vehicle Workshop": "Pilih Bengkel Kendaraan",
+  "Vehicle Workshop Name": "Nama Bengkel Kendaraan",
+  "Vehicle Workshop Address": "Alamat Bengkel Kendaraan",
+  "Enter Vehicle Workshop Name": "Masukkan Nama Bengkel Kendaraan",
+  "Enter Vehicle Workshop Address": "Masukkan Alamat Bengkel Kendaraan",
+  "Select Maintenance Type": "Pilih Tipe Pemeliharaan"
 }

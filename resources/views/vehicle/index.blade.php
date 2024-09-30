@@ -127,7 +127,7 @@
                     newTypeDiv.style.display = '';
                     newType.required = true;
                 } else {
-                    document.getElementById("new_type_form").style.display = 'none';
+                    newTypeDiv.style.display = 'none';
                     newType.required = false;
                 }
             });

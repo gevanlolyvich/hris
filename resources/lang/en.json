@@ -2185,5 +2185,11 @@
     "under maintenance": "Under Maintenance",
     "Other": "Other",
     "New Type": "New Type",
-    "Enter New Type": "Enter New Type"
+    "Enter New Type": "Enter New Type",
+    "Select Vehicle Workshop": "Select Vehicle Workshop",
+    "Vehicle Workshop Name": "Vehicle Workshop Name",
+    "Vehicle Workshop Address": "Vehicle Workshop Address",
+    "Enter Vehicle Workshop Name": "Enter Vehicle Workshop Name",
+    "Enter Vehicle Workshop Address": "Enter Vehicle Workshop Address",
+    "Select Maintenance Type": "Select Maintenance Type"
 }
