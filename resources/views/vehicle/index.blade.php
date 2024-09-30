@@ -49,7 +49,7 @@
                                             <div class="badge bg-warning p-2 px-3 rounded">{{ __($vehicle->status) }}</div>
                                         @endif
                                     </td>
-                                    <td>{{ $vehicle->type }}</td>
+                                    <td>{{ $vehicle?->type?->name ?: '-' }}</td>
                                     <td>{{ $vehicle->police_no }}</td>
                                     <td>{{ $vehicle->branch?->name ?? '-' }}</td>
                                     <td>{{ $vehicle->km }}</td>
@@ -118,8 +118,22 @@
                 }
             });
 
+            $(document).on('change', '#type', function () {
+                let type_choice = $(this).val();
+                let newTypeDiv = document.getElementById("new_type_form");
+                let newType = document.getElementById("new_type");
+
+                if (type_choice == 0) {
+                    newTypeDiv.style.display = '';
+                    newType.required = true;
+                } else {
+                    document.getElementById("new_type_form").style.display = 'none';
+                    newType.required = false;
+                }
+            });
+
             $('#commonModal').on('shown.bs.modal', function () {
-                let resricted_choice = document.getElementById('is_resricted').value;
+                let resricted_choice = document.getElementById('is_resricted')?.value;
 
                 if (resricted_choice == 1) {
                     document.getElementById("branch_div").style.display = '';

@@ -2182,5 +2182,8 @@
     "Vehicle Type Successfully Deleted": "Vehicle Type Successfully Deleted",
     "Driving License": "Driving License",
     "Under Maintenance": "Under Maintenance",
-    "under maintenance": "Under Maintenance"
+    "under maintenance": "Under Maintenance",
+    "Other": "Other",
+    "New Type": "New Type",
+    "Enter New Type": "Enter New Type"
 }
