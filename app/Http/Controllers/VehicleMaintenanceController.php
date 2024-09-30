@@ -373,7 +373,7 @@ class VehicleMaintenanceController extends Controller
             $vehicleMaintenance->name                  = $request->name;
             $vehicleMaintenance->location              = $request->location;
             $vehicleMaintenance->cost                  = $request->cost;
-            $vehicleMaintenance->file                  = $document_path;
+            $vehicleMaintenance->file                  = $document_path ?: $vehicleMaintenance->file;
             $vehicleMaintenance->description           = $request->description;
             $vehicleMaintenance->save();
     
