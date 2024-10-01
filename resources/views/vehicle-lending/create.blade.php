@@ -17,6 +17,11 @@
                 </div>
             </div>
             <div class="form-group col-12">
+                {{ Form::label('sim', __('Driving License'), ['class' => 'col-form-label']) }}
+                {{ Form::file('sim', ['class' => 'form-control mb-2']) }}
+                <span class="text-warning pl-1"><b>{{ __('Max Upload Size Per File: 10 MB')}}</b></span>
+            </div>
+            <div class="form-group col-12">
                 {{ Form::label('purpose', __('Purpose'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
                 {{ Form::textarea('purpose', null, ['class' => 'form-control', 'placeholder' => __('Enter Purposes Of Vehicle Lending Request'),'rows'=>'5']) }}
             </div>

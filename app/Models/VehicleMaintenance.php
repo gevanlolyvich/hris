@@ -16,7 +16,8 @@ class VehicleMaintenance extends Model
         'name',
         'start_date',
         'end_date',
-        'location',
+        'next_date',
+        'workshop_id',
         'cost',
         'file',
         'description'
@@ -30,5 +31,10 @@ class VehicleMaintenance extends Model
     public function maintenanceType(): BelongsTo
     {
         return $this->belongsTo(VehicleMaintenanceType::class, 'maintenance_type_id', 'id')->withTrashed();
+    }
+
+    public function workshop(): BelongsTo
+    {
+        return $this->belongsTo(VehicleWorkshop::class, 'workshop_id', 'id')->withTrashed();
     }
 }

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Vehicle;
+use App\Models\VehicleType;
 use App\Models\VehicleMaintenance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class VehicleController extends Controller
 {
@@ -46,6 +48,7 @@ class VehicleController extends Controller
 
     public function create()
     {
+        $status     = Vehicle::getVehicleStatuses();
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id') ?? [];
@@ -54,7 +57,10 @@ class VehicleController extends Controller
                 $branches           = Branch::select('id', 'name')->get()->pluck('name', 'id');
             }
 
-            return view('vehicle.create', compact('branches'));
+            $types = VehicleType::get()->pluck('name', 'id');
+            $types->put(0, "+ " .__('Add New'));
+
+            return view('vehicle.create', compact('branches', 'status', 'types'));
         } else if (\Auth::user()->type != 'employee') {
             $branch     = Branch::find(\Auth::user()->branch_id);
             $branch_id  = collect();
@@ -71,7 +77,10 @@ class VehicleController extends Controller
 
             $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
 
-            return view('vehicle.create', compact('branches'));
+            $types      = VehicleType::get()->pluck('name', 'id');
+            $types->put(0, "+ " .__('Add New'));
+
+            return view('vehicle.create', compact('branches', 'status', 'types'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -89,7 +98,8 @@ class VehicleController extends Controller
                 $request->all(),
                 [
                     'name' => 'required',
-                    'type' => 'required',
+                    'status' => 'required',
+                    'type_id' => 'required',
                     'police_no' => 'required',
                     'km' => 'required',
                     'emoney_balance' => 'required',
@@ -102,15 +112,27 @@ class VehicleController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            // Create New Vehicle
-            $vehicle                    = new Vehicle();
-            $vehicle->name              = $request->name;
-            $vehicle->type              = strtoupper($request->type);
-            $vehicle->police_no         = strtoupper($request->police_no);
-            $vehicle->km                = $request->km;
-            $vehicle->emoney_balance    = $request->emoney_balance;
-            $vehicle->branch_id         = $request->branch_id;
-            $vehicle->save();
+            DB::transaction(function () use ($request) {
+                $type_id = $request->type_id;
+                if ($request->type_id == 0) {
+                    $type           = new VehicleType();
+                    $type->name     = strtoupper($request->new_type);
+                    $type->save();
+    
+                    $type_id    = $type->id;
+                }
+    
+                // Create New Vehicle
+                $vehicle                    = new Vehicle();
+                $vehicle->name              = $request->name;
+                $vehicle->status            = $request->status;
+                $vehicle->type_id           = $type_id;
+                $vehicle->police_no         = strtoupper($request->police_no);
+                $vehicle->km                = $request->km;
+                $vehicle->emoney_balance    = $request->emoney_balance;
+                $vehicle->branch_id         = $request->branch_id;
+                $vehicle->save();
+            });
 
             return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Created'));
         } else {
@@ -135,7 +157,7 @@ class VehicleController extends Controller
      */
     public function edit(Vehicle $vehicle)
     {
-        $status = [0 => __('Inactive'), 1 => __('Active')];
+        $status     = Vehicle::getVehicleStatuses();
         if (\Auth::user()->vehicleOfficer) {
             if (\Auth::user()->vehicleOfficer->is_resricted) {
                 $allowed_branches   = \Auth::user()->vehicleOfficer->accesses?->pluck('branch_id')->toArray() ?? [];
@@ -148,7 +170,10 @@ class VehicleController extends Controller
                 $branches           = Branch::select('id', 'name')->get()->pluck('name', 'id');
             }
 
-            return view('vehicle.edit', compact('branches', 'vehicle', 'status'));
+            $types = VehicleType::get()->pluck('name', 'id');
+            $types->put(0, "+ " .__('Add New'));
+
+            return view('vehicle.edit', compact('branches', 'vehicle', 'status', 'types'));
         } else if (\Auth::user()->type != 'employee') {
             $branch     = Branch::find(\Auth::user()->branch_id);
             $branch_id  = collect();
@@ -169,7 +194,10 @@ class VehicleController extends Controller
 
             $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
 
-            return view('vehicle.edit', compact('branches', 'vehicle', 'status'));
+            $types = VehicleType::get()->pluck('name', 'id');
+            $types->put(0, "+ " .__('Add New'));
+
+            return view('vehicle.edit', compact('branches', 'vehicle', 'status', 'types'));
         } else {
             return redirect()->route('vehicle.index')->with('error', __('Permission denied.'));
         }
@@ -217,8 +245,8 @@ class VehicleController extends Controller
                 $request->all(),
                 [
                     'name' => 'required',
-                    'is_active' => 'required|boolean',
-                    'type' => 'required',
+                    'status' => 'required',
+                    'type_id' => 'required',
                     'police_no' => 'required',
                     'km' => 'required',
                 ]
@@ -230,14 +258,26 @@ class VehicleController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $vehicle->name              = $request->name;
-            $vehicle->is_active         = $request->is_active;
-            $vehicle->type              = strtoupper($request->type);
-            $vehicle->police_no         = strtoupper($request->police_no);
-            $vehicle->km                = $request->km;
-            $vehicle->emoney_balance    = $request->emoney_balance;
-            $vehicle->branch_id         = $request->branch_id;
-            $vehicle->save();
+            DB::transaction(function () use ($request, $vehicle) {
+                $type_id = $request->type_id;
+                if ($request->type_id == 0) {
+                    $type           = new VehicleType();
+                    $type->name     = strtoupper($request->new_type);
+                    $type->save();
+    
+                    $type_id    = $type->id;
+                }
+
+                $vehicle->name              = $request->name;
+                $vehicle->status            = $request->status;
+                $vehicle->type_id           = $type_id;
+                $vehicle->police_no         = strtoupper($request->police_no);
+                $vehicle->km                = $request->km;
+                $vehicle->emoney_balance    = $request->emoney_balance;
+                $vehicle->branch_id         = $request->branch_id;
+                $vehicle->save();
+            });
+
 
             return redirect()->route('vehicle.index')->with('success', __('Vehicle Successfully Updated'));
         } else {
