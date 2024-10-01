@@ -186,6 +186,8 @@
 
             $(document).on('change', '#date_input', function () {
                 let dateInput = $(this).val();
+                let nextDate = new Date(dateInput);
+                nextDate.setDate(nextDate.getDate() + 1);
 
                 const end_date = document.getElementById('end_date_input');
                 end_date.disabled = false;
@@ -194,7 +196,7 @@
 
                 const next_date = document.getElementById('next_date_input');
                 next_date.disabled = false;
-                next_date.min = dateInput;
+                next_date.min = nextDate.toISOString().split('T')[0];
                 next_date.value = '';
             })
 
