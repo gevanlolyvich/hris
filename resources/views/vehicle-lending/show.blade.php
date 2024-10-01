@@ -28,6 +28,24 @@
                     <td>{{ \Auth::user()->dateFormat($vehicleLending->date) }}</td>
                 </tr>
                 <tr>
+                    <th>{{ __('Driving License')}}</th>
+                    <td>
+                        @if ($vehicleLending->sim)
+                            @php
+                                $return_temp_file      = explode('/', $vehicleLending->sim);
+                                $return_filename       = array_pop($return_temp_file);
+                            @endphp
+                            <a href="{{ asset($vehicleLending->sim) }}" target="blank" class="btn btn-md btn-success align-items-center text-start mt-2"
+                                data-bs-toggle="tooltip"
+                                data-bs-original-title="{{ __('View') }}">
+                                <i class="fas fa-file"></i> {{ $return_filename }}
+                            </a>
+                        @else
+                            -
+                        @endif
+                    </td>
+                </tr>
+                <tr>
                     <th>{{ __('Purpose') }}</th>
                     <td>
                         {{ Form::textarea('purpose', $vehicleLending->purpose, ['class' => 'form-control', 'disabled'=>'disabled','placeholder' => '-', 'rows' => '5']) }}

@@ -15,7 +15,7 @@
         <i class="ti ti-file-export"></i>
     </a> --}}
     @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Create Vehicle Maintenance'))
-        <a href="#" data-url="{{ route('vehicle-maintenance.create') }}" data-ajax-popup="true" data-size="lg"
+        <a href="#" data-url="{{ route('vehicle-maintenance.create') }}" data-ajax-popup="true" data-size="xl"
             data-title="{{ __('Create Vehicle Maintenance') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
             data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
@@ -111,7 +111,7 @@
                                 @else
                                     <td>{{ $maintenance?->start_date ?? '-' }}  >>  {{ $maintenance->end_date ?? '-' }}</td>
                                 @endif
-                                <td>{{ $maintenance?->location ?? '-' }}</td>
+                                <td>{{ $maintenance?->workshop?->name ?? '-' }}</td>
                                 <td class="action">
                                     <span>
                                         <button class="btn btn-primary btn-sm leave-input"
@@ -124,7 +124,7 @@
                                         @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
                                             @can('Edit Vehicle Maintenance')
                                                 <button class="btn btn-info btn-sm leave-input ms-2"
-                                                    data-bs-toggle="tooltip" data-size="lg" data-ajax-popup="true"
+                                                    data-bs-toggle="tooltip" data-size="xl" data-ajax-popup="true"
                                                     data-url="{{  route('vehicle-maintenance.edit', $maintenance->id) }}"
                                                     title="" data-title="{{ __('Update Vehicle Lending') }}"
                                                     data-bs-original-title="{{ __('Edit') }}">
@@ -186,15 +186,36 @@
 
             $(document).on('change', '#date_input', function () {
                 let dateInput = $(this).val();
-
-                console.log(dateInput);
+                let nextDate = new Date(dateInput);
+                nextDate.setDate(nextDate.getDate() + 1);
 
                 const end_date = document.getElementById('end_date_input');
-
                 end_date.disabled = false;
                 end_date.min = dateInput;
                 end_date.value = '';
+
+                const next_date = document.getElementById('next_date_input');
+                next_date.disabled = false;
+                next_date.min = nextDate.toISOString().split('T')[0];
+                next_date.value = '';
             })
+
+            $(document).on('change', '#workshop', function () {
+                let workshop_choice = $(this).val();
+                let newWorkshopDiv = document.getElementById("new_workshop_form");
+                let newName = document.getElementById("new_workshop_name");
+                let newAddress = document.getElementById("new_workshop_address");
+
+                if (workshop_choice == 0) {
+                    newWorkshopDiv.style.display = '';
+                    newName.required = true;
+                    newAddress.required = true;
+                } else {
+                    newWorkshopDiv.style.display = 'none';
+                    newName.required = false;
+                    newAddress.required = true;
+                }
+            });
         });
 
     </script>

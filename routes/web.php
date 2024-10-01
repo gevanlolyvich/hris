@@ -100,6 +100,8 @@ use App\Http\Controllers\VehicleLendingController;
 use App\Http\Controllers\VehicleOfficerController;
 use App\Http\Controllers\VehicleMaintenanceTypeController;
 use App\Http\Controllers\VehicleMaintenanceController;
+use App\Http\Controllers\VehicleWorkshopController;
+use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\PushSubscriptionController;
 
 /*
@@ -1754,6 +1756,20 @@ Route::resource('vehicle-maintenance-type', VehicleMaintenanceTypeController::cl
 );
 
 Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('vehicle-type', VehicleTypeController::class)->middleware(
     [
         'auth',
         'XSS',
