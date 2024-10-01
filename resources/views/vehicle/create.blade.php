@@ -7,8 +7,16 @@
                 {{ Form::text('name', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Name')]) }}
             </div>
             <div class="form-group col-md-6 col-12">
-                {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-                {{ Form::text('type', null, ['class' => 'form-control ', 'required' => 'required', 'placeholder' => __('Enter Type')]) }}
+                {{ Form::label('status', __('Status'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::select('status', $status, null, ['class' => 'form-control select2', 'placeholder' => __('Select Status')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12">
+                {{ Form::label('type_id', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::select('type_id', $types, null, ['class' => 'form-control select2', 'id' => 'type', 'placeholder' => __('Select Type')]) }}
+            </div>
+            <div class="form-group col-md-6 col-12" style="display: none" id="new_type_form">
+                {{ Form::label('new_type', __('New Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+                {{ Form::text('new_type', null, ['class' => 'form-control', 'id' => 'new_type', 'placeholder' => __('Enter New Type')]) }}
             </div>
             <div class="form-group col-md-6 col-12">
                 {{ Form::label('police_no', __('Police No'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>

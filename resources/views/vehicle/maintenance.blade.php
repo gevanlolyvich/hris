@@ -79,10 +79,17 @@
                                 @foreach ($maintenances as $maintenance)
                                     <li>
                                         <i>{{ $maintenance->start_date }} @if ($maintenance->end_date) >> {{ $maintenance->end_date}} @endif</i> <br>
-                                        <div style="color: #1058c4">
+                                        {{-- <div style="color: #1058c4"> --}}
+                                        <a href="#" data-size="xl"
+                                            data-url="{{ route('vehicle-maintenance.show', $maintenance->id) }}"
+                                            data-ajax-popup="true" data-bs-toggle="tooltip"
+                                            title="" data-title="{{ __('Detail Vehicle Maintenance') }}"
+                                            data-bs-original-title="{{ __('Detail') }}">
                                             <b>{{ $maintenance->name }} [{{ $maintenance?->maintenanceType?->name ?? '-' }}]</b>
-                                        </div>
-                                        <i style="color: #c5480e" class="fa fa-solid fa-map-pin"></i> {{ $maintenance->location}} <br>
+                                            <br>
+                                        </a>
+                                        {{-- </div> --}}
+                                        <i style="color: #c5480e" class="fa fa-solid fa-map-pin"></i> {{ $maintenance->workshop->name}} <br>
                                         <i style="color: #c5480e" class="fas fa-dollar-sign"></i> {{ \Auth::user()->priceFormat($maintenance->cost) }}
                                         <p class="mt-2">{{ $maintenance->description}}</p>
                                         <hr>

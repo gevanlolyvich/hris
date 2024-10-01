@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             NewSystemTaxSetting::class,
             NewFeatureLeaveOffice::class,
             NewFeatureVehicleMaintenance::class,
+            NewFeatureVehicleWorkshopAndType::class,
         ]);
     }
 }
