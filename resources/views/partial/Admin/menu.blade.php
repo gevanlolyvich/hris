@@ -577,24 +577,24 @@ $mode_setting = \App\Models\Utility::mode_layout();
                         <span class="dash-arrow"><i data-feather="chevron-right"></i></span>
                     </a>
                     <ul class="dash-submenu">
-                        @can('Manage Vehicle Type')
+                        @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Manage Vehicle Type'))
                             <li class="dash-item {{ Request::segment(1) == 'vehicle-type' ? ' active' : '' }}">
                                 <a class="dash-link"
                                     href="{{ route('vehicle-type.index') }}">{{ __('Vehicle Type') }}</a>
                             </li>
-                        @endcan
+                        @endif
                         @if (\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee')
                             <li class="dash-item {{ Request::segment(1) == 'vehicle' ? ' active' : '' }}">
                                 <a class="dash-link"
                                     href="{{ route('vehicle.index') }}">{{ __('Vehicle List') }}</a>
                             </li>
                         @endif
-                        @can('Manage Vehicle Workshop')
+                        @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Manage Vehicle Workshop'))
                             <li class="dash-item {{ Request::segment(1) == 'vehicle-workshop' ? ' active' : '' }}">
                                 <a class="dash-link"
                                     href="{{ route('vehicle-workshop.index') }}">{{ __('Vehicle Workshop') }}</a>
                             </li>
-                        @endcan
+                        @endif
                         @if ((\Auth::user()->vehicleOfficer || \Auth::user()->type != 'employee') && \Auth::user()->can('Manage Vehicle Maintenance'))
                             <li class="dash-item {{ Request::segment(1) == 'vehicle-maintenance' ? ' active' : '' }}">
                                 <a class="dash-link"
