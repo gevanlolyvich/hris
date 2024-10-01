@@ -58,7 +58,7 @@ class VehicleController extends Controller
             }
 
             $types = VehicleType::get()->pluck('name', 'id');
-            $types->put(0, __('Other'));
+            $types->put(0, "+ " .__('Add New'));
 
             return view('vehicle.create', compact('branches', 'status', 'types'));
         } else if (\Auth::user()->type != 'employee') {
@@ -78,7 +78,7 @@ class VehicleController extends Controller
             $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
 
             $types      = VehicleType::get()->pluck('name', 'id');
-            $types->put(0, __('Other'));
+            $types->put(0, "+ " .__('Add New'));
 
             return view('vehicle.create', compact('branches', 'status', 'types'));
         } else {
@@ -171,7 +171,7 @@ class VehicleController extends Controller
             }
 
             $types = VehicleType::get()->pluck('name', 'id');
-            $types->put(0, __('Other'));
+            $types->put(0, "+ " .__('Add New'));
 
             return view('vehicle.edit', compact('branches', 'vehicle', 'status', 'types'));
         } else if (\Auth::user()->type != 'employee') {
@@ -195,7 +195,7 @@ class VehicleController extends Controller
             $branches   = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->select('id', 'name')->get()->pluck('name', 'id') : Branch::select('id', 'name')->get()->pluck('name', 'id');
 
             $types = VehicleType::get()->pluck('name', 'id');
-            $types->put(0, __('Other'));
+            $types->put(0, "+ " .__('Add New'));
 
             return view('vehicle.edit', compact('branches', 'vehicle', 'status', 'types'));
         } else {

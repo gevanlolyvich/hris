@@ -174,7 +174,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, __('Other'));
+            $workshops->put(0, '+ '.__('Add New'));
 
             return view('vehicle-maintenance.create', compact('vehicles', 'types', 'workshops'));
         } else if (\Auth::user()->type != 'employee' && \Auth::user()->can('Create Vehicle Maintenance')) {
@@ -200,7 +200,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, __('Other'));
+            $workshops->put(0, '+ '.__('Add New'));
 
             return view('vehicle-maintenance.create', compact('vehicles', 'types', 'workshops'));
         } else {
@@ -315,7 +315,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, __('Other'));
+            $workshops->put(0, '+ '.__('Add New'));
 
             return view('vehicle-maintenance.edit', compact('vehicles', 'types', 'vehicleMaintenance', 'workshops'));
         } else if (\Auth::user()->type != 'employee' && \Auth::user()->can('Edit Vehicle Maintenance')) {
@@ -341,7 +341,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, __('Other'));
+            $workshops->put(0, '+ '.__('Add New'));
 
             return view('vehicle-maintenance.edit', compact('vehicles', 'types', 'vehicleMaintenance', 'workshops'));
         } else {
