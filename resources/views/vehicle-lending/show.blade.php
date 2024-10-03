@@ -17,7 +17,7 @@
                 </tr>
                 <tr>
                     <th>{{ __('Vehicle Type') }}</th>
-                    <td>{{ $vehicleLending->vehicle->type }}</td>
+                    <td>{{ $vehicleLending->vehicle->type->name }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Branch') }}</th>

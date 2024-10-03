@@ -74,7 +74,7 @@ class VehicleLendingExport implements FromCollection, WithEvents, ShouldAutoSize
             $lending?->requester?->name ?? '-',
             $lending?->vehicle?->name ?? '-',
             $lending?->vehicle?->police_no ?? '-',
-            $lending?->vehicle?->type ?? '-',
+            $lending?->vehicle?->type?->name ?? '-',
             $lending?->approver?->name ?? '-',
             $lending->pickup_time,
             $lending->pickup_km,
