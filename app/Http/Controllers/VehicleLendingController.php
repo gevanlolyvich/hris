@@ -139,7 +139,7 @@ class VehicleLendingController extends Controller
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -161,7 +161,7 @@ class VehicleLendingController extends Controller
             $vehicles       = $branch_id?->isNotEmpty() ? Vehicle::where('status', 'active')->whereIn('branch_id', $branch_id)->get() : Vehicle::where('status', 'active')->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle?->type?->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -171,7 +171,7 @@ class VehicleLendingController extends Controller
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle?->type?->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -312,7 +312,7 @@ class VehicleLendingController extends Controller
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle->type->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -336,7 +336,7 @@ class VehicleLendingController extends Controller
                                 Vehicle::where('status', 'active')->whereNotIn('id', $unavailable_vehicle_id)->get();
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle?->type?->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -346,7 +346,7 @@ class VehicleLendingController extends Controller
 
             foreach ($vehicles as $vehicle) {
                 $branch         = $vehicle?->branch?->name ?? '-';
-                $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+                $vehicle->name  = "{$vehicle->name} | {$vehicle?->type?->name} | {$vehicle->police_no} | {$branch}";
             }
             $vehicles           = $vehicles->pluck('name', 'id');
 
@@ -612,7 +612,7 @@ class VehicleLendingController extends Controller
         $vehicles           = Vehicle::where('status', 'active')->whereNotIn('id', $lendings)->get();
         foreach ($vehicles as $vehicle) {
             $branch         = $vehicle?->branch?->name ?? '-';
-            $vehicle->name  = "{$vehicle->name} | {$vehicle->type} | {$vehicle->police_no} | {$branch}";
+            $vehicle->name  = "{$vehicle->name} | {$vehicle?->type?->name} | {$vehicle->police_no} | {$branch}";
         }
         $vehicles       = $vehicles->pluck('name', 'id');
 
