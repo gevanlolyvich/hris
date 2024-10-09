@@ -31,6 +31,7 @@
                                 <th width="10px">ID</th>
                                 <th>{{ __('Name') }}</th>
                                 <th>{{ __('Salary Type') }}</th>
+                                <th>{{ __('Period Type') }}</th>
                                 <th width="200px">{{ __('Action') }}</th>
                             </tr>
                         </thead>
@@ -40,6 +41,7 @@
                                     <td>{{ $emp_type->id }}</td>
                                     <td>{{ $emp_type->name }}</td>
                                     <td>{{ __($emp_type->type) }}</td>
+                                    <td>{{ __($emp_type->period_type) }}</td>
                                     <td class="Action">
                                         <span>
                                             @can('Edit Designation')

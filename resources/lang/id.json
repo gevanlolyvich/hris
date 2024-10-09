@@ -2201,5 +2201,8 @@
   "Enter Vehicle Workshop Name": "Masukkan Nama Bengkel Kendaraan",
   "Enter Vehicle Workshop Address": "Masukkan Alamat Bengkel Kendaraan",
   "Select Maintenance Type": "Pilih Tipe Pemeliharaan",
-  "Add New": "Tambah Baru"
+  "Add New": "Tambah Baru",
+  "Period Type":"Tipe Periode",
+  "Select Period Type" :"Pilih Tipe Periode",
+  "Periodical":"Periodical"
 }

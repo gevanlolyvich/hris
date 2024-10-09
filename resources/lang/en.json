@@ -2192,5 +2192,8 @@
     "Enter Vehicle Workshop Name": "Enter Vehicle Workshop Name",
     "Enter Vehicle Workshop Address": "Enter Vehicle Workshop Address",
     "Select Maintenance Type": "Select Maintenance Type",
-    "Add New": "Add New"
+    "Add New": "Add New",
+    "Period Type":"Period Type",
+    "Select Period Type" :"Select Period Type",
+    "Periodical":"Periodical"
 }
