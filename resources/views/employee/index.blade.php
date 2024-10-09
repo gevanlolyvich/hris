@@ -80,6 +80,7 @@
                             <tr>
                                 <th>{{ __('Employee ID') }}</th>
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Status') }}</th>
                                 <th>{{ __('Email') }}</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
@@ -103,6 +104,13 @@
                                         @endcan
                                     </td>
                                     <td>{{ $employee->name }}</td>
+                                    <td>
+                                        @if ($employee->is_active)
+                                            <button type="button" class="btn btn-sm btn-success disabled">{{ __('Active')}}</button>
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-danger disabled">{{ __('Inactive')}}</button>
+                                        @endif
+                                    </td>
                                     <td>{{ $employee->email }}</td>
                                     <td>
                                         {{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}
