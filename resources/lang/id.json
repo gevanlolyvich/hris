@@ -2204,5 +2204,7 @@
   "Add New": "Tambah Baru",
   "Period Type":"Tipe Periode",
   "Select Period Type" :"Pilih Tipe Periode",
-  "Periodical":"Periodical"
+  "Periodical":"Periodical",
+  "Start Period":"Periode Mulai",
+  "End Period":"Periode Selesai"
 }

@@ -2195,5 +2195,7 @@
     "Add New": "Add New",
     "Period Type":"Period Type",
     "Select Period Type" :"Select Period Type",
-    "Periodical":"Periodical"
+    "Periodical":"Periodical",
+    "Start Period":"Start Period",
+    "End Period":"End Period"
 }

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Imports\EmployeesImport;
 use App\Exports\EmployeesExport;
+use App\Models\EmployeePeriod;
 use App\Models\EmployeeType;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\NOC;
@@ -78,9 +79,9 @@ class EmployeeController extends Controller
             $branch_count = 2;
             foreach ($branch as $index => $b) {
                 if ($b == 'Head Office') {
-                    $branch[$index] = '1. '.  $b;
+                    $branch[$index] = '1. ' .  $b;
                 } else {
-                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch[$index] = $branch_count . '. ' . __($b);
                     $branch_count += 1;
                 }
             }
@@ -156,24 +157,42 @@ class EmployeeController extends Controller
                     'identity_number' => 'required'
                 ]
             );
+
+            $employee_type = EmployeeType::find($request->type);
+            // return $employee_type;
+            if ($employee_type->period_type != "Fixed") {
+                $validator->addRules([
+                    'reason' => 'required',
+                    'start_period' => 'required|date',
+                    'end_period' => 'required|date|after_or_equal:start_period'
+                ]);
+            }
+
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
 
                 return redirect()->back()->withInput()->with('error', $messages->first());
             }
             // return $request;
+            // return Auth::user();
 
-            $user = User::create(
-                [
-                    'name' => $request['name'],
-                    'email' => $request['email'],
-                    'password' => Hash::make($request['password']),
-                    'type' => 'employee',
-                    'lang' => 'en',
-                    'created_by' => \Auth::user()->id,
-                    'branch_id' => $request['branch_id'],
-                ]
-            );
+            $form_user = [
+                'name' => $request['name'],
+                'email' => $request['email'],
+                'password' => Hash::make($request['password']),
+                'type' => 'employee',
+                'lang' => 'en',
+                'created_by' => \Auth::user()->id,
+                'branch_id' => $request['branch_id'],
+            ];
+            if (Auth::user()->branch_id != null) {
+                $form_user['is_active'] = false;
+            } else {
+                $form_user['is_active'] = true;
+            }
+
+            // return $form_user;
+            $user = User::create($form_user);
             $user->save();
             $user->assignRole('Employee');
 
@@ -185,41 +204,46 @@ class EmployeeController extends Controller
             }
 
 
-            $employee = Employee::create(
-                [
-                    'user_id' => $user->id,
-                    'personel_id' => $request['personel_id'],
-                    'shift_type_id' => $request['shift_type_id'],
-                    'managed_by' => $request['managed_by'],
-                    'name' => $request['name'],
-                    'type_id' => $request['type'],
-                    'dob' => $request['dob'],
-                    'gender' => $request['gender'],
-                    'phone' => $request['phone'],
-                    'address' => $request['address'],
-                    'domicile_address' => $request['domicile_address'] ?? null,
-                    'emergency_contact_number' => $request['emergency_contact_number'],
-                    'emergency_contact_relation' => $request['emergency_contact_relation'],
-                    'marital_status' => $request['marital_status'],
-                    'dependents' => $request['dependents'] ?? 0,
-                    'email' => $request['email'],
-                    'password' => Hash::make($request['password']),
-                    'employee_id' => $request['employee_id'],
-                    'branch_id' => $request['branch_id'],
-                    'department_id' => $request['department_id'],
-                    'designation_id' => $request['designation_id'],
-                    'company_doj' => $request['company_doj'],
-                    'documents' => $document_implode,
-                    'account_holder_name' => $request['account_holder_name'],
-                    'account_number' => $request['account_number'],
-                    'bank_id' => $request['bank_id'],
-                    'tax_payer_id' => $request['tax_payer_id'],
-                    'nationality' => $request['nationality'],
-                    'identity_type' => $request['identity_type'],
-                    'identity_number' => $request['identity_number'],
-                    'created_by' => \Auth::user()->id,
-                ]
-            );
+            $form_employee = [
+                'user_id' => $user->id,
+                'personel_id' => $request['personel_id'],
+                'shift_type_id' => $request['shift_type_id'],
+                'managed_by' => $request['managed_by'],
+                'name' => $request['name'],
+                'type_id' => $request['type'],
+                'dob' => $request['dob'],
+                'gender' => $request['gender'],
+                'phone' => $request['phone'],
+                'address' => $request['address'],
+                'domicile_address' => $request['domicile_address'] ?? null,
+                'emergency_contact_number' => $request['emergency_contact_number'],
+                'emergency_contact_relation' => $request['emergency_contact_relation'],
+                'marital_status' => $request['marital_status'],
+                'dependents' => $request['dependents'] ?? 0,
+                'email' => $request['email'],
+                'password' => Hash::make($request['password']),
+                'employee_id' => $request['employee_id'],
+                'branch_id' => $request['branch_id'],
+                'department_id' => $request['department_id'],
+                'designation_id' => $request['designation_id'],
+                'company_doj' => $request['company_doj'],
+                'documents' => $document_implode,
+                'account_holder_name' => $request['account_holder_name'],
+                'account_number' => $request['account_number'],
+                'bank_id' => $request['bank_id'],
+                'tax_payer_id' => $request['tax_payer_id'],
+                'nationality' => $request['nationality'],
+                'identity_type' => $request['identity_type'],
+                'identity_number' => $request['identity_number'],
+                'created_by' => \Auth::user()->id,
+            ];
+            if (Auth::user()->branch_id != null) {
+                $form_employee['is_active'] = false;
+            } else {
+                $form_employee['is_active'] = true;
+            }
+            // return $form_employee;
+            $employee = Employee::create($form_employee);
 
             ShiftHistory::create(
                 [
@@ -227,6 +251,21 @@ class EmployeeController extends Controller
                     'employee_id' => $employee->id,
                 ]
             );
+
+            $form_emp_period = [
+                'employee_id' => $employee->id,
+                'start_period' => $request->start_period,
+                'end_period' => $request->end_period,
+                'reason' => $request->reason,
+            ];
+            if (Auth::user()->branch_id != null) {
+                $form_emp_period['active'] = false;
+                $form_emp_period['status'] = "Pending";
+            } else {
+                $form_emp_period['active'] = true;
+                $form_emp_period['status'] = "Approved";
+            }
+            EmployeePeriod::create($form_emp_period);
 
             if ($request->hasFile('document')) {
                 foreach ($request->document as $key => $document) {

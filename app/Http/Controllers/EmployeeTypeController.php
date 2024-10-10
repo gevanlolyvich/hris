@@ -142,4 +142,12 @@ class EmployeeTypeController extends Controller
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
+
+    public function json(Request $request)
+    {
+        $type = EmployeeType::find($request->id);
+
+
+        return response()->json($type);
+    }
 }

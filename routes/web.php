@@ -238,6 +238,12 @@ Route::post('employee/json', [EmployeeController::class, 'json'])->name('employe
         'XSS',
     ]
 );
+Route::get('employee-types/json', [EmployeeTypeController::class, 'json'])->name('employeetypes.json')->middleware(
+    [
+        'auth',
+        'XSS'
+    ]
+);
 Route::post('department/employee/json', [EmployeeController::class, 'departmentJson'])->name('department.employee.json')->middleware(
     [
         'auth',
