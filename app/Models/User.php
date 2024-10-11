@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'created_by',
         'email_verified_at',
         'branch_id',
+        'is_active'
     ];
 
     /**

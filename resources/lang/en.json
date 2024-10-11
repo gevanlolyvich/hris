@@ -2197,5 +2197,19 @@
     "Select Period Type" :"Select Period Type",
     "Periodical":"Periodical",
     "Start Period":"Start Period",
-    "End Period":"End Period"
+    "End Period":"End Period",
+    "Application":"Application",
+    "Employee Application": "Employee Application",
+    "Manage Employee Application": "Manage Employee Application",
+    "Create Employee Application": "Create Employee Application",
+    "Update Employee Application": "Update Employee Application",
+    "Employee Application Approval": "Employee Application Approval",
+    "New Employee Application Request": "New Employee Application Request",
+    "Make Employee Application Request": "Make Employee Application Request",
+    "Employee Application Successfully Created": "Employee Application Successfully Created",
+    "Employee Application Successfully Updated": "Employee Application Successfully Updated",
+    "Employee Application Successfully Approved": "Employee Application Successfully Approved",
+    "Employee Application Successfully Rejected": "Employee Application Successfully Rejected",
+    "Employee Application Successfully Deleted": "Employee Application Successfully Deleted",
+    "Employee Application Status Successfully Updated": "Employee Application Status Successfully Updated"
 }
