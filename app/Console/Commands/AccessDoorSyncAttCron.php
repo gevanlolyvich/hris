@@ -21,7 +21,7 @@ class AccessDoorSyncAttCron extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Performs attendance synchronization with the access door system';
 
     /**
      * Execute the console command.
