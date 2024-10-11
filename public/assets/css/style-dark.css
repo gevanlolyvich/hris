@@ -24063,6 +24063,7 @@ select.dataTable-input[data-multiselectsplitter-secondselect-selector] {
 
 .login-label {
     font-size: 1rem;
+    color: white !important;
 }
 
 .login-btn {
@@ -24081,6 +24082,11 @@ select.dataTable-input[data-multiselectsplitter-secondselect-selector] {
 .card-login {
     height: 100%;
     background: linear-gradient(141.55deg, #17191f 3.46%, #17191f 99.86%) !important;
+}
+
+.card-login input {
+    border: solid white 1.5px;
+    color: white !important;
 }
 
 .card-login-head {
@@ -24103,6 +24109,10 @@ select.dataTable-input[data-multiselectsplitter-secondselect-selector] {
     color: white;
     border: solid 1px white;
     font-weight: 400;
+}
+
+.auth-footer-login a {
+    color: white !important;
 }
 
 .auth-footer-login {
