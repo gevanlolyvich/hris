@@ -47,7 +47,7 @@
             <div class="card card-login" style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}" class="needs-validation" novalidate=""
-                        id="form_data">
+                        id="form_data" style="margin-bottom: 0">
                         @csrf
                         <div>
                             <div class="form-group mb-3">
@@ -92,12 +92,7 @@
 
                             <hr class="mt-4 mb-4 login-line " />
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-block btn-download" tabindex="4">
-                                    <i class="fa-brands fa-android" style="float: left; font-size:1.5rem"></i>
-                                    {{ __('Login Download') }}
-                                </button>
-                            </div>
+
 
                             @if (Utility::getValByName('disable_signup_button') == 'on')
                                 <p class="my-4 text-center">{{ __("Don't have an account?") }}
@@ -107,6 +102,14 @@
                             @endif
                         </div>
                     </form>
+                    <div class="d-grid">
+
+                        <a href="{{ asset('storage/uploads/apk/HRIS.apk') }}" target="_blank"
+                            class="btn btn-block btn-download" tabindex="4">
+                            <i class="fa-brands fa-android" style="float: left; font-size:1.5rem"></i>
+                            {{ __('Login Download') }}
+                        </a>
+                    </div>
 
                 </div>
             </div>
