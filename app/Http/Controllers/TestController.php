@@ -59,7 +59,7 @@ class TestController extends Controller
                         ->first();
                     if (!$duplicate_data && $employees->contains('personel_id', $data['nrk']) && ($data['first_time'] || $data['last_time'])) {
                         return [
-                            'personel_id'       => $data['nr k'],
+                            'personel_id'       => $data['nrk'],
                             'date'              => $parsed_responses['date'],
                             'coordinate'        => $attendances['coordinate'] ?? $default_coordinate,
                             'coordinate_out'    => $attendances['coordinate'] ?? $default_coordinate,
