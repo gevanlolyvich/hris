@@ -72,29 +72,30 @@
                                                     <i class="ti ti-caret-right text-white"></i>
                                                 </a>
                                             </div>
-                                            @can('Edit Designation')
-                                                <div class="action-btn bg-info ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center"
-                                                        {{-- data-url="{{  route('employee-applications.edit', [$emp->id]) }}" --}}
-                                                        data-url="{{  URL::to('employee-applications/'.$emp->id."/edit") }}"
-                                                        data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip" title=""
-                                                        data-title="{{ __('Edit Designation') }}"
-                                                        data-bs-original-title="{{ __('Edit') }}">
-                                                        <i class="ti ti-pencil text-white"></i>
-                                                    </a>
-                                                </div>
-                                            @endcan
+                                            @if ($emp->status=="Pending"||$emp->status=="Rejected")
+                                                @can('Edit Designation')
+                                                    <div class="action-btn bg-info ms-2">
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center"
+                                                            data-url="{{  URL::to('employee-applications/'.$emp->id."/edit") }}"
+                                                            data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip" title=""
+                                                            data-title="{{ __('Edit Designation') }}"
+                                                            data-bs-original-title="{{ __('Edit') }}">
+                                                            <i class="ti ti-pencil text-white"></i>
+                                                        </a>
+                                                    </div>
+                                                @endcan
 
-                                            @can('Delete Designation')
-                                                <div class="action-btn bg-danger ms-2">
-                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['employee-applications.destroy', $emp->id], 'id' => 'delete-form-' . $emp->id]) !!}
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                        data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                        aria-label="Delete"><i
-                                                            class="ti ti-trash text-white text-white"></i></a>
-                                                    </form>
-                                                </div>
-                                            @endcan
+                                                @can('Delete Designation')
+                                                    <div class="action-btn bg-danger ms-2">
+                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['employee-applications.destroy', $emp->id], 'id' => 'delete-form-' . $emp->id]) !!}
+                                                        <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
+                                                            aria-label="Delete"><i
+                                                                class="ti ti-trash text-white text-white"></i></a>
+                                                        </form>
+                                                    </div>
+                                                @endcan
+                                            @endif
                                         </span>
                                     </td>
                                 </tr>
@@ -121,5 +122,8 @@
             });
         });
 
+        $('body').on('click', '#renewalButton', function () {
+            $('#renewal_form').show();
+        });
     </script> 
 @endpush
