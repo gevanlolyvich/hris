@@ -103,6 +103,8 @@ class EmployeeController extends Controller
             $designations     = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $employees        = !empty(\Auth::user()->branch_id) ? Employee::where('branch_id', \Auth::user()->branch_id)->where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $shift_types      = !empty(\Auth::user()->branch_id) ? ShiftType::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+            $employeeTypes    = !empty(\Auth::user()->branch_id) ? EmployeeType::where('period_type', "Periodical")->orderBy('name', 'ASC')->get()->pluck('name', 'id') : EmployeeType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
             // $shift_types      = ShiftType::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $nationalities    = ['WNI' => __('WNI'), 'WNA' => __('WNA')];
             $identity_types   = ['KTP' => __('KTP'), 'Passport' => __('Passport'), 'SIM' => __('SIM')];
@@ -121,7 +123,7 @@ class EmployeeController extends Controller
             ];
 
             // $employeeTypes = Employee::$employeeTypes;
-            $employeeTypes = EmployeeType::get()->pluck('name', 'id');
+            // $employeeTypes = EmployeeType::get()->pluck('name', 'id');
 
             return view('employee.create', compact('employees', 'departments', 'designations', 'documents', 'branches', 'company_settings', 'shift_types', 'nationalities', 'banks', 'identity_types', 'emergency_contact_relations', 'marital_statuses', 'employeeTypes'));
         } else {
@@ -257,6 +259,7 @@ class EmployeeController extends Controller
                 'start_period' => $request->start_period,
                 'end_period' => $request->end_period,
                 'reason' => $request->reason,
+                'type_id' => $request->type
             ];
             if (Auth::user()->branch_id != null) {
                 $form_emp_period['active'] = false;
