@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
@@ -42,7 +43,26 @@ class EmployeeApplicationController extends Controller
                 'Periodical' => __('Periodical'),
             ];
 
-            return view('employee_period.create', compact('types', 'period_types'));
+            $branch = Branch::find(\Auth::user()->branch_id);
+            $branch_id = collect();
+            if ($branch) {
+                $branch_id->push($branch?->id);
+            }
+
+            $children = $branch?->childBranchFlatten();
+            if ($children?->isNotEmpty()) {
+                foreach ($children as $child) {
+                    $branch_id->push($child->id);
+                }
+            }
+            $periodical_types = EmployeeType::where('period_type', "Periodical")->get();
+            // $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'asc') : Employee::orderby('name', 'asc');
+            $employees = Employee::whereIn('type_id', $periodical_types->pluck('id'));
+            $employees = $branch_id?->isNotEmpty() ? $employees->whereIn('branch_id', $branch_id)->orderby('name', 'asc')->pluck('name', 'id') : $employees->orderby('name', 'asc')->pluck('name', 'id');
+
+            $periodical_types = $periodical_types->pluck('name', 'id');
+            // return $employees;
+            return view('employee_period.create', compact('types', 'period_types', 'employees', 'periodical_types'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -50,29 +70,41 @@ class EmployeeApplicationController extends Controller
 
     public function store(Request $request)
     {
-
         if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'name' => 'required|max:100',
-                    'type' => 'required',
+                    'employee_id'   => 'required',
+                    'reason'        => 'required',
+                    'period_type'   => 'required',
+                    'start_period'  => 'required',
+                    'end_period'    => 'required',
                 ]
             );
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
-
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $employee_type                = new EmployeeType();
-            $employee_type->type          = $request->type;
-            $employee_type->name          = $request->name;
-            $employee_type->period_type   = $request->period_type;
+            $employee_period                = new EmployeePeriod();
+            $employee_period->employee_id   = $request->employee_id;
+            $employee_period->type_id       = $request->period_type;
+            $employee_period->reason        = $request->reason;
+            $employee_period->start_period  = $request->start_period;
+            $employee_period->end_period    = $request->end_period;
+            $employee_period->created_by    = Auth::user()->id;
 
-            $employee_type->save();
+            if (Auth::user()->branch_id != null) {
+                $employee_period->active = false;
+                $employee_period->status = "Pending";
+            } else {
+                $employee_period->active = true;
+                $employee_period->status = "Approved";
+            }
 
-            return redirect()->route('employee_period.index')->with('success', __('Employee Type successfully created'));
+            $employee_period->save();
+
+            return redirect()->back()->with('success', __('Employee Application Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -87,18 +119,15 @@ class EmployeeApplicationController extends Controller
     {
 
         if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
-            $types = [
-                'Fixed' => __('Fixed'),
-                'Flexible' => __('Flexible'),
-            ];
-
             $period_types = [
                 'Fixed' => __('Fixed'),
                 'Periodical' => __('Periodical'),
             ];
 
-            $employee_type = EmployeeType::find($id);
-            return view('employee_period.edit', compact('employee_type', 'types', 'period_types'));
+            $employee_period = EmployeePeriod::find($id);
+            $employee_types = EmployeeType::where('period_type', 'Periodical')->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
+            return view('employee_period.edit', compact('period_types', 'employee_period', 'employee_types'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -106,13 +135,14 @@ class EmployeeApplicationController extends Controller
 
     public function update(Request $request)
     {
-        // return $request;
         if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'name' => 'required|max:100',
-                    'type' => 'required',
+                    'reason'        => 'required',
+                    'period_type'   => 'required',
+                    'start_period'  => 'required',
+                    'end_period'    => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -120,13 +150,20 @@ class EmployeeApplicationController extends Controller
 
                 return redirect()->back()->with('error', $messages->first());
             }
-            $employee_type = EmployeeType::find($request->id);
-            $employee_type->name = $request->name;
-            $employee_type->type = $request->type;
-            $employee_type->period_type = $request->period_type;
-            $employee_type->save();
+            // return $request;
 
-            return redirect()->route('employee_period.index')->with('success', __('Employee Type successfully updated'));
+            $employee_period = EmployeePeriod::find($request->id);
+            $employee_period->reason        = $request->reason;
+            $employee_period->start_period  = $request->start_period;
+            $employee_period->end_period    = $request->end_period;
+            $employee_period->status        = "Pending";
+            $employee_period->save();
+
+            $employee = $employee_period->employee;
+            $employee->type_id = $request->period_type;
+            $employee->save();
+
+            return redirect()->back()->with('success', __('Employee Application Successfully Updated'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }

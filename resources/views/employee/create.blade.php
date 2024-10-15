@@ -160,7 +160,7 @@
                                         </div>
                                         <div class="form-group col-md-6"><span class="text-danger pl-1">*</span>
                                             {!! Form::label('end_period', __('End Period'), ['class' => 'form-label']) !!}
-                                            {{ Form::date('end_period', old('end_period'), ['class' => 'form-control ', 'autocomplete' => 'off','placeholder'=>'Select Start Period']) }}
+                                            {{ Form::date('end_period', old('end_period'), ['class' => 'form-control ', 'autocomplete' => 'off','placeholder'=>'Select End Period']) }}
                                         </div>
                                     </div>
                                 </div>
