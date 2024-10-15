@@ -2211,5 +2211,7 @@
     "Employee Application Successfully Approved": "Employee Application Successfully Approved",
     "Employee Application Successfully Rejected": "Employee Application Successfully Rejected",
     "Employee Application Successfully Deleted": "Employee Application Successfully Deleted",
-    "Employee Application Status Successfully Updated": "Employee Application Status Successfully Updated"
+    "Employee Application Status Successfully Updated": "Employee Application Status Successfully Updated",
+    "New Employee":"New Employee",
+    "Employee Renewal":"Employee Renewal"
 }

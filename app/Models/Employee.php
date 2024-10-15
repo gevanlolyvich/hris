@@ -600,4 +600,14 @@ class Employee extends Model
     {
         return $this->hasMany(Termination::class, 'employee_id', 'id');
     }
+
+    public function periods(): HasMany
+    {
+        return $this->hasMany(EmployeePeriod::class, 'employee_id', 'id');
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeType::class, 'type_id', 'id');
+    }
 }

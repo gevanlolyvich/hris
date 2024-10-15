@@ -2220,5 +2220,7 @@
   "Employee Application Successfully Approved": "Pengajuan Karyawan Berhasil Disetujui",
   "Employee Application Successfully Rejected": "Pengajuan Karyawan Berhasil Ditolak",
   "Employee Application Successfully Deleted": "Pengajuan Karyawan Berhasil Dihapus",
-  "Employee Application Status Successfully Updated": "Status Pengajuan Karyawan Berhasil Diperbarui"
+  "Employee Application Status Successfully Updated": "Status Pengajuan Karyawan Berhasil Diperbarui",
+  "New Employee":"Karyawan Baru",
+  "Renewal Employee":"Perpanjang Karyawan"
 }

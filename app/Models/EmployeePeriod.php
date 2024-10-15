@@ -10,7 +10,17 @@ class EmployeePeriod extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['employee_id', 'start_period', 'end_period', 'reason', 'active', 'status', 'sync', 'response'];
+    protected $fillable = [
+        'employee_id',
+        'type_id',
+        'start_period',
+        'end_period',
+        'reason',
+        'active',
+        'status',
+        'sync',
+        'response'
+    ];
 
     public function employee(): BelongsTo
     {
