@@ -172,10 +172,10 @@ class EmployeeApplicationController extends Controller
     public function destroy($id)
     {
         if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
-            $employee_type = EmployeeType::find($id);
-            $employee_type->delete();
+            $employee_period = EmployeePeriod::find($id);
+            $employee_period->delete();
 
-            return redirect()->route('employee_period.index')->with('success', __('Employee Type successfully deleted'));
+            return redirect()->back()->with('success', __('Employee Application Successfully Deleted'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
