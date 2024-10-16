@@ -32,6 +32,12 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mx-auto">
             {{-- <img src="{{ asset('installer/img/crystal.png') }}" alt=""> --}}
             <div class="card card-login-head">
+                <div class="loader-show">
+                    <div class="loader-bottom"></div>
+                </div>
+                <div class="loader-show">
+                    <div class="loader-top" style="float: right"></div>
+                </div>
                 <div class="card-body card-title">
                     {{-- <div>
                         <img src="{{ $logos . $logo }}" alt="{{ env('APP_NAME') }}" class="login-logo logo logo-lg" />
@@ -41,6 +47,13 @@
                         {{ __('Login Subtitle') }}
                     </p>
                 </div>
+                <div class="loader-show">
+                    <div class="loader-top"></div>
+                </div>
+                <div class="loader-show">
+                    <div class="loader-bottom" style="float: right"></div>
+                </div>
+
             </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mx-auto">
