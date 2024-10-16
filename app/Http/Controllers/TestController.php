@@ -20,26 +20,27 @@ class TestController extends Controller
     function new_get_attendances()
     {
         $units = ['Head Office'];
-        $apis =['http://172.16.0.16:3050'];
+        $apis = ['http://172.16.0.16:3050'];
+        // $apis = ['http://127.0.0.1:3020'];
         $locations = '-6.172612489913187, 106.8627610802651';
         $default_coordinate = '-6.172612489913187, 106.8627610802651, 20';
         $date = date('Y-m-d');
         $tomorrow = date("Y-m-d", strtotime('tomorrow'));
         $yesterday = date("Y-m-d", strtotime('yesterday'));
         $employees = Employee::where('is_active', 1)->select('personel_id')->get();
-        $presentAttendance = AttendanceStatus::where('id',1)->first();
+        $presentAttendance = AttendanceStatus::where('id', 1)->first();
 
         $bot_token = env('TELEGRAM_BOT_TOKEN');
         $group_id  = env('TELEGRAM_BOT_GROUP_ID');
 
         $settings = Utility::settings();
 
-        for ($a=0; $a < count($apis); $a++) {
+        for ($a = 0; $a < count($apis); $a++) {
             $responses = null;
             try {
                 $responses = Http::withHeaders([
                     'X-APP-KEY' => 'PTJAKTOURJXBPTJAKTOURJXBPTJAKTOURJXBACCESSDOOOR'
-                ])->get($apis[$a] . '/transaction-attendances?date=' . $date);
+                ])->get($apis[$a] . '/transaction-attendances-new?date=' . $date);
             } catch (\Throwable $th) {
                 $responses = null;
                 Log::info($th);
@@ -49,8 +50,8 @@ class TestController extends Controller
             if (!empty($responses?->json())) {
                 $parsed_responses = $responses->json();
                 $attendances = $parsed_responses['attendances'];
-    
-                $massAssign = array_map(function ($data) use ($parsed_responses, $default_coordinate, $employees, $attendances){
+
+                $massAssign = array_map(function ($data) use ($parsed_responses, $default_coordinate, $employees, $attendances) {
                     $duplicate_data = LogAttendance::where('personel_id', $data['nrk'])
                         ->where('date', $parsed_responses['date'])
                         ->where('min', $data['first_time'])
@@ -71,7 +72,7 @@ class TestController extends Controller
                         ];
                     }
                 }, $attendances);
-    
+
                 $parsed_data = array_values(array_filter($massAssign, function ($data) {
                     return $data !== null;
                 }));
@@ -107,12 +108,12 @@ class TestController extends Controller
                     if (!empty($employee)) {
                         if ($f_data->shift_id) {
                             $shift_times = ShiftTime::where('shift_type_id', $f_data->shift_id)
-                                ->where('days',date('l'))
+                                ->where('days', date('l'))
                                 ->select(['is_working', 'start_time', 'end_time'])
                                 ->first();
                         } else {
                             $shift_times = ShiftTime::where('shift_type_id', $employee->shift_type->id)
-                                ->where('days',date('l'))
+                                ->where('days', date('l'))
                                 ->select(['is_working', 'start_time', 'end_time'])
                                 ->first();
                         }
@@ -121,17 +122,17 @@ class TestController extends Controller
                         if ($attendance?->source_out != 'Application' || empty($attendance) || ($attendance?->source_out == 'Application' && $attendance?->clock_in == $attendance?->clock_out)) {
                             $clock_in  = $attendance['clock_in'] ?? null;
                             $clock_out = null;
-            
+
                             if ($f_data->min) {
                                 $clock_in = $f_data->min;
                             }
-            
+
                             if ($f_data->max != $f_data->min && !empty($attendance)) {
                                 $clock_out = $f_data->max;
                             } else {
                                 $clock_out = $f_data->min;
                             }
-    
+
                             // * Calculating late
                             $late = '00:00:00';
                             if (strtotime($clock_in) > (strtotime($shift_times->start_time) + ((int)$settings['late_tolerance'] * 60))) {
@@ -141,18 +142,18 @@ class TestController extends Controller
                                 $late_secs  = floor($totalLateSeconds % 60);
                                 $late  = sprintf('%02d:%02d:%02d', $late_hours, $late_mins, $late_secs);
                             }
-            
+
                             // * Calculating Workhours
                             $workhours = '00:00:00';
                             if ($clock_in && $clock_out && strtotime($clock_out) > strtotime($clock_in)) {
                                 $total_workhour_seconds = strtotime($clock_out) - strtotime($clock_in);
-            
+
                                 $workhour_hours = floor($total_workhour_seconds / 3600);
                                 $workhour_mins  = floor($total_workhour_seconds / 60 % 60);
                                 $workhour_secs  = floor($total_workhour_seconds % 60);
                                 $workhours      = sprintf('%02d:%02d:%02d', $workhour_hours, $workhour_mins, $workhour_secs);
                             }
-            
+
                             // * Calculating Early Leaving
                             $early_leaving = '00:00:00';
                             if (strtotime($clock_out) <= strtotime($shift_times->end_time)) {
@@ -162,7 +163,7 @@ class TestController extends Controller
                                 $early_secs          = floor($total_early_seconds % 60);
                                 $early_leaving       = sprintf('%02d:%02d:%02d', $early_hours, $early_mins, $early_secs);
                             }
-            
+
                             // ? Create / Update Attendance
                             if ($attendance && strtotime($clock_in) < strtotime($attendance?->clock_in)) {
                                 Log::info('Updating Today Attendance Data');
@@ -210,9 +211,8 @@ class TestController extends Controller
                 }
             }
 
-            LogSyncAttendance::insert(['status'=>'Success','date'=>$date,'unit'=>$units[$a],'created_at'=>date('Y-m-d H:i:s'),'updated_at'=>date('Y-m-d H:i:s')]);
+            LogSyncAttendance::insert(['status' => 'Success', 'date' => $date, 'unit' => $units[$a], 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]);
         }
         return null;
     }
 }
-
