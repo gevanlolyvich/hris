@@ -21,13 +21,17 @@
         data-bs-original-title="{{ __('Import') }}">
         <i class="ti ti-file"></i>
     </a>
+
     @can('Create Employee')
-        <a href="{{ route('employee.create') }}" 
-            data-title="{{ __('Create New Employee') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-            data-bs-original-title="{{ __('Create') }}">
-            <i class="ti ti-plus"></i>
-        </a>
+        @if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id)))
+            <a href="{{ route('employee.create') }}" 
+                data-title="{{ __('Create New Employee') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+                data-bs-original-title="{{ __('Create') }}">
+                <i class="ti ti-plus"></i>
+            </a>
+        @endif
     @endcan
+        
 @endsection
 
 @section('content')
