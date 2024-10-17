@@ -78,7 +78,7 @@
     </div>
 </div>
 
-@if (Auth::user()->type == 'company' || Auth::user()->type == 'hr' || in_array($employee_period->employee_id, \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray()))
+@if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id)))
     <div class="modal-footer">
         <button type="button" class="btn btn-success rounded bs-pass-para status" data-status="Approved" {{ $employee_period->status == 'Approved' ? 'disabled' : ''}}>{{ __('Approved') }}</button>
         <button type="button" class="btn btn-danger rounded bs-pass-para status" data-status="Reject" {{ $employee_period->status == 'Approved' ? 'disabled' : ''}}>{{ __('Reject') }}</button>

@@ -6,7 +6,7 @@
         
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
-                {{ Form::label('request_type', __('Request Type'), ['class' => 'form-label']) }}
+                {{ Form::label('request_type', __('Employee Application Type'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
                     <a class="btn btn-outline-primary"
                         href="{{ route('employee.create') }}">
