@@ -109,7 +109,7 @@ class EmployeeApplicationController extends Controller
                 $employee_period->active = false;
                 $employee_period->status = "Pending";
             } else {
-                $employee_period->active = true;
+                // $employee_period->active = true;
                 $employee_period->status = "Approved";
             }
 
@@ -216,19 +216,19 @@ class EmployeeApplicationController extends Controller
                 $employee_period->update([
                     'response' => $request->response,
                     'status' => $request->status,
-                    'active' => true,
+                    // 'active' => true,
                 ]);
 
-                if ($request->status === "Approved") {
-                    // Aktifkan employee
-                    $employee = Employee::findOrFail($employee_period->employee_id);
-                    $employee->update(['is_active' => true]);
+                // if ($request->status === "Approved") {
+                //     // Aktifkan employee
+                //     $employee = Employee::findOrFail($employee_period->employee_id);
+                //     $employee->update(['is_active' => true]);
 
-                    // Aktifkan user
-                    $user = User::findOrFail($employee->user_id);
+                //     // Aktifkan user
+                //     $user = User::findOrFail($employee->user_id);
 
-                    $user->update(['is_active' => true]);
-                }
+                //     $user->update(['is_active' => true]);
+                // }
             });
             return redirect()->back()->with('success', __('Employee Application Successfully Updated'));
         } else {

@@ -175,8 +175,6 @@ class EmployeeController extends Controller
 
                 return redirect()->back()->withInput()->with('error', $messages->first());
             }
-            // return $request;
-            // return Auth::user();
 
             $form_user = [
                 'name' => $request['name'],
@@ -187,10 +185,11 @@ class EmployeeController extends Controller
                 'created_by' => \Auth::user()->id,
                 'branch_id' => $request['branch_id'],
             ];
-            if (Auth::user()->branch_id != null) {
-                $form_user['is_active'] = false;
-            } else {
+
+            if ($employee_type->period_type != 'Periodical') {
                 $form_user['is_active'] = true;
+            } else {
+                $form_user['is_active'] = false;
             }
 
             // return $form_user;
@@ -239,12 +238,13 @@ class EmployeeController extends Controller
                 'identity_number' => $request['identity_number'],
                 'created_by' => \Auth::user()->id,
             ];
-            if (Auth::user()->branch_id != null) {
-                $form_employee['is_active'] = false;
-            } else {
+
+            if ($employee_type->period_type != 'Periodical') {
                 $form_employee['is_active'] = true;
+            } else {
+                $form_employee['is_active'] = false;
             }
-            // return $form_employee;
+
             $employee = Employee::create($form_employee);
 
             ShiftHistory::create(
@@ -254,21 +254,23 @@ class EmployeeController extends Controller
                 ]
             );
 
-            $form_emp_period = [
-                'employee_id' => $employee->id,
-                'start_period' => $request->start_period,
-                'end_period' => $request->end_period,
-                'reason' => $request->reason,
-                'type_id' => $request->type
-            ];
-            if (Auth::user()->branch_id != null) {
-                $form_emp_period['active'] = false;
-                $form_emp_period['status'] = "Pending";
-            } else {
-                $form_emp_period['active'] = true;
-                $form_emp_period['status'] = "Approved";
+            if ($employee_type->period_type == 'Periodical') {
+                $form_emp_period = [
+                    'employee_id'   => $employee->id,
+                    'start_period'  => $request->start_period,
+                    'end_period'    => $request->end_period,
+                    'reason'        => $request->reason,
+                    'type_id'       => $request->type,
+                    'active'        => false,
+                ];
+
+                if (Auth::user()->branch_id != null) {
+                    $form_emp_period['status'] = "Pending";
+                } else {
+                    $form_emp_period['status'] = "Approved";
+                }
+                EmployeePeriod::create($form_emp_period);
             }
-            EmployeePeriod::create($form_emp_period);
 
             if ($request->hasFile('document')) {
                 foreach ($request->document as $key => $document) {
