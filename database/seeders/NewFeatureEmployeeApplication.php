@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class NewFeaturePhysicalActivity extends Seeder
+class NewFeatureEmployeeApplication extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,10 +18,10 @@ class NewFeaturePhysicalActivity extends Seeder
     {
         $currentTimestamp = date('Y-m-d H:i:s');
         $featureNames = [
-            "Manage Physical Activity",
-            "Create Physical Activity",
-            "Edit Physical Activity",
-            "Delete Physical Activity"
+            "Manage Employee Application",
+            "Create Employee Application",
+            "Edit Employee Application",
+            "Delete Employee Application",
         ];
 
         $newFeature = array_map(function ($name) use ($currentTimestamp) {
@@ -42,8 +42,5 @@ class NewFeaturePhysicalActivity extends Seeder
 
         $hr = Role::findByName('hr');
         $hr->givePermissionTo($transformNewFeature);
-
-        $employee = Role::findByName('employee');
-        $employee->givePermissionTo($transformNewFeature);
     }
 }
