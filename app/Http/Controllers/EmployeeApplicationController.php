@@ -20,9 +20,20 @@ class EmployeeApplicationController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
 
-            $employee_periods = EmployeePeriod::orderBy('created_at', 'DESC')->orderBy('status', 'DESC')->get();
+            $query = EmployeePeriod::with('employee');
+
+            if (Auth::user()->branch_id) {
+                $query->whereHas('employee', function ($query) {
+                    $query->where('branch_id', Auth::user()->branch_id);
+                });
+            }
+
+            $employee_periods = $query->orderBy('created_at', 'DESC')
+                ->orderBy('status', 'DESC')
+                ->get();
+
             return view('employee_period.index', compact('employee_periods'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -31,7 +42,7 @@ class EmployeeApplicationController extends Controller
 
     public function create()
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             // $departments  = !empty(\Auth::user()->branch_id) ? Department::orderBy('name', 'ASC')->where('branch_id', \Auth::user()->branch_id)->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $types = [
                 'Fixed' => __('Fixed'),
@@ -70,7 +81,7 @@ class EmployeeApplicationController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -118,7 +129,7 @@ class EmployeeApplicationController extends Controller
     public function edit($id)
     {
 
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             $period_types = [
                 'Fixed' => __('Fixed'),
                 'Periodical' => __('Periodical'),
@@ -135,7 +146,7 @@ class EmployeeApplicationController extends Controller
 
     public function update(Request $request)
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -171,7 +182,7 @@ class EmployeeApplicationController extends Controller
 
     public function destroy($id)
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             $employee_period = EmployeePeriod::find($id);
             $employee_period->delete();
 
@@ -199,7 +210,7 @@ class EmployeeApplicationController extends Controller
 
     public function changeAction(Request $request)
     {
-        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id))) {
+        if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
             DB::transaction(function () use ($request) {
                 $employee_period = EmployeePeriod::findOrFail($request->employee_period_id);
                 $employee_period->update([
