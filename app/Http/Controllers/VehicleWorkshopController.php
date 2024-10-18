@@ -118,8 +118,8 @@ class VehicleWorkshopController extends Controller
     {
         if (\Auth::user()->can('Delete Vehicle Workshop')) {
             $vehicleWorkshop->delete();
-            
-            return redirect()->route('vehicle-maintenance-type.index')->with('success', __('Vehicle Maintenance Type Successfully Deleted'));
+
+            return redirect()->route('vehicle-workshop.index')->with('success', __('Vehicle Maintenance Type Successfully Deleted'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
