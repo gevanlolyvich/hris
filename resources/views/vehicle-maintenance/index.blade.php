@@ -206,14 +206,18 @@
                 let newName = document.getElementById("new_workshop_name");
                 let newAddress = document.getElementById("new_workshop_address");
 
+                console.log({workshop_choice})
+
                 if (workshop_choice == 0) {
+                    // console.log({requrired:true})
                     newWorkshopDiv.style.display = '';
                     newName.required = true;
                     newAddress.required = true;
                 } else {
+                    // console.log({requrired:false})
                     newWorkshopDiv.style.display = 'none';
                     newName.required = false;
-                    newAddress.required = true;
+                    newAddress.required = false;
                 }
             });
         });
