@@ -41,7 +41,7 @@ class VehicleMaintenanceController extends Controller
             if ($request->type == 'monthly' && !empty($request->month)) {
                 $month = date('m', strtotime($request->month));
                 $year  = date('Y', strtotime($request->month));
-    
+
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
@@ -59,7 +59,7 @@ class VehicleMaintenanceController extends Controller
                 $year       = date('Y');
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
+
                 $maintenances->whereBetween(
                     'start_date',
                     [
@@ -103,13 +103,13 @@ class VehicleMaintenanceController extends Controller
             if ($request->type == 'monthly' && !empty($request->month)) {
                 $month = date('m', strtotime($request->month));
                 $year  = date('Y', strtotime($request->month));
-    
+
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
+
                 // old date
                 // $end_date   = date($year . '-' . $month . '-t');
-    
+
                 $maintenances->whereBetween(
                     'start_date',
                     [
@@ -124,10 +124,10 @@ class VehicleMaintenanceController extends Controller
                 $year       = date('Y');
                 $start_date = date($year . '-' . $month . '-01');
                 $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
-    
+
                 // old date
                 // $end_date   = date($year . '-' . $month . '-t');
-    
+
                 $maintenances->whereBetween(
                     'start_date',
                     [
@@ -146,7 +146,7 @@ class VehicleMaintenanceController extends Controller
             return view('vehicle-maintenance.index', compact('maintenances', 'vehicles_choices'));
         } else if (\Auth::user()->can('Manage Vehicle Maintenance')) {
             $maintenannces = VehicleMaintenance::orderby('start_date', 'DESC')->get();
-            
+
             return view('vehicle-maintenance.index', compact(var_name: 'maintenannces'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -174,7 +174,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, '+ '.__('Add New'));
+            $workshops->put(0, '+ ' . __('Add New'));
 
             return view('vehicle-maintenance.create', compact('vehicles', 'types', 'workshops'));
         } else if (\Auth::user()->type != 'employee' && \Auth::user()->can('Create Vehicle Maintenance')) {
@@ -200,8 +200,9 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, '+ '.__('Add New'));
+            $workshops->put(0, '+ ' . __('Add New'));
 
+            // return compact('vehicles', 'types', 'workshops');
             return view('vehicle-maintenance.create', compact('vehicles', 'types', 'workshops'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -227,13 +228,14 @@ class VehicleMaintenanceController extends Controller
                     'file' => 'nullable|mimes:jpeg,png,jpg,pdf,doc,docx,xls,xlsx|max:10480'
                 ]
             );
-    
+
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
-    
+
                 return redirect()->back()->with('error', $messages->first());
             }
-        
+            // return $request;
+
             DB::transaction(function () use ($request) {
                 $vehicle = Vehicle::find($request->vehicle_id);
 
@@ -246,12 +248,12 @@ class VehicleMaintenanceController extends Controller
                 }
 
                 $workshop_id = $request->workshop_id;
-                if ($request->type_id == 0) {
+                if ($request->workshop_id == 0) {
                     $workshop           = new VehicleWorkshop();
                     $workshop->name     = $request->new_workshop_name;
                     $workshop->address  = $request->new_workshop_address;
                     $workshop->save();
-    
+
                     $workshop_id        = $workshop->id;
                 }
 
@@ -270,12 +272,13 @@ class VehicleMaintenanceController extends Controller
                 $maintenance->save();
 
                 if (($request->end_date == null && Carbon::today()->equalTo(Carbon::parse($request->start_date))) || // Check if start date same as today when user doesn't input endate
-                (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))){ // Check today is between two date
+                    (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))
+                ) { // Check today is between two date
                     $vehicle->status = 'inactive';
                     $vehicle->save();
                 }
             });
-    
+
             return redirect()->back()->with('success', __('Vehicle Maintenance Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -315,7 +318,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, '+ '.__('Add New'));
+            $workshops->put(0, '+ ' . __('Add New'));
 
             return view('vehicle-maintenance.edit', compact('vehicles', 'types', 'vehicleMaintenance', 'workshops'));
         } else if (\Auth::user()->type != 'employee' && \Auth::user()->can('Edit Vehicle Maintenance')) {
@@ -341,7 +344,7 @@ class VehicleMaintenanceController extends Controller
             $types              = VehicleMaintenanceType::orderBy('name', 'ASC')->pluck('name', 'id');
 
             $workshops          = VehicleWorkshop::get()->pluck('name', 'id');
-            $workshops->put(0, '+ '.__('Add New'));
+            $workshops->put(0, '+ ' . __('Add New'));
 
             return view('vehicle-maintenance.edit', compact('vehicles', 'types', 'vehicleMaintenance', 'workshops'));
         } else {
@@ -368,13 +371,13 @@ class VehicleMaintenanceController extends Controller
                     'file' => 'nullable|mimes:jpeg,png,jpg,pdf,doc,docx,xls,xlsx|max:10480'
                 ]
             );
-    
+
             if ($validator->fails()) {
                 $messages = $validator->getMessageBag();
-    
+
                 return redirect()->back()->with('error', $messages->first());
             }
-    
+
             DB::transaction(function () use ($request, $vehicleMaintenance) {
                 $vehicle = Vehicle::find($request->vehicle_id);
 
@@ -384,7 +387,7 @@ class VehicleMaintenanceController extends Controller
                     $docName = time() . "_" . date('Y-m-d') . "_" . preg_replace('/\s+/', '', $vehicle->name) . "." . $docs->getClientOriginalExtension();
                     $path = $docs->storeAs('uploads/vehicle-maintenances', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
-    
+
                     // Delete Old file
                     $old_filepath = str_replace(env('APP_URL') . '/storage', '../storage/app/public', $vehicleMaintenance->file);
                     if (File::exists($old_filepath)) {
@@ -402,14 +405,15 @@ class VehicleMaintenanceController extends Controller
                 $vehicleMaintenance->file                  = $document_path ?: $vehicleMaintenance->file;
                 $vehicleMaintenance->description           = $request->description;
                 $vehicleMaintenance->save();
-        
+
                 if (($request->end_date == null && Carbon::today()->equalTo(Carbon::parse($request->start_date))) || // Check if start date same as today when user doesn't input endate
-                    (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))){ // Check today is between two date
+                    (Carbon::today()->between(Carbon::parse($request->start_date), Carbon::parse($request->end_date)))
+                ) { // Check today is between two date
                     $vehicle->status = 'inactive';
                     $vehicle->save();
                 }
             });
-    
+
             return redirect()->back()->with('success', __('Vehicle Maintenance Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
