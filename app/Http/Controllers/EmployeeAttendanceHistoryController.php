@@ -93,13 +93,13 @@ class EmployeeAttendanceHistoryController extends Controller
             $branch_count = 2;
             foreach ($branch as $index => $b) {
                 if ($b == 'Head Office') {
-                    $branch[$index] = '1. '.  $b;
+                    $branch[$index] = '1. ' .  $b;
                 } else {
-                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch[$index] = $branch_count . '. ' . __($b);
                     $branch_count += 1;
                 }
             }
-            
+
             return view('employeeattendancehistory.index', compact('employees', 'branch', 'department'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -178,7 +178,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
         $hours            = floor($total_late / 3600);
         $mins             = floor($total_late / 60 % 60);
-        $total_late       = [ 'hours' => $hours, 'minutes' => $mins];
+        $total_late       = ['hours' => $hours, 'minutes' => $mins];
 
         // calculating total early
         $total_early = 0;
@@ -187,16 +187,34 @@ class EmployeeAttendanceHistoryController extends Controller
         }
         $hours            = floor($total_early / 3600);
         $mins             = floor($total_early / 60 % 60);
-        $total_early      = [ 'hours' => $hours, 'minutes' => $mins];
-        
+        $total_early      = ['hours' => $hours, 'minutes' => $mins];
+
         // calculating workhours
         $total_workhours = 0;
-        foreach ($attendanceEmployee as $attendance) {
-            $total_workhours += strtotime($attendance->work_hours) - strtotime(date('Y-m-d'));
+        $debug = [];
+
+        foreach ($attendanceEmployee as $i => $attendance) {
+            $work_hours = strtotime($attendance->work_hours);
+            if ($work_hours == false) {
+                $work_hours = strtotime('09:00:00'); // default work hours
+            }
+            $current_day_timestamp = strtotime(date('Y-m-d'));
+
+            $total_workhours += $work_hours - $current_day_timestamp;
+
+            $debug[$i] = [
+                'employee_id' => $attendance->employee_id,
+                'date' => $attendance->date,
+                'work_hours' => $work_hours,
+                'ymd' => $current_day_timestamp,
+                'result' => $total_workhours
+            ];
         }
+        // return $debug;
+
         $hours            = floor($total_workhours / 3600);
         $mins             = floor($total_workhours / 60 % 60);
-        $total_workhours  = [ 'hours' => $hours, 'minutes' => $mins];
+        $total_workhours  = ['hours' => $hours, 'minutes' => $mins];
 
         // calculating overtime
         $total_overtime = 0;
@@ -229,7 +247,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
         $hours                  = floor($total_overtime / 3600);
         $mins                   = floor($total_overtime / 60 % 60);
-        $total_overtime         = [ 'hours' => $hours, 'minutes' => $mins];
+        $total_overtime         = ['hours' => $hours, 'minutes' => $mins];
         $max_overtime           = $employee?->departments?->overtime_limit;
         $overtime_exceed_limit  = $hours >= $max_overtime && !empty($max_overtime);
 
@@ -239,7 +257,7 @@ class EmployeeAttendanceHistoryController extends Controller
 
         $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
 
-        foreach($attendanceEmployee as $attendance) {
+        foreach ($attendanceEmployee as $attendance) {
             if ($attendance->coord_in || $attendance->coord_out) {
                 $nearest_in         = null;
                 $nearest_in_coord   = null;
