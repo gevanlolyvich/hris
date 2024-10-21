@@ -174,6 +174,59 @@
             
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            if ($("#work-hours-table").length > 0) {
+                new simpleDatatables.DataTable("#work-hours-table", {
+                    perPage: 5 
+                });
+            }
+
+            if ($("#overtime-table").length > 0) {
+                new simpleDatatables.DataTable("#overtime-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#late-table").length > 0) {
+                new simpleDatatables.DataTable("#late-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#early-leaving-table").length > 0) {
+                new simpleDatatables.DataTable("#early-leaving-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#shift-table").length > 0) {
+                new simpleDatatables.DataTable("#shift-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#address-table").length > 0) {
+                new simpleDatatables.DataTable("#address-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#transfer-table").length > 0) {
+                new simpleDatatables.DataTable("#transfer-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#training-table").length > 0) {
+                new simpleDatatables.DataTable("#training-table", {
+                    perPage: 5 
+                });
+            }
+        });
+
+    </script>
 @endpush
 
 @section('content')
@@ -436,7 +489,7 @@
                             <h5>{{__('Work Hours')}}</h5>
                             <hr>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table" id="work-hours-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -468,7 +521,7 @@
                             <h5>{{__('Overtime')}}</h5>
                             <hr>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="overtime-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -509,7 +562,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="late-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -540,7 +593,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="early-leaving-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -575,7 +628,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table datatable" id="shift-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -602,7 +655,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table datatable" id="address-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -641,7 +694,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table" id="transfer-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -672,7 +725,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table" id="training-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Start Date') }}</th>
