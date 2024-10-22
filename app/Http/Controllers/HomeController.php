@@ -36,14 +36,12 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Show the application dashboard.
      *
-    //  * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
     {
@@ -232,23 +230,23 @@ class HomeController extends Controller
                 $validAttendance    = $branch_id?->isNotEmpty() ? AttendanceEmployee::whereHas('employee', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
                 })->where('date', '=', $currentDate)->where('is_valid', true)->count() : AttendanceEmployee::where('date', '=', $currentDate)->where('is_valid', true)->count();
-                $invalidAttendance  = $branch_id?->isNotEmpty() ? AttendanceEmployee::whereHas('employee', function ($query) use ($branch_id){
+                $invalidAttendance  = $branch_id?->isNotEmpty() ? AttendanceEmployee::whereHas('employee', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
                 })->where('date', '=', $currentDate)->whereNull('is_valid')->count() : AttendanceEmployee::where('date', '=', $currentDate)->whereNull('is_valid')->count();
 
-                $requestAttendanceCount = $branch_id?->isNotEmpty() ? AttendanceRequest::whereHas('employee', function ($query) use ($branch_id){
+                $requestAttendanceCount = $branch_id?->isNotEmpty() ? AttendanceRequest::whereHas('employee', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
                 })->whereNull('is_approved')->count() : AttendanceRequest::whereNull('is_approved')->count();
-                
-                $permitCount            = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id){
+
+                $permitCount            = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
                 })->whereNull('is_approved')->count() : Permit::whereNull('is_approved')->count();
 
-                $leaveCount             = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id){
+                $leaveCount             = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
                     $query->whereIn('branch_id', $branch_id);
                 })->where('status', 'Pending')->count() : Leave::where('status', 'Pending')->count();
 
-                $leaveOfficeCount       = $branch_id?->isNotEmpty() ? LeaveOffice::whereHas('employee', function ($query) use ($branch_id, $today){
+                $leaveOfficeCount       = $branch_id?->isNotEmpty() ? LeaveOffice::whereHas('employee', function ($query) use ($branch_id, $today) {
                     $query->whereIn('branch_id', $branch_id);
                 })->where('date', $today)->count() : LeaveOffice::where('date', $today)->count();
 
@@ -281,7 +279,27 @@ class HomeController extends Controller
 
                 // $announcements = $announcements->sortByDesc('start_date');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'activeJob', 'inActiveJOb', 'meetings', 'countEmployee', 'countUser', 'notClockIns', 'countEmployee', 'accountBalance', 'totalPayee', 'totalPayer', 'validAttendance', 'invalidAttendance', 'requestAttendanceCount', 'permitCount', 'leaveCount', 'leaveOfficeCount', 'settings'));
+                return view('dashboard.dashboard', compact(
+                    'announcements',
+                    'employees',
+                    'activeJob',
+                    'inActiveJOb',
+                    'meetings',
+                    'countEmployee',
+                    'countUser',
+                    'notClockIns',
+                    'countEmployee',
+                    'accountBalance',
+                    'totalPayee',
+                    'totalPayer',
+                    'validAttendance',
+                    'invalidAttendance',
+                    'requestAttendanceCount',
+                    'permitCount',
+                    'leaveCount',
+                    'leaveOfficeCount',
+                    'settings'
+                ));
             }
         } else {
             if (!file_exists(storage_path() . "/installed")) {

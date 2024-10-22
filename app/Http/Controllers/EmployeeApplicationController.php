@@ -18,11 +18,15 @@ use Illuminate\Support\Facades\Validator;
 
 class EmployeeApplicationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr')) {
 
             $query = EmployeePeriod::with('employee');
+
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
 
             if (Auth::user()->branch_id) {
                 $query->whereHas('employee', function ($query) {

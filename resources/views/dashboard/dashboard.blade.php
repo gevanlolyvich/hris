@@ -513,6 +513,84 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
+                    <a href="{{ route('employee.index') }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-primary">
+                                                <i class="ti ti-users"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Employee') }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-primary">{{ $countEmployee }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <a href="{{ route('employee-applications.index', ['status' => "Pending"]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-info">
+                                                <i class="ti ti-circle-plus"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Employee Application') }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <a href="{{ route('employee-applications.index', ['status' => "Reject"]) }}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-auto mb-3 mb-sm-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="theme-avtar bg-warning">
+                                                <i class="ti ti-ban"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <small class="text-muted">{{ __('Total') }}</small>
+                                                <h6 class="m-0">{{ __('Rejected Employee') }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-12">
+            {{-- start --}}
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
                     <a href="{{ route('leave-office.index', ['type' => 'daily', 'month' => date('Y-m'), 'date' => date('Y-m-d'), 'branch' => '']) }}">
                         <div class="card">
                             <div class="card-body">
