@@ -13,11 +13,13 @@ use App\Models\Training;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
+use App\Models\EmployeePeriod;
 use App\Utilities\DistanceCalculator;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\ShiftHistory;
 use App\Models\Overtime;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -120,6 +122,9 @@ class EmployeeAttendanceHistoryController extends Controller
 
         $attendanceEmployee   = AttendanceEmployee::where('employee_id', $empId);
         $overtimes            = Overtime::where('employee_id', $empId)->whereNotNull(['report_document']);
+
+        $employee_periods     = EmployeePeriod::where('employee_id', $empId)->where('status', 'Approved')->with('type')->get();
+        $employee_reports = Report::where('employee_id', $empId)->where('type', 'daily')->with('activity')->get();
 
         if ($request->type == 'monthly' && !empty($request->month)) {
             $month = date('m', strtotime($request->month));
@@ -308,7 +313,24 @@ class EmployeeAttendanceHistoryController extends Controller
 
         $trainings  = Training::where('employee', $empId)->get();
 
-        return view('employeeattendancehistory.show', compact('employee', 'attendanceEmployee', 'total_late', 'total_early', 'total_workhours', 'total_overtime', 'shift_changes', 'home_changes', 'id', 'overtimes', 'max_overtime', 'overtime_exceed_limit', 'transfers', 'trainings'));
+        return view('employeeattendancehistory.show', compact(
+            'employee',
+            'attendanceEmployee',
+            'total_late',
+            'total_early',
+            'total_workhours',
+            'total_overtime',
+            'shift_changes',
+            'home_changes',
+            'id',
+            'overtimes',
+            'max_overtime',
+            'overtime_exceed_limit',
+            'transfers',
+            'trainings',
+            'employee_periods',
+            'employee_reports'
+        ));
     }
 
     public function exportIndividualAttendance(Request $request)

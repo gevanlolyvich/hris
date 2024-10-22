@@ -27,4 +27,9 @@ class EmployeePeriod extends Model
     {
         return $this->belongsTo(Employee::class, 'employee_id', 'id');
     }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeType::class, 'type_id', 'id');
+    }
 }

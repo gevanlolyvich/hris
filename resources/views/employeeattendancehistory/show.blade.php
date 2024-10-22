@@ -224,6 +224,18 @@
                     perPage: 5 
                 });
             }
+            
+            if ($("#employee-period-table").length > 0) {
+                new simpleDatatables.DataTable("#employee-period-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#employee-report-table").length > 0) {
+                new simpleDatatables.DataTable("#employee-report-table", {
+                    perPage: 5 
+                });
+            }
         });
 
     </script>
@@ -741,6 +753,76 @@
                                                 <td>{{ $training->end_date }}</td>
                                                 <td>{{ $training->training_cost }}</td>
                                                 <td>{{ $training->description }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Employee Period and Report --}}
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Employee Period')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="employee-period-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Period') }}</th>
+                                            <th>{{ __('Type') }}</th>
+                                            <th>{{ __('Branch') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (count($employee_periods))
+                                            @foreach ($employee_periods as $period)
+                                                <tr>
+                                                    <td>{{ $period?->start_period }} >> {{ $period?->end_period }}</td>
+                                                    <td>{{ $period?->type?->name ?? $period->type}}</td>
+                                                    <td>{{ $period?->employee?->branch?->name ?? $period?->branch }}</td>
+                                                </tr>
+                                                
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td>{{ $employee->company_doj }} >> {{ __('Now') }}</td>
+                                                <td>{{ $employee->type?->name }}</td>
+                                                <td>{{ $employee->branch?->name }}</td>
+                                            </tr>
+                                        @endif
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Employee Report')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="employee-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Date') }}</th>
+                                            <th>{{ __('Description') }}</th>
+                                        </tr>
+                                    </thead> 
+                                    <tbody>
+                                        @foreach ($employee_reports as $reports)
+                                            <tr>
+                                                <td>{{ $reports->activity?->date }}</td>
+                                                <td>{{ $reports->activity?->activity ?? '-' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
