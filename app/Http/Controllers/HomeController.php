@@ -19,6 +19,7 @@ use App\Models\Payees;
 use App\Models\Payer;
 use App\Models\Permit;
 use App\Models\AttendanceRequest;
+use App\Models\EmployeePeriod;
 use App\Models\ShiftTime;
 use App\Models\ShiftType;
 use App\Models\Ticket;
@@ -253,6 +254,14 @@ class HomeController extends Controller
                 $notClockIns    = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get() : Employee::where('is_active', 1)->whereNotIn('id', $notClockIn)->orderBy('name', 'asc')->get();
                 $accountBalance = AccountList::sum('initial_balance');
 
+                $pendingEmployeeApplicationsCount = $branch_id?->isNotEmpty() ? EmployeePeriod::whereHas('employee', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->where('status', 'Pending')->count() : EmployeePeriod::where('status', 'Pending')->count();
+
+                $rejectEmployeeApplicationsCount = $branch_id?->isNotEmpty() ? EmployeePeriod::whereHas('employee', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->where('status', 'Reject')->count() : EmployeePeriod::where('status', 'Reject')->count();
+
                 $activeJob   = Job::where('status', 'active')->count();
                 $inActiveJOb = Job::where('status', 'in_active')->count();
 
@@ -298,7 +307,9 @@ class HomeController extends Controller
                     'permitCount',
                     'leaveCount',
                     'leaveOfficeCount',
-                    'settings'
+                    'settings',
+                    'rejectEmployeeApplicationsCount',
+                    'pendingEmployeeApplicationsCount'
                 ));
             }
         } else {
