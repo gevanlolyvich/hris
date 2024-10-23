@@ -553,7 +553,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto text-end">
-                                        <h4 class="m-0 text-info"> {{ $validAttendance }}</h4>
+                                        <h4 class="m-0 text-info"> {{ $pendingEmployeeApplicationsCount }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -577,7 +577,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto text-end">
-                                        <h4 class="m-0 text-warning">{{ $invalidAttendance }}</h4>
+                                        <h4 class="m-0 text-warning">{{ $rejectEmployeeApplicationsCount }}</h4>
                                     </div>
                                 </div>
                             </div>
