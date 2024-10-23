@@ -36,7 +36,12 @@ class EmployeeTypeController extends Controller
                 'Flexible' => __('Flexible'),
             ];
 
-            return view('employeetype.create', compact('types'));
+            $period_types = [
+                'Fixed' => __('Fixed'),
+                'Periodical' => __('Periodical'),
+            ];
+
+            return view('employeetype.create', compact('types', 'period_types'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -62,6 +67,7 @@ class EmployeeTypeController extends Controller
             $employee_type                = new EmployeeType();
             $employee_type->type          = $request->type;
             $employee_type->name          = $request->name;
+            $employee_type->period_type   = $request->period_type;
 
             $employee_type->save();
 
@@ -84,8 +90,14 @@ class EmployeeTypeController extends Controller
                 'Fixed' => __('Fixed'),
                 'Flexible' => __('Flexible'),
             ];
+
+            $period_types = [
+                'Fixed' => __('Fixed'),
+                'Periodical' => __('Periodical'),
+            ];
+
             $employee_type = EmployeeType::find($id);
-            return view('employeetype.edit', compact('employee_type', 'types'));
+            return view('employeetype.edit', compact('employee_type', 'types', 'period_types'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -110,6 +122,7 @@ class EmployeeTypeController extends Controller
             $employee_type = EmployeeType::find($request->id);
             $employee_type->name = $request->name;
             $employee_type->type = $request->type;
+            $employee_type->period_type = $request->period_type;
             $employee_type->save();
 
             return redirect()->route('employeetype.index')->with('success', __('Employee Type successfully updated'));
@@ -128,5 +141,13 @@ class EmployeeTypeController extends Controller
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
+
+    public function json(Request $request)
+    {
+        $type = EmployeeType::find($request->id);
+
+
+        return response()->json($type);
     }
 }

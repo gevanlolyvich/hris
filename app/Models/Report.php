@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Report extends Model
 {
@@ -42,6 +43,11 @@ class Report extends Model
         return $this->hasMany(ReportActivity::class, 'report_id');
     }
 
+    public function activity(): HasOne
+    {
+        return $this->hasOne(ReportActivity::class, 'report_id');
+    }
+
     public function accomplishments(): HasMany
     {
         return $this->hasMany(ReportAccomplishment::class, 'report_id');
@@ -63,9 +69,9 @@ class Report extends Model
     }
 
     public static $report_type = [
-        'daily'=>'Daily',
-        'weekly'=>'Weekly',
-        'monthly'=>'Monthly',
-        'yearly'=>'Yearly',
+        'daily' => 'Daily',
+        'weekly' => 'Weekly',
+        'monthly' => 'Monthly',
+        'yearly' => 'Yearly',
     ];
 }

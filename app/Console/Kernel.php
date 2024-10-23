@@ -37,6 +37,12 @@ class Kernel extends ConsoleKernel
             ->between('1:00', '23:59')
             ->sentryMonitor();
 
+        $schedule->command('app:activate-deactivate-users')
+            ->everyTenMinutes()
+            ->timezone('Asia/Jakarta')
+            ->between('1:00', '23:59')
+            ->sentryMonitor();
+
         $schedule->command('vehicle:nextMaintenance')
             ->dailyAt('09:00')
             ->timezone('Asia/Jakarta')

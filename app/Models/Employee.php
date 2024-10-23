@@ -49,6 +49,7 @@ class Employee extends Model
         'salary_type',
         'salary',
         'created_by',
+        'is_active'
     ];
 
     function getTotalWorkdays($employeeWorkdays, $month, $year)
@@ -124,7 +125,7 @@ class Employee extends Model
             $attendanceDayName = date('l', strtotime($attendance->date));
 
             // Check if the attendance date is a work day based on shift times
-            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);            
+            $shift = $attendance->shift_type?->shiftTimes?->firstWhere('days', $attendanceDayName);
 
             if ($shift && $shift->is_working && $type == 'Fixed') {
                 // Calculate required work hours based on shift
@@ -212,9 +213,9 @@ class Employee extends Model
 
         //Loan
         $loans      = Loan::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-                        $query->orWhere('is_recurring', true)
-                            ->orWhere('period', "{$year}-{$month}");
-                    })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             if ($loan->type == 'percentage') {
@@ -226,9 +227,9 @@ class Employee extends Model
 
         //Saturation Deduction
         $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-                                        $query->orWhere('is_recurring', true)
-                                            ->orWhere('period', "{$year}-{$month}");
-                                    })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             if ($saturation_deduction->type == 'percentage') {
@@ -255,9 +256,9 @@ class Employee extends Model
 
         //allowance
         $allowances      = Allowance::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-                                $query->orWhere('is_recurring', true)
-                                    ->orWhere('period', "{$year}-{$month}");
-                            })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             if ($allowance->type == 'percentage') {
@@ -269,9 +270,9 @@ class Employee extends Model
 
         //commission
         $commissions      = Commission::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-                                $query->orWhere('is_recurring', true)
-                                    ->orWhere('period', "{$year}-{$month}");
-                            })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_commission = 0;
         foreach ($commissions as $commission) {
             if ($commission->type == 'percentage') {
@@ -283,9 +284,9 @@ class Employee extends Model
 
         //OtherPayment
         $other_payments      = OtherPayment::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-                                $query->orWhere('is_recurring', true)
-                                    ->orWhere('period', "{$year}-{$month}");
-                            })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             if ($other_payment->type == 'percentage') {
@@ -341,9 +342,9 @@ class Employee extends Model
     public static function allowance($id, $month, $year)
     {
         $allowances      = Allowance::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-                                $query->orWhere('is_recurring', true)
-                                    ->orWhere('period', "{$year}-{$month}");
-                            })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             $total_allowance = $allowance->amount + $total_allowance;
@@ -358,9 +359,9 @@ class Employee extends Model
     {
         //commission
         $commissions      = Commission::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-                                $query->orWhere('is_recurring', true)
-                                    ->orWhere('period', "{$year}-{$month}");
-                            })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         // dd($commissions);
         $total_commission = 0;
 
@@ -376,9 +377,9 @@ class Employee extends Model
     {
         //Loan
         $loans      = Loan::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-                        $query->orWhere('is_recurring', true)
-                            ->orWhere('period', "{$year}-{$month}");
-                    })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
             $total_loan = $loan->amount + $total_loan;
@@ -392,9 +393,9 @@ class Employee extends Model
     {
         //Saturation Deduction
         $saturation_deductions      = SaturationDeduction::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-                                        $query->orWhere('is_recurring', true)
-                                            ->orWhere('period', "{$year}-{$month}");
-                                    })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_saturation_deduction = 0;
         foreach ($saturation_deductions as $saturation_deduction) {
             $total_saturation_deduction = $saturation_deduction->amount + $total_saturation_deduction;
@@ -408,9 +409,9 @@ class Employee extends Model
     {
         //OtherPayment
         $other_payments      = OtherPayment::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $total_other_payment = 0;
         foreach ($other_payments as $other_payment) {
             $total_other_payment = $other_payment->amount + $total_other_payment;
@@ -517,12 +518,12 @@ class Employee extends Model
     {
         return $this->belongsTo(self::class, 'managed_by', 'id');
     }
-    
+
     public function recursiveManager(): BelongsTo
     {
         return $this->manager()->with('recursiveManager');
     }
-    
+
     public function managersFlatten()
     {
         $result = collect();
@@ -531,10 +532,10 @@ class Employee extends Model
             $result->push($item);
             $result = $result->merge($item->managersFlatten());
         }
-        
+
         return $result;
     }
-    
+
     public function subordinate(): HasMany
     {
         return $this->hasMany(self::class, 'managed_by');
@@ -544,22 +545,22 @@ class Employee extends Model
     {
         return $this->subordinate()->with('subordinateRecursive');
     }
-    
+
     public function subordinatesFlatten()
     {
         $result = collect();
         $subordinates = $this->subordinateRecursive;
-        
+
         foreach ($subordinates as $subordinate) {
             if ($subordinate instanceof Employee) {
                 $result->push($subordinate);
                 $result = $result->merge($subordinate->subordinatesFlatten());
             }
         }
-        
+
         return $result;
     }
-    
+
     public function shift_histories(): HasMany
     {
         return $this->hasMany(ShiftHistory::class);
@@ -569,12 +570,12 @@ class Employee extends Model
     {
         return $this->hasMany(EventEmployee::class, 'employee_id');
     }
-    
+
     public function home_histories(): HasMany
     {
         return $this->hasMany(EmployeeHomeHistory::class);
     }
-    
+
     public static $employeeTypes = [
         'full time' => 'Full Time',
         'daily worker' => 'Daily Worker',
@@ -598,5 +599,15 @@ class Employee extends Model
     public function terminations()
     {
         return $this->hasMany(Termination::class, 'employee_id', 'id');
+    }
+
+    public function periods(): HasMany
+    {
+        return $this->hasMany(EmployeePeriod::class, 'employee_id', 'id');
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(EmployeeType::class, 'type_id', 'id');
     }
 }

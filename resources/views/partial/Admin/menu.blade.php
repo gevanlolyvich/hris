@@ -170,6 +170,11 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                     {{ __('Employee') }}
                                 </a>
                             </li>
+                            <li class="dash-item {{ Request::segment(1) == 'employee-applications' ? 'active' : '' }}">
+                                <a href="{{ route('employee-applications.index') }}" class="dash-link">
+                                    {{ __('Application') }}
+                                </a>
+                            </li>
                             @if (Gate::check('Manage Termination'))
                                 <li class="dash-item">
                                     <a class="dash-link"

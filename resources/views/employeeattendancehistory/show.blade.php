@@ -174,6 +174,71 @@
             
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            if ($("#work-hours-table").length > 0) {
+                new simpleDatatables.DataTable("#work-hours-table", {
+                    perPage: 5 
+                });
+            }
+
+            if ($("#overtime-table").length > 0) {
+                new simpleDatatables.DataTable("#overtime-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#late-table").length > 0) {
+                new simpleDatatables.DataTable("#late-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#early-leaving-table").length > 0) {
+                new simpleDatatables.DataTable("#early-leaving-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#shift-table").length > 0) {
+                new simpleDatatables.DataTable("#shift-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#address-table").length > 0) {
+                new simpleDatatables.DataTable("#address-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#transfer-table").length > 0) {
+                new simpleDatatables.DataTable("#transfer-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#training-table").length > 0) {
+                new simpleDatatables.DataTable("#training-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#employee-period-table").length > 0) {
+                new simpleDatatables.DataTable("#employee-period-table", {
+                    perPage: 5 
+                });
+            }
+            
+            if ($("#employee-report-table").length > 0) {
+                new simpleDatatables.DataTable("#employee-report-table", {
+                    perPage: 5 
+                });
+            }
+        });
+
+    </script>
 @endpush
 
 @section('content')
@@ -436,7 +501,7 @@
                             <h5>{{__('Work Hours')}}</h5>
                             <hr>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table" id="work-hours-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -468,7 +533,7 @@
                             <h5>{{__('Overtime')}}</h5>
                             <hr>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="overtime-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -509,7 +574,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="late-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -540,7 +605,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                            <table class="table" id="pc-dt-simple">
+                            <table class="table datatable" id="early-leaving-table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Date') }}</th>
@@ -575,7 +640,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table datatable" id="shift-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -602,7 +667,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table datatable" id="address-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -641,7 +706,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table" id="transfer-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
@@ -672,7 +737,7 @@
                             <hr>
                             <br>
                             <div class="table-responsive">
-                                <table class="table" id="pc-dt-simple">
+                                <table class="table" id="training-table">
                                     <thead>
                                         <tr>
                                             <th>{{ __('Start Date') }}</th>
@@ -688,6 +753,76 @@
                                                 <td>{{ $training->end_date }}</td>
                                                 <td>{{ $training->training_cost }}</td>
                                                 <td>{{ $training->description }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Employee Period and Report --}}
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Employee Period')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="employee-period-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Period') }}</th>
+                                            <th>{{ __('Type') }}</th>
+                                            <th>{{ __('Branch') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (count($employee_periods))
+                                            @foreach ($employee_periods as $period)
+                                                <tr>
+                                                    <td>{{ $period?->start_period }} >> {{ $period?->end_period }}</td>
+                                                    <td>{{ $period?->type?->name ?? $period->type}}</td>
+                                                    <td>{{ $period?->employee?->branch?->name ?? $period?->branch }}</td>
+                                                </tr>
+                                                
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td>{{ $employee->company_doj }} >> {{ __('Now') }}</td>
+                                                <td>{{ $employee->type?->name }}</td>
+                                                <td>{{ $employee->branch?->name }}</td>
+                                            </tr>
+                                        @endif
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="card">
+                        <div class="card-header card-body employee-detail-body fulls-card table-border-style">
+                            <h5>{{__('Employee Report')}}</h5>
+                            <hr>
+                            <br>
+                            <div class="table-responsive">
+                                <table class="table" id="employee-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Date') }}</th>
+                                            <th>{{ __('Description') }}</th>
+                                        </tr>
+                                    </thead> 
+                                    <tbody>
+                                        @foreach ($employee_reports as $reports)
+                                            <tr>
+                                                <td>{{ $reports->activity?->date }}</td>
+                                                <td>{{ $reports->activity?->activity ?? '-' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

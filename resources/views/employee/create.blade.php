@@ -142,11 +142,27 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('type', __('Employee Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                    {!! Form::select('type', $employeeTypes, old('type'), ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
+                                    {!! Form::select('type', $employeeTypes, old('type'), ['class' => 'form-control select2 type-select', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
                                 </div>
                                 <div class="form-group col-md-6">
                                     {!! Form::label('company_doj', __('Company Date Of Joining'), ['class' => 'form-label']) !!}
                                     {{ Form::date('company_doj', old('company_doj'), ['class' => 'form-control ', 'autocomplete' => 'off','placeholder'=>'Select Company Date Of Joining']) }}
+                                </div>
+                                <div id="period_field" style="display:none">
+                                    <div class="form-group">
+                                        {!! Form::label('reason', __('Reason'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
+                                        {!! Form::textarea('reason', old('reason'), ['class' => 'form-control', 'rows' => 2 ,'placeholder'=>__('Enter Reason')]) !!}
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6"><span class="text-danger pl-1">*</span>
+                                            {!! Form::label('start_period', __('Start Period'), ['class' => 'form-label']) !!}
+                                            {{ Form::date('start_period', old('start_period'), ['class' => 'form-control ', 'autocomplete' => 'off','placeholder'=>'Select Start Period']) }}
+                                        </div>
+                                        <div class="form-group col-md-6"><span class="text-danger pl-1">*</span>
+                                            {!! Form::label('end_period', __('End Period'), ['class' => 'form-label']) !!}
+                                            {{ Form::date('end_period', old('end_period'), ['class' => 'form-control ', 'autocomplete' => 'off','placeholder'=>'Select End Period']) }}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-group col-md-12">
                                     {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
@@ -453,5 +469,31 @@
                 }
             });
         }
+    </script>
+
+    <script>
+
+        function getEmployeeType(employee_type_id){
+            $.ajax({
+                url: '{{ route('employeetypes.json') }}',
+                type: 'GET',
+                data: {
+                    "id": employee_type_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+                success: function(data) {
+                    if (data.period_type == "Fixed") {
+                        $('#period_field').hide();
+                    } else {
+                        $('#period_field').show();
+                    }
+                }
+            });
+        }
+
+        $('body').on('change', '.type-select', function () {
+            let period_type = $(this).val();
+            getEmployeeType(period_type)
+        });
     </script>
 @endpush
