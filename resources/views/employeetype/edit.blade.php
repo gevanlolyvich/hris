@@ -20,6 +20,15 @@
 
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="form-group">
+                {{ Form::label('period_type', __('Period Type'), ['class' => 'form-label']) }}
+                <div class="form-icon-user">
+                    {{ Form::select('period_type', $period_types, null, ['class' => 'form-control select2 ','placeholder' => __('Select Periode Type')]) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
                 {{ Form::label('type', __('Type'), ['class' => 'form-label']) }}
                 <div class="form-icon-user">
                     {{ Form::select('type', $types, null, ['class' => 'form-control select2 ','placeholder' => __('Select Salary Type')]) }}

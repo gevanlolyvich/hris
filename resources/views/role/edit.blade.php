@@ -120,7 +120,8 @@
                                 'Vehicle Maintenance Type',
                                 'Vehicle Workshop',
                                 'Vehicle Type',
-                            ];
+                                'Employee Application'
+                                ];
                             if (Auth::user()->type == 'super admin') {
                                 $modules[] = 'Language';
                             }

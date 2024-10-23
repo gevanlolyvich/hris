@@ -21,13 +21,17 @@
         data-bs-original-title="{{ __('Import') }}">
         <i class="ti ti-file"></i>
     </a>
+
     @can('Create Employee')
-        <a href="{{ route('employee.create') }}" 
-            data-title="{{ __('Create New Employee') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-            data-bs-original-title="{{ __('Create') }}">
-            <i class="ti ti-plus"></i>
-        </a>
+        @if (Auth::user()->type == 'company' || (Auth::user()->type == 'hr' && !(Auth::user()->branch_id)))
+            <a href="{{ route('employee.create') }}" 
+                data-title="{{ __('Create New Employee') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+                data-bs-original-title="{{ __('Create') }}">
+                <i class="ti ti-plus"></i>
+            </a>
+        @endif
     @endcan
+        
 @endsection
 
 @section('content')
@@ -80,6 +84,7 @@
                             <tr>
                                 <th>{{ __('Employee ID') }}</th>
                                 <th>{{ __('Name') }}</th>
+                                <th>{{ __('Status') }}</th>
                                 <th>{{ __('Email') }}</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Department') }}</th>
@@ -103,6 +108,13 @@
                                         @endcan
                                     </td>
                                     <td>{{ $employee->name }}</td>
+                                    <td>
+                                        @if ($employee->is_active)
+                                            <button type="button" class="btn btn-sm btn-success disabled">{{ __('Active')}}</button>
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-danger disabled">{{ __('Inactive')}}</button>
+                                        @endif
+                                    </td>
                                     <td>{{ $employee->email }}</td>
                                     <td>
                                         {{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}

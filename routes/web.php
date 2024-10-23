@@ -82,6 +82,7 @@ use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\EmployeeApplicationController;
 use App\Http\Controllers\PayslipTypeController;
 use App\Http\Controllers\PermitController;
 use App\Http\Controllers\PermitTypeController;
@@ -236,6 +237,12 @@ Route::post('employee/json', [EmployeeController::class, 'json'])->name('employe
     [
         'auth',
         'XSS',
+    ]
+);
+Route::get('employee-types/json', [EmployeeTypeController::class, 'json'])->name('employeetypes.json')->middleware(
+    [
+        'auth',
+        'XSS'
     ]
 );
 Route::post('department/employee/json', [EmployeeController::class, 'departmentJson'])->name('department.employee.json')->middleware(
@@ -1770,6 +1777,27 @@ Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middlewar
 );
 
 Route::resource('vehicle-type', VehicleTypeController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('employee-applications', EmployeeApplicationController::class)->middleware(
+    [
+        'auth',
+        'XSS'
+    ]
+);
+
+Route::get('employee-applications/{id}/action', [EmployeeApplicationController::class, 'action'])->name('employee-applications.action')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('employee-applications/changeaction', [EmployeeApplicationController::class, 'changeAction'])->name('employee-applications.changeaction')->middleware(
     [
         'auth',
         'XSS',
