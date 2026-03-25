@@ -2176,24 +2176,32 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendNotifications(array $subs, string $data, string $urgency = 'normal')
     {
-        $webPush = new WebPush(
-            [
-                "VAPID" => [
-                    "publicKey" => env('PUSH_PUBLIC_KEY'),
-                    "privateKey" => env('PUSH_PRIVATE_KEY'),
-                    "subject" => env('APP_URL'),
-                ]
-            ],
-            [
-                'urgency' => $urgency,
+        // $webPush = new WebPush(
+        //     [
+        //         "VAPID" => [
+        //             "publicKey" => env('PUSH_PUBLIC_KEY'),
+        //             "privateKey" => env('PUSH_PRIVATE_KEY'),
+        //             "subject" => env('APP_URL'),
+        //         ]
+        //     ],
+        // );
+
+        $webPush = new WebPush([
+            "VAPID" => [
+                "publicKey"  => config('webpush.vapid.public_key'),
+                "privateKey" => config('webpush.vapid.private_key'),
+                "subject"    => config('webpush.vapid.subject'),
             ]
-        );
+        ]);
 
         // Sending Notification
         foreach ($subs as $sub) {
             $webPush->queueNotification(
                 Subscription::create(json_decode($sub['data'], true)),
                 $data,
+                [
+                    'urgency' => $urgency,
+                ]
             );
         }
 

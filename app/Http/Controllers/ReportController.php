@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MonthlyAttendanceExport;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -132,9 +133,9 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            
+
             if (empty($childrenbranch_id)) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
@@ -254,7 +255,9 @@ class ReportController extends Controller
             foreach ($leaveTypes as $leaveType) {
                 $leave        = new Leave();
                 $leave->title = $leaveType->title;
-                $totalLeave   = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
+                $totalLeave   = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
                 if ($type == 'yearly') {
                     $totalLeave->whereYear('applied_on', $year);
                 } else {
@@ -269,7 +272,9 @@ class ReportController extends Controller
                 $leaves[]     = $leave;
             }
 
-            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
+            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
+                $query->whereIn('branch_id', $branch_id);
+            })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
             if ($type == 'yearly') {
                 $leaveData->whereYear('applied_on', $year);
             } else {
@@ -421,9 +426,9 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            
+
             if (empty($branch_id?->isNotEmpty())) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
@@ -487,7 +492,7 @@ class ReportController extends Controller
                 foreach ($allowances as $allowance) {
                     $totalAllowance += $allowance->amount;
                 }
-                
+
                 $commisions = json_decode($payslip->commission);
                 foreach ($commisions as $commision) {
                     $totalCommision += $commision->amount;
@@ -561,13 +566,13 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
-            
+
             $data['branch']     = __('All');
             $data['department'] = __('All');
 
-            
+
 
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
@@ -616,19 +621,27 @@ class ReportController extends Controller
                 $dates[]                = $formatted_date;
                 $formated_dates[]       = $year . '-' . $month . '-' . $formatted_date;
                 $date                   = "{$year}-{$month}-{$formatted_date}";
-                $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
-                $holiday_date[$date]    = $holiday; 
+                $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists();
+                $holiday_date[$date]    = $holiday;
             }
 
             $employeesAttendance        = [];
             $totalPresent               = $totalLeave = $totalEarlyLeave = 0;
             $totalOvertime              = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
             foreach ($employees as $employee) {
+                $attendanceStatus = [];
                 $attendances['name']    = $employee->name;
 
                 $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
                 $employee_overtimes     = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in')->get();
                 $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+
+                //permits table database
+                $permits = DB::table('permits')
+                    ->where('employee_id', $employee->id)
+                    ->whereDate('start_date', '<=', $year . '-' . $month . '-31')
+                    ->whereDate('end_date', '>=', $year . '-' . $month . '-01')
+                    ->get();
 
                 foreach ($employee_overtimes as $overtime) {
                     $total_hours        = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
@@ -659,18 +672,35 @@ class ReportController extends Controller
                                 $attendanceStatus[$date] = 'C';
                                 $totalLeave              += 1;
                             } elseif ($employee_attendances[$dateFormat]->status == 'Permission') {
-                                $attendanceStatus[$date] = 'I';
+                                //permit Date Format
+                                $permitOnDate = $permits->first(function ($permit) use ($dateFormat) {
+                                    return $dateFormat >= $permit->start_date
+                                        && $dateFormat <= $permit->end_date;
+                                });
+                                if ($permitOnDate) {
+                                    //match permit_type_id
+                                    $attendanceStatus[$date] = match ((int)$permitOnDate->permit_type_id) {
+                                        1 => 'S',
+                                        2 => 'IK',
+                                        3 => 'CO',
+                                        4 => 'EO',
+                                        5 => 'PH',
+                                        6 => 'L',
+                                        default => 'I',
+                                    };
+                                } else {
+                                    $attendanceStatus[$date] = 'I';
+                                }
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
                         } elseif (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
                             $attendanceStatus[$date] = 'L';
-                        }
-                         else {
+                        } else {
                             $attendanceStatus[$date] = 'A';
                         }
-                    } else{
-                        $attendanceStatus[$date] = '';
+                    } else {
+                        $attendanceStatus[$date] = null;
                     }
                 }
                 $attendances['status'] = $attendanceStatus;
@@ -698,9 +728,9 @@ class ReportController extends Controller
             $branch_count = 2;
             foreach ($branch as $index => $b) {
                 if ($b == 'Head Office') {
-                    $branch[$index] = '1. '.  $b;
+                    $branch[$index] = '1. ' .  $b;
                 } else {
-                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch[$index] = $branch_count . '. ' . __($b);
                     $branch_count += 1;
                 }
             }
@@ -911,10 +941,10 @@ class ReportController extends Controller
                     $queryArray[$key] = $value;
                 }
             }
-    
+
             $name = 'Monthly_Attendance_Employee' . date('Y-m-d H:i:s');
             $data = Excel::download(new MonthlyAttendanceExport(json_encode($queryArray)), $name . '.xlsx');
-    
+
             return $data;
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

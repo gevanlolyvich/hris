@@ -54,7 +54,9 @@ class PermitController extends Controller
 
                 $permits   = Permit::whereIn('employee_id', $employees)->orderBy('start_date', 'DESC');
             } else {
-                $permits = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
+                $permits = $branch_id?->isNotEmpty() ? Permit::whereHas('employee', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->orderBy('start_date', 'DESC') : Permit::orderBy('start_date', 'DESC');
             }
 
             if ($status != null && $status == 'Pending') {
@@ -63,11 +65,15 @@ class PermitController extends Controller
 
             if (!empty($request->branch_id)) {
                 $department     = Department::where('branch_id', $request->branch_id)->get()->pluck('name', 'id');
-                $permits        = $permits->whereHas('employee', function ($query) use ($request) { $query->where('branch_id', $request->branch_id); });
+                $permits        = $permits->whereHas('employee', function ($query) use ($request) {
+                    $query->where('branch_id', $request->branch_id);
+                });
             }
             if (!empty($request->department_id)) {
                 $department     = empty($request->branch_id) ? Department::where('department_id', $request->department_id)->get()->pluck('name', 'id') : $department;
-                $permits        = $permits->whereHas('employee', function ($query) use ($request) { $query->where('department_id', $request->department_id); });
+                $permits        = $permits->whereHas('employee', function ($query) use ($request) {
+                    $query->where('department_id', $request->department_id);
+                });
             }
 
             $permits = $permits->get();
@@ -75,9 +81,9 @@ class PermitController extends Controller
             $branch_count = 2;
             foreach ($branch as $index => $b) {
                 if ($b == 'Head Office') {
-                    $branch[$index] = '1. '.  $b;
+                    $branch[$index] = '1. ' .  $b;
                 } else {
-                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch[$index] = $branch_count . '. ' . __($b);
                     $branch_count += 1;
                 }
             }
@@ -127,6 +133,7 @@ class PermitController extends Controller
                     'start_date'        => 'required',
                     'end_date'          => 'required',
                     'reason'            => 'required',
+                    'myDocument'        => 'required|file|mimes:pdf,jpg,png,jpeg|max:2048',
                 ]
             );
             if ($validator->fails()) {
@@ -163,7 +170,7 @@ class PermitController extends Controller
                         ->orWhereBetween('end_date', [$start_date, $end_date])
                         ->orWhere(function ($query) use ($start_date, $end_date) {
                             $query->where('start_date', '<=', $start_date)
-                                    ->where('end_date', '>=', $end_date);
+                                ->where('end_date', '>=', $end_date);
                         });
                 })
                 ->first();
@@ -199,7 +206,7 @@ class PermitController extends Controller
                 $query->where('type', 'hr')
                     ->where(function ($query) use ($employee) {
                         $query->whereNull('branch_id')
-                                ->orWhere('branch_id', $employee->branch_id);
+                            ->orWhere('branch_id', $employee->branch_id);
                     });
             })->get();
             foreach ($pushSubscriptions as $sub) {
@@ -214,7 +221,7 @@ class PermitController extends Controller
                 ]),
                 'high'
             );
-            
+
             return redirect()->back()->with('success', __('Attendance Permit Successfully Created'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -232,21 +239,21 @@ class PermitController extends Controller
 
         if (\Auth::user()->can('Edit Leave')) {
             if ($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()?->employee?->id || \Auth::user()->type != 'employee') {
-                
+
                 $branch = Branch::find(\Auth::user()->branch_id);
                 $branch_id = collect();
                 if ($branch) {
                     $branch_id->push($branch?->id);
                 }
 
-                
+
                 $children = $branch?->childBranchFlatten();
                 if ($children?->isNotEmpty()) {
                     foreach ($children as $child) {
                         $branch_id->push($child->id);
                     }
                 }
-                
+
                 $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->orderby('name', 'asc')->get()->pluck('name', 'id');
                 $permittype = PermitType::get()->pluck('name', 'id');
 
@@ -271,6 +278,7 @@ class PermitController extends Controller
                         'start_date'        => 'required',
                         'end_date'          => 'required',
                         'reason'            => 'required',
+                        'myDocument'        => 'required|file|mimes:pdf,jpg,png,jpeg|max:2048',
                     ]
                 );
                 if ($validator->fails()) {
@@ -293,7 +301,7 @@ class PermitController extends Controller
                             ->orWhereBetween('end_date', [$start_date, $end_date])
                             ->orWhere(function ($query) use ($start_date, $end_date) {
                                 $query->where('start_date', '<=', $start_date)
-                                        ->where('end_date', '>=', $end_date);
+                                    ->where('end_date', '>=', $end_date);
                             });
                     })
                     ->first();
@@ -383,7 +391,7 @@ class PermitController extends Controller
     public function changeaction(Request $request)
     {
         $permit = Permit::find($request->permit_id);
-        
+
         $form = [
             'status'        => $request->status,
             'is_approved'   => $request->status == 'Approved',
@@ -406,11 +414,11 @@ class PermitController extends Controller
                     array_push($dates, $value->format('Y-m-d'));
                 }
             }
-    
+
             $permitAttendance = AttendanceStatus::find(3);
             for ($i = 0; $i < count($dates); $i++) {
                 $date = $dates[$i];
-    
+
                 AttendanceEmployee::where('employee_id', $permit->employee_id)->where('date', $date)->delete();
                 AttendanceEmployee::create([
                     'employee_id'           => $permit->employee_id,

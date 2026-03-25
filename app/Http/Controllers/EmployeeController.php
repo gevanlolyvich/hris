@@ -394,7 +394,7 @@ class EmployeeController extends Controller
                     'shift_type_id' => 'required',
                     // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
-                    'type' => 'required',
+                    'type_id' => 'required',
                     'dob' => 'required',
                     'gender' => 'required',
                     'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:9',
@@ -551,7 +551,24 @@ class EmployeeController extends Controller
             $departments   = !empty(\Auth::user()->branch_id) ? Department::where('branch_id', \Auth::user()->branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Department::orderBy('name', 'ASC')->get()->pluck('name', 'id');
             $department_id = $departments->pluck('id')->toArray();
             $designations  = !empty(\Auth::user()->branch_id) ? Designation::whereIn('department_id', $department_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id') : Designation::orderBy('name', 'ASC')->get()->pluck('name', 'id');
+
             $employee      = Employee::find($empId);
+
+            //anank 261120251133
+            if (!$employee) {
+                $employee = Employee::where('employee_id', $empId)->first();
+                Log::info('SHOW EMPLOYEE', [
+                    'encrypted_id' => $id,
+                    'decrypted_id' => $empId,
+                    'employee_found' => $employee ? true : false,
+                ]);
+            }
+
+            //if (!$employee) {
+            //   return redirect()->back()->with('error', 'Employee not found or invalid ID.');
+            //}
+            //end
+
             $employeesId   = $employee->employee_id;
 
             return view('employee.show', compact('employee', 'employeesId', 'branches', 'departments', 'designations', 'documents'));

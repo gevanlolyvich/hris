@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class OvertimeController extends Controller
 {
@@ -64,7 +65,7 @@ class OvertimeController extends Controller
         // time filter
         if ($request->type == 'monthly' && !empty($request->month)) {
             $month = date('m', strtotime($request->month));
-            $year  = date('Y', strtotime($request->month));
+            $year = date('Y', strtotime($request->month));
 
             $start_date = date($year . '-' . $month . '-01');
             $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
@@ -82,8 +83,8 @@ class OvertimeController extends Controller
         } elseif ($request->type == 'daily' && !empty($request->date)) {
             $overtimes->where('date', $request->date);
         } else {
-            $month      = date('m');
-            $year       = date('Y');
+            $month = date('m');
+            $year = date('Y');
             $start_date = date($year . '-' . $month . '-01');
             $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
@@ -104,9 +105,9 @@ class OvertimeController extends Controller
         $branch_count = 2;
         foreach ($branch as $index => $b) {
             if ($b == 'Head Office') {
-                $branch[$index] = '1. '.  $b;
+                $branch[$index] = '1. ' . $b;
             } else {
-                $branch[$index] = $branch_count. '. ' . __($b);
+                $branch[$index] = $branch_count . '. ' . __($b);
                 $branch_count += 1;
             }
         }
@@ -120,7 +121,8 @@ class OvertimeController extends Controller
         $types = [
             'hourly' => __('Hourly'),
             'daily' => __('Daily'),
-        ];;
+        ];
+        ;
 
         if (\Auth::user()->type == 'employee') {
             $subordinates = \Auth::user()->employee->subordinatesFlatten();
@@ -189,13 +191,13 @@ class OvertimeController extends Controller
             }
 
             $month = date('m', strtotime($request->date));
-            $year  = date('Y', strtotime($request->date));
+            $year = date('Y', strtotime($request->date));
 
             $start_date = date($year . '-' . $month . '-01');
-            $end_date   = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
+            $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
-            $employee    = Employee::find($request->employee_id);
-            $overtimes   = Overtime::where('employee_id', $request->employee_id)->whereBetween('date', [$start_date, $end_date])->get();
+            $employee = Employee::find($request->employee_id);
+            $overtimes = Overtime::where('employee_id', $request->employee_id)->whereBetween('date', [$start_date, $end_date])->get();
 
             $total_overtime = $overtimes->reduce(function (int $carry, $overtime) {
                 $total = strtotime($overtime->clock_out) > strtotime($overtime->clock_in) ? strtotime($overtime->clock_out) - strtotime($overtime->clock_in) : strtotime($overtime->clock_in) - strtotime($overtime->clock_out);
@@ -207,16 +209,26 @@ class OvertimeController extends Controller
             }
 
             // determine work day or not
-            $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($request->date)))->first();
+            $dayName = date('l', strtotime($request->date));
+            $shift = $employee->shift_type->shiftTimes
+                ->where('days', $dayName)
+                ->first();
+            // cek holiday
+            $isHoliday = \DB::table('holidays')
+                ->where('start_date', '<=', $request->date)
+                ->where('end_date', '>=', $request->date)
+                ->exists();
+            // logic final
+            $isWorkDay = ($shift && $shift->is_working) && !$isHoliday;
 
-            $overtime                 = new Overtime();
-            $overtime->employee_id    = $request->employee_id;
-            $overtime->title          = $request->title;
-            $overtime->date           = $request->date;
-            $overtime->type           = $request->type;
-            $overtime->description    = $request->description;
-            $overtime->is_work_day    = $shift->is_working;
-            $overtime->created_by     = \Auth::user()->id;
+            $overtime = new Overtime();
+            $overtime->employee_id = $request->employee_id;
+            $overtime->title = $request->title;
+            $overtime->date = $request->date;
+            $overtime->type = $request->type;
+            $overtime->description = $request->description;
+            $overtime->is_work_day = $isWorkDay;
+            $overtime->created_by = \Auth::user()->id;
 
             $document_path = null;
             if ($request->file('overtimeDocument')) {
@@ -225,7 +237,7 @@ class OvertimeController extends Controller
                 $path = $docs->storeAs('uploads/overtimes', $docName, 'public');
                 $document_path = env('APP_URL') . '/storage/' . $path;
             }
-            $overtime->document       = $document_path;
+            $overtime->document = $document_path;
 
             $overtime->save();
 
@@ -279,7 +291,7 @@ class OvertimeController extends Controller
                         }
                     }
 
-                    $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+                    $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
                 }
                 return view('overtime.edit', compact('overtime', 'employees', 'types'));
             } else {
@@ -317,15 +329,26 @@ class OvertimeController extends Controller
                 }
 
                 $employee = Employee::find($request->employee_id);
-                // determine work day or not
-                $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($request->date)))->first();
 
-                $overtime->employee_id    = $request->employee_id;
-                $overtime->title          = $request->title;
-                $overtime->date           = $request->date;
-                $overtime->type           = $request->type;
-                $overtime->description    = $request->description;
-                $overtime->is_work_day    = $shift->is_working;
+                // determine work day or not
+                $dayName = date('l', strtotime($request->date));
+                $shift = $employee->shift_type->shiftTimes
+                    ->where('days', $dayName)
+                    ->first();
+                // cek holiday
+                $isHoliday = \DB::table('holidays')
+                    ->where('start_date', '<=', $request->date)
+                    ->where('end_date', '>=', $request->date)
+                    ->exists();
+                // logic final
+                $isWorkDay = ($shift && $shift->is_working) && !$isHoliday;
+
+                $overtime->employee_id = $request->employee_id;
+                $overtime->title = $request->title;
+                $overtime->date = $request->date;
+                $overtime->type = $request->type;
+                $overtime->description = $request->description;
+                $overtime->is_work_day = $isWorkDay;
 
                 if ($overtime->document && $request->file('overtimeDocument')) {
                     $filepath_array = explode('/', $overtime->document);
@@ -344,7 +367,7 @@ class OvertimeController extends Controller
                     $path = $docs->storeAs('uploads/overtimes', $docName, 'public');
                     $document_path = env('APP_URL') . '/storage/' . $path;
                 }
-                $overtime->document       = $document_path ? $document_path : $overtime->document;
+                $overtime->document = $document_path ? $document_path : $overtime->document;
 
                 $overtime->save();
 
@@ -418,8 +441,8 @@ class OvertimeController extends Controller
                 $picture_path = env('APP_URL') . "/storage/uploads/overtimes/$overtime->id/attendance/clock_out/$pictureName";
             }
 
-            $overtime->clock_out   = date('Y-m-d H:i:s');
-            $overtime->coord_out   = "$request->latitude, $request->longitude, $request->accuracy";
+            $overtime->clock_out = date('Y-m-d H:i:s');
+            $overtime->coord_out = "$request->latitude, $request->longitude, $request->accuracy";
             $overtime->picture_out = $picture_path;
             $overtime->save();
 
@@ -448,8 +471,8 @@ class OvertimeController extends Controller
                 $picture_path = env('APP_URL') . "/storage/uploads/overtimes/$overtime->id/attendance/clock_in/$pictureName";
             }
 
-            $overtime->clock_in   = date('Y-m-d H:i:s');
-            $overtime->coord_in   = "$request->latitude, $request->longitude, $request->accuracy";
+            $overtime->clock_in = date('Y-m-d H:i:s');
+            $overtime->coord_in = "$request->latitude, $request->longitude, $request->accuracy";
             $overtime->picture_in = $picture_path;
             $overtime->save();
 
@@ -488,17 +511,39 @@ class OvertimeController extends Controller
             }
 
             if (!empty($request->start_time)) {
-                $overtime->clock_in     = date('Y-m-d H:i:s', strtotime("$overtime->date $request->start_time"));    
+                $overtime->clock_in = date('Y-m-d H:i:s', strtotime("$overtime->date $request->start_time"));
             }
             if (!empty($request->end_time)) {
-                $overtime->clock_out    = date('Y-m-d H:i:s', strtotime("$overtime->date $request->end_time"));    
+                $overtime->clock_out = date('Y-m-d H:i:s', strtotime("$overtime->date $request->end_time"));
             }
-            $overtime->report_note      = $request->note;
-            $overtime->report_document  = $document_path;
+            $overtime->report_note = $request->note;
+            $overtime->report_document = $document_path;
             $overtime->save();
             return redirect()->back()->with('success', __('Overtime Report Successfully Added'));
         } else {
             return redirect()->back()->with('error', __('Failed Adding Report'));
         }
+    }
+
+    public function approve($id)
+    {
+        $overtime = Overtime::findOrFail($id);
+
+        $overtime->status = 'approved';
+        $overtime->approved_by = auth()->id();
+        $overtime->save();
+
+        return back()->with('success', 'Overtime Approved');
+    }
+
+    public function reject($id)
+    {
+        $overtime = Overtime::findOrFail($id);
+
+        $overtime->status = 'rejected';
+        $overtime->approved_by = auth()->id();
+        $overtime->save();
+
+        return back()->with('success', 'Overtime Rejected');
     }
 }

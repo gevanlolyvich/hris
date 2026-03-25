@@ -15,19 +15,24 @@
         <div class=" mt-2 " id="multiCollapseExample1">
             <div class="card">
                 <div class="card-body">
-                {{ Form::open(array('route' => array('setsalary.show', $employee->id),'method'=>'get','id'=>'setsalary_filter')) }}
+                    {{ Form::open(['route' => ['setsalary.show', $employee->id], 'method' => 'get', 'id' => 'setsalary_filter']) }}
                     <div class="row align-items-center">
                         <div class="col-10 month">
                             <div class="btn-box">
-                                {{Form::label('month',__('Month'),['class'=>'col-form-label'])}}
-                                {{Form::month('month',isset($_GET['month']) ? $_GET['month'] : date('Y-m'),array('class'=>'month-btn form-control month-btn'))}}
+                                {{ Form::label('month', __('Month'), ['class' => 'col-form-label']) }}
+                                {{ Form::month('month', isset($_GET['month']) ? $_GET['month'] : date('Y-m'), ['class' => 'month-btn form-control month-btn']) }}
                             </div>
                         </div>
                         <div class="col-2 mt-4 float-right text-right">
-                            <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('setsalary_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                            <a href="#" class="btn btn-sm btn-primary"
+                                onclick="document.getElementById('setsalary_filter').submit(); return false;"
+                                data-bs-toggle="tooltip" title="{{ __('Apply') }}"
+                                data-original-title="{{ __('apply') }}">
                                 <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
                             </a>
-                            <a href="{{route('setsalary.show', $employee->id)}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                            <a href="{{ route('setsalary.show', $employee->id) }}" class="btn btn-sm btn-danger "
+                                data-bs-toggle="tooltip" title="{{ __('Reset') }}"
+                                data-original-title="{{ __('Reset') }}">
                                 <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
                             </a>
                         </div>
@@ -43,19 +48,26 @@
             <div class="card-body fulls-card p-3 align-items-center">
                 <div class="row text-center">
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6> 
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ $employee->name }}</h6>
                     </div>
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">
+                            {{ ucwords($employee?->employeeType?->name ?? '-') }}</h6>
                     </div>
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}</h6>
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">
+                            {{ !empty(\Auth::user()->getBranch($employee->branch_id)) ? \Auth::user()->getBranch($employee->branch_id)->name : '-' }}
+                        </h6>
                     </div>
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}</h6>
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">
+                            {{ !empty(\Auth::user()->getDepartment($employee->department_id)) ? \Auth::user()->getDepartment($employee->department_id)->name : '-' }}
+                        </h6>
                     </div>
                     <div class="col">
-                        <h6 style="padding: 10px 0;margin-bottom: 0px">{{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}</h6>
+                        <h6 style="padding: 10px 0;margin-bottom: 0px">
+                            {{ !empty(\Auth::user()->getDesignation($employee->designation_id)) ? \Auth::user()->getDesignation($employee->designation_id)->name : '-' }}
+                        </h6>
                     </div>
                 </div>
             </div>
@@ -73,11 +85,11 @@
                             </div>
                             @can('Create Set Salary')
                                 <div class="col-6 text-end">
-                                    <a  data-url="{{ route('employee.basic.salary', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Set Basic Sallary') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-bs-original-title="{{ __('Set Salary') }}">
-                                        <i class="{{ $employee->salary_type() && $employee->salary ? "ti ti-pencil text-white" : "ti ti-plus" }}"></i>
+                                    <a data-url="{{ route('employee.basic.salary', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Set Basic Sallary') }}" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Set Salary') }}">
+                                        <i
+                                            class="{{ $employee->salary_type() && $employee->salary ? 'ti ti-pencil text-white' : 'ti ti-plus' }}"></i>
                                     </a>
                                 </div>
                             @endcan
@@ -101,7 +113,8 @@
                             <div class="project-info d-flex text-md">
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Required Days') }} </b>
-                                    <div class="project-amnt ">{{ $employee->employeeType->type == 'Fixed' ? $total_work_days : '-' }}</div>
+                                    <div class="project-amnt ">
+                                        {{ $employee->employeeType->type == 'Fixed' ? $total_work_days : '-' }}</div>
                                 </div>
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Valid Days') }} </b>
@@ -109,11 +122,13 @@
                                 </div>
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Total Main Salary') }} </b>
-                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($employee->employeeType->type == 'Fixed' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}</div>
+                                    <div class="project-amnt">
+                                        {{ \Auth::user()->priceFormat($employee->employeeType->type == 'Fixed' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>                    
+                    </div>
                 </div>
             </div>
 
@@ -123,14 +138,14 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Allowance') . " (+)" }}</h5>
+                                <h5>{{ __('Allowance') . ' (+)' }}</h5>
                             </div>
                             @can('Create Allowance')
                                 <div class="col-6 text-end">
-                                    <a  data-url="{{ route('allowances.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Allowance') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
+                                    <a data-url="{{ route('allowances.create', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Create Allowance') }}" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-sm btn-primary" data-size="lg"
+                                        data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -153,7 +168,8 @@
                                 <tbody>
                                     @foreach ($allowances as $allowance)
                                         <tr>
-                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}</td>
+                                            <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
+                                            </td>
                                             <td>{{ $allowance->title }}</td>
                                             <td>{{ $allowance->is_recurring ? __('Recurring') : __('No') }}</td>
                                             <td>{{ $allowance->period ?? '-' }}</td>
@@ -162,7 +178,7 @@
                                                 <span>
                                                     @can('Edit Allowance')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a  class="mx-3 btn btn-sm  align-items-center"
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('allowance/' . $allowance->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
@@ -174,9 +190,12 @@
                                                     @endcan
                                                     @can('Delete Allowance')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['allowance.destroy', $allowance->id], 'id' => 'delete-form-' . $allowance->id]) !!}
-                                                            <a 
-                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['allowance.destroy', $allowance->id],
+                                                                'id' => 'delete-form-' . $allowance->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
@@ -200,14 +219,14 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Commission') . " (+)" }}</h5>
+                                <h5>{{ __('Commission') . ' (+)' }}</h5>
                             </div>
                             @can('Create Commission')
                                 <div class="col text-end">
-                                    <a  data-url="{{ route('commissions.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Commission') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
+                                    <a data-url="{{ route('commissions.create', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Create Commission') }}" data-bs-toggle="tooltip" title=""
+                                        class="btn btn-sm btn-primary" data-size="lg"
+                                        data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
 
@@ -249,7 +268,7 @@
                                                 <span>
                                                     @can('Edit Commission')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a  class="mx-3 btn btn-sm  align-items-center"
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('commission/' . $commission->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
@@ -261,9 +280,12 @@
                                                     @endcan
                                                     @can('Delete Commission')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['commission.destroy', $commission->id], 'id' => 'delete-form-' . $commission->id]) !!}
-                                                            <a 
-                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['commission.destroy', $commission->id],
+                                                                'id' => 'delete-form-' . $commission->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
@@ -287,15 +309,15 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Other Payment') . " (+)" }}</h5>
+                                <h5>{{ __('Other Payment') . ' (+)' }}</h5>
                             </div>
                             @can('Create Other Payment')
                                 <div class="col text-end">
 
-                                    <a  data-url="{{ route('otherpayments.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Other Payment') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-                                        data-size="lg" data-bs-original-title="{{ __('Create') }}">
+                                    <a data-url="{{ route('otherpayments.create', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Create Other Payment') }}" data-bs-toggle="tooltip"
+                                        title="" class="btn btn-sm btn-primary" data-size="lg"
+                                        data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
                                 </div>
@@ -334,7 +356,7 @@
                                                 <span>
                                                     @can('Edit Other Payment')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a  class="mx-3 btn btn-sm  align-items-center"
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('otherpayment/' . $otherpayment->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
@@ -346,9 +368,12 @@
                                                     @endcan
                                                     @can('Delete Other Payment')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['otherpayment.destroy', $otherpayment->id], 'id' => 'delete-form-' . $otherpayment->id]) !!}
-                                                            <a 
-                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['otherpayment.destroy', $otherpayment->id],
+                                                                'id' => 'delete-form-' . $otherpayment->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
@@ -372,7 +397,47 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Overtime') . " (+)" }}</h5>
+                                <h5>{{ __('Overtime') . ' (+)' }}</h5>
+                            </div>
+                        </div>
+                        @php
+                            $overall_total_hours = 0;
+                            $maximum_hours = $employee?->departments?->overtime_limit;
+
+                            foreach ($overtimes as $overtime) {
+                                if ($overtime->type == 'daily') {
+                                    $hours = 8;
+                                } else {
+                                    $hours = round(
+                                        (strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600,
+                                    );
+                                }
+
+                                if (!empty($maximum_hours)) {
+                                    if ($overall_total_hours >= $maximum_hours) {
+                                        break;
+                                    }
+
+                                    if ($overall_total_hours + $hours >= $maximum_hours) {
+                                        $hours = $maximum_hours - $overall_total_hours;
+                                    }
+
+                                    $overall_total_hours += $hours;
+                                }
+                            }
+                        @endphp
+                        {{-- <div class="alert alert-info">
+                            Overtime Used: <strong>{{ $overall_total_hours }}</strong> / {{ $maximum_hours }} Hours
+                            <br>
+                            Remaining: <strong>{{ $maximum_hours - $overall_total_hours }}</strong> Hours
+                        </div> --}}
+                        <div class="mb-3">
+                            <label>Overtime Usage</label>
+                            <div class="progress" style="height:20px;">
+                                <div class="progress-bar bg-success"
+                                    style="width: {{ $maximum_hours > 0 ? ($overall_total_hours / $maximum_hours) * 100 : 0 }}%;">
+                                    {{ $overall_total_hours }} / {{ $maximum_hours }} Hours
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -393,8 +458,7 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        $overall_total_hours = 0;
-                                        $maximum_hours       = $employee?->departments?->overtime_limit;
+                                        $used_hours = 0;
                                     @endphp
                                     @foreach ($overtimes as $overtime)
                                         @php
@@ -402,24 +466,61 @@
                                             if ($overtime->type == 'daily') {
                                                 $total_hours = 8;
                                             } else {
-                                                if (date('Y-m-d', strtotime($overtime->clock_out)) != date('Y-m-d', strtotime($overtime->clock_in))) {
+                                                if (
+                                                    date('Y-m-d', strtotime($overtime->clock_out)) !=
+                                                    date('Y-m-d', strtotime($overtime->clock_in))
+                                                ) {
                                                     $end = date('Y-m-d', strtotime($overtime->clock_in . ' +1 day'));
-                                                    $total_hours = max(0, round((strtotime($end) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                    $total_hours = max(
+                                                        0,
+                                                        round(
+                                                            (strtotime($end) - strtotime($overtime->clock_in)) / 3600,
+                                                        ),
+                                                    );
                                                 } else {
-                                                    $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                                                    $total_hours = max(
+                                                        0,
+                                                        round(
+                                                            (strtotime($overtime->clock_out) -
+                                                                strtotime($overtime->clock_in)) /
+                                                                3600,
+                                                        ),
+                                                    );
                                                 }
                                             }
-                                        
-                                            if(!empty($maximum_hours)) {
-                                                if ($overall_total_hours >= $maximum_hours) {
+
+                                            if (!empty($maximum_hours)) {
+                                                if ($used_hours >= $maximum_hours) {
                                                     continue;
                                                 }
-                                                if (($overall_total_hours + $total_hours) >= $maximum_hours) {
-                                                    $total_hours =  $maximum_hours - $overall_total_hours;
+
+                                                if ($used_hours + $total_hours >= $maximum_hours) {
+                                                    $total_hours = $maximum_hours - $used_hours;
                                                 }
-                                                $overall_total_hours += $total_hours;
+
+                                                $used_hours += $total_hours;
                                             }
-                                            $rate = $overtime->is_work_day ? $total_hours * ($overtime->employee->salary / $total_work_hours) : $total_hours * ($overtime->employee->salary / $total_work_hours) * 2;
+
+                                            $hourly_rate = $overtime->employee->salary / $total_work_hours;
+                                            if ($overtime->is_work_day) {
+                                                if ($total_hours <= 1) {
+                                                    $rate = $total_hours * 1.5 * $hourly_rate;
+                                                } else {
+                                                    $rate =
+                                                        1 * 1.5 * $hourly_rate + ($total_hours - 1) * 2 * $hourly_rate;
+                                                }
+                                            } else {
+                                                if ($total_hours <= 8) {
+                                                    $rate = $total_hours * 2 * $hourly_rate;
+                                                } elseif ($total_hours == 9) {
+                                                    $rate = 8 * 2 * $hourly_rate + 1 * 3 * $hourly_rate;
+                                                } else {
+                                                    $rate =
+                                                        8 * 2 * $hourly_rate +
+                                                        1 * 3 * $hourly_rate +
+                                                        ($total_hours - 9) * 4 * $hourly_rate;
+                                                }
+                                            }
                                         @endphp
                                         <tr>
                                             <td>{{ $overtime->title }}</td>
@@ -428,7 +529,7 @@
                                             <td>{{ $overtime->is_work_day ? __('Work Days') : __('Holidays') }}</td>
                                             <td>{{ $overtime->clock_in ?? '-' }}</td>
                                             <td>{{ $overtime->clock_out ?? '-' }}</td>
-                                            <td>{{ $total_hours }} {{  __('Hours')}}</td>
+                                            <td>{{ $total_hours }} {{ __('Hours') }}</td>
                                             <td>{{ \Auth::user()->priceFormat($rate) }}</td>
                                         </tr>
                                     @endforeach
@@ -445,13 +546,13 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Loan') . " (-)" }}</h5>
+                                <h5>{{ __('Loan') . ' (-)' }}</h5>
                             </div>
                             @can('Create Loan')
                                 <div class="col text-end">
-                                    <a  data-url="{{ route('loans.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-title="{{ __('Create Loan') }}"
-                                        data-bs-toggle="tooltip" title="" data-size="lg" class="btn btn-sm btn-primary"
+                                    <a data-url="{{ route('loans.create', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Create Loan') }}" data-bs-toggle="tooltip" title=""
+                                        data-size="lg" class="btn btn-sm btn-primary"
                                         data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
@@ -494,7 +595,7 @@
                                                 <span>
                                                     @can('Edit Loan')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a  class="mx-3 btn btn-sm  align-items-center"
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
                                                                 data-url="{{ URL::to('loan/' . $loan->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
@@ -506,9 +607,12 @@
                                                     @endcan
                                                     @can('Delete Loan')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['loan.destroy', $loan->id], 'id' => 'delete-form-' . $loan->id]) !!}
-                                                            <a 
-                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['loan.destroy', $loan->id],
+                                                                'id' => 'delete-form-' . $loan->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
@@ -532,13 +636,14 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-6">
-                                <h5>{{ __('Saturation Deduction') . " (-)" }}</h5>
+                                <h5>{{ __('Saturation Deduction') . ' (-)' }}</h5>
                             </div>
                             @can('Create Saturation Deduction')
                                 <div class="col text-end">
-                                    <a  data-url="{{ route('saturationdeductions.create', $employee->id) }}"
-                                        data-ajax-popup="true" data-size="lg" data-title="{{ __('Create Saturation Deduction') }}"
-                                        data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+                                    <a data-url="{{ route('saturationdeductions.create', $employee->id) }}"
+                                        data-ajax-popup="true" data-size="lg"
+                                        data-title="{{ __('Create Saturation Deduction') }}" data-bs-toggle="tooltip"
+                                        title="" class="btn btn-sm btn-primary"
                                         data-bs-original-title="{{ __('Create') }}">
                                         <i class="ti ti-plus"></i>
                                     </a>
@@ -581,8 +686,8 @@
                                                 <span>
                                                     @can('Edit Saturation Deduction')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a  class="mx-3 btn btn-sm  align-items-center"
-                                                                data-url="{{  URL::to('saturationdeduction/' . $saturationdeduction->id . '/edit')  }}"
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
+                                                                data-url="{{ URL::to('saturationdeduction/' . $saturationdeduction->id . '/edit') }}"
                                                                 data-ajax-popup="true" data-size="lg"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-title="{{ __('Edit Saturation Deduction') }}"
@@ -593,9 +698,12 @@
                                                     @endcan
                                                     @can('Delete Saturation Deduction')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['saturationdeduction.destroy', $saturationdeduction->id], 'id' => 'delete-form-' . $saturationdeduction->id]) !!}
-                                                            <a 
-                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['saturationdeduction.destroy', $saturationdeduction->id],
+                                                                'id' => 'delete-form-' . $saturationdeduction->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
                                                                 data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
@@ -614,7 +722,6 @@
             </div>
         </div>
     </div>
-    
 @endsection
 
 @push('script-page')
@@ -660,7 +767,7 @@
             });
         }
 
-        $(document).on('change', 'select[name=is_recurring]', function () {
+        $(document).on('change', 'select[name=is_recurring]', function() {
             let recurring_choice = $(this).val();
             let periodHTML = document.getElementById('period');
 
@@ -672,8 +779,8 @@
             }
         })
 
-        $(document).ready(function () {
-            $('#commonModal').on('shown.bs.modal', function () {
+        $(document).ready(function() {
+            $('#commonModal').on('shown.bs.modal', function() {
                 let recurringHTML = document.getElementById('is_recurring');
 
                 if (recurringHTML) {
