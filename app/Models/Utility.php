@@ -17,18 +17,19 @@ use Spatie\GoogleCalendar\Event as GoogleEvent;
 
 class Utility extends Model
 {
-    function getTotalHours($shiftTimes, $month, $year) {
+    function getTotalHours($shiftTimes, $month, $year)
+    {
         // Initialize the total working hours count
         $totalWorkingHours = 0;
-    
+
         // Loop through each day in the month
         for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
-    
+
             // Check if the current day is a workday for the employee
             $shift = collect($shiftTimes)->firstWhere('days', $currentDayName);
-    
+
             if ($shift && $shift['is_working']) {
                 // Calculate working hours for the day (subtract 1 hour for break time)
                 $startTimestamp = strtotime("$year-$month-$day " . $shift['start_time']);
@@ -41,12 +42,12 @@ class Utility extends Model
 
                 // Subtract 1 hour for break time
                 $workingHours = max(0, round(($endTimestamp - $startTimestamp) / 3600 - 1, 2));
-    
+
                 // Add working hours to the total
                 $totalWorkingHours += $workingHours;
             }
         }
-    
+
         return $totalWorkingHours;
     }
 
@@ -120,7 +121,7 @@ class Utility extends Model
             "s3_secret" => "",
             "s3_region" => "",
             "s3_bucket" => "",
-            "s3_url"    => "",
+            "s3_url" => "",
             "s3_endpoint" => "",
             "s3_max_upload_size" => "",
             "s3_storage_validation" => "",
@@ -152,8 +153,8 @@ class Utility extends Model
 
     public static function languages()
     {
-        $dir     = base_path() . '/resources/lang/';
-        $glob    = glob($dir . "*", GLOB_ONLYDIR);
+        $dir = base_path() . '/resources/lang/';
+        $glob = glob($dir . "*", GLOB_ONLYDIR);
         $arrLang = array_map(
             function ($value) use ($dir) {
                 return str_replace($dir, '', $value);
@@ -183,12 +184,12 @@ class Utility extends Model
     public static function setEnvironmentValue(array $values)
     {
         $envFile = app()->environmentFilePath();
-        $str     = file_get_contents($envFile);
+        $str = file_get_contents($envFile);
         if (count($values) > 0) {
             foreach ($values as $envKey => $envValue) {
-                $keyPosition       = strpos($str, "{$envKey}=");
+                $keyPosition = strpos($str, "{$envKey}=");
                 $endOfLinePosition = strpos($str, "\n", $keyPosition);
-                $oldLine           = substr($str, $keyPosition, $endOfLinePosition - $keyPosition);
+                $oldLine = substr($str, $keyPosition, $endOfLinePosition - $keyPosition);
                 // If key does not exist, add it
                 if (!$keyPosition || !$endOfLinePosition || !$oldLine) {
                     $str .= "{$envKey}='{$envValue}'\n";
@@ -224,13 +225,12 @@ class Utility extends Model
 
     public static function employeePayslipDetail($employeeId, $month)
     {
-        $employee             = Employee::find($employeeId);
-        $payslip              = Payslip::where('employee_id', $employee->id)->where('salary_month', $month)->first();
+        $employee = Employee::find($employeeId);
+        $payslip = Payslip::where('employee_id', $employee->id)->where('salary_month', $month)->first();
 
-        $year                 = $month ? date('Y', strtotime($month)) : date('Y');
-        $month                = $month ? date('m', strtotime($month)): date('m');
-        $total_work_hours     = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-
+        $year = $month ? date('Y', strtotime($month)) : date('Y');
+        $month = $month ? date('m', strtotime($month)) : date('m');
+        $total_work_hours = 173;
 
         $earning['allowance'] = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
@@ -240,37 +240,37 @@ class Utility extends Model
 
         foreach ($earning['allowance'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empall  = $earn->amount * $employee->salary / 100;
+                $empall = $earn->amount * $employee->salary / 100;
             } else {
                 $empall = $earn->amount;
             }
             $totalAllowance += $empall;
         }
 
-        $earning['commission']        = Commission::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
-                                            $query->orWhere('is_recurring', true)
-                                                ->orWhere('period', "{$year}-{$month}");
-                                        })->get();
+        $earning['commission'] = Commission::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalCommission = 0;
 
         foreach ($earning['commission'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empcom  = $earn->amount * $employee->salary / 100;
+                $empcom = $earn->amount * $employee->salary / 100;
             } else {
                 $empcom = $earn->amount;
             }
             $totalCommission += $empcom;
         }
 
-        $earning['otherPayment']      = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
-                                            $query->orWhere('is_recurring', true)
-                                                ->orWhere('period', "{$year}-{$month}");
-                                        })->get();
+        $earning['otherPayment'] = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalotherpayment = 0;
 
         foreach ($earning['otherPayment'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empotherpay  = $earn->amount * $employee->salary / 100;
+                $empotherpay = $earn->amount * $employee->salary / 100;
             } else {
                 $empotherpay = $earn->amount;
             }
@@ -278,11 +278,11 @@ class Utility extends Model
         }
 
         //Overtime
-        $earning['overTime']      = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+        $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->where('status', 'approved')->get();
 
         $earning['totalOverTime'] = 0;
-        $total_over_time_hours  = 0;
-        $overtime_limit         = $employee?->departments?->overtime_limit;
+        $total_over_time_hours = 0;
+        $overtime_limit = $employee?->departments?->overtime_limit;
         foreach ($earning['overTime'] as $over_time) {
             // $total_hours              = $over_time->type == 'daily' ? 8 : max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
             $total_hours = 0;
@@ -291,43 +291,63 @@ class Utility extends Model
             } else {
                 if (date('Y-m-d', strtotime($over_time->clock_out)) != date('Y-m-d', strtotime($over_time->clock_in))) {
                     $end = date('Y-m-d', strtotime($over_time->clock_in . ' +1 day'));
-                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600, 2));
+                    $total_hours = max(0, round((strtotime($end) - strtotime($over_time->clock_in)) / 3600));
                 } else {
-                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600, 2));
+                    $total_hours = max(0, round((strtotime($over_time->clock_out) - strtotime($over_time->clock_in)) / 3600));
                 }
             }
 
-            if($overtime_limit) {
+            if ($overtime_limit) {
                 if ($total_over_time_hours >= $overtime_limit) {
                     continue;
                 }
                 if (($total_over_time_hours + $total_hours) >= $overtime_limit) {
-                    $total_hours =  $overtime_limit - $total_over_time_hours;
+                    $total_hours = $overtime_limit - $total_over_time_hours;
                 }
                 $total_over_time_hours += $total_hours;
             }
 
-            $amount                   = $over_time->is_work_day ? $total_hours * ($over_time->employee->salary / $total_work_hours) : $total_hours * ($over_time->employee->salary / $total_work_hours) * 2;
-            $over_time->amount        = $amount;
+            $hourly_rate = $over_time->employee->salary / $total_work_hours;
+
+            if ($over_time->is_work_day) {
+                if ($total_hours <= 1) {
+                    $amount = $total_hours * 1.5 * $hourly_rate;
+                } else {
+                    $amount = 1 * 1.5 * $hourly_rate + ($total_hours - 1) * 2 * $hourly_rate;
+                }
+            } else {
+                if ($total_hours <= 8) {
+                    $amount = $total_hours * 2 * $hourly_rate;
+                } elseif ($total_hours == 9) {
+                    $amount = 8 * 2 * $hourly_rate + 1 * 3 * $hourly_rate;
+                } else {
+                    $amount =
+                        8 * 2 * $hourly_rate +
+                        1 * 3 * $hourly_rate +
+                        ($total_hours - 9) * 4 * $hourly_rate;
+                }
+            }
+
+            $over_time->amount = $amount;
             $earning['totalOverTime'] += $amount;
         }
 
-        $deduction['loan']           = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
-                                            $query->orWhere('is_recurring', true)
-                                                ->orWhere('period', "{$year}-{$month}");
-                                        })->get();
+        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalloan = 0;
 
         foreach ($deduction['loan'] as $earn) {
             if ($earn->type == 'percentage') {
-                $emploan  = $earn->amount * $employee->salary / 100;
+                $emploan = $earn->amount * $employee->salary / 100;
             } else {
                 $emploan = $earn->amount;
             }
             $totalloan += $emploan;
         }
 
-        $deduction['deduction']      = SaturationDeduction::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+        $deduction['deduction'] = SaturationDeduction::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
@@ -335,18 +355,18 @@ class Utility extends Model
 
         foreach ($deduction['deduction'] as $earn) {
             if ($earn->type == 'percentage') {
-                $empdeduction  = $earn->amount * $employee->salary / 100;
+                $empdeduction = $earn->amount * $employee->salary / 100;
             } else {
                 $empdeduction = $earn->amount;
             }
             $totaldeduction += $empdeduction;
         }
 
-        $payslip['earning']        = $earning;
-        $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
+        $payslip['earning'] = $earning;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
         // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
 
-        $payslip['deduction']      = $deduction;
+        $payslip['deduction'] = $deduction;
         $payslip['totalDeduction'] = $totalloan + $totaldeduction;
 
         return $payslip;
@@ -376,7 +396,7 @@ class Utility extends Model
     {
         \Artisan::call('cache:forget spatie.permission.cache');
         \Artisan::call('cache:clear');
-        $usr            = \Auth::user();
+        $usr = \Auth::user();
         $arrPermissions = [
             "Manage Job Category",
             "Create Job Category",
@@ -418,8 +438,8 @@ class Utility extends Model
                 Permission::create(['name' => $ap]);
             }
         }
-        $companyRole          = Role::where('name', 'LIKE', 'company')->first();
-        $companyPermissions   = $companyRole->getPermissionNames()->toArray();
+        $companyRole = Role::where('name', 'LIKE', 'company')->first();
+        $companyPermissions = $companyRole->getPermissionNames()->toArray();
         $companyNewPermission = [
             "Manage Job Category",
             "Create Job Category",
@@ -462,8 +482,8 @@ class Utility extends Model
                 $companyRole->givePermissionTo($permission);
             }
         }
-        $employeeRole          = Role::where('name', 'LIKE', 'employee')->first();
-        $employeePermissions   = $employeeRole->getPermissionNames()->toArray();
+        $employeeRole = Role::where('name', 'LIKE', 'employee')->first();
+        $employeePermissions = $employeeRole->getPermissionNames()->toArray();
         $employeeNewPermission = [
             'Manage Career',
         ];
@@ -521,11 +541,11 @@ class Utility extends Model
                     // get email content language base
                     $content = EmailTemplateLang::where('parent_id', '=', $template->id)->where('lang', 'LIKE', $usr->lang)->first();
 
-                    if (!empty ($content)) {
+                    if (!empty($content)) {
                         $content->from = $template->from;
-    
+
                         if (!empty($content->content)) {
-    
+
                             $content->content = self::replaceVariable($content->content, $obj);
                             // send email
                             try {
@@ -533,7 +553,7 @@ class Utility extends Model
                             } catch (\Exception $e) {
                                 $error = __('E-Mail has been not sent due to SMTP configuration');
                             }
-    
+
                             if (isset($error)) {
                                 $arReturn = [
                                     'is_success' => false,
@@ -658,7 +678,7 @@ class Utility extends Model
             // '{email}',
             // '{password}',
         ];
-        $arrValue    = [
+        $arrValue = [
             'email' => '-',
             'password' => '-',
 
@@ -745,9 +765,9 @@ class Utility extends Model
         $settings = Utility::settings();
         $company_name = $settings['company_name'];
 
-        $arrValue['app_name']     = env('APP_NAME');
+        $arrValue['app_name'] = env('APP_NAME');
         $arrValue['company_name'] = self::settings()['company_name'];
-        $arrValue['app_url']      = '<a href="' . env('APP_URL') . '" target="_blank">' . env('APP_URL') . '</a>';
+        $arrValue['app_url'] = '<a href="' . env('APP_URL') . '" target="_blank">' . env('APP_URL') . '</a>';
 
         return str_replace($arrVariable, array_values($arrValue), $content);
     }
@@ -756,18 +776,18 @@ class Utility extends Model
     {
         $template = EmailTemplate::all();
         foreach ($template as $t) {
-            $default_lang                 = EmailTemplateLang::where('parent_id', '=', $t->id)->where('lang', 'LIKE', 'en')->first();
-            $emailTemplateLang            = new EmailTemplateLang();
+            $default_lang = EmailTemplateLang::where('parent_id', '=', $t->id)->where('lang', 'LIKE', 'en')->first();
+            $emailTemplateLang = new EmailTemplateLang();
             $emailTemplateLang->parent_id = $t->id;
-            $emailTemplateLang->lang      = $lang;
-            $emailTemplateLang->subject   = $default_lang->subject;
-            $emailTemplateLang->content   = $default_lang->content;
+            $emailTemplateLang->lang = $lang;
+            $emailTemplateLang->subject = $default_lang->subject;
+            $emailTemplateLang->content = $default_lang->content;
             $emailTemplateLang->save();
         }
     }
     public static function add_landing_page_data()
     {
-        $section_data   = [];
+        $section_data = [];
         $section_data[] = [
             'section_name' => 'section-1',
             'section_order' => 1,
@@ -893,7 +913,23 @@ class Utility extends Model
     public static function getAllThemeColors()
     {
         $colors = [
-            'blue', 'denim', 'sapphire', 'olympic', 'violet', 'black', 'cyan', 'dark-blue-natural', 'gray-dark', 'light-blue', 'light-purple', 'magenta', 'orange-mute', 'pale-green', 'rich-magenta', 'rich-red', 'sky-gray'
+            'blue',
+            'denim',
+            'sapphire',
+            'olympic',
+            'violet',
+            'black',
+            'cyan',
+            'dark-blue-natural',
+            'gray-dark',
+            'light-blue',
+            'light-purple',
+            'magenta',
+            'orange-mute',
+            'pale-green',
+            'rich-magenta',
+            'rich-red',
+            'sky-gray'
         ];
         return $colors;
     }
@@ -901,7 +937,7 @@ class Utility extends Model
     public static function send_slack_msg($msg)
     {
 
-        $settings  = Utility::settings();
+        $settings = Utility::settings();
         try {
             if (isset($settings['slack_webhook']) && !empty($settings['slack_webhook'])) {
                 $ch = curl_init();
@@ -928,15 +964,15 @@ class Utility extends Model
     public static function send_telegram_msg($resp)
     {
 
-        $settings  = Utility::settings();
+        $settings = Utility::settings();
         try {
             $msg = $resp;
             // Set your Bot ID and Chat ID.
-            $telegrambot    = $settings['telegram_accestoken'];
+            $telegrambot = $settings['telegram_accestoken'];
             $telegramchatid = $settings['telegram_chatid'];
             // Function call with your own text or variable
-            $url     = 'https://api.telegram.org/bot' . $telegrambot . '/sendMessage';
-            $data    = array(
+            $url = 'https://api.telegram.org/bot' . $telegrambot . '/sendMessage';
+            $data = array(
                 'chat_id' => $telegramchatid,
                 'text' => $msg,
             );
@@ -948,7 +984,7 @@ class Utility extends Model
                 ),
             );
             $context = stream_context_create($options);
-            $result  = file_get_contents($url, false, $context);
+            $result = file_get_contents($url, false, $context);
             // $url     = $url;
         } catch (\Exception $e) {
         }
@@ -956,10 +992,10 @@ class Utility extends Model
 
     public static function send_twilio_msg($to, $msg)
     {
-        $settings  = Utility::settings();
+        $settings = Utility::settings();
         try {
 
-            $account_sid    = $settings['twilio_sid'];
+            $account_sid = $settings['twilio_sid'];
             $auth_token = $settings['twilio_token'];
             $twilio_number = $settings['twilio_from'];
             $client = new Client($account_sid, $auth_token);
@@ -996,7 +1032,7 @@ class Utility extends Model
     {
         $data = DB::table('settings');
         $data = $data->where('created_by', '=', 1);
-        $data     = $data->get();
+        $data = $data->get();
         $settings = [
             "dark_mode" => "off",
             "is_sidebar_transperent" => "on",
@@ -1060,7 +1096,7 @@ class Utility extends Model
                     );
 
                     $max_size = !empty($settings['wasabi_max_upload_size']) ? $settings['wasabi_max_upload_size'] : '2048';
-                    $mimes =  !empty($settings['wasabi_storage_validation']) ? $settings['wasabi_storage_validation'] : '';
+                    $mimes = !empty($settings['wasabi_storage_validation']) ? $settings['wasabi_storage_validation'] : '';
                 } else if ($settings['storage_setting'] == 's3') {
                     config(
                         [
@@ -1072,11 +1108,11 @@ class Utility extends Model
                         ]
                     );
                     $max_size = !empty($settings['s3_max_upload_size']) ? $settings['s3_max_upload_size'] : '2048';
-                    $mimes =  !empty($settings['s3_storage_validation']) ? $settings['s3_storage_validation'] : '';
+                    $mimes = !empty($settings['s3_storage_validation']) ? $settings['s3_storage_validation'] : '';
                 } else {
                     $max_size = !empty($settings['local_storage_max_upload_size']) ? $settings['local_storage_max_upload_size'] : '2048';
 
-                    $mimes =  !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
+                    $mimes = !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
                 }
 
 
@@ -1133,8 +1169,8 @@ class Utility extends Model
 
                     $res = [
                         'flag' => 1,
-                        'msg'  => 'success',
-                        'url'  => $path
+                        'msg' => 'success',
+                        'url' => $path
                     ];
                     return $res;
                 }
@@ -1211,7 +1247,7 @@ class Utility extends Model
                     );
 
                     $max_size = !empty($settings['wasabi_max_upload_size']) ? $settings['wasabi_max_upload_size'] : '2048';
-                    $mimes =  !empty($settings['wasabi_storage_validation']) ? $settings['wasabi_storage_validation'] : '';
+                    $mimes = !empty($settings['wasabi_storage_validation']) ? $settings['wasabi_storage_validation'] : '';
                 } else if ($settings['storage_setting'] == 's3') {
                     config(
                         [
@@ -1223,11 +1259,11 @@ class Utility extends Model
                         ]
                     );
                     $max_size = !empty($settings['s3_max_upload_size']) ? $settings['s3_max_upload_size'] : '2048';
-                    $mimes =  !empty($settings['s3_storage_validation']) ? $settings['s3_storage_validation'] : '';
+                    $mimes = !empty($settings['s3_storage_validation']) ? $settings['s3_storage_validation'] : '';
                 } else {
                     $max_size = !empty($settings['local_storage_max_upload_size']) ? $settings['local_storage_max_upload_size'] : '2048';
 
-                    $mimes =  !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
+                    $mimes = !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
                 }
 
 
@@ -1289,8 +1325,8 @@ class Utility extends Model
 
                     $res = [
                         'flag' => 1,
-                        'msg'  => 'success',
-                        'url'  => $path
+                        'msg' => 'success',
+                        'url' => $path
                     ];
                     return $res;
                 }
@@ -1309,7 +1345,7 @@ class Utility extends Model
             return $res;
         }
     }
-    
+
     public static function colorCodeData($type)
     {
         if ($type == 'event') {
@@ -1365,7 +1401,7 @@ class Utility extends Model
 
         // $path = storage_path('app/google-calendar/' . $setting['google_calender_json_file']);
         $path = storage_path($setting['google_calender_json_file']);
-       
+
         config([
             'google-calendar.default_auth_profile' => 'service_account',
             'google-calendar.auth_profiles.service_account.credentials_json' => $path,
@@ -1373,45 +1409,45 @@ class Utility extends Model
             'google-calendar.auth_profiles.oauth.token_json' => $path,
             'google-calendar.calendar_id' => isset($setting['google_clender_id']) ? $setting['google_clender_id'] : '',
             'google-calendar.user_to_impersonate' => '',
-            
+
         ]);
         // dd('google-calendar.calendar_id');
     }
 
     public static function addCalendarData($request, $type)
     {
-        Self::googleCalendarConfig();
-        
+        self::googleCalendarConfig();
+
         $event = new GoogleEvent();
         $event->name = $request->title;
         $event->startDateTime = Carbon::parse($request->start_date);
         $event->endDateTime = Carbon::parse($request->end_date);
-        $event->colorId = Self::colorCodeData($type);
+        $event->colorId = self::colorCodeData($type);
         $event->save();
     }
 
     public static function getCalendarData($type)
     {
-        Self::googleCalendarConfig();
-        
+        self::googleCalendarConfig();
+
         $data = GoogleEvent::get();
-        $type = Self::colorCodeData($type);
+        $type = self::colorCodeData($type);
         $arrayJson = [];
         foreach ($data as $val) {
             $end_date = date_create($val->endDateTime);
-            
+
             date_add($end_date, date_interval_create_from_date_string("1 days"));
-            
+
             if ($val->colorId == "$type") {
                 $arrayJson[] = [
                     "id" => $val->id,
                     "title" => $val->summary,
                     "start" => $val->startDateTime,
                     "end" => date_format($end_date, "Y-m-d H:i:s"),
-                    "className" => Self::$colorCode[$type],
+                    "className" => self::$colorCode[$type],
                     "allDay" => true,
                 ];
-                
+
             }
         }
         return $arrayJson;

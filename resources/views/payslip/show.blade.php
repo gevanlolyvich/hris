@@ -11,19 +11,22 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <h5 class="emp-title mb-0">{{ __('Basic Salary') }}</h5>
-                        <h5 class="emp-title black-text">{{ !empty($payslip->basic_salary) ? \Auth::user()->priceFormat($payslip->basic_salary) : '-' }}</h5>
+                        <h5 class="emp-title black-text">
+                            {{ !empty($payslip->basic_salary) ? \Auth::user()->priceFormat($payslip->basic_salary) : '-' }}
+                        </h5>
                     </div>
                     <div class="col-md-4 mb-3">
                         <h5 class="emp-title mb-0">{{ __('Payroll Month') }}</h5>
-                        <h5 class="emp-title black-text">{{ !empty($payslip->salary_month)  ? \Auth::user()->dateFormat($payslip->salary_month) : '-' }}</h5>
+                        <h5 class="emp-title black-text">
+                            {{ !empty($payslip->salary_month) ? \Auth::user()->dateFormat($payslip->salary_month) : '-' }}
+                        </h5>
                     </div>
 
                     <div class="col-lg-12 our-system">
                         <div class="row">
                             <ul class="nav nav-tabs my-4">
                                 <li>
-                                    <a data-toggle="tab" href="#allowance"
-                                        class="active">{{ __('Allowance') }}</a>
+                                    <a data-toggle="tab" href="#allowance" class="active">{{ __('Allowance') }}</a>
                                 </li>
                                 <li>
                                     <a data-toggle="tab" href="#commission">{{ __('Commission') }}</a>
@@ -51,7 +54,6 @@
 
                                                         $allowances = json_decode($payslip->allowance);
 
-
                                                     @endphp
                                                     <table class="table align-items-center">
                                                         <thead>
@@ -66,8 +68,11 @@
                                                         <tbody class="list">
                                                             @foreach ($allowances as $allownace)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find($allownace->employee_id);
-                                                                    $empallow = ($allownace->amount * $employess->salary) / 100;
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $allownace->employee_id,
+                                                                    );
+                                                                    $empallow =
+                                                                        ($allownace->amount * $employess->salary) / 100;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $allownace->title }}</td>
@@ -111,8 +116,12 @@
 
                                                             @foreach ($commissions as $commission)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find($commission->employee_id);
-                                                                    $empcomm = ($commission->amount * $employess->salary) / 100;
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $commission->employee_id,
+                                                                    );
+                                                                    $empcomm =
+                                                                        ($commission->amount * $employess->salary) /
+                                                                        100;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $commission->title }}</td>
@@ -154,8 +163,11 @@
                                                         <tbody class="list">
                                                             @foreach ($loans as $loan)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find($loan->employee_id);
-                                                                    $emploan = ($loan->amount * $employess->salary) / 100;
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $loan->employee_id,
+                                                                    );
+                                                                    $emploan =
+                                                                        ($loan->amount * $employess->salary) / 100;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $loan->title }}</td>
@@ -184,7 +196,9 @@
                                             <div class="card bg-none mb-0">
                                                 <div class="table-responsive">
                                                     @php
-                                                        $saturation_deductions = json_decode($payslip->saturation_deduction);
+                                                        $saturation_deductions = json_decode(
+                                                            $payslip->saturation_deduction,
+                                                        );
                                                     @endphp
                                                     <table class="table align-items-center">
                                                         <thead>
@@ -197,8 +211,11 @@
                                                         <tbody class="list">
                                                             @foreach ($saturation_deductions as $deduction)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find($deduction->employee_id);
-                                                                    $empdeduction = ($deduction->amount * $employess->salary) / 100;
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $deduction->employee_id,
+                                                                    );
+                                                                    $empdeduction =
+                                                                        ($deduction->amount * $employess->salary) / 100;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $deduction->title }}</td>
@@ -240,8 +257,11 @@
                                                         <tbody class="list">
                                                             @foreach ($other_payments as $payment)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find($payment->employee_id);
-                                                                    $emppayment = ($payment->amount * $employess->salary) / 100;
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $payment->employee_id,
+                                                                    );
+                                                                    $emppayment =
+                                                                        ($payment->amount * $employess->salary) / 100;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $payment->title }}</td>
