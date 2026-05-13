@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MonthlyAttendanceExport;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -34,18 +35,18 @@ class ReportController extends Controller
         if (\Auth::user()->can('Manage Report')) {
             // $deposit = Deposit::where('created_by', \Auth::user()->creatorId());
 
-            $labels       = $data = [];
+            $labels = $data = [];
             $expenseCount = $incomeCount = 0;
             if (!empty($request->start_month) && !empty($request->end_month)) {
 
                 $start = strtotime($request->start_month);
-                $end   = strtotime($request->end_month);
+                $end = strtotime($request->end_month);
 
                 $currentdate = $start;
-                $month       = [];
+                $month = [];
                 while ($currentdate <= $end) {
                     $month = date('m', $currentdate);
-                    $year  = date('Y', $currentdate);
+                    $year = date('Y', $currentdate);
 
                     $depositFilter = Deposit::whereMonth('date', $month)->whereYear('date', $year)->get();
 
@@ -54,26 +55,26 @@ class ReportController extends Controller
                         $depositsTotal += $deposit->amount;
                     }
                     $incomeData[] = $depositsTotal;
-                    $incomeCount  += $depositsTotal;
+                    $incomeCount += $depositsTotal;
 
                     $expenseFilter = Expense::whereMonth('date', $month)->whereYear('date', $year)->get();
-                    $expenseTotal  = 0;
+                    $expenseTotal = 0;
                     foreach ($expenseFilter as $expense) {
                         $expenseTotal += $expense->amount;
                     }
                     $expenseData[] = $expenseTotal;
-                    $expenseCount  += $expenseTotal;
+                    $expenseCount += $expenseTotal;
 
-                    $labels[]    = date('M Y', $currentdate);
+                    $labels[] = date('M Y', $currentdate);
                     $currentdate = strtotime('+1 month', $currentdate);
                 }
 
                 $filter['startDateRange'] = date('M-Y', strtotime($request->start_month));
-                $filter['endDateRange']   = date('M-Y', strtotime($request->end_month));
+                $filter['endDateRange'] = date('M-Y', strtotime($request->end_month));
             } else {
                 for ($i = 0; $i < 6; $i++) {
                     $month = date('m', strtotime("-$i month"));
-                    $year  = date('Y', strtotime("-$i month"));
+                    $year = date('Y', strtotime("-$i month"));
 
                     $depositFilter = Deposit::whereMonth('date', $month)->whereYear('date', $year)->get();
 
@@ -83,20 +84,20 @@ class ReportController extends Controller
                     }
 
                     $incomeData[] = $depositTotal;
-                    $incomeCount  += $depositTotal;
+                    $incomeCount += $depositTotal;
 
                     $expenseFilter = Expense::whereMonth('date', $month)->whereYear('date', $year)->get();
-                    $expenseTotal  = 0;
+                    $expenseTotal = 0;
                     foreach ($expenseFilter as $expense) {
                         $expenseTotal += $expense->amount;
                     }
                     $expenseData[] = $expenseTotal;
-                    $expenseCount  += $expenseTotal;
+                    $expenseCount += $expenseTotal;
 
                     $labels[] = date('M Y', strtotime("-$i month"));
                 }
                 $filter['startDateRange'] = date('M-Y');
-                $filter['endDateRange']   = date('M-Y', strtotime("-5 month"));
+                $filter['endDateRange'] = date('M-Y', strtotime("-5 month"));
             }
 
             $incomeArr['name'] = __('Income');
@@ -132,19 +133,19 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            
+
             if (empty($childrenbranch_id)) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
             }
 
-            $filterYear['branch']        = __('All');
-            $filterYear['department']    = __('All');
-            $filterYear['type']          = __('Monthly');
+            $filterYear['branch'] = __('All');
+            $filterYear['department'] = __('All');
+            $filterYear['type'] = __('Monthly');
             $filterYear['dateYearRange'] = date('M-Y');
-            $employees                   = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'ASC') : Employee::orderby('name', 'ASC');
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderby('name', 'ASC') : Employee::orderby('name', 'ASC');
             if (!empty($request->branch)) {
                 $employees->where('branch_id', $request->branch);
                 $filterYear['branch'] = !empty(Branch::find($request->branch)) ? Branch::find($request->branch)->name : '';
@@ -156,31 +157,31 @@ class ReportController extends Controller
 
             $employees = $employees->get();
 
-            $leaves        = [];
+            $leaves = [];
             $totalApproved = $totalReject = $totalPending = 0;
             foreach ($employees as $employee) {
 
-                $employeeLeave['id']          = $employee->id;
+                $employeeLeave['id'] = $employee->id;
                 $employeeLeave['employee_id'] = $employee->employee_id;
-                $employeeLeave['employee']    = $employee->name;
+                $employeeLeave['employee'] = $employee->name;
 
                 $approved = Leave::where('employee_id', $employee->id)->where('status', 'Approved');
-                $reject   = Leave::where('employee_id', $employee->id)->where('status', 'Reject');
-                $pending  = Leave::where('employee_id', $employee->id)->where('status', 'Pending');
+                $reject = Leave::where('employee_id', $employee->id)->where('status', 'Reject');
+                $pending = Leave::where('employee_id', $employee->id)->where('status', 'Pending');
 
                 if ($request->type == 'monthly' && !empty($request->month)) {
                     $month = date('m', strtotime($request->month));
-                    $year  = date('Y', strtotime($request->month));
+                    $year = date('Y', strtotime($request->month));
 
                     $approved->whereMonth('applied_on', $month)->whereYear('applied_on', $year);
                     $reject->whereMonth('applied_on', $month)->whereYear('applied_on', $year);
                     $pending->whereMonth('applied_on', $month)->whereYear('applied_on', $year);
 
                     $filterYear['dateYearRange'] = date('M-Y', strtotime($request->month));
-                    $filterYear['type']          = __('Monthly');
+                    $filterYear['type'] = __('Monthly');
                 } elseif (!isset($request->type)) {
-                    $month     = date('m');
-                    $year      = date('Y');
+                    $month = date('m');
+                    $year = date('Y');
                     $monthYear = date('Y-m');
 
                     $approved->whereMonth('applied_on', $month)->whereYear('applied_on', $year);
@@ -188,7 +189,7 @@ class ReportController extends Controller
                     $pending->whereMonth('applied_on', $month)->whereYear('applied_on', $year);
 
                     $filterYear['dateYearRange'] = date('M-Y', strtotime($monthYear));
-                    $filterYear['type']          = __('Monthly');
+                    $filterYear['type'] = __('Monthly');
                 }
 
                 if ($request->type == 'yearly' && !empty($request->year)) {
@@ -198,33 +199,33 @@ class ReportController extends Controller
 
 
                     $filterYear['dateYearRange'] = $request->year;
-                    $filterYear['type']          = __('Yearly');
+                    $filterYear['type'] = __('Yearly');
                 }
 
                 $approved = $approved->count();
-                $reject   = $reject->count();
-                $pending  = $pending->count();
+                $reject = $reject->count();
+                $pending = $pending->count();
 
                 $totalApproved += $approved;
-                $totalReject   += $reject;
-                $totalPending  += $pending;
+                $totalReject += $reject;
+                $totalPending += $pending;
 
                 $employeeLeave['approved'] = $approved;
-                $employeeLeave['reject']   = $reject;
-                $employeeLeave['pending']  = $pending;
+                $employeeLeave['reject'] = $reject;
+                $employeeLeave['pending'] = $pending;
 
                 $leaves[] = $employeeLeave;
             }
 
             $starting_year = date('Y', strtotime('-5 year'));
-            $ending_year   = date('Y', strtotime('+5 year'));
+            $ending_year = date('Y', strtotime('+5 year'));
 
             $filterYear['starting_year'] = $starting_year;
-            $filterYear['ending_year']   = $ending_year;
+            $filterYear['ending_year'] = $ending_year;
 
             $filter['totalApproved'] = $totalApproved;
-            $filter['totalReject']   = $totalReject;
-            $filter['totalPending']  = $totalPending;
+            $filter['totalReject'] = $totalReject;
+            $filter['totalPending'] = $totalPending;
 
 
             return view('report.leave', compact('department', 'branch', 'leaves', 'filterYear', 'filter'));
@@ -250,11 +251,13 @@ class ReportController extends Controller
             }
 
             $leaveTypes = LeaveType::get();
-            $leaves     = [];
+            $leaves = [];
             foreach ($leaveTypes as $leaveType) {
-                $leave        = new Leave();
+                $leave = new Leave();
                 $leave->title = $leaveType->title;
-                $totalLeave   = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
+                $totalLeave = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id) : Leave::where('employee_id', $employee_id)->where('status', $status)->where('leave_type_id', $leaveType->id);
                 if ($type == 'yearly') {
                     $totalLeave->whereYear('applied_on', $year);
                 } else {
@@ -266,10 +269,12 @@ class ReportController extends Controller
                 $totalLeave = $totalLeave->count();
 
                 $leave->total = $totalLeave;
-                $leaves[]     = $leave;
+                $leaves[] = $leave;
             }
 
-            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
+            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
+                $query->whereIn('branch_id', $branch_id);
+            })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
             if ($type == 'yearly') {
                 $leaveData->whereYear('applied_on', $year);
             } else {
@@ -296,26 +301,26 @@ class ReportController extends Controller
             $accountList->prepend('All', '');
 
             $filterYear['account'] = __('All');
-            $filterYear['type']    = __('Income');
+            $filterYear['type'] = __('Income');
 
 
             if ($request->type == 'expense') {
                 $accountData = Expense::orderBy('id');
-                $accounts    = Expense::select('account_lists.id', 'account_lists.account_name')->leftjoin('account_lists', 'expenses.account_id', '=', 'account_lists.id')->groupBy('expenses.account_id')->selectRaw('sum(amount) as total');
+                $accounts = Expense::select('account_lists.id', 'account_lists.account_name')->leftjoin('account_lists', 'expenses.account_id', '=', 'account_lists.id')->groupBy('expenses.account_id')->selectRaw('sum(amount) as total');
 
                 if (!empty($request->start_month) && !empty($request->end_month)) {
                     $start = strtotime($request->start_month);
-                    $end   = strtotime($request->end_month);
+                    $end = strtotime($request->end_month);
                 } else {
                     $start = strtotime(date('Y-m'));
-                    $end   = strtotime(date('Y-m', strtotime("-5 month")));
+                    $end = strtotime(date('Y-m', strtotime("-5 month")));
                 }
 
                 $currentdate = $start;
 
                 while ($currentdate <= $end) {
                     $data['month'] = date('m', $currentdate);
-                    $data['year']  = date('Y', $currentdate);
+                    $data['year'] = date('Y', $currentdate);
 
                     $accountData->Orwhere(
                         function ($query) use ($data) {
@@ -333,7 +338,7 @@ class ReportController extends Controller
                 }
 
                 $filterYear['startDateRange'] = date('M-Y', $start);
-                $filterYear['endDateRange']   = date('M-Y', $end);
+                $filterYear['endDateRange'] = date('M-Y', $end);
 
                 if (!empty($request->account)) {
                     $accountData->where('account_id', $request->account);
@@ -347,15 +352,15 @@ class ReportController extends Controller
                 $filterYear['type'] = __('Expense');
             } else {
                 $accountData = Deposit::orderBy('id');
-                $accounts    = Deposit::select('account_lists.id', 'account_lists.account_name')->leftjoin('account_lists', 'deposits.account_id', '=', 'account_lists.id')->groupBy('deposits.account_id')->selectRaw('sum(amount) as total');
+                $accounts = Deposit::select('account_lists.id', 'account_lists.account_name')->leftjoin('account_lists', 'deposits.account_id', '=', 'account_lists.id')->groupBy('deposits.account_id')->selectRaw('sum(amount) as total');
 
                 if (!empty($request->start_month) && !empty($request->end_month)) {
 
                     $start = strtotime($request->start_month);
-                    $end   = strtotime($request->end_month);
+                    $end = strtotime($request->end_month);
                 } else {
                     $start = strtotime(date('Y-m'));
-                    $end   = strtotime(date('Y-m', strtotime("-5 month")));
+                    $end = strtotime(date('Y-m', strtotime("-5 month")));
                 }
 
 
@@ -363,7 +368,7 @@ class ReportController extends Controller
 
                 while ($currentdate <= $end) {
                     $data['month'] = date('m', $currentdate);
-                    $data['year']  = date('Y', $currentdate);
+                    $data['year'] = date('Y', $currentdate);
 
                     $accountData->Orwhere(
                         function ($query) use ($data) {
@@ -381,7 +386,7 @@ class ReportController extends Controller
                 }
 
                 $filterYear['startDateRange'] = date('M-Y', $start);
-                $filterYear['endDateRange']   = date('M-Y', $end);
+                $filterYear['endDateRange'] = date('M-Y', $end);
 
                 if (!empty($request->account)) {
                     $accountData->where('account_id', $request->account);
@@ -421,17 +426,17 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get()->pluck('name', 'id') : Branch::get()->pluck('name', 'id');
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get()->pluck('name', 'id') : Department::get()->pluck('name', 'id');
-            
+
             if (empty($branch_id?->isNotEmpty())) {
                 $branch->prepend('All', '');
                 $department->prepend('All', '');
             }
 
-            $filterYear['branch']     = __('All');
+            $filterYear['branch'] = __('All');
             $filterYear['department'] = __('All');
-            $filterYear['type']       = __('Monthly');
+            $filterYear['type'] = __('Monthly');
 
             $payslips = PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id');
 
@@ -441,24 +446,24 @@ class ReportController extends Controller
                 $payslips->where('salary_month', $request->month);
 
                 $filterYear['dateYearRange'] = date('M-Y', strtotime($request->month));
-                $filterYear['type']          = __('Monthly');
+                $filterYear['type'] = __('Monthly');
             } elseif (!isset($request->type)) {
                 $month = date('Y-m');
 
                 $payslips->where('salary_month', $month);
 
                 $filterYear['dateYearRange'] = date('M-Y', strtotime($month));
-                $filterYear['type']          = __('Monthly');
+                $filterYear['type'] = __('Monthly');
             }
 
 
             if ($request->type == 'yearly' && !empty($request->year)) {
                 $startMonth = $request->year . '-01';
-                $endMonth   = $request->year . '-12';
+                $endMonth = $request->year . '-12';
                 $payslips->where('salary_month', '>=', $startMonth)->where('salary_month', '<=', $endMonth);
 
                 $filterYear['dateYearRange'] = $request->year;
-                $filterYear['type']          = __('Yearly');
+                $filterYear['type'] = __('Yearly');
             }
 
 
@@ -474,20 +479,20 @@ class ReportController extends Controller
                 $filterYear['department'] = !empty(Department::find($request->department)) ? Department::find($request->department)->name : '';
             }
 
-            $employees  = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id') : Employee::select('id')->get()->pluck('id');
-            $payslips   = $branch_id?->isNotEmpty() ? $payslips->whereIn('employee_id', $employees)->get() : $payslips->get();
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id') : Employee::select('id')->get()->pluck('id');
+            $payslips = $branch_id?->isNotEmpty() ? $payslips->whereIn('employee_id', $employees)->get() : $payslips->get();
 
             $totalBasicSalary = $totalNetSalary = $totalAllowance = $totalCommision = $totalLoan = $totalSaturationDeduction = $totalOtherPayment = $totalOverTime = 0;
 
             foreach ($payslips as $payslip) {
                 $totalBasicSalary += $payslip->basic_salary;
-                $totalNetSalary   += $payslip->net_payble;
+                $totalNetSalary += $payslip->net_payble;
 
                 $allowances = json_decode($payslip->allowance);
                 foreach ($allowances as $allowance) {
                     $totalAllowance += $allowance->amount;
                 }
-                
+
                 $commisions = json_decode($payslip->commission);
                 foreach ($commisions as $commision) {
                     $totalCommision += $commision->amount;
@@ -510,33 +515,33 @@ class ReportController extends Controller
 
                 $overtimes = json_decode($payslip->overtime);
                 foreach ($overtimes as $overtime) {
-                    $month              = date('m', strtotime($overtime->date));
-                    $year               = date('Y', strtotime($overtime->date));
+                    $month = date('m', strtotime($overtime->date));
+                    $year = date('Y', strtotime($overtime->date));
 
-                    $employee           = Employee::find($overtime->employee_id);
-                    $total_work_hours   = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+                    $employee = Employee::find($overtime->employee_id);
+                    $total_work_hours = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
 
-                    $total_hours        = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
-                    $amount             = $overtime->is_work_day ? $total_hours * ($employee->salary / $total_work_hours) : $total_hours * ($employee->salary / $total_work_hours) * 2;
-                    $totalOverTime      += $amount;
+                    $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                    $amount = $overtime->is_work_day ? $total_hours * ($employee->salary / $total_work_hours) : $total_hours * ($employee->salary / $total_work_hours) * 2;
+                    $totalOverTime += $amount;
                 }
             }
 
-            $filterData['totalBasicSalary']         = $totalBasicSalary;
-            $filterData['totalNetSalary']           = $totalNetSalary;
-            $filterData['totalAllowance']           = $totalAllowance;
-            $filterData['totalCommision']           = $totalCommision;
-            $filterData['totalLoan']                = $totalLoan;
+            $filterData['totalBasicSalary'] = $totalBasicSalary;
+            $filterData['totalNetSalary'] = $totalNetSalary;
+            $filterData['totalAllowance'] = $totalAllowance;
+            $filterData['totalCommision'] = $totalCommision;
+            $filterData['totalLoan'] = $totalLoan;
             $filterData['totalSaturationDeduction'] = $totalSaturationDeduction;
-            $filterData['totalOtherPayment']        = $totalOtherPayment;
-            $filterData['totalOverTime']            = $totalOverTime;
+            $filterData['totalOtherPayment'] = $totalOtherPayment;
+            $filterData['totalOverTime'] = $totalOverTime;
 
 
             $starting_year = date('Y', strtotime('-5 year'));
-            $ending_year   = date('Y', strtotime('+5 year'));
+            $ending_year = date('Y', strtotime('+5 year'));
 
             $filterYear['starting_year'] = $starting_year;
-            $filterYear['ending_year']   = $ending_year;
+            $filterYear['ending_year'] = $ending_year;
 
             return view('report.payroll', compact('payslips', 'filterData', 'branch', 'department', 'filterYear'));
         } else {
@@ -561,20 +566,20 @@ class ReportController extends Controller
             }
 
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
-            
+
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
-            
-            $data['branch']     = __('All');
+
+            $data['branch'] = __('All');
             $data['department'] = __('All');
 
-            
+
 
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
                 // $employees->where('branch_id', $request->branch);
                 $showed_branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->find($request->branch) : Branch::find($request->branch);
                 if (!empty($showed_branch)) {
-                    $employees      = $employees->where('branch_id', $showed_branch->id);
+                    $employees = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
                 }
 
@@ -586,19 +591,19 @@ class ReportController extends Controller
                 $showed_department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->find($request->department) : Department::find($request->department);
 
                 if (!empty($showed_department)) {
-                    $employees          = $employees->where('department_id', $showed_department->id);
+                    $employees = $employees->where('department_id', $showed_department->id);
                     $data['department'] = $showed_department->name;
                 }
             }
 
             if (!empty($request->month)) {
                 $currentdate = strtotime($request->month);
-                $month       = date('m', $currentdate);
-                $year        = date('Y', $currentdate);
-                $curMonth    = date('M-Y', strtotime($request->month));
+                $month = date('m', $currentdate);
+                $year = date('Y', $currentdate);
+                $curMonth = date('M-Y', strtotime($request->month));
             } else {
-                $month    = date('m');
-                $year     = date('Y');
+                $month = date('m');
+                $year = date('Y');
                 $curMonth = date('M-Y', strtotime($year . '-' . $month));
             }
 
@@ -612,38 +617,46 @@ class ReportController extends Controller
             $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
             $holiday_date = [];
             for ($i = 1; $i <= $num_of_days; $i++) {
-                $formatted_date         = str_pad($i, 2, '0', STR_PAD_LEFT);
-                $dates[]                = $formatted_date;
-                $formated_dates[]       = $year . '-' . $month . '-' . $formatted_date;
-                $date                   = "{$year}-{$month}-{$formatted_date}";
-                $holiday                = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists(); 
-                $holiday_date[$date]    = $holiday; 
+                $formatted_date = str_pad($i, 2, '0', STR_PAD_LEFT);
+                $dates[] = $formatted_date;
+                $formated_dates[] = $year . '-' . $month . '-' . $formatted_date;
+                $date = "{$year}-{$month}-{$formatted_date}";
+                $holiday = Holiday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->exists();
+                $holiday_date[$date] = $holiday;
             }
 
-            $employeesAttendance        = [];
-            $totalPresent               = $totalLeave = $totalEarlyLeave = 0;
-            $totalOvertime              = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
+            $employeesAttendance = [];
+            $totalPresent = $totalLeave = $totalEarlyLeave = 0;
+            $totalOvertime = $earlyleaveHours = $earlyleaveMins = $lateHours = $lateMins = 0;
             foreach ($employees as $employee) {
-                $attendances['name']    = $employee->name;
+                $attendanceStatus = [];
+                $attendances['name'] = $employee->name;
 
-                $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
-                $employee_overtimes     = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in')->get();
-                $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+                $employee_attendances = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', true)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
+                $employee_overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in')->get();
+                $shift = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+
+                //permits table database
+                $permits = DB::table('permits')
+                    ->where('employee_id', $employee->id)
+                    ->whereDate('start_date', '<=', $year . '-' . $month . '-31')
+                    ->whereDate('end_date', '>=', $year . '-' . $month . '-01')
+                    ->get();
 
                 foreach ($employee_overtimes as $overtime) {
-                    $total_hours        = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
-                    $totalOvertime      += $total_hours;
+                    $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
+                    $totalOvertime += $total_hours;
                 }
 
                 foreach ($employee_attendances as $attendance) {
                     if ($attendance->early_leaving > 0) {
                         $earlyleaveHours += date('h', strtotime($attendance->early_leaving));
-                        $earlyleaveMins  += date('i', strtotime($attendance->early_leaving));
+                        $earlyleaveMins += date('i', strtotime($attendance->early_leaving));
                     }
 
                     if ($attendance->late > 0) {
                         $lateHours += date('h', strtotime($attendance->late));
-                        $lateMins  += date('i', strtotime($attendance->late));
+                        $lateMins += date('i', strtotime($attendance->late));
                     }
                 }
 
@@ -654,23 +667,40 @@ class ReportController extends Controller
                         if (isset($employee_attendances[$dateFormat])) {
                             if (($employee_attendances[$dateFormat]->status == 'Present') || ($employee_attendances[$dateFormat]->status == 'No Working Hour')) {
                                 $attendanceStatus[$date] = 'H';
-                                $totalPresent            += 1;
+                                $totalPresent += 1;
                             } elseif ($employee_attendances[$dateFormat]->status == 'Leave') {
                                 $attendanceStatus[$date] = 'C';
-                                $totalLeave              += 1;
+                                $totalLeave += 1;
                             } elseif ($employee_attendances[$dateFormat]->status == 'Permission') {
-                                $attendanceStatus[$date] = 'I';
+                                //permit Date Format
+                                $permitOnDate = $permits->first(function ($permit) use ($dateFormat) {
+                                    return $dateFormat >= $permit->start_date
+                                        && $dateFormat <= $permit->end_date;
+                                });
+                                if ($permitOnDate) {
+                                    //match permit_type_id
+                                    $attendanceStatus[$date] = match ((int) $permitOnDate->permit_type_id) {
+                                        1 => 'S',
+                                        2 => 'IK',
+                                        3 => 'CO',
+                                        4 => 'EO',
+                                        5 => 'PH',
+                                        6 => 'L',
+                                        default => 'I',
+                                    };
+                                } else {
+                                    $attendanceStatus[$date] = 'I';
+                                }
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
                         } elseif (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
                             $attendanceStatus[$date] = 'L';
-                        }
-                         else {
+                        } else {
                             $attendanceStatus[$date] = 'A';
                         }
-                    } else{
-                        $attendanceStatus[$date] = '';
+                    } else {
+                        $attendanceStatus[$date] = null;
                     }
                 }
                 $attendances['status'] = $attendanceStatus;
@@ -678,14 +708,14 @@ class ReportController extends Controller
             }
 
             $totalEarlyleave = $earlyleaveHours + ($earlyleaveMins / 60);
-            $totalLate       = $lateHours + ($lateMins / 60);
+            $totalLate = $lateHours + ($lateMins / 60);
 
-            $data['totalOvertime']   = $totalOvertime;
+            $data['totalOvertime'] = $totalOvertime;
             $data['totalEarlyLeave'] = $totalEarlyleave;
-            $data['totalLate']       = $totalLate;
-            $data['totalPresent']    = $totalPresent;
-            $data['totalLeave']      = $totalLeave;
-            $data['curMonth']        = $curMonth;
+            $data['totalLate'] = $totalLate;
+            $data['totalPresent'] = $totalPresent;
+            $data['totalLeave'] = $totalLeave;
+            $data['curMonth'] = $curMonth;
 
             $department = $department->pluck('name', 'id');
             $branch = $branch->pluck('name', 'id');
@@ -698,9 +728,9 @@ class ReportController extends Controller
             $branch_count = 2;
             foreach ($branch as $index => $b) {
                 if ($b == 'Head Office') {
-                    $branch[$index] = '1. '.  $b;
+                    $branch[$index] = '1. ' . $b;
                 } else {
-                    $branch[$index] = $branch_count. '. ' . __($b);
+                    $branch[$index] = $branch_count . '. ' . __($b);
                     $branch_count += 1;
                 }
             }
@@ -720,10 +750,10 @@ class ReportController extends Controller
             $department = Department::get()->pluck('name', 'id');
             $department->prepend('All', '');
 
-            $filterYear['branch']     = __('All');
+            $filterYear['branch'] = __('All');
             $filterYear['department'] = __('All');
 
-            $timesheets       = TimeSheet::select('time_sheets.*', 'employees.name')->leftjoin('employees', 'time_sheets.employee_id', '=', 'employees.id')->where('time_sheets.created_by', \Auth::user()->creatorId());
+            $timesheets = TimeSheet::select('time_sheets.*', 'employees.name')->leftjoin('employees', 'time_sheets.employee_id', '=', 'employees.id')->where('time_sheets.created_by', \Auth::user()->creatorId());
 
             $timesheetFilters = TimeSheet::select('time_sheets.*', 'employees.name')->groupBy('employee_id')->selectRaw('sum(hours) as total')->leftjoin('employees', 'time_sheets.employee_id', '=', 'employees.id')->where('time_sheets.created_by', \Auth::user()->creatorId());
 
@@ -735,11 +765,11 @@ class ReportController extends Controller
                 $timesheetFilters->where('date', '<=', $request->end_date);
 
                 $filterYear['start_date'] = $request->start_date;
-                $filterYear['end_date']   = $request->end_date;
+                $filterYear['end_date'] = $request->end_date;
             } else {
 
                 $filterYear['start_date'] = date('Y-m-01');
-                $filterYear['end_date']   = date('Y-m-t');
+                $filterYear['end_date'] = date('Y-m-t');
 
                 $timesheets->where('date', '>=', $filterYear['start_date']);
                 $timesheets->where('date', '<=', $filterYear['end_date']);
@@ -769,7 +799,7 @@ class ReportController extends Controller
             foreach ($timesheetFilters as $timesheetFilter) {
                 $totalHours += $timesheetFilter->hours;
             }
-            $filterYear['totalHours']    = $totalHours;
+            $filterYear['totalHours'] = $totalHours;
             $filterYear['totalEmployee'] = count($timesheetFilters);
 
 
@@ -832,9 +862,9 @@ class ReportController extends Controller
 
 
         $currentdate = strtotime($filter_month);
-        $month       = date('m', $currentdate);
-        $year        = date('Y', $currentdate);
-        $data['curMonth']    = date('M-Y', strtotime($filter_month));
+        $month = date('m', $currentdate);
+        $year = date('Y', $currentdate);
+        $data['curMonth'] = date('M-Y', strtotime($filter_month));
 
 
         $fileName = $data['branch'] . ' ' . __('Branch') . ' ' . $data['curMonth'] . ' ' . __('Attendance Report of') . ' ' . $data['department'] . ' ' . __('Department') . ' ' . '.csv';
@@ -911,10 +941,10 @@ class ReportController extends Controller
                     $queryArray[$key] = $value;
                 }
             }
-    
+
             $name = 'Monthly_Attendance_Employee' . date('Y-m-d H:i:s');
             $data = Excel::download(new MonthlyAttendanceExport(json_encode($queryArray)), $name . '.xlsx');
-    
+
             return $data;
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));

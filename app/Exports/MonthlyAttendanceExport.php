@@ -147,8 +147,11 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
                     if (sizeof($attendances_on_date) > 0) {
                         foreach ($attendances_on_date as $attendance) {
-                            $attendance_shift   = $attendance->shift_type->shiftTimes->where('days', $day)->values()[0];
-                            
+
+
+			    $attendance_shift   = $attendance->shift_type->shiftTimes->where('days', $day)->values()[0];
+
+
                             if (($attendance->status == 'Present') || ($attendance->status == 'No Working Hour')) {
                                 $clock_out_data     = $attendance->clock_out ?? $attendance->clock_in;
                                 $date_data          .= "{$attendance->clock_in} - {$clock_out_data}; ";

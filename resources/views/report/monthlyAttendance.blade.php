@@ -334,17 +334,25 @@
                                         <tr>
                                             <td>{{ $attendance['name'] }}</td>
                                             @foreach ($attendance['status'] as $status)
+                                                 @php
+                                                    $badgeColors = [
+                                                        'H'  => 'success',   // Hadir
+                                                        'A'  => 'danger',    // Alpha
+                                                        'I'  => 'info',      // Izin umum
+                                                        'IK' => 'info',      // Izin Keperluan
+                                                        'C'  => 'warning',   // Cuti
+                                                        'L'  => 'primary',   // Libur
+                                                        'CO' => 'info',      // Cuti Off
+                                                        'EO' => 'info', // Emergency Off
+                                                        'PH' => 'info',   // Public Holiday
+                                                        'S'  => 'info',
+                                                    ];
+                                                @endphp
                                                 <td>
-                                                    @if ($status == 'H')
-                                                        <i class="badge bg-success p-2  rounded">{{ $status }}</i>
-                                                    @elseif($status == 'A')
-                                                        <i class="badge bg-danger p-2  rounded">{{ $status }}</i>
-                                                    @elseif($status == 'I')
-                                                        <i class="badge bg-info p-2  rounded">{{ $status }}</i>
-                                                    @elseif($status == 'C')
-                                                        <i class="badge bg-warning p-2  rounded">{{ $status }}</i>
-                                                    @elseif($status == 'L')
-                                                        <i class="badge bg-primary p-2  rounded">{{ $status }}</i>
+                                                    @if ($status)
+                                                        <i class="badge bg-{{ $badgeColors[$status] ?? 'secondary' }} p-2 rounded">
+                                                            {{ $status }}
+                                                        </i>
                                                     @endif
                                                 </td>
                                             @endforeach

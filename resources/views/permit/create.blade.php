@@ -53,13 +53,13 @@
                 <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
                 <div>
                     <label for="myDocument">
-                    <div class="btn btn-block btn-primary bg-primary document"> <i
-                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
+                        <div class="btn btn-block btn-primary bg-primary document"> 
+                            <i class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                         </div>
-                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="myDocument">
+                        <input style="margin-top: -50px" type="file" class="form-control mb-4 file" name="myDocument" required>
                     </label>
-                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile"><i
-                        class="ti ti-file text-white"></i><p id="fileName"></p>
+                    <div class="btn btn-block btn-success bg-success disabled" style="display: none;" id="uploadFile">
+                        <i class="ti ti-file text-white"></i><p id="fileName"></p>
                     </div>
                 </div>
             </div>

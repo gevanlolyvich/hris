@@ -6,7 +6,18 @@
 
 @php
     $setting = App\Models\Utility::settings();
-    
+    use App\Models\Employee;
+    use App\Models\Birthdays_greeting;
+
+    $todayBirthdayEmployees = Employee::whereMonth('dob', date('m'))
+        ->whereDay('dob', date('d'))
+        ->where('is_active', 1)
+        ->get()
+        ->filter(function ($employee) {
+            return \Carbon\Carbon::parse($employee->dob)->age <= 56;
+        });
+
+    $birthdayGreetings = Birthdays_greeting::orderBy('id')->get();
 @endphp
 
 {{-- @section('breadcrumb')
@@ -27,7 +38,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Clock Out')}}</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">{{ __('Clock In / Clock Out') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" style="padding-top: 0.35rem">
@@ -35,21 +46,24 @@
                             {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
                             <div class="col-md-6 col-lg-12 text-center mx-auto mt-2">
                                 <button type="button" class="btn btn-info btn-lg btn-block" id="load-overtime"><i
-                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                        class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
                                 </button>
                                 <div id="camera-overtime" style="display: none; position: relative" class="col-12">
-                                    <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
-                                    <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime" style="display: none;"><i
-                                        class="fa fa-solid fa-camera"></i> {{ __('Take A Picture') }}
+                                    <video id="video-overtime" style="border-radius: 5%" class="mb-2">Video stream not
+                                        available.</video>
+                                    <button type="button" class="btn btn-info btn-sm custBtn3" id="takepic-overtime"
+                                        style="display: none;"><i class="fa fa-solid fa-camera"></i>
+                                        {{ __('Take A Picture') }}
                                     </button>
                                 </div>
                                 <canvas id="canvas-overtime" style="display: none;"></canvas>
                                 <div id="output-overtime" style="display: none;">
-                                    <img id="photo-overtime" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                                    <img id="photo-overtime" style="border-radius: 5%"
+                                        alt="The screen capture will appear in this box.">
                                 </div>
                                 <label for="picture-overtime">
                                     <input type="hidden" name="picture" id="picture-overtime">
-                                </label>      
+                                </label>
                             </div>
                             <hr>
                             <input type="hidden" name="latitude" id="latitude-overtime" value="0">
@@ -57,19 +71,21 @@
                             <input type="hidden" name="accuracy" id="accuracy-overtime" value="0">
                             <input type="hidden" name="overtimeId" id="overtimeId" value="">
                             <div class="col-md-6 text-center mx-auto mt-3">
-                                <button type="submit" value="0" name="in" id="clock_in-overtime" onclick="getLocation()"
-                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" disabled>{{ __('In') }}</button>
+                                <button type="submit" value="0" name="in" id="clock_in-overtime"
+                                    onclick="getLocation()" class="btn btn-primary btn-lg btn-block" style="width: 150px"
+                                    disabled>{{ __('In') }}</button>
                                 {{ Form::close() }}
-                            </div>                                                    
+                            </div>
                             <div class="col-md-6 text-center mx-auto mt-3">
                                 {{ Form::open(['route' => ['overtime.attendance'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                                    <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
-                                    <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
-                                    <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
-                                    <input type="hidden" name="picture_out" id="picture_out-overtime">
-                                    <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
-                                    <button type="submit" value="1" name="out" id="clock_out-overtime" onclick="getLocation()"
-                                        class="btn btn-danger" style="width: 150px">{{ __('Out') }}</button>
+                                <input type="hidden" name="latitude" id="latitude_out-overtime" value="0">
+                                <input type="hidden" name="longitude" id="longitude_out-overtime" value="0">
+                                <input type="hidden" name="accuracy" id="accuracy_out-overtime" value="0">
+                                <input type="hidden" name="picture_out" id="picture_out-overtime">
+                                <input type="hidden" name="overtimeIdOut" id="overtimeIdOut" value="">
+                                <button type="submit" value="1" name="out" id="clock_out-overtime"
+                                    onclick="getLocation()" class="btn btn-danger"
+                                    style="width: 150px">{{ __('Out') }}</button>
                                 {{ Form::close() }}
                             </div>
                         </div>
@@ -78,91 +94,100 @@
             </div>
         </div>
 
-        <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">{{__('Report')}}</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">{{ __('Report') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" style="padding-top: 0.35rem">
                         {{ Form::open(['route' => ['overtime.report'], 'method' => 'post', 'enctype' => 'multipart/form-data']) }}
-                            <div class="form-group" style="margin-bottom: 0px">
-                                {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
-                                <div class="row">
-                                    <label for="myDocument" class="col-6">
+                        <div class="form-group" style="margin-bottom: 0px">
+                            {{ Form::label('myDocument', __('Document'), ['class' => 'col-form-label']) }}
+                            <div class="row">
+                                <label for="myDocument" class="col-6">
                                     <div class="btn btn-block btn-primary bg-primary document"> <i
-                                                class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
-                                        </div>
-                                        <input style="margin-top: -50px" type="file" class="btn btn-block btn-primary bg-primary document form-control mb-4 file" name="myDocument">
-                                    </label>
-                                    <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;" id="uploadFile"><i
-                                        class="fa fa-regular fa-file"></i><p id="fileName"></p>
+                                            class="ti ti-upload px-1"></i>{{ __('Choose file here') }}
                                     </div>
-                                </div>
-                                <div class="col-md-6" id="exist-document-class" style="display: none;">
-                                    {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
-                                    <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
-                                        data-bs-toggle="tooltip" id="exist-document-view"
-                                        data-bs-original-title="{{ __('View') }}">
-                                        <i class="ti ti-file text-white" style="font-size: 15px"></i>
-                                    </a>
+                                    <input style="margin-top: -50px" type="file"
+                                        class="btn btn-block btn-primary bg-primary document form-control mb-4 file"
+                                        name="myDocument">
+                                </label>
+                                <div class="btn btn-block btn-success bg-success disabled col-6" style="display: none;"
+                                    id="uploadFile"><i class="fa fa-regular fa-file"></i>
+                                    <p id="fileName"></p>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
-                                {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'),'rows'=>'3']) }}
+                            <div class="col-md-6" id="exist-document-class" style="display: none;">
+                                {{ Form::label('old_file', __('Old File : '), ['class' => 'col-form-label']) }}
+                                <a href="#" target="blank" class="btn btn-block btn-info btn-outline-dark bg-info"
+                                    data-bs-toggle="tooltip" id="exist-document-view"
+                                    data-bs-original-title="{{ __('View') }}">
+                                    <i class="ti ti-file text-white" style="font-size: 15px"></i>
+                                </a>
                             </div>
-                            <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn  btn-light" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                            <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
+                        <div class="form-group">
+                            {{ Form::label('note', __('Note'), ['class' => 'col-form-label']) }}
+                            {{ Form::textarea('note', null, ['class' => 'form-control', 'id' => 'note', 'placeholder' => __('Add Notes'), 'rows' => '3']) }}
                         </div>
+                        <input type="hidden" name="overtimeId" id="overtimeIdReportInput" value="0">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn  btn-light"
+                            data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <input type="submit" value="{{ __('Submit') }}" class="btn  btn-primary">
+                    </div>
                     {{ Form::close() }}
                 </div>
             </div>
         </div>
-        
-        <div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+        <div class="modal fade" id="openStreetMapModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">{{__('Clock In / Out Data')}}</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">{{ __('Clock In / Out Data') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" style="padding-top: 0.35rem">
                         <div class="row text-center mx-auto">
                             <div class="col" style="display: none;" id="modal-note">
                                 <div class="text-center mx-auto">
-                                    <strong>{{__('Notes')}}</strong>
+                                    <strong>{{ __('Notes') }}</strong>
                                     <textarea class="form-control mb-3 mt-1" name="note-value" id="note-value" rows="2" disabled></textarea>
                                 </div>
                             </div>
                             <div class="col" style="display: none;" id="modal-type">
                                 <div class="text-center mx-auto">
-                                    <strong>{{__('Type')}}</strong>
+                                    <strong>{{ __('Type') }}</strong>
                                     <textarea class="form-control mb-3 mt-1" name="note-value" id="type-value" rows="2" disabled></textarea>
                                 </div>
                             </div>
                             <div class="col" style="display: none;" id="modal-source">
                                 <div class="text-center mx-auto">
-                                    <strong>{{__('Source')}}</strong>
+                                    <strong>{{ __('Source') }}</strong>
                                     <textarea class="form-control mb-3 mt-1" name="source-value" id="source-value" rows="2" disabled></textarea>
                                 </div>
                             </div>
                         </div>
-                        <div class="clock-images mx-d-flex flex-column align-items-center" id="photos" style="display: none;">
+                        <div class="clock-images mx-d-flex flex-column align-items-center" id="photos"
+                            style="display: none;">
                             <div class="text-center mx-auto">
-                                <strong>{{__('Clock In / Out Image Capture')}}</strong>
+                                <strong>{{ __('Clock In / Out Image Capture') }}</strong>
                                 <br>
-                                <img id="clockImage" src="" alt="Clock In Out Image" style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-3 mt-1">
+                                <img id="clockImage" src="" alt="Clock In Out Image"
+                                    style="max-width: 100%; max-height: 300px; border-radius: 5%" class="mb-3 mt-1">
                                 <br>
                             </div>
                         </div>
                         <div class="text-center mx-auto">
-                            <strong>{{__('Clock In / Out Location')}}</strong>
-                            <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%" class="mt-1"></div>
+                            <strong>{{ __('Clock In / Out Location') }}</strong>
+                            <div id="openStreetMapContainer" style="height: 400px; border-radius: 5%" class="mt-1">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -173,21 +198,28 @@
             <div class="card">
                 <div class="card-header">
                     <h5>{{ __('Mark Attandance') }}</h5>
-                </div>               
+                </div>
                 <div class="card-body">
                     @if ($officeTime['is_working'])
-                        <h6>{{ __($officeTime['name'])}}</h6>
+                        <h6>{{ __($officeTime['name']) }}</h6>
                         <p class="text-muted pb-0-5">
-                            {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ')}} {{ $officeTime['endTime'] }} WIB
+                            {{ __('Office Time:') }} {{ $officeTime['startTime'] }} {{ __(' to ') }}
+                            {{ $officeTime['endTime'] }} WIB
                         </p>
                         {{-- Condition for showing employee already clock in or not --}}
-                        @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
-                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$yesterdayEmployeeAttendance->date}} {{$yesterdayEmployeeAttendance->clock_in}} WIB</h5>
+                        @if (
+                            $yesterdayOfficeTime['is_cross_day'] &&
+                                !empty($yesterdayEmployeeAttendance) &&
+                                $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
+                            <h5 class="text-danger pb-0-5">{{ __('Already Clock In At') }} |
+                                {{ $yesterdayEmployeeAttendance->date }} {{ $yesterdayEmployeeAttendance->clock_in }} WIB
+                            </h5>
                             {!! Form::hidden('source', $yesterdayEmployeeAttendance->source_out) !!}
-                            @elseif (empty($employeeAttendance))
+                        @elseif (empty($employeeAttendance))
                             {{-- DO Nothing --}}
-                            @else
-                            <h5 class="text-danger pb-0-5">{{ __("Already Clock In At")}} | {{$employeeAttendance->date}} {{$employeeAttendance->clock_in}} WIB</h5>
+                        @else
+                            <h5 class="text-danger pb-0-5">{{ __('Already Clock In At') }} |
+                                {{ $employeeAttendance->date }} {{ $employeeAttendance->clock_in }} WIB</h5>
                             {!! Form::hidden('source', $employeeAttendance->source_out) !!}
                         @endif
                     @else
@@ -196,26 +228,29 @@
                         </h6>
                     @endif
                     <div class="row d-flex flex-column align-items-center">
-                        {{-- Show form for attendance type and notes --}}                      
+                        {{-- Show form for attendance type and notes --}}
                         {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
                         {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
                         @if ($settings['photo_on_clock'] == 'Required')
-                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
+                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
                         @endif
                         <div class="col-md-6 col-lg-12 text-center mx-auto">
                             <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load"><i
-                                class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
                             </button>
                             <div id="camera" style="display: none; position: relative" class="col-12">
-                                <video id="video" style="border-radius: 5%" class="mb-2">Video stream not available.</video>
+                                <video id="video" style="border-radius: 5%" class="mb-2">Video stream not
+                                    available.</video>
                                 <div class="row allign-center text-center">
                                     <div class="col-6">
-                                        <button type="button" class="btn btn-info btn-md custBtn1" id="takepic" style="display: none;">
+                                        <button type="button" class="btn btn-info btn-md custBtn1" id="takepic"
+                                            style="display: none;">
                                             <i class="fa fa-solid fa-camera"></i>
                                         </button>
                                     </div>
                                     <div class="col-6">
-                                        <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera" style="display: none;">
+                                        <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera"
+                                            style="display: none;">
                                             <i class="fa fa-solid fa-window-close"></i>
                                         </button>
                                     </div>
@@ -223,26 +258,31 @@
                             </div>
                             <canvas id="canvas" style="display: none;"></canvas>
                             <div id="output" style="display: none;">
-                                <img id="photo" style="border-radius: 5%" alt="The screen capture will appear in this box.">
+                                <img id="photo" style="border-radius: 5%"
+                                    alt="The screen capture will appear in this box.">
                             </div>
                             <label for="picture">
                                 <input type="hidden" name="picture" id="picture">
-                            </label>      
+                            </label>
                         </div>
                         <div class="col-md-12" id="other-form" style="display: none;">
                             <div class="form-group mb-1">
                                 {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
-                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p> 
-                                {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose Shift']) }}
+                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
+                                {{ Form::select('shift_type_id', $shift_types, \Auth::user()->employee->shift_type_id, ['class' => 'form-control select2', 'id' => 'id', 'placeholder' => 'Choose Shift']) }}
                             </div>
                             <div class="form-group mb-1">
                                 {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
-                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{__('Required')}}</p>
-                                {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder'=>'Choose attendance type']) }}
+                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
+                                {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'id', 'placeholder' => 'Choose attendance type']) }}
                             </div>
                             <div class="form-group">
                                 {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
-                                {!! Form::textarea('notes', null, ['class' => 'form-control', 'rows' => '2' ,'placeholder'=> __('Enter notes for clock in') ]) !!}
+                                {!! Form::textarea('notes', null, [
+                                    'class' => 'form-control',
+                                    'rows' => '2',
+                                    'placeholder' => __('Enter notes for clock in'),
+                                ]) !!}
                             </div>
                             <input type="hidden" name="latitude" id="latitude" value="0">
                             <input type="hidden" name="longitude" id="longitude" value="0">
@@ -250,58 +290,97 @@
                             {{-- <input type="hidden" name="clockInData" id="clockInData" value="{{ $employeeAttendance }}"> --}}
                         </div>
                         <div class="col-md-6 text-center mx-auto mt-1">
-                            @if ($yesterdayOfficeTime['is_cross_day'] && !empty($yesterdayEmployeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in || $yesterdayEmployeeAttendance->source_out !== 'Application') && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
+                            @if (
+                                $yesterdayOfficeTime['is_cross_day'] &&
+                                    !empty($yesterdayEmployeeAttendance) &&
+                                    ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] ||
+                                        $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in ||
+                                        $yesterdayEmployeeAttendance->source_out !== 'Application') &&
+                                    strtotime(date('Y-m-d H:i:s')) > strtotime($officeTime['startTime']) - 3600)
                                 <button type="button" value="0" name="in" id="clock_in"
-                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                            @elseif ($yesterdayOfficeTime['is_cross_day'] && empty($yesterdayEmployeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600))
-                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                            @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > (strtotime($officeTime['startTime']) - 3600))
-                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
-                            @elseif (!empty($employeeAttendance) && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in || $employeeAttendance->source_out !== 'Application'))
-                                <button type="button" value="0" name="in" id="clock_in" onclick="getLocation()"
-                                class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
-                            @elseif (!empty($yesterdayEmployeeAttendance) && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
+                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px"
+                                    disabled>{{ __('CLOCK IN') }}</button>
+                            @elseif (
+                                $yesterdayOfficeTime['is_cross_day'] &&
+                                    empty($yesterdayEmployeeAttendance) &&
+                                    strtotime(date('Y-m-d H:i:s')) >
+                                        strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600)
                                 <button type="button" value="0" name="in" id="clock_in"
-                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                    onclick="getLocation()" class="btn btn-primary btn-lg btn-block"
+                                    style="width: 150px">{{ __('CLOCK IN') }}</button>
+                            @elseif (empty($employeeAttendance) && strtotime(date('Y-m-d H:i:s')) > strtotime($officeTime['startTime']) - 3600)
+                                <button type="button" value="0" name="in" id="clock_in"
+                                    onclick="getLocation()" class="btn btn-primary btn-lg btn-block"
+                                    style="width: 150px">{{ __('CLOCK IN') }}</button>
+                            @elseif (
+                                !empty($employeeAttendance) &&
+                                    ($employeeAttendance->clock_out == '00:00:00' ||
+                                        $employeeAttendance->clock_out == $employeeAttendance->clock_in ||
+                                        $employeeAttendance->source_out !== 'Application'))
+                                <button type="button" value="0" name="in" id="clock_in"
+                                    onclick="getLocation()" class="btn btn-primary btn-lg btn-block disabled"
+                                    style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                            @elseif (
+                                !empty($yesterdayEmployeeAttendance) &&
+                                    $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
+                                <button type="button" value="0" name="in" id="clock_in"
+                                    class="btn btn-primary btn-lg btn-block disabled" style="width: 150px"
+                                    disabled>{{ __('CLOCK IN') }}</button>
                             @else
                                 <button type="button" value="0" name="in" id="clock_in"
-                                    class="btn btn-primary btn-lg btn-block" style="width: 150px" >{{ __('CLOCK IN') }}</button>
+                                    class="btn btn-primary btn-lg btn-block"
+                                    style="width: 150px">{{ __('CLOCK IN') }}</button>
                             @endif
                             {{ Form::close() }}
-                        </div>                                                    
+                        </div>
                         <div class="col-md-6 text-center mx-auto mt-3">
-                            @if ($yesterdayOfficeTime['is_cross_day'] && $yesterdayEmployeeAttendance && empty($employeeAttendance) && ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] || $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in || $yesterdayEmployeeAttendance->source_out !== 'Application'))
+                            @if (
+                                $yesterdayOfficeTime['is_cross_day'] &&
+                                    $yesterdayEmployeeAttendance &&
+                                    empty($employeeAttendance) &&
+                                    ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] ||
+                                        $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in ||
+                                        $yesterdayEmployeeAttendance->source_out !== 'Application'))
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
-                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
-                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
-                            @elseif ($employeeAttendance && ($employeeAttendance->clock_out == '00:00:00' || $employeeAttendance->clock_out == $employeeAttendance->clock_in || $employeeAttendance->source_out !== 'Application'))
+                                <input type="hidden" name="shift_type_id"
+                                    value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id }}">
+                                <button type="button" value="1" name="out" id="clock_out"
+                                    onclick="getLocation()" class="btn btn-danger"
+                                    style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                            @elseif (
+                                $employeeAttendance &&
+                                    ($employeeAttendance->clock_out == '00:00:00' ||
+                                        $employeeAttendance->clock_out == $employeeAttendance->clock_in ||
+                                        $employeeAttendance->source_out !== 'Application'))
                                 {{ Form::model($yesterdayEmployeeAttendance, ['route' => ['attendanceemployee.update', $employeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
-                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id}}">
-                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                <input type="hidden" name="shift_type_id"
+                                    value="{{ $employeeAttendance->shift_type_id ?? $yesterdayEmployeeAttendance->shift_type_id }}">
+                                <button type="button" value="1" name="out" id="clock_out"
+                                    onclick="getLocation()" class="btn btn-danger"
+                                    style="width: 150px">{{ __('CLOCK OUT') }}</button>
                             @elseif ($yesterdayEmployeeAttendance && $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in)
                                 {{ Form::model($employeeAttendance, ['route' => ['attendanceemployee.update', $yesterdayEmployeeAttendance->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form']) }}
                                 <input type="hidden" name="latitude" id="latitude_out" value="0">
                                 <input type="hidden" name="longitude" id="longitude_out" value="0">
                                 <input type="hidden" name="accuracy" id="accuracy_out" value="0">
                                 <input type="hidden" name="picture_out" id="picture_out">
-                                <input type="hidden" name="shift_type_id" value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id}}">
-                                <button type="button" value="1" name="out" id="clock_out" onclick="getLocation()"
-                                    class="btn btn-danger" style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                <input type="hidden" name="shift_type_id"
+                                    value="{{ $employeeAttendance?->shift_type_id ?? $yesterdayEmployeeAttendance?->shift_type_id }}">
+                                <button type="button" value="1" name="out" id="clock_out"
+                                    onclick="getLocation()" class="btn btn-danger"
+                                    style="width: 150px">{{ __('CLOCK OUT') }}</button>
                             @else
                                 <button type="button" value="0" name="out" id="clock_out"
-                                    class="btn btn-danger disabled" style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
+                                    class="btn btn-danger disabled" style="width: 150px"
+                                    disabled>{{ __('CLOCK OUT') }}</button>
                             @endif
                             {{ Form::close() }}
                         </div>
@@ -311,7 +390,7 @@
             @if (!$attendances->isEmpty())
                 <div class="card">
                     <div class="card-header">
-                        <h5>{{ __("Today Attendance History") }}</h5>
+                        <h5>{{ __('Today Attendance History') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -329,23 +408,38 @@
                                             <td>{{ $attendanceData->shift_type?->name ?? '-' }}</td>
                                             <td>
                                                 @if ($attendanceData->coord_in)
-                                                    <a href="#" class="btn btn-primary btn-sm map-link" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}" data-note="{{ $attendanceData->note }}" data-source="{{ $attendanceData->source_in }}" data-type="{{ $attendanceData->attendance_type?->name ?? '-' }}">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                    <a href="#" class="btn btn-primary btn-sm map-link"
+                                                        data-coordinates="{{ $attendanceData->coord_in }}"
+                                                        data-image="{{ $attendanceData->picture_in }}"
+                                                        data-note="{{ $attendanceData->note }}"
+                                                        data-source="{{ $attendanceData->source_in }}"
+                                                        data-type="{{ $attendanceData->attendance_type?->name ?? '-' }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i>
+                                                        {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
                                                     </a>
                                                 @else
-                                                    <a href="#" class="btn btn-primary btn-sm map-link disabled" data-coordinates="{{ $attendanceData->coord_in }}" data-image="{{ $attendanceData->picture_in }}">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
+                                                    <a href="#" class="btn btn-primary btn-sm map-link disabled"
+                                                        data-coordinates="{{ $attendanceData->coord_in }}"
+                                                        data-image="{{ $attendanceData->picture_in }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i>
+                                                        {{ $attendanceData->clock_in != '00:00:00' ? \Auth::user()->timeFormat($attendanceData->clock_in) : '00:00' }}
                                                     </a>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if ($attendanceData->coord_out)
-                                                    <a href="#" class="btn btn-info btn-sm map-link" data-coordinates="{{ $attendanceData->coord_out }}" data-image="{{ $attendanceData->picture_out }}" data-source="{{ $attendanceData->source_out }}">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
+                                                    <a href="#" class="btn btn-info btn-sm map-link"
+                                                        data-coordinates="{{ $attendanceData->coord_out }}"
+                                                        data-image="{{ $attendanceData->picture_out }}"
+                                                        data-source="{{ $attendanceData->source_out }}">
+                                                        <i class="fa fa-solid fa-map-pin"></i>
+                                                        {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @else
-                                                    <a href="#" class="btn btn-info btn-sm map-link text-center disabled">
-                                                        <i class="fa fa-solid fa-map-pin"></i> {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
+                                                    <a href="#"
+                                                        class="btn btn-info btn-sm map-link text-center disabled">
+                                                        <i class="fa fa-solid fa-map-pin"></i>
+                                                        {{ $attendanceData->clock_out != $attendanceData->clock_in ? \Auth::user()->timeFormat($attendanceData->clock_out) : ' - ' }}
                                                     </a>
                                                 @endif
                                             </td>
@@ -363,23 +457,25 @@
                         <h5>{{ __('Overtime') }}</h5>
                     </div>
                     <div class="card-body">
-                        <h6>{{ __('Title')}} :</h6>
-                        <p class="text-muted pb-0-5">{{ $overtime->title}}</p>
-                        <h6>{{ __('Description')}} :</h6>
-                        <p class="text-muted pb-0-5">{{ $overtime->description}}</p>
+                        <h6>{{ __('Title') }} :</h6>
+                        <p class="text-muted pb-0-5">{{ $overtime->title }}</p>
+                        <h6>{{ __('Description') }} :</h6>
+                        <p class="text-muted pb-0-5">{{ $overtime->description }}</p>
                         <hr>
                         <hr>
                         <div class="text-center">
                             @if ($overtime->type != 'daily')
-                                <button class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3" data-bs-toggle="tooltip"
-                                    data-overtime-id="{{ $overtime->id }}"
+                                <button
+                                    class="btn @if ($overtime->clock_out) btn-success @else btn-primary @endif btn-xl clock-input mx-3"
+                                    data-bs-toggle="tooltip" data-overtime-id="{{ $overtime->id }}"
                                     data-clock-in="{{ $overtime->clock_in }}"
                                     data-bs-original-title="{{ __('Clock In / Clock Out') }}">
                                     <i class="fa fa-solid fa-clock"></i>
                                 </button>
                             @endif
-                            <button class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input" data-bs-toggle="tooltip"
-                                data-overtime-id="{{ $overtime->id }}"
+                            <button
+                                class="btn @if ($overtime->report_document) btn-success @else btn-primary @endif btn-xxl report-input"
+                                data-bs-toggle="tooltip" data-overtime-id="{{ $overtime->id }}"
                                 data-document="{{ $overtime->report_document }}"
                                 data-note="{{ $overtime->report_note }}"
                                 data-bs-original-title="{{ __('Report Document') }}">
@@ -400,7 +496,7 @@
                                 <tr>
                                     <th>{{ __('Meeting title') }}</th>
                                     <th>{{ __('Type') }}</th>
-                                    <th>{{ __("Start Date") }}</th>
+                                    <th>{{ __('Start Date') }}</th>
                                     <th>{{ __('End Date') }}</th>
                                     <th>{{ __('Detail') }}</th>
                                 </tr>
@@ -415,7 +511,8 @@
                                         <td class="Action">
                                             <span>
                                                 <div class="action-btn bg-success ms-2">
-                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                    <a href="#" class="mx-3 btn btn-sm  align-items-center"
+                                                        data-size="lg"
                                                         data-url="{{ URL::to('meeting/' . $meeting->id) }}"
                                                         data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
                                                         title="" data-title="{{ __('Meeting') }}"
@@ -466,6 +563,60 @@
         <div class="col-xl-12 col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-body table-border-style">
+                    <h5>{{ __('Happy Birthday') }} | {{ \Auth::user()->dateFormat(\Carbon\Carbon::now()) }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody class="list">
+                                @forelse ($todayBirthdayEmployees as $todayBirthdayEmployee)
+                                    @php
+
+                                        $sapaan = $todayBirthdayEmployee->gender == 'Male' ? __('Mr.') : __('Ms.');
+                                        $birthdayGreeting = null;
+
+                                        if ($birthdayGreetings->count() > 0) {
+                                            $seed = crc32($todayBirthdayEmployee->id . '-' . date('Y-m-d'));
+                                            $index = $seed % $birthdayGreetings->count();
+                                            $birthdayGreeting = $birthdayGreetings->values()->get($index);
+                                        }
+
+                                        $message = $birthdayGreeting
+                                            ? str_replace(
+                                                ['{sapaan}', '{name}'],
+                                                [$sapaan, $todayBirthdayEmployee->name],
+                                                $birthdayGreeting->greeting,
+                                            )
+                                            : 'Selamat ulang tahun,' .
+                                                $sapaan .
+                                                ' ' .
+                                                $todayBirthdayEmployee->name .
+                                                '! Semoga hari Anda menyenangkan!';
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $sapaan }} {{ $todayBirthdayEmployee->name }}</strong>
+                                            <br>
+                                            {{ $message }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="text-muted">
+                                            {{ __('Tidak ada karyawan yang ulang tahun hari ini.') }}
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12 col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-header card-body table-border-style">
                     <h5>{{ __('Announcement List') }}</h5>
                 </div>
                 <div class="card-body">
@@ -490,14 +641,15 @@
                                         <td>
                                             @if ($announcement->document)
                                                 <div class="action-btn bg-info ms-2">
-                                                    <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                    <a href="{{ $announcement->document }}" target="blank"
+                                                        class="mx-3 btn btn-sm  align-items-center"
                                                         data-bs-toggle="tooltip"
                                                         data-bs-original-title="{{ __('View Document') }}">
                                                         <i class="ti ti-file text-white"></i>
                                                     </a>
                                                 </div>
                                             @else
-                                            -
+                                                -
                                             @endif
                                         </td>
                                     </tr>
@@ -537,7 +689,7 @@
                     </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <a href="{{ route('employee-applications.index', ['status' => "Pending"]) }}">
+                    <a href="{{ route('employee-applications.index', ['status' => 'Pending']) }}">
                         <div class="card">
                             <div class="card-body">
                                 <div class="row align-items-center justify-content-between">
@@ -561,7 +713,7 @@
                     </a>
                 </div>
                 <div class="col-lg-4 col-md-6">
-                    <a href="{{ route('employee-applications.index', ['status' => "Reject"]) }}">
+                    <a href="{{ route('employee-applications.index', ['status' => 'Reject']) }}">
                         <div class="card">
                             <div class="card-body">
                                 <div class="row align-items-center justify-content-between">
@@ -591,7 +743,8 @@
             {{-- start --}}
             <div class="row">
                 <div class="col-lg-4 col-md-6">
-                    <a href="{{ route('leave-office.index', ['type' => 'daily', 'month' => date('Y-m'), 'date' => date('Y-m-d'), 'branch' => '']) }}">
+                    <a
+                        href="{{ route('leave-office.index', ['type' => 'daily', 'month' => date('Y-m'), 'date' => date('Y-m-d'), 'branch' => '']) }}">
                         <div class="card">
                             <div class="card-body">
                                 <div class="row align-items-center justify-content-between">
@@ -666,7 +819,7 @@
         </div>
 
         <div class="col-lg-4 col-md-6">
-            <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">      
+            <a href="{{ route('attendancerequest.index', ['is_approved' => 0]) }}">
                 <div class="card">
                     <div class="card-body">
                         <div class="row align-items-center justify-content-between">
@@ -754,9 +907,10 @@
                                     <h5>{{ __("Today's Not Clock In") }}</h5>
                                 </div>
                                 <div class="col-2">
-                                    <a href="{{ route('attendanceemployee.exportNotClockIn', ['date' => date('Y-m-d')]) }}" data-bs-toggle="tooltip"
-                                        data-bs-original-title="{{ __('Export') }}">
-                                        <button type="button" class="btn btn-info btn-lg btn-block">{{ count($notClockIns) }}</button>
+                                    <a href="{{ route('attendanceemployee.exportNotClockIn', ['date' => date('Y-m-d')]) }}"
+                                        data-bs-toggle="tooltip" data-bs-original-title="{{ __('Export') }}">
+                                        <button type="button"
+                                            class="btn btn-info btn-lg btn-block">{{ count($notClockIns) }}</button>
                                     </a>
                                 </div>
                             </div>
@@ -793,7 +947,7 @@
                                         <tr>
                                             <th>{{ __('Meeting title') }}</th>
                                             <th>{{ __('Type') }}</th>
-                                            <th>{{ __("Start Date") }}</th>
+                                            <th>{{ __('Start Date') }}</th>
                                             <th>{{ __('End Date') }}</th>
                                             <th>{{ __('Detail') }}</th>
                                         </tr>
@@ -808,10 +962,12 @@
                                                 <td class="Action">
                                                     <span>
                                                         <div class="action-btn bg-success ms-2">
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center"
+                                                                data-size="lg"
                                                                 data-url="{{ URL::to('meeting/' . $meeting->id) }}"
-                                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                title="" data-title="{{ __('Meeting') }}"
+                                                                data-ajax-popup="true" data-size="md"
+                                                                data-bs-toggle="tooltip" title=""
+                                                                data-title="{{ __('Meeting') }}"
                                                                 data-bs-original-title="{{ __('Meeting') }}">
                                                                 <i class="ti ti-caret-right text-white"></i>
                                                             </a>
@@ -825,7 +981,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
                 <div class="col-xl-7">
                     <div class="card">
@@ -861,6 +1017,58 @@
         <div class="col-xl-12 col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-body table-border-style">
+                    <h5>{{ __('Happy Birthday') }} | {{ \Auth::user()->dateFormat(\Carbon\Carbon::now()) }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody class="list">
+                                @forelse ($todayBirthdayEmployees as $todayBirthdayEmployee)
+                                    @php
+                                        $sapaan = $todayBirthdayEmployee->gender == 'Male' ? __('Mr.') : __('Ms.');
+                                        $birthdayGreeting = null;
+
+                                        if ($birthdayGreetings->count() > 0) {
+                                            $seed = crc32($todayBirthdayEmployee->id . '-' . date('Y-m-d'));
+                                            $index = $seed % $birthdayGreetings->count();
+                                            $birthdayGreeting = $birthdayGreetings->values()->get($index);
+                                        }
+                                        $message = $birthdayGreeting
+                                            ? str_replace(
+                                                ['{sapaan}', '{name}'],
+                                                [$sapaan, $todayBirthdayEmployee->name],
+                                                $birthdayGreeting->greeting,
+                                            )
+                                            : 'Selamat ulang tahun,' .
+                                                $sapaan .
+                                                ' ' .
+                                                $todayBirthdayEmployee->name .
+                                                '! Semoga hari Anda menyenangkan!';
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $sapaan }} {{ $todayBirthdayEmployee->name }}</strong>
+                                            <br>
+                                            {{ $message }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="text-muted">
+                                            {{ __('Tidak ada karyawan yang ulang tahun hari ini.') }}
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12 col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-header card-body table-border-style">
                     <h5>{{ __('Announcement List') }}</h5>
                 </div>
                 <div class="card-body" style="height: 270px; overflow:auto">
@@ -885,14 +1093,15 @@
                                         <td>
                                             @if ($announcement->document)
                                                 <div class="action-btn bg-info ms-2">
-                                                    <a href="{{ $announcement->document }}" target="blank" class="mx-3 btn btn-sm  align-items-center"
+                                                    <a href="{{ $announcement->document }}" target="blank"
+                                                        class="mx-3 btn btn-sm  align-items-center"
                                                         data-bs-toggle="tooltip"
                                                         data-bs-original-title="{{ __('View Document') }}">
                                                         <i class="ti ti-file text-white"></i>
                                                     </a>
                                                 </div>
                                             @else
-                                            -
+                                                -
                                             @endif
                                         </td>
                                     </tr>
@@ -911,11 +1120,12 @@
     <style>
         @media (max-width: 768px) {
             #event_calendar {
-                height: 750px; /* Adjust for smaller screens */
+                height: 750px;
+                /* Adjust for smaller screens */
             }
         }
 
-        .custBtn1{
+        .custBtn1 {
             position: absolute;
             top: 83%;
             left: 40%;
@@ -925,7 +1135,7 @@
             cursor: pointer;
         }
 
-        .custBtn2{
+        .custBtn2 {
             position: absolute;
             top: 83%;
             left: 60%;
@@ -935,7 +1145,7 @@
             cursor: pointer;
         }
 
-        .custBtn3{
+        .custBtn3 {
             position: absolute;
             top: 83%;
             left: 50%;
@@ -951,106 +1161,114 @@
     <script src="{{ asset('assets/js/plugins/main.min.js') }}"></script>
     <script>
         async function getLocation() {
-          let locationIcon = document.getElementById('location-permission');
-          return new Promise((resolve, reject) => {
-            if ("geolocation" in navigator) {
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  const latitude = position.coords.latitude;
-                  const longitude = position.coords.longitude;
-                  const accuracy = position.coords.accuracy;
-                  locationIcon.style.color = "Green";
-                  resolve({ latitude, longitude, accuracy });
-                },
-                (error) => {
-                  if (error.code === 1) {
+            let locationIcon = document.getElementById('location-permission');
+            return new Promise((resolve, reject) => {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+                            const accuracy = position.coords.accuracy;
+                            locationIcon.style.color = "Green";
+                            resolve({
+                                latitude,
+                                longitude,
+                                accuracy
+                            });
+                        },
+                        (error) => {
+                            if (error.code === 1) {
+                                locationIcon.style.color = "Red";
+                                reject(new Error("User denied Geolocation"));
+                            } else {
+                                locationIcon.style.color = "Red";
+                                reject(error);
+                            }
+                        }
+                    );
+                } else {
                     locationIcon.style.color = "Red";
-                    reject(new Error("User denied Geolocation"));
-                  } else {
-                    locationIcon.style.color = "Red";
-                    reject(error);
-                  }
+                    reject(new Error("Geolocation is not supported by your browser."));
                 }
-              );
-            } else {
-                locationIcon.style.color = "Red";
-                reject(new Error("Geolocation is not supported by your browser."));
-            }
-          });
+            });
         }
 
         // Automatically call getLocation when the page loads
         window.addEventListener("load", async () => {
-          try {
-            const { latitude, longitude, accuracy } = await getLocation();
+            try {
+                const {
+                    latitude,
+                    longitude,
+                    accuracy
+                } = await getLocation();
 
-            const clockInButton = document.getElementById("clock_in");
-            const clockOutButton = document.getElementById("clock_out");
-            const sourceHidden = document.getElementById("source");
-            // const clockInData = document.getElementById("clockInData");
+                const clockInButton = document.getElementById("clock_in");
+                const clockOutButton = document.getElementById("clock_out");
+                const sourceHidden = document.getElementById("source");
+                // const clockInData = document.getElementById("clockInData");
 
-            if (latitude !== 0 && longitude !== 0 && clockInButton) {
-                const latElement = document.getElementById("latitude");
-                const longElement = document.getElementById("longitude");
-                const accElement = document.getElementById("accuracy");
-                if (latElement) {
-                    latElement.value = latitude;
+                if (latitude !== 0 && longitude !== 0 && clockInButton) {
+                    const latElement = document.getElementById("latitude");
+                    const longElement = document.getElementById("longitude");
+                    const accElement = document.getElementById("accuracy");
+                    if (latElement) {
+                        latElement.value = latitude;
+                    }
+                    if (longElement) {
+                        longElement.value = longitude
+                    }
+                    if (accElement) {
+                        accElement.value = accuracy;
+                    }
+                    clockInButton.disabled = false;
                 }
-                if (longElement) {
-                    longElement.value = longitude
+                if (latitude !== 0 && longitude !== 0 && clockOutButton) {
+                    const latOutElement = document.getElementById("latitude_out");
+                    const longOutElement = document.getElementById("longitude_out");
+                    const accOutElement = document.getElementById("accuracy_out");
+                    if (latOutElement) {
+                        latOutElement.value = latitude;
+                    }
+                    if (longOutElement) {
+                        longOutElement.value = longitude
+                    }
+                    if (accOutElement) {
+                        accOutElement.value = accuracy;
+                    }
+                    clockOutButton.disabled = false;
                 }
-                if (accElement) {
-                    accElement.value = accuracy;
+            } catch (error) {
+                console.error(error);
+                if (error.message === "User denied Geolocation") {
+                    // Handle the case where the user denied geolocation access
+                    const clockInButton = document.getElementById("clock_in");
+                    const clockOutButton = document.getElementById("clock_out");
+                    const otherForm = document.getElementById('other-form');
+                    if (clockInButton) {
+                        clockInButton.disabled = true;
+                    }
+                    if (clockOutButton) {
+                        clockOutButton.disabled = true;
+                    }
+                    if (otherForm) {
+                        otherForm.style.display = ''
+                    }
                 }
-                clockInButton.disabled = false;
-            }
-            if (latitude !== 0 && longitude !== 0 && clockOutButton) {
-                const latOutElement = document.getElementById("latitude_out");
-                const longOutElement = document.getElementById("longitude_out");
-                const accOutElement = document.getElementById("accuracy_out");
-                if (latOutElement) {
-                    latOutElement.value = latitude;
-                }
-                if (longOutElement) {
-                    longOutElement.value = longitude
-                }
-                if (accOutElement) {
-                    accOutElement.value = accuracy;
-                }
-                clockOutButton.disabled = false;
-            }
-          } catch (error) {
-            console.error(error);
-            if (error.message === "User denied Geolocation") {
-              // Handle the case where the user denied geolocation access
-              const clockInButton = document.getElementById("clock_in");
-              const clockOutButton = document.getElementById("clock_out");
-              const otherForm = document.getElementById('other-form');
-              if (clockInButton) {
-                clockInButton.disabled = true;
-              }
-              if (clockOutButton) {
-                clockOutButton.disabled = true;
-              }
-              if (otherForm) {
-                  otherForm.style.display = ''
-              }
-            }
-          } finally  {
-            const otherForm = document.getElementById('other-form');
-            const clockOutButton = document.getElementById("clock_out");
-            const clockInButton = document.getElementById("clock_in");
+            } finally {
+                const otherForm = document.getElementById('other-form');
+                const clockOutButton = document.getElementById("clock_out");
+                const clockInButton = document.getElementById("clock_in");
 
-            if (!Boolean(Number(clockOutButton.value))) {
-                if (otherForm) {
-                    otherForm.style.display = ''
+                if (!Boolean(Number(clockOutButton.value))) {
+                    if (otherForm) {
+                        otherForm.style.display = ''
+                    }
+                } else {
+                    otherForm.style.display = 'none';
                 }
-            } else {
-                otherForm.style.display = 'none';
             }
-          }
         });
-    </script> 
+    </script>
 
     @if (Auth::user()->type == 'company' || Auth::user()->type == 'hr')
         <script type="text/javascript">
@@ -1110,166 +1328,167 @@
             }
         </script>
     @else
-    <script>
-        $(document).ready(function() {
-            get_data();
-        });
-
-        function get_data() {
-            var calender_type = $('#calender_type :selected').val();
-            $('#event_calendar').removeClass('local_calender');
-            $('#event_calendar').removeClass('google_calender');
-            if (calender_type == undefined) {
-                calender_type = 'local_calender';
-            }
-            $('#event_calendar').addClass(calender_type);
-
-            $.ajax({
-                url: $("#path_admin").val() + "/event/get_event_data",
-                method: "POST",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    'calender_type': calender_type,
-                    'user_type': "{{ Auth::user()->type }}",
-                    'empId': "{{ Auth::user()->employee->id }}",
-                },
-                success: function(data) {
-                    (function() {
-                        var etitle;
-                        var etype;
-                        var etypeclass;
-                        var calendar = new FullCalendar.Calendar(document.getElementById(
-                        'event_calendar'), {
-                            headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                            },
-                            buttonText: {
-                                timeGridDay: "{{ __('Day') }}",
-                                timeGridWeek: "{{ __('Week') }}",
-                                dayGridMonth: "{{ __('Month') }}"
-                            },
-                            themeSystem: 'bootstrap',
-                            slotDuration: '00:10:00',
-                            navLinks: true,
-                            droppable: true,
-                            selectable: true,
-                            selectMirror: true,
-                            editable: true,
-                            dayMaxEvents: true,
-                            handleWindowResize: true,
-                            events: data,
-                        });
-                        calendar.render();
-                    })();
-                }
+        <script>
+            $(document).ready(function() {
+                get_data();
             });
-        }
-    </script>
 
-    <script>
-        $(document).ready(function() {
-            var map = null;
-            var imageSrc = null;
-            var notes = null;
-            var sourceValue = null;
-
-            $('body').on('click', '.map-link', function() {
-                var coordinates = $(this).data('coordinates').split(', ');
-                notes = $(this).data('note');
-                var attendanceType = $(this).data('type');
-                sourceValue = $(this).data('source');
-
-                imageSrc = $(this).data('image');
-                if (imageSrc.length) {
-                    $('#clockImage').attr('src', imageSrc)
-                    document.getElementById('photos').style.display = '';
-                } else {
-                    document.getElementById('photos').style.display = 'none';
+            function get_data() {
+                var calender_type = $('#calender_type :selected').val();
+                $('#event_calendar').removeClass('local_calender');
+                $('#event_calendar').removeClass('google_calender');
+                if (calender_type == undefined) {
+                    calender_type = 'local_calender';
                 }
-            
-                // Convert the radius string to a number
-                var radius = parseFloat(coordinates[2]);
+                $('#event_calendar').addClass(calender_type);
 
-            
-                // Open the modal
-                $('#openStreetMapModal').modal('show');
-            
-                // Initialize the map after the modal is fully shown
-                $('#openStreetMapModal').on('shown.bs.modal', function () {
-                    if (notes) {
-                        document.getElementById('modal-note').style.display = '';
-                        document.getElementById('note-value').value = notes;
+                $.ajax({
+                    url: $("#path_admin").val() + "/event/get_event_data",
+                    method: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        'calender_type': calender_type,
+                        'user_type': "{{ Auth::user()->type }}",
+                        'empId': "{{ Auth::user()->employee->id }}",
+                    },
+                    success: function(data) {
+                        (function() {
+                            var etitle;
+                            var etype;
+                            var etypeclass;
+                            var calendar = new FullCalendar.Calendar(document.getElementById(
+                                'event_calendar'), {
+                                headerToolbar: {
+                                    left: 'prev,next today',
+                                    center: 'title',
+                                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                                },
+                                buttonText: {
+                                    timeGridDay: "{{ __('Day') }}",
+                                    timeGridWeek: "{{ __('Week') }}",
+                                    dayGridMonth: "{{ __('Month') }}"
+                                },
+                                themeSystem: 'bootstrap',
+                                slotDuration: '00:10:00',
+                                navLinks: true,
+                                droppable: true,
+                                selectable: true,
+                                selectMirror: true,
+                                editable: true,
+                                dayMaxEvents: true,
+                                handleWindowResize: true,
+                                events: data,
+                            });
+                            calendar.render();
+                        })();
+                    }
+                });
+            }
+        </script>
+
+        <script>
+            $(document).ready(function() {
+                var map = null;
+                var imageSrc = null;
+                var notes = null;
+                var sourceValue = null;
+
+                $('body').on('click', '.map-link', function() {
+                    var coordinates = $(this).data('coordinates').split(', ');
+                    notes = $(this).data('note');
+                    var attendanceType = $(this).data('type');
+                    sourceValue = $(this).data('source');
+
+                    imageSrc = $(this).data('image');
+                    if (imageSrc.length) {
+                        $('#clockImage').attr('src', imageSrc)
+                        document.getElementById('photos').style.display = '';
                     } else {
-                        document.getElementById('modal-note').style.display = 'none';
-                        document.getElementById('note-value').value = '';
+                        document.getElementById('photos').style.display = 'none';
                     }
 
-                    if (attendanceType) {
-                        document.getElementById('modal-type').style.display = '';
-                        document.getElementById('type-value').value = attendanceType;
-                    } else {
-                        document.getElementById('modal-type').style.display = 'none';
-                        document.getElementById('type-value').value = '';
-                    }
+                    // Convert the radius string to a number
+                    var radius = parseFloat(coordinates[2]);
 
-                    if (sourceValue) {
-                        document.getElementById('modal-source').style.display = '';
-                        document.getElementById('source-value').value = sourceValue;
-                    } else {
-                        document.getElementById('modal-source').style.display = 'none';
-                        document.getElementById('source-value').value = '';
-                    }
 
-                    // If a map already exists, remove it
-                    if (map !== null) {
-                        map.remove();
-                    }
+                    // Open the modal
+                    $('#openStreetMapModal').modal('show');
 
-                    map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]], 17);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-                
-                    // Add a marker for the location
-                    var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
-                
-                    // Add a circle with the converted radius
-                    var circle = L.circle([coordinates[0], coordinates[1]], {
-                        color: 'blue',
-                        fillColor: '#f0023',
-                        fillOpacity: 0.2,
-                        radius: radius,
-                    }).addTo(map);
+                    // Initialize the map after the modal is fully shown
+                    $('#openStreetMapModal').on('shown.bs.modal', function() {
+                        if (notes) {
+                            document.getElementById('modal-note').style.display = '';
+                            document.getElementById('note-value').value = notes;
+                        } else {
+                            document.getElementById('modal-note').style.display = 'none';
+                            document.getElementById('note-value').value = '';
+                        }
+
+                        if (attendanceType) {
+                            document.getElementById('modal-type').style.display = '';
+                            document.getElementById('type-value').value = attendanceType;
+                        } else {
+                            document.getElementById('modal-type').style.display = 'none';
+                            document.getElementById('type-value').value = '';
+                        }
+
+                        if (sourceValue) {
+                            document.getElementById('modal-source').style.display = '';
+                            document.getElementById('source-value').value = sourceValue;
+                        } else {
+                            document.getElementById('modal-source').style.display = 'none';
+                            document.getElementById('source-value').value = '';
+                        }
+
+                        // If a map already exists, remove it
+                        if (map !== null) {
+                            map.remove();
+                        }
+
+                        map = L.map('openStreetMapContainer').setView([coordinates[0], coordinates[1]],
+                            17);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        // Add a marker for the location
+                        var marker = L.marker([coordinates[0], coordinates[1]]).addTo(map);
+
+                        // Add a circle with the converted radius
+                        var circle = L.circle([coordinates[0], coordinates[1]], {
+                            color: 'blue',
+                            fillColor: '#f0023',
+                            fillOpacity: 0.2,
+                            radius: radius,
+                        }).addTo(map);
+                    });
                 });
             });
-        });
-    </script>
+        </script>
     @endif
 
     <script>
         /* JS comes here */
         (function() {
-    
+
             var width = 320; // We will scale the photo width to this
             var height = 0; // This will be computed based on the input stream
-    
+
             var streaming = false;
-    
+
             var video = null;
             var canvas = null;
             var photo = null;
             var takepic = null;
             var loadbutton = document.getElementById('load');
-    
+
             loadbutton.addEventListener('click', startup, false);
 
             function compressAndSetPicture(canvas, quality) {
                 canvas.toBlob(
-                    function (blob) {
+                    function(blob) {
                         var reader = new FileReader();
-                        reader.onloadend = function () {
+                        reader.onloadend = function() {
                             var compressedDataUrl = reader.result;
                             // Set the compressed image as the source of the photo element
                             document.getElementById('photo').src = compressedDataUrl;
@@ -1291,7 +1510,7 @@
                     quality // Adjust the image quality (0 to 1)
                 );
             }
-    
+
             function startup() {
                 let cameraIcon = document.getElementById('camera-permission');
                 video = document.getElementById('video');
@@ -1299,7 +1518,7 @@
                 photo = document.getElementById('photo');
                 takepic = document.getElementById('takepic');
                 closecamera = document.getElementById('closecamera');
-    
+
                 navigator.mediaDevices.getUserMedia({
                         video: true,
                         audio: false
@@ -1320,15 +1539,15 @@
                         alert("Please Allow Camera Access To Take Picture For Clock In / Out");
                         console.log("An error occurred: " + err);
                     });
-    
+
                 video.addEventListener('canplay', function(ev) {
                     if (!streaming) {
                         height = video.videoHeight / (video.videoWidth / width);
-    
+
                         if (isNaN(height)) {
                             height = width / (4 / 3);
                         }
-    
+
                         video.setAttribute('width', width);
                         video.setAttribute('height', height);
                         document.getElementById('camera').style.width = width;
@@ -1340,7 +1559,7 @@
                         streaming = true;
                     }
                 }, false);
-    
+
                 takepic.addEventListener('click', function(ev) {
                     takepicture();
                     ev.preventDefault();
@@ -1351,19 +1570,19 @@
                     closeCamera();
                     ev.preventDefault();
                 }, false)
-    
+
                 clearphoto();
             }
-    
+
             function clearphoto() {
                 var context = canvas.getContext('2d');
                 context.fillStyle = "#AAA";
                 context.fillRect(0, 0, canvas.width, canvas.height);
-    
+
                 var data = canvas.toDataURL('image/png');
                 photo.setAttribute('src', data);
             }
-    
+
             function takepicture() {
                 var context = canvas.getContext('2d');
                 if (width && height) {
@@ -1382,7 +1601,7 @@
                 document.getElementById('load').style.display = '';
                 document.getElementById('camera').style.display = 'none';
                 document.getElementById('output').style.display = 'none';
-            
+
                 var tracks = video.srcObject?.getTracks();
                 tracks?.forEach(track => track.stop());
                 video.srcObject = null;
@@ -1393,14 +1612,14 @@
     @if (Auth::user()->type == 'employee')
         <script>
             $(document).ready(() => {
-                $(document).on('change', '[name="overtimeDocument"]', function () {
+                $(document).on('change', '[name="overtimeDocument"]', function() {
                     const overFile = document.getElementById('overtimeFile');
                     overFile.style.display = '';
                     overFile.style['max-width'] = '';
                     document.getElementById('overtimeFileName').textContent = this.files[0].name;
                 });
 
-                $(document).on('change', '[name="myDocument"]', function () {
+                $(document).on('change', '[name="myDocument"]', function() {
                     const overFile = document.getElementById('uploadFile');
                     overFile.style.display = '';
                     overFile.style['max-width'] = '';
@@ -1451,7 +1670,8 @@
 
                     video_overtime.addEventListener('canplay', function(ev) {
                         if (!streaming_overtime) {
-                            height_overtime = video_overtime.videoHeight / (video_overtime.videoWidth / width_overtime);
+                            height_overtime = video_overtime.videoHeight / (video_overtime.videoWidth /
+                                width_overtime);
 
                             if (isNaN(height_overtime)) {
                                 height_overtime = width / (4 / 3);
@@ -1514,23 +1734,27 @@
                 let coordOut = null;
                 let pictureIn = null;
                 let pictureOut = null;
-    
+
                 $('body').on('click', '.clock-input', async function() {
                     try {
                         let overtimeId = $(this).data('overtime-id');
                         document.getElementById('overtimeId').value = overtimeId;
                         document.getElementById('overtimeIdOut').value = overtimeId;
-    
-                        const { latitude, longitude, accuracy } = await getLocation();
+
+                        const {
+                            latitude,
+                            longitude,
+                            accuracy
+                        } = await getLocation();
 
                         const latElement = document.getElementById("latitude-overtime");
                         const longElement = document.getElementById("longitude-overtime");
                         const accElement = document.getElementById("accuracy-overtime");
-    
+
                         const latOutElement = document.getElementById("latitude_out-overtime");
                         const longOutElement = document.getElementById("longitude_out-overtime");
                         const accOutElement = document.getElementById("accuracy_out-overtime");
-    
+
                         if (latElement) {
                             latElement.value = latitude;
                         }
@@ -1540,7 +1764,7 @@
                         if (accElement) {
                             accElement.value = accuracy;
                         }
-    
+
                         if (latOutElement) {
                             latOutElement.value = latitude;
                         }
@@ -1550,74 +1774,74 @@
                         if (accOutElement) {
                             accOutElement.value = accuracy;
                         }
-                        
+
                         let clock_in = $(this).data('clock-in');
-                        if (!clock_in){
+                        if (!clock_in) {
                             document.getElementById("clock_in-overtime").disabled = false;
                             document.getElementById("clock_out-overtime").disabled = true;
                         }
                     } catch (error) {
                         console.error(error);
                         if (error.message === "User denied Geolocation") {
-                        // Handle the case where the user denied geolocation access
-                        const clockInButton = document.getElementById("clock_in");
-                        const clockOutButton = document.getElementById("clock_out");
-                        if (clockInButton) {
-                            clockInButton.disabled = true;
-                        }
-                        if (clockOutButton) {
-                            clockOutButton.disabled = true;
-                        }
+                            // Handle the case where the user denied geolocation access
+                            const clockInButton = document.getElementById("clock_in");
+                            const clockOutButton = document.getElementById("clock_out");
+                            if (clockInButton) {
+                                clockInButton.disabled = true;
+                            }
+                            if (clockOutButton) {
+                                clockOutButton.disabled = true;
+                            }
                         }
                     }
-                
+
                     // Open the modal
                     $('#clockInOutInputModal').modal('show');
                 });
-    
+
                 $('body').on('click', '.report-input', function() {
                     // Open the modal
                     $('#reportInputModal').modal('show');
-    
+
                     // Set the modal's data attributes
                     // Get the values from the clicked button
                     let overtimeId = $(this).data('overtime-id');
                     document.getElementById('overtimeIdReportInput').value = overtimeId;
-    
+
                     let documentFile = $(this).data('document');
                     if (documentFile) {
-                    document.getElementById('exist-document-class').style.display = '';
-                    document.getElementById('exist-document-view').href = documentFile;
+                        document.getElementById('exist-document-class').style.display = '';
+                        document.getElementById('exist-document-view').href = documentFile;
                     }
-    
+
                     let notes = $(this).data('note');
                     if (notes) {
                         document.getElementById('note').value = notes;
                     }
                 });
-    
-                $('#reportInputModal').on('hidden.bs.modal', function () {
+
+                $('#reportInputModal').on('hidden.bs.modal', function() {
                     let file = document.getElementById('uploadFile');
                     if (file) {
                         file.style.display = 'none';
                     }
-    
+
                     document.getElementById('exist-document-class').style.display = 'none';
                     document.getElementById('exist-document-view').href = '#';
                 });
-    
-                $('#commonModal').on('hidden.bs.modal', function () {
+
+                $('#commonModal').on('hidden.bs.modal', function() {
                     let file = document.getElementById('uploadFile');
                     if (file) {
                         file.style.display = 'none';
                     }
                 });
-    
-                $('#clockInOutInputModal').on('hidden.bs.modal', function () {
+
+                $('#clockInOutInputModal').on('hidden.bs.modal', function() {
                     document.getElementById('load-overtime').style.display = '';
                     document.getElementById('camera-overtime').style.display = 'none';
                     document.getElementById('output-overtime').style.display = 'none';
-                
+
                     video_overtime = document.getElementById('video-overtime');
                     var tracks = video_overtime?.srcObject?.getTracks();
                     tracks?.forEach(track => track.stop());
@@ -1628,7 +1852,11 @@
 
         <script>
             $('body').on('click', '#clock_in', async function() {
-                const { latitude, longitude, accuracy } = await getLocation();
+                const {
+                    latitude,
+                    longitude,
+                    accuracy
+                } = await getLocation();
 
 
                 const latElement = document.getElementById("latitude");
@@ -1650,7 +1878,11 @@
             });
 
             $('body').on('click', '#clock_out', async function() {
-                const { latitude, longitude, accuracy } = await getLocation();
+                const {
+                    latitude,
+                    longitude,
+                    accuracy
+                } = await getLocation();
 
                 const latOutElement = document.getElementById("latitude_out");
                 const longOutElement = document.getElementById("longitude_out");

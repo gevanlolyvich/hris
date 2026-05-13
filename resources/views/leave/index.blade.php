@@ -1,4 +1,3 @@
-
 @extends('layouts.admin')
 
 @section('page-title')
@@ -23,9 +22,9 @@
     </a>
 
     @can('Create Leave')
-        <a href="#" data-url="{{ route('leave.create') }}" data-ajax-popup="true" data-title="{{ __('Create New Leave') }}"
-            data-size="lg" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
-            data-bs-original-title="{{ __('Create') }}">
+        <a href="#" data-url="{{ route('leave.create') }}" data-ajax-popup="true"
+            data-title="{{ __('Create New Leave') }}" data-size="lg" data-bs-toggle="tooltip" title=""
+            class="btn btn-sm btn-primary" data-bs-original-title="{{ __('Create') }}">
             <i class="ti ti-plus"></i>
         </a>
     @endcan
@@ -36,18 +35,18 @@
         <div class=" mt-2 " id="multiCollapseExample1">
             <div class="card">
                 <div class="card-body">
-                    {{ Form::open(array('route' => array('leave.index'),'method'=>'get','id'=>'employeeattendancehistory_filter')) }}
+                    {{ Form::open(['route' => ['leave.index'], 'method' => 'get', 'id' => 'employeeattendancehistory_filter']) }}
                     <div class="row align-items-center justify-content-end">
                         <div class="col-12">
                             <div class="row">
                                 <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                                     {{ Form::label('branch_id', __('Select Branch'), ['class' => 'form-label']) }}
-                                    {{ Form::select('branch_id', $branch, isset($_GET['branch_id'])?$_GET['branch_id']:null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                    {{ Form::select('branch_id', $branch, isset($_GET['branch_id']) ? $_GET['branch_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
                                 </div>
                                 <div class="form-group col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                                     {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}
                                     <div class="department_div btn-box">
-                                        {{ Form::select('department_id', !empty($department) ? $department : [], isset($_GET['department_id'])?$_GET['department_id']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                        {{ Form::select('department_id', !empty($department) ? $department : [], isset($_GET['department_id']) ? $_GET['department_id'] : null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
                                     </div>
                                 </div>
                             </div>
@@ -55,10 +54,15 @@
                         <div class="col-auto mt-4">
                             <div class="row">
                                 <div class="col-auto">
-                                    <a href="#" class="btn btn-sm btn-primary" onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;" data-bs-toggle="tooltip" title="{{__('Apply')}}" data-original-title="{{__('apply')}}">
+                                    <a href="#" class="btn btn-sm btn-primary"
+                                        onclick="document.getElementById('employeeattendancehistory_filter').submit(); return false;"
+                                        data-bs-toggle="tooltip" title="{{ __('Apply') }}"
+                                        data-original-title="{{ __('apply') }}">
                                         <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
                                     </a>
-                                    <a href="{{route('leave.index')}}" class="btn btn-sm btn-danger " data-bs-toggle="tooltip"  title="{{ __('Reset') }}" data-original-title="{{__('Reset')}}">
+                                    <a href="{{ route('leave.index') }}" class="btn btn-sm btn-danger "
+                                        data-bs-toggle="tooltip" title="{{ __('Reset') }}"
+                                        data-original-title="{{ __('Reset') }}">
                                         <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
                                     </a>
                                 </div>
@@ -94,35 +98,56 @@
                         <tbody>
                             @foreach ($leaves as $leave)
                                 <tr>
-                                    <td>{{ !empty(\Auth::user()->getEmployee($leave->employee_id)) ? \Auth::user()->getEmployee($leave->employee_id)->name : '' }}</td>
+                                    <td>{{ !empty(\Auth::user()->getEmployee($leave->employee_id)) ? \Auth::user()->getEmployee($leave->employee_id)->name : '' }}
+                                    </td>
                                     <td>{{ !empty(\Auth::user()->getLeaveType($leave->leave_type_id)) ? \Auth::user()->getLeaveType($leave->leave_type_id)->title : '' }}
                                     </td>
                                     {{-- <td>{{ \Auth::user()->dateFormat($leave->applied_on) }}</td> --}}
                                     <td>{{ \Auth::user()->dateFormat($leave->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($leave->end_date) }}</td>
-                                   
+
+                                    {{-- @php
+                                        $attendanceCount = \App\Models\AttendanceEmployee::where(
+                                            'employee_id',
+                                            $leave->employee_id,
+                                        )
+                                            ->whereBetween('date', [$leave->start_date, $leave->end_date])
+                                            ->where('source_in', 'Application')
+                                            ->count();
+
+                                        $totalDays = in_array($leave->status, ['Waiting Confirmation', 'Approved'])
+                                            ? $attendanceCount
+                                            : $leave->total_leave_days;
+                                    @endphp --}}
                                     <td>{{ $leave->total_leave_days }}</td>
+
                                     <td>{{ $leave->leave_reason }}</td>
                                     <td>
                                         @if ($leave->document_path)
                                             <div class="action-btn bg-info ms-2">
-                                                <a href="{{ asset($leave->document_path )}}" target="blank" class="mx-3 btn btn-sm  align-items-center"
-                                                    data-bs-toggle="tooltip"
+                                                <a href="{{ asset($leave->document_path) }}" target="blank"
+                                                    class="mx-3 btn btn-sm  align-items-center" data-bs-toggle="tooltip"
                                                     data-bs-original-title="{{ __('View') }}">
                                                     <i class="ti ti-file text-white"></i>
                                                 </a>
                                             </div>
                                         @else
-                                        -
-                                        @endif 
+                                            -
+                                        @endif
                                     </td>
                                     <td>
                                         @if ($leave->status == 'Pending')
                                             <div class="badge bg-warning p-2 px-3 rounded">{{ $leave->status }}</div>
                                         @elseif($leave->status == 'Approved')
                                             <div class="badge bg-success p-2 px-3 rounded">{{ $leave->status }}</div>
-                                        @elseif($leave->status == "Reject")
+                                        @elseif ($leave->status == 'Waiting Confirmation')
+                                            <span class="badge bg-info p-2 px-3 rounded">{{ $leave->status }}</span>
+                                        @elseif ($leave->status == 'Confirmed')
+                                            <span class="badge bg-success p-2 px-3 rounded">{{ $leave->status }}</span>
+                                        @elseif($leave->status == 'Reject')
                                             <div class="badge bg-danger p-2 px-3 rounded">{{ $leave->status }}</div>
+                                        @elseif ($leave->status == 'Cancel')
+                                            <div class="badge bg-secondary p-2 px-3 rounded">{{ $leave->status }}</div>
                                         @endif
                                     </td>
 
@@ -138,7 +163,13 @@
                                                 </a>
                                             </div>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if (($leave->created_by == Auth::user()->id || $leave->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $leave->status != 'Approved')
+                                                @if (
+                                                    ($leave->created_by == Auth::user()->id ||
+                                                        $leave->employee_id == Auth::user()->employee->id ||
+                                                        Auth::user()->type != 'employee') &&
+                                                        $leave->status != 'Approved' &&
+                                                        $leave->status != 'Waiting Confirmation' &&
+                                                        $leave->status != 'Confirmed')
                                                     @can('Edit Leave')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"
@@ -153,10 +184,15 @@
                                                     @endcan
                                                     @can('Delete Leave')
                                                         <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                                aria-label="Delete"><i
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['leave.destroy', $leave->id],
+                                                                'id' => 'delete-form-' . $leave->id,
+                                                            ]) !!}
+                                                            <a href="#"
+                                                                class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                                data-bs-toggle="tooltip" title=""
+                                                                data-bs-original-title="Delete" aria-label="Delete"><i
                                                                     class="ti ti-trash text-white text-white"></i></a>
                                                             </form>
                                                         </div>
@@ -164,12 +200,14 @@
                                                 @endif
                                             @else
                                                 @can('Edit Leave')
-                                                    @if ($leave->status != 'Approved')
+                                                    @if ($leave->status != 'Approved' && $leave->status != 'Waiting Confirmation' && $leave->status != 'Confirmed')
                                                         <div class="action-btn bg-info ms-2">
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
+                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center"
+                                                                data-size="lg"
                                                                 data-url="{{ URL::to('leave/' . $leave->id . '/edit') }}"
-                                                                data-ajax-popup="true" data-size="md" data-bs-toggle="tooltip"
-                                                                title="" data-title="{{ __('Edit Leave') }}"
+                                                                data-ajax-popup="true" data-size="md"
+                                                                data-bs-toggle="tooltip" title=""
+                                                                data-title="{{ __('Edit Leave') }}"
                                                                 data-bs-original-title="{{ __('Edit') }}">
                                                                 <i class="ti ti-pencil text-white"></i>
                                                             </a>
@@ -179,16 +217,21 @@
 
                                                 @can('Delete Leave')
                                                     {{-- @if ($leave->status != 'Approved') --}}
-                                                        <div class="action-btn bg-danger ms-2">
-                                                            {!! Form::open(['method' => 'DELETE', 'route' => ['leave.destroy', $leave->id], 'id' => 'delete-form-' . $leave->id]) !!}
-                                                            <a href="#" class="mx-3 btn btn-sm  align-items-center bs-pass-para"
-                                                                data-bs-toggle="tooltip" title="" data-bs-original-title="Delete"
-                                                                aria-label="Delete"><i
-                                                                    class="ti ti-trash text-white text-white"></i></a>
-                                                            </form>
-                                                        </div>
+                                                    <div class="action-btn bg-danger ms-2">
+                                                        {!! Form::open([
+                                                            'method' => 'DELETE',
+                                                            'route' => ['leave.destroy', $leave->id],
+                                                            'id' => 'delete-form-' . $leave->id,
+                                                        ]) !!}
+                                                        <a href="#"
+                                                            class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                            data-bs-toggle="tooltip" title=""
+                                                            data-bs-original-title="Delete" aria-label="Delete"><i
+                                                                class="ti ti-trash text-white text-white"></i></a>
+                                                        </form>
+                                                    </div>
                                                     {{-- @endif --}}
-                                            @endcan
+                                                @endcan
                                             @endif
                                         </span>
                                     </td>
@@ -205,11 +248,11 @@
 
 @push('script-page')
     <script>
-        $(document).ready(function () {
-            $('#commonModal').on('shown.bs.modal', function () {
-                $('.status').on('click', function () {
+        $(document).ready(function() {
+            $('#commonModal').on('shown.bs.modal', function() {
+                $('.status').on('click', function() {
                     $('#commonModal').modal('hide');
-                    
+
                     var buttonValue = $(this).data("status");
                     $("#hiddenStatus").val(buttonValue);
                 })
@@ -233,14 +276,19 @@
                                             </select>`;
                     $('.leave_type_div').html(leave_selct);
 
-                    $('.leave_type_id').append('<option value="" disabled selected>{{ __('Select Leave Type') }}</option>');
+                    $('.leave_type_id').append(
+                        '<option value="" disabled selected>{{ __('Select Leave Type') }}</option>'
+                    );
                     $.each(data, function(key, value) {
                         if (value.total_leave == value.days) {
                             $('.leave_type_id').append('<option value="' + value.id +
-                                '" disabled>' + `( ${value.total_leave} / ${value.days} ) | ${value.title}` + '</option>');
+                                '" disabled>' +
+                                `( ${value.total_leave} / ${value.days} ) | ${value.title}` +
+                                '</option>');
                         } else {
                             $('.leave_type_id').append('<option value="' + value.id + '">' +
-                                `( ${value.total_leave} / ${value.days} ) | ${value.title}` + '</option>');
+                                `( ${value.total_leave} / ${value.days} ) | ${value.title}` +
+                                '</option>');
                         }
                     });
 
@@ -254,7 +302,7 @@
 
     <script>
         $(document).ready(() => {
-            $(document).on('change', '[name="myDocument"]', function () {
+            $(document).on('change', '[name="myDocument"]', function() {
                 const file = document.getElementById('uploadFile');
                 file.style.display = '';
                 file.style['max-width'] = '';
@@ -280,7 +328,8 @@
                                             </select>`;
                     $('.department_div').html(emp_selct);
 
-                    $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
+                    $('.department_id').append(
+                        '<option value="" disabled selected>{{ __('Select Department') }}</option>');
                     $.each(data, function(key, value) {
                         $('.department_id').append('<option value="' + key + '">' + value +
                             '</option>');
@@ -300,4 +349,3 @@
         });
     </script>
 @endpush
-

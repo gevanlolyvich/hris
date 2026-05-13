@@ -43,7 +43,7 @@ class TerminateEmployeeCron extends Command
             ->select('user_id')->get()->pluck('user_id');
         Employee::whereIn('id', $terminations)
             ->where('is_active', 1)
-            ->update(['is_active' => 0, 'termination_date'=> date('Y-m-d')]);
+            ->update(['is_active' => 0, 'termination_date' => date('Y-m-d')]);
         User::whereIn('id', $users)
             ->where('is_active', 1)
             ->update(['is_active' => 0]);
@@ -53,11 +53,11 @@ class TerminateEmployeeCron extends Command
         $old_users = Employee::whereIn('id', $old_terminations)
             ->where('is_active', 1)
             ->select('user_id')->get()->pluck('user_id');
-        foreach($old_terminations as $old_id) {
+        foreach ($old_terminations as $old_id) {
             $termination = Termination::where('employee_id', $old_id)->select('employee_id', 'termination_date')->first();
             Employee::where('id', $old_id)
                 ->where('is_active', 1)
-                ->update(['is_active' => 0, 'termination_date'=> date($termination->termination_date)]);
+                ->update(['is_active' => 0, 'termination_date' => $termination->termination_date]);
         }
         User::whereIn('id', $old_users)
             ->where('is_active', 1)
@@ -70,7 +70,7 @@ class TerminateEmployeeCron extends Command
             ->select('user_id')->get()->pluck('user_id');
         Employee::whereIn('id', $cancel_terminations)
             ->where('is_active', 0)
-            ->update(['is_active' => 1, 'termination_date'=> null]);
+            ->update(['is_active' => 1, 'termination_date' => null]);
         User::whereIn('id', $cancel_users)
             ->where('is_active', 0)
             ->update(['is_active' => 1]);

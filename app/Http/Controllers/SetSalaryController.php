@@ -21,39 +21,41 @@ use Illuminate\Support\Facades\Log;
 
 class SetSalaryController extends Controller
 {
-    function getTotalWorkdays($employeeWorkdays, $month, $year) {    
+    function getTotalWorkdays($employeeWorkdays, $month, $year)
+    {
         // Get the number of days in the month
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    
+
         // Initialize the total workdays count
         $totalWorkdays = 0;
-    
+
         // Loop through each day in the month
         for ($day = 1; $day <= $daysInMonth; $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
-    
+
             // Check if the current day is a workday for the employee
             if (in_array($currentDayName, $employeeWorkdays)) {
                 $totalWorkdays++;
             }
         }
-    
+
         return $totalWorkdays;
     }
 
-    function getTotalHours($shiftTimes, $month, $year) {
+    function getTotalHours($shiftTimes, $month, $year)
+    {
         // Initialize the total working hours count
         $totalWorkingHours = 0;
-    
+
         // Loop through each day in the month
         for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
             // Get the day of the week for the current day
             $currentDayName = date('l', strtotime("$year-$month-$day"));
-    
+
             // Check if the current day is a workday for the employee
             $shift = collect($shiftTimes)->firstWhere('days', $currentDayName);
-    
+
             if ($shift && $shift['is_working']) {
                 // Calculate working hours for the day (subtract 1 hour for break time)
                 $startTimestamp = strtotime("$year-$month-$day " . $shift['start_time']);
@@ -66,16 +68,17 @@ class SetSalaryController extends Controller
 
                 // Subtract 1 hour for break time
                 $workingHours = max(0, round(($endTimestamp - $startTimestamp) / 3600 - 1, 2));
-    
+
                 // Add working hours to the total
                 $totalWorkingHours += $workingHours;
             }
         }
-    
+
         return $totalWorkingHours;
     }
 
-    function getPresentDays($attendanceData, $shiftTimes, $type = 'Fixed') {
+    function getPresentDays($attendanceData, $shiftTimes, $type = 'Fixed')
+    {
         // Initialize the present days count
         $presentDaysCount = 0;
 
@@ -83,15 +86,15 @@ class SetSalaryController extends Controller
         foreach ($attendanceData as $attendance) {
             // Get the day of the week for the attendance date
             $attendanceDayName = date('l', strtotime($attendance['date']));
-    
+
             // Check if the attendance date is a workday based on shift times
             $shift = collect($shiftTimes)->firstWhere('days', $attendanceDayName);
-    
+
             if ($shift && $shift['is_working'] && $type == 'Fixed') {
                 // Calculate required work hours based on shift
 
                 $startShift = strtotime($shift['start_time']);
-                $endShift   = strtotime($shift['end_time']);
+                $endShift = strtotime($shift['end_time']);
 
                 if ($endShift < $startShift) {
                     // Shift spans two dates, consider hours on the next day
@@ -102,9 +105,9 @@ class SetSalaryController extends Controller
                     // Shift spans two dates, consider hours on the next day
                     $shift['end_time'] += 86400; // Add 24 hours
                 }
-                
+
                 $requiredWorkHours = max(0, round(($endShift - $startShift) / 3600 - 1, 2));
-    
+
                 // Check if the work hours of attendance match the required work hours
                 if ($attendance['work_hours']) {
                     list($hours, $minutes, $seconds) = explode(':', $attendance['work_hours']);
@@ -112,7 +115,7 @@ class SetSalaryController extends Controller
                 } else {
                     $attendanceWorkHours = 0;
                 }
-                
+
                 if ($attendanceWorkHours >= $requiredWorkHours || $type != 'Fixed') {
                     // Increment the present days count
                     $presentDaysCount++;
@@ -121,14 +124,13 @@ class SetSalaryController extends Controller
                 $presentDaysCount++;
             }
         }
-    
+
         return $presentDaysCount;
     }
 
     public function index()
     {
-        if(\Auth::user()->can('Manage Set Salary'))
-        {
+        if (\Auth::user()->can('Manage Set Salary')) {
             $branch = Branch::find(\Auth::user()->branch_id);
             $branch_id = collect();
             if ($branch) {
@@ -144,55 +146,47 @@ class SetSalaryController extends Controller
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get() : Employee::where('is_active', 1)->orderby('name', 'asc')->get();
 
             return view('setsalary.index', compact('employees'));
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
 
     public function edit($id)
     {
-        if(\Auth::user()->can('Edit Set Salary'))
-        {
-            $payslip_type      = PayslipType::get()->pluck('name', 'id');
+        if (\Auth::user()->can('Edit Set Salary')) {
+            $payslip_type = PayslipType::get()->pluck('name', 'id');
             $allowance_options = AllowanceOption::get()->pluck('name', 'id');
-            $loan_options      = LoanOption::get()->pluck('name', 'id');
+            $loan_options = LoanOption::get()->pluck('name', 'id');
             $deduction_options = DeductionOption::get()->pluck('name', 'id');
-            if(\Auth::user()->type == 'employee')
-            {
-                $currentEmployee      = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->first();
+            if (\Auth::user()->type == 'employee') {
+                $currentEmployee = Employee::where('is_active', 1)->where('user_id', '=', \Auth::user()->id)->first();
 
                 if (empty($currentEmployee) || !$currentEmployee) {
                     return redirect()->back()->with('error', __('Inactive'));
                 }
 
-                $allowances           = Allowance::where('employee_id', $currentEmployee->id)->get();
-                $commissions          = Commission::where('employee_id', $currentEmployee->id)->get();
-                $loans                = Loan::where('employee_id', $currentEmployee->id)->get();
+                $allowances = Allowance::where('employee_id', $currentEmployee->id)->get();
+                $commissions = Commission::where('employee_id', $currentEmployee->id)->get();
+                $loans = Loan::where('employee_id', $currentEmployee->id)->get();
                 $saturationdeductions = SaturationDeduction::where('employee_id', $currentEmployee->id)->get();
-                $otherpayments        = OtherPayment::where('employee_id', $currentEmployee->id)->get();
-                $overtimes            = Overtime::where('employee_id', $currentEmployee->id)->get();
-                $employee             = Employee::where('user_id', '=', \Auth::user()->id)->first();
+                $otherpayments = OtherPayment::where('employee_id', $currentEmployee->id)->get();
+                $overtimes = Overtime::where('employee_id', $currentEmployee->id)->get();
+                $employee = Employee::where('user_id', '=', \Auth::user()->id)->first();
 
                 return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances'));
 
-            }
-            else
-            {
-                $allowances           = Allowance::where('employee_id', $id)->get();
-                $commissions          = Commission::where('employee_id', $id)->get();
-                $loans                = Loan::where('employee_id', $id)->get();
+            } else {
+                $allowances = Allowance::where('employee_id', $id)->get();
+                $commissions = Commission::where('employee_id', $id)->get();
+                $loans = Loan::where('employee_id', $id)->get();
                 $saturationdeductions = SaturationDeduction::where('employee_id', $id)->get();
-                $otherpayments        = OtherPayment::where('employee_id', $id)->get();
-                $overtimes            = Overtime::where('employee_id', $id)->get();
-                $employee             = Employee::where('is_active', 1)->find($id);
+                $otherpayments = OtherPayment::where('employee_id', $id)->get();
+                $overtimes = Overtime::where('employee_id', $id)->get();
+                $employee = Employee::where('is_active', 1)->find($id);
 
                 return view('setsalary.edit', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances'));
             }
-        }
-        else
-        {
+        } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
     }
@@ -212,88 +206,89 @@ class SetSalaryController extends Controller
             }
         }
 
-        $year                 = $request->month ? date('Y', strtotime($request->month)) : date('Y');
-        $month                = $request->month ? date('m', strtotime($request->month)): date('m');
-        $start_date           = date($year . '-' . $month . '-01');
-        $end_date             = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
+        $year = $request->month ? date('Y', strtotime($request->month)) : date('Y');
+        $month = $request->month ? date('m', strtotime($request->month)) : date('m');
+        $start_date = date($year . '-' . $month . '-01');
+        $end_date = date('Y-m-t', strtotime('01-' . $month . '-' . $year));
 
-        $payslip_type         = PayslipType::get()->pluck('name', 'id');
-        $allowance_options    = AllowanceOption::get()->pluck('name', 'id');
-        $loan_options         = LoanOption::get()->pluck('name', 'id');
-        $deduction_options    = DeductionOption::get()->pluck('name', 'id');
+        $payslip_type = PayslipType::get()->pluck('name', 'id');
+        $allowance_options = AllowanceOption::get()->pluck('name', 'id');
+        $loan_options = LoanOption::get()->pluck('name', 'id');
+        $deduction_options = DeductionOption::get()->pluck('name', 'id');
 
-        $employee               = null;
+        $employee = null;
         if (\Auth::user()->type == 'employee') {
-            $employee           = Employee::find(\Auth::user()->id);
+            $employee = Employee::find(\Auth::user()->id);
         } else {
-            $employee           = $branch_id?->isNotEmpty() ? Employee::where('id', $id)->whereIn('branch_id', $branch_id)->first() : Employee::find($id);
-        }  
+            $employee = $branch_id?->isNotEmpty() ? Employee::where('id', $id)->whereIn('branch_id', $branch_id)->first() : Employee::find($id);
+        }
 
         if (empty($employee)) {
             return redirect()->back()->with('error', __('Permission denied'));
         }
-        
-        $allowances           = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
-        $commissions          = Commission::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
-        $loans                = Loan::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
+
+        $allowances = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
+        $commissions = Commission::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
+        $loans = Loan::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $saturationdeductions = SaturationDeduction::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
-        $otherpayments        = OtherPayment::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
-                                    $query->orWhere('is_recurring', true)
-                                        ->orWhere('period', "{$year}-{$month}");
-                                })->get();
-        $overtimes            = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
+        $otherpayments = OtherPayment::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
+        $overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull('report_document')->where('status', 'approved')->get();
 
-        $total_work_days      = (new Employee)->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_work_hours     = (new Employee)->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-        $total_present_days   = (new Employee)->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $total_work_days = (new Employee)->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        // $total_work_hours = (new Employee)->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+        $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays) 
+        $total_present_days = (new Employee)->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
 
-        foreach ( $allowances as  $value) {
-            if($value->type == 'percentage' ){
+        foreach ($allowances as $value) {
+            if ($value->type == 'percentage') {
                 // $employee           = Employee::find($value->employee_id);
-                $empsal             = $value->amount * $employee->salary / 100;
-                $value->tota_allow  = $empsal;
-            }
-        }
-
-        foreach ( $commissions as  $value) {
-            if(  $value->type == 'percentage' ){
-                $empsal            = $value->amount * $employee->salary / 100;
+                $empsal = $value->amount * $employee->salary / 100;
                 $value->tota_allow = $empsal;
             }
         }
 
-        foreach ( $loans as  $value) {
-            if(  $value->type == 'percentage' ){
-                // $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
+        foreach ($commissions as $value) {
+            if ($value->type == 'percentage') {
+                $empsal = $value->amount * $employee->salary / 100;
                 $value->tota_allow = $empsal;
             }
         }
 
-        foreach ( $saturationdeductions as  $value) {
-            if(  $value->type == 'percentage' ){
+        foreach ($loans as $value) {
+            if ($value->type == 'percentage') {
                 // $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
+                $empsal = $value->amount * $employee->salary / 100;
                 $value->tota_allow = $empsal;
             }
         }
 
-        foreach ( $otherpayments as  $value) {
-            if(  $value->type == 'percentage' ){
+        foreach ($saturationdeductions as $value) {
+            if ($value->type == 'percentage') {
                 // $employee          = Employee::find($value->employee_id);
-                $empsal  = $value->amount * $employee->salary / 100;
+                $empsal = $value->amount * $employee->salary / 100;
+                $value->tota_allow = $empsal;
+            }
+        }
+
+        foreach ($otherpayments as $value) {
+            if ($value->type == 'percentage') {
+                // $employee          = Employee::find($value->employee_id);
+                $empsal = $value->amount * $employee->salary / 100;
                 $value->tota_allow = $empsal;
             }
         }
@@ -305,19 +300,19 @@ class SetSalaryController extends Controller
     public function employeeUpdateSalary(Request $request, $id)
     {
         $validator = \Validator::make(
-            $request->all(), [
-                               'salary_type' => 'required',
-                               'salary' => 'required',
-                           ]
+            $request->all(),
+            [
+                'salary_type' => 'required',
+                'salary' => 'required',
+            ]
         );
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             $messages = $validator->getMessageBag();
 
             return redirect()->back()->with('error', $messages->first());
         }
         $employee = Employee::findOrFail($id);
-        $input    = $request->all();
+        $input = $request->all();
         $employee->fill($input)->save();
 
         return redirect()->back()->with('success', 'Employee Salary Updated.');
@@ -325,8 +320,7 @@ class SetSalaryController extends Controller
 
     public function employeeSalary()
     {
-        if(\Auth::user()->type == "employee")
-        {
+        if (\Auth::user()->type == "employee") {
             $branch = Branch::find(\Auth::user()->branch_id);
             $branch_id = collect();
             if ($branch) {
@@ -350,7 +344,7 @@ class SetSalaryController extends Controller
     {
 
         $payslip_type = PayslipType::get()->pluck('name', 'id');
-        $employee     = Employee::find($id);
+        $employee = Employee::find($id);
 
         return view('setsalary.basic_salary', compact('employee', 'payslip_type'));
     }

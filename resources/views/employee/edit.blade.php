@@ -166,7 +166,7 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('type', __('Employee Type'), ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>
-                                        {!! Form::select('type', $employeeTypes, $employee->type_id, ['class' => 'form-control select2', 'id' => 'type', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
+                                        {!! Form::select('type_id', $employeeTypes, $employee->type_id, ['class' => 'form-control select2', 'id' => 'type_id', 'required' => 'required','placeholder' =>  __('Select Employee Type')]) !!}
                                     </div>
                                     <div class="form-group col-md-6">
                                         {!! Form::label('company_doj', 'Company Date Of Joining', ['class' => 'form-label']) !!}<span class="text-danger pl-1">*</span>

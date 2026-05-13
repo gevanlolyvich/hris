@@ -25,11 +25,12 @@ class Kernel extends ConsoleKernel
             ->between('1:00', '23:59')
             ->sentryMonitor();
 
-        $schedule->command('terminate:employees')
-            ->everyTenMinutes()
-            ->timezone('Asia/Jakarta')
-            ->between('1:00', '23:59')
-            ->sentryMonitor();
+	/* blok sementara by Anank */
+        //$schedule->command('terminate:employees')
+        //    ->everyTenMinutes()
+        //    ->timezone('Asia/Jakarta')
+        //    ->between('1:00', '23:59')
+        //    ->sentryMonitor();
 
         $schedule->command('transfer:employees')
             ->everyTenMinutes()
@@ -37,11 +38,12 @@ class Kernel extends ConsoleKernel
             ->between('1:00', '23:59')
             ->sentryMonitor();
 
-        $schedule->command('app:activate-deactivate-users')
-            ->everyTenMinutes()
-            ->timezone('Asia/Jakarta')
-            ->between('1:00', '23:59')
-            ->sentryMonitor();
+        /* blok sementara by Anank */
+	//$schedule->command('app:activate-deactivate-users')
+        //    ->everyTenMinutes()
+        //    ->timezone('Asia/Jakarta')
+        //    ->between('1:00', '23:59')
+        //    ->sentryMonitor();
 
         $schedule->command('vehicle:nextMaintenance')
             ->dailyAt('09:00')

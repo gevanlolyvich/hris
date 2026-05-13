@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\TerminateEmployeeCron;
 use App\Models\Branch;
 use App\Models\Employee;
 use App\Mail\TerminationSend;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use illuminate\Support\Facades\Artisan;
 
 class TerminationController extends Controller
 {
@@ -19,7 +21,7 @@ class TerminationController extends Controller
     {
         if (\Auth::user()->can('Manage Termination')) {
             if (Auth::user()->type == 'employee') {
-                $emp          = Employee::where('user_id', '=', \Auth::user()->id)->first();
+                $emp = Employee::where('user_id', '=', \Auth::user()->id)->first();
                 $terminations = Termination::where('employee_id', '=', $emp->id)->orderBy('termination_date', 'DESC')->get();
             } else {
                 $branch = Branch::find(\Auth::user()->branch_id);
@@ -35,7 +37,9 @@ class TerminationController extends Controller
                     }
                 }
 
-                $terminations = $branch_id?->isNotEmpty() ? Termination::whereHas('employee', function ($query) use ($branch_id) { $query->whereIn('branch_id', $branch_id); })->orderBy('termination_date', 'DESC')->get() : Termination::orderBy('termination_date', 'DESC')->get();
+                $terminations = $branch_id?->isNotEmpty() ? Termination::whereHas('employee', function ($query) use ($branch_id) {
+                    $query->whereIn('branch_id', $branch_id);
+                })->orderBy('termination_date', 'DESC')->get() : Termination::orderBy('termination_date', 'DESC')->get();
             }
 
             return view('termination.index', compact('terminations'));
@@ -60,7 +64,7 @@ class TerminationController extends Controller
                 }
             }
 
-            $employees        = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
+            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id') : Employee::where('is_active', 1)->orderby('name', 'asc')->get()->pluck('name', 'id');
             $terminationtypes = TerminationType::get()->pluck('name', 'id');
 
             return view('termination.create', compact('employees', 'terminationtypes'));
@@ -89,18 +93,18 @@ class TerminationController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            $termination                   = new Termination();
-            $termination->employee_id      = $request->employee_id;
+            $termination = new Termination();
+            $termination->employee_id = $request->employee_id;
             $termination->termination_type = $request->termination_type;
-            $termination->notice_date      = $request->notice_date;
+            $termination->notice_date = $request->notice_date;
             $termination->termination_date = $request->termination_date;
-            $termination->description      = $request->description;
-            $termination->created_by       = \Auth::user()->creatorId();
+            $termination->description = $request->description;
+            $termination->created_by = \Auth::user()->creatorId();
             $termination->save();
 
             $setings = Utility::settings();
             if ($setings['employee_termination'] == 1) {
-                $employee           = Employee::find($termination->employee_id);
+                $employee = Employee::find($termination->employee_id);
 
                 $employee->terminated_by = \Auth::user()->creatorId();
                 $employee->save();
@@ -114,6 +118,7 @@ class TerminationController extends Controller
                 $resp = Utility::sendEmailTemplate('employee_termination', [$employee->email], $uArr);
                 return redirect()->route('termination.index')->with('success', __('Termination  successfully created.') . ((!empty($resp) && $resp['is_success'] == false && !empty($resp['error'])) ? '<br> <span class="text-danger">' . $resp['error'] . '</span>' : ''));
             }
+            Artisan::call(TerminateEmployeeCron::class);
 
             return redirect()->route('termination.index')->with('success', __('Termination  successfully created.'));
         } else {
@@ -150,8 +155,8 @@ class TerminationController extends Controller
             //     $query->where('id', $termination->employee_id);
             // })->orderby('name', 'asc');
 
-            $employees        = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->orWhere('id', $termination->employee_id) : Employee::where('is_active', 1)->orWhere('id', $termination->employee_id);
-            $employees        = $employees->orderBy('name', 'asc')->get()->pluck('name', 'id');
+            $employees = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->orWhere('id', $termination->employee_id) : Employee::where('is_active', 1)->orWhere('id', $termination->employee_id);
+            $employees = $employees->orderBy('name', 'asc')->get()->pluck('name', 'id');
 
             $terminationtypes = TerminationType::get()->pluck('name', 'id');
 
@@ -190,11 +195,11 @@ class TerminationController extends Controller
                     Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
                 }
 
-                $termination->employee_id      = $request->employee_id;
+                $termination->employee_id = $request->employee_id;
                 $termination->termination_type = $request->termination_type;
-                $termination->notice_date      = $request->notice_date;
+                $termination->notice_date = $request->notice_date;
                 $termination->termination_date = $request->termination_date;
-                $termination->description      = $request->description;
+                $termination->description = $request->description;
                 $termination->save();
 
                 return redirect()->route('termination.index')->with('success', __('Termination successfully updated.'));

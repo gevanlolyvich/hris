@@ -22,6 +22,7 @@ class Overtime extends Model
         'document',
         'report_document',
         'report_note',
+        'status',
         'created_by',
     ];
 

@@ -169,7 +169,7 @@ Route::group(
         Route::get('company-setting', [SettingsController::class, 'companyIndex'])->name('company.setting');
         Route::get('company-email-setting/{name}', [EmailTemplateController::class, 'updateStatus'])->name('company.email.setting');
         // Route::post('company-email-setting/{name}', 'EmailTemplateController@updateStatus')->name('status.email.language')->middleware(['auth']);
-
+    
         Route::post('pusher-settings', [SettingsController::class, 'savePusherSettings'])->name('pusher.settings');
         Route::post('business-setting', [SettingsController::class, 'saveBusinessSettings'])->name('business.setting');
 
@@ -209,21 +209,21 @@ Route::get(
 
     [SettingsController::class, 'testEmail']
 )->name('test.email')->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+        [
+            'auth',
+            'XSS',
+        ]
+    );
 Route::post(
     '/test/send',
     [SettingsController::class, 'testEmailSend']
 
 )->name('test.email.send')->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-);
+        [
+            'auth',
+            'XSS',
+        ]
+    );
 // End
 
 Route::resource('user', UserController::class)
@@ -1474,7 +1474,7 @@ Route::resource('contract_type', ContractTypeController::class)->middleware(['au
 Route::resource('contract', ContractController::class)->middleware(['auth', 'XSS']);
 Route::post('/contract_status_edit/{id}', [ContractController::class, 'contract_status_edit'])->name('contract.status')->middleware(['auth', 'XSS']);
 Route::post('/contract/{id}/file', [ContractController::class, 'fileUpload'])->name('contracts.file.upload')->middleware(['auth', 'XSS']);
-Route::get('/contract/{id}/file/{fid}',  [ContractController::class, 'fileDownload'])->name('contracts.file.download')->middleware(['auth', 'XSS']);
+Route::get('/contract/{id}/file/{fid}', [ContractController::class, 'fileDownload'])->name('contracts.file.download')->middleware(['auth', 'XSS']);
 Route::get('/contract/{id}/file/delete/{fid}', [ContractController::class, 'fileDelete'])->name('contracts.file.delete')->middleware(['auth', 'XSS']);
 Route::post('/contract/{id}/notestore', [ContractController::class, 'noteStore'])->name('contracts.note.store')->middleware(['auth']);
 Route::get('/contract/{id}/note', [ContractController::class, 'noteDestroy'])->name('contracts.note.destroy')->middleware(['auth']);
@@ -1558,6 +1558,12 @@ Route::post('eventemployee', [EventEmployeeController::class, 'report'])->name('
 Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attendance'])->name('eventemployee.attendance')->middleware(['auth', 'XSS']);
 Route::post('overtime/attendance', [OvertimeController::class, 'attendance'])->name('overtime.attendance')->middleware(['auth', 'XSS']);
 Route::post('overtime/report', [OvertimeController::class, 'report'])->name('overtime.report')->middleware(['auth', 'XSS']);
+Route::get('overtime/{id}/approve', [OvertimeController::class, 'approve'])
+    ->name('overtime.approve');
+
+Route::get('overtime/{id}/reject', [OvertimeController::class, 'reject'])
+    ->name('overtime.reject');
+
 
 Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export')->middleware(['auth', 'XSS']);
 Route::get('export/notClockIn', [AttendanceEmployeeController::class, 'exportNotClockIn'])->name('attendanceemployee.exportNotClockIn')->middleware(['auth', 'XSS']);

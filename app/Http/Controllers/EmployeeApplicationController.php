@@ -221,18 +221,37 @@ class EmployeeApplicationController extends Controller
                     'response' => $request->response,
                     'status' => $request->status,
                     // 'active' => true,
+		    'active' => true,
+		    ////'updated_at' => Carbon::tomorrow(),
                 ]);
 
+		//Anank
                 // if ($request->status === "Approved") {
-                //     // Aktifkan employee
-                //     $employee = Employee::findOrFail($employee_period->employee_id);
-                //     $employee->update(['is_active' => true]);
+                 if ($request->status === "Approved") {
+                // Aktifkan employee
+                // $employee = Employee::findOrFail($employee_period->employee_id);
+                     $employee = Employee::findOrFail($employee_period->employee_id);
+                // $employee->update(['is_active' => true]);
+                   if (!$employee->is_active) {  
+			   $employee->update([
+				   'is_active' => true, 
+				   ////'updated_at' => Carbon::tomorrow(),
+			   ]);
+		   }
 
-                //     // Aktifkan user
-                //     $user = User::findOrFail($employee->user_id);
+                // Aktifkan user
+                // $user = User::findOrFail($employee->user_id);
+                     $user = User::findOrFail($employee->user_id);
 
-                //     $user->update(['is_active' => true]);
+		   // $user->update(['is_active' => true]);
+                   if (!$user->is_active) {
+			   $user->update([
+				   'is_active' => true, 
+				   ////'updated_at' => Carbon::tomorrow(),
+			   ]);
+		   }
                 // }
+                 }
             });
             return redirect()->back()->with('success', __('Employee Application Successfully Updated'));
         } else {
