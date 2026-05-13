@@ -14,7 +14,6 @@ use App\Mail\CommonEmailTemplate;
 use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event as GoogleEvent;
 
-
 class Utility extends Model
 {
     function getTotalHours($shiftTimes, $month, $year)
@@ -61,8 +60,6 @@ class Utility extends Model
         //     $data = $data->where('created_by', '=', 1);
         // }
         // $data = $data->get();
-
-
 
         $settings = [
             "site_currency" => "Dollars",
@@ -155,6 +152,8 @@ class Utility extends Model
     {
         $dir = base_path() . '/resources/lang/';
         $glob = glob($dir . "*", GLOB_ONLYDIR);
+        $dir = base_path() . '/resources/lang/';
+        $glob = glob($dir . "*", GLOB_ONLYDIR);
         $arrLang = array_map(
             function ($value) use ($dir) {
                 return str_replace($dir, '', $value);
@@ -227,7 +226,12 @@ class Utility extends Model
     {
         $employee = Employee::find($employeeId);
         $payslip = Payslip::where('employee_id', $employee->id)->where('salary_month', $month)->first();
+        $employee = Employee::find($employeeId);
+        $payslip = Payslip::where('employee_id', $employee->id)->where('salary_month', $month)->first();
 
+        $year = $month ? date('Y', strtotime($month)) : date('Y');
+        $month = $month ? date('m', strtotime($month)) : date('m');
+        $total_work_hours = 173;
         $year = $month ? date('Y', strtotime($month)) : date('Y');
         $month = $month ? date('m', strtotime($month)) : date('m');
         $total_work_hours = 173;
@@ -251,6 +255,10 @@ class Utility extends Model
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
+        $earning['commission'] = Commission::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $totalCommission = 0;
 
         foreach ($earning['commission'] as $earn) {
@@ -262,6 +270,10 @@ class Utility extends Model
             $totalCommission += $empcom;
         }
 
+        $earning['otherPayment'] = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $earning['otherPayment'] = OtherPayment::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
@@ -281,6 +293,8 @@ class Utility extends Model
         $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
 
         $earning['totalOverTime'] = 0;
+        $total_over_time_hours = 0;
+        $overtime_limit = $employee?->departments?->overtime_limit;
         $total_over_time_hours = 0;
         $overtime_limit = $employee?->departments?->overtime_limit;
         foreach ($earning['overTime'] as $over_time) {
@@ -329,9 +343,35 @@ class Utility extends Model
             }
 
             $over_time->amount = $amount;
+            $hourly_rate = $over_time->employee->salary / $total_work_hours;
+
+            if ($over_time->is_work_day) {
+                if ($total_hours <= 1) {
+                    $amount = $total_hours * 1.5 * $hourly_rate;
+                } else {
+                    $amount = 1 * 1.5 * $hourly_rate + ($total_hours - 1) * 2 * $hourly_rate;
+                }
+            } else {
+                if ($total_hours <= 8) {
+                    $amount = $total_hours * 2 * $hourly_rate;
+                } elseif ($total_hours == 9) {
+                    $amount = 8 * 2 * $hourly_rate + 1 * 3 * $hourly_rate;
+                } else {
+                    $amount =
+                        8 * 2 * $hourly_rate +
+                        1 * 3 * $hourly_rate +
+                        ($total_hours - 9) * 4 * $hourly_rate;
+                }
+            }
+
+            $over_time->amount = $amount;
             $earning['totalOverTime'] += $amount;
         }
 
+        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
         $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
@@ -362,6 +402,8 @@ class Utility extends Model
             $totaldeduction += $empdeduction;
         }
 
+        $payslip['earning'] = $earning;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
         $payslip['earning'] = $earning;
         $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
         // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
@@ -440,6 +482,8 @@ class Utility extends Model
         }
         $companyRole = Role::where('name', 'LIKE', 'company')->first();
         $companyPermissions = $companyRole->getPermissionNames()->toArray();
+        $companyRole = Role::where('name', 'LIKE', 'company')->first();
+        $companyPermissions = $companyRole->getPermissionNames()->toArray();
         $companyNewPermission = [
             "Manage Job Category",
             "Create Job Category",
@@ -482,6 +526,8 @@ class Utility extends Model
                 $companyRole->givePermissionTo($permission);
             }
         }
+        $employeeRole = Role::where('name', 'LIKE', 'employee')->first();
+        $employeePermissions = $employeeRole->getPermissionNames()->toArray();
         $employeeRole = Role::where('name', 'LIKE', 'employee')->first();
         $employeePermissions = $employeeRole->getPermissionNames()->toArray();
         $employeeNewPermission = [
@@ -602,7 +648,6 @@ class Utility extends Model
 
             '{app_name}',
             '{app_url}',
-
 
             '{employee_name}',
             '{employee_email}',
@@ -778,7 +823,12 @@ class Utility extends Model
         foreach ($template as $t) {
             $default_lang = EmailTemplateLang::where('parent_id', '=', $t->id)->where('lang', 'LIKE', 'en')->first();
             $emailTemplateLang = new EmailTemplateLang();
+            $default_lang = EmailTemplateLang::where('parent_id', '=', $t->id)->where('lang', 'LIKE', 'en')->first();
+            $emailTemplateLang = new EmailTemplateLang();
             $emailTemplateLang->parent_id = $t->id;
+            $emailTemplateLang->lang = $lang;
+            $emailTemplateLang->subject = $default_lang->subject;
+            $emailTemplateLang->content = $default_lang->content;
             $emailTemplateLang->lang = $lang;
             $emailTemplateLang->subject = $default_lang->subject;
             $emailTemplateLang->content = $default_lang->content;
@@ -875,7 +925,6 @@ class Utility extends Model
             'section_blade_file_name' => 'custome-footer-section',
             'section_type' => 'section-10',
         ];
-
 
         foreach ($section_data as $section_key => $section_value) {
 
@@ -1007,7 +1056,6 @@ class Utility extends Model
         }
     }
 
-
     public static function colorset()
     {
 
@@ -1115,9 +1163,7 @@ class Utility extends Model
                     $mimes = !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
                 }
 
-
                 $file = $request->$key_name;
-
 
                 if (count($custom_validation) > 0) {
                     $validation = $custom_validation;
@@ -1166,7 +1212,6 @@ class Utility extends Model
                         // dd($path);
                     }
 
-
                     $res = [
                         'flag' => 1,
                         'msg' => 'success',
@@ -1189,7 +1234,6 @@ class Utility extends Model
             return $res;
         }
     }
-
 
     public static function get_file($path)
     {
@@ -1231,7 +1275,6 @@ class Utility extends Model
         try {
             $settings = Utility::settings();
 
-
             if (!empty($settings['storage_setting'])) {
 
                 if ($settings['storage_setting'] == 'wasabi') {
@@ -1266,9 +1309,7 @@ class Utility extends Model
                     $mimes = !empty($settings['local_storage_validation']) ? $settings['local_storage_validation'] : '';
                 }
 
-
                 $file = $request->$key_name;
-
 
                 if (count($custom_validation) > 0) {
                     $validation = $custom_validation;
@@ -1295,14 +1336,11 @@ class Utility extends Model
 
                     if ($settings['storage_setting'] == 'local') {
 
-
-
                         \Storage::disk()->putFileAs(
                             $path,
                             $request->file($key_name)[$data_key],
                             $name
                         );
-
 
                         $path = $name;
                     } else if ($settings['storage_setting'] == 'wasabi') {
@@ -1418,6 +1456,8 @@ class Utility extends Model
     {
         self::googleCalendarConfig();
 
+        self::googleCalendarConfig();
+
         $event = new GoogleEvent();
         $event->name = $request->title;
         $event->startDateTime = Carbon::parse($request->start_date);
@@ -1428,6 +1468,8 @@ class Utility extends Model
 
     public static function getCalendarData($type)
     {
+        self::googleCalendarConfig();
+
         self::googleCalendarConfig();
 
         $data = GoogleEvent::get();

@@ -1,32 +1,31 @@
 @php
-// $logo = asset(Storage::url('uploads/logo/'));
-$logo=\App\Models\Utility::get_file('uploads/logo/');
+    // $logo = asset(Storage::url('uploads/logo/'));
+    $logo = \App\Models\Utility::get_file('uploads/logo/');
 
-$company_logo = Utility::getValByName('company_logo');
+    $company_logo = Utility::getValByName('company_logo');
 @endphp
 <div class="modal-body">
     <div class="text-md-end mb-2">
-        <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="tooltip"
-            data-bs-placement="bottom" title="{{ __('Download') }}" onclick="saveAsPDF()"><span
-                class="fa fa-download"></span></a>
+        <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="{{ __('Download') }}" onclick="saveAsPDF()"><span class="fa fa-download"></span></a>
         {{-- <a title="Mail Send" href="{{ route('payslip.send', [$employee->id, $payslip->salary_month]) }}"
             class="btn btn-sm btn-warning"><span class="fa fa-paper-plane"></span></a> --}}
     </div>
     <div class="invoice" id="printableArea">
-    <div class="row">
-        <div class="col-form-label">
-            <div class="invoice-number">
-                <img src="{{ $logo . '/' . (isset($company_logo) && !empty($company_logo) ? $company_logo : 'dark_logo.png') }}"
+        <div class="row">
+            <div class="col-form-label">
+                <div class="invoice-number">
+                    <img src="{{ $logo . '/' . (isset($company_logo) && !empty($company_logo) ? $company_logo : 'dark_logo.png') }}"
                         width="75px;">
                 </div>
-           
-           
+
+
                 <div class="invoice-print">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="invoice-title">
                                 {{-- <h6 class="mb-3">{{ __('Payslip') }}</h6> --}}
-                                
+
                             </div>
                             <hr>
                             <div class="row text-sm">
@@ -69,7 +68,7 @@ $company_logo = Utility::getValByName('company_logo');
                                             <td class="text-right">
                                                 {{ \Auth::user()->priceFormat($payslip->basic_salary) }}</td>
                                         </tr>
-                                        
+
                                         @foreach ($payslipDetail['earning']['allowance'] as $allowance)
                                             @php
                                                 $employess = \App\Models\Employee::find($allowance->employee_id);
@@ -84,7 +83,8 @@ $company_logo = Utility::getValByName('company_logo');
                                                         {{ \Auth::user()->priceFormat($allowance->amount) }}</td>
                                                 @else
                                                     <td class="text-right">{{ $allowance->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($empdallow) }})</td>
+                                                        ({{ \Auth::user()->priceFormat($empdallow) }})
+                                                    </td>
                                                 @endif
                                             </tr>
                                         @endforeach
@@ -102,7 +102,8 @@ $company_logo = Utility::getValByName('company_logo');
                                                         {{ \Auth::user()->priceFormat($commission->amount) }}</td>
                                                 @else
                                                     <td class="text-right">{{ $commission->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($empcomm) }})</td>
+                                                        ({{ \Auth::user()->priceFormat($empcomm) }})
+                                                    </td>
                                                 @endif
 
                                             </tr>
@@ -121,14 +122,15 @@ $company_logo = Utility::getValByName('company_logo');
                                                         {{ \Auth::user()->priceFormat($otherPayment->amount) }}</td>
                                                 @else
                                                     <td class="text-right">{{ $otherPayment->amount }}%
-                                                        ({{ \Auth::user()->priceFormat($emppayment) }})</td>
+                                                        ({{ \Auth::user()->priceFormat($emppayment) }})
+                                                    </td>
                                                 @endif
 
                                             </tr>
                                         @endforeach
                                         @foreach ($payslipDetail['earning']['overTime'] as $overTime)
                                             <tr>
-                                                <td>{{ __('OverTime') }}</td>
+                                                <td>{{ __('OverTime 1') }}</td>
                                                 <td>{{ $overTime->title }}</td>
                                                 <td>{{ $overTime->type ?? 'hourly' }}</td>
                                                 <td class="text-right">
@@ -163,7 +165,8 @@ $company_logo = Utility::getValByName('company_logo');
                                                             {{ \Auth::user()->priceFormat($loan->amount) }}</td>
                                                     @else
                                                         <td class="text-right">{{ $loan->amount }}%
-                                                            ({{ \Auth::user()->priceFormat($emploan) }})</td>
+                                                            ({{ \Auth::user()->priceFormat($emploan) }})
+                                                        </td>
                                                     @endif
 
                                                 </tr>
@@ -182,11 +185,12 @@ $company_logo = Utility::getValByName('company_logo');
                                                             {{ \Auth::user()->priceFormat($deduction->amount) }}</td>
                                                     @else
                                                         <td class="text-right">{{ $deduction->amount }}%
-                                                            ({{ \Auth::user()->priceFormat($empdeduction) }})</td>
+                                                            ({{ \Auth::user()->priceFormat($empdeduction) }})
+                                                        </td>
                                                     @endif
 
                                                 </tr>
-                                            @endforeach    
+                                            @endforeach
                                         @else
                                             <tr>
                                                 <td> - </td>

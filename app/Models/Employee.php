@@ -197,6 +197,11 @@ class Employee extends Model
         $total_present_days = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
         $fixed_rate = ($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1;
         $normal_salary = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
+        $employee = Employee::find($this->id);
+        $total_work_days = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_present_days = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $fixed_rate = ($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1;
+        $normal_salary = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
 
         return $normal_salary;
     }
@@ -493,7 +498,6 @@ class Employee extends Model
     {
         return $this->hasOne('App\Models\PaySlip', 'id', 'employee_id');
     }
-
 
     public function present_status($employee_id, $data)
     {

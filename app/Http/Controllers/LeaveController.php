@@ -268,9 +268,7 @@ class LeaveController extends Controller
 
         $leave->save();
 
-        // sync to google calendar
         if ($request->get('synchronize_type') == 'google_calender') {
-
             $type = 'leave';
 
             $request1 = new GoogleEvent();
@@ -440,7 +438,6 @@ class LeaveController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date;
 
-        // Cek duplicate
         $duplicate_leave = LocalLeave::where('employee_id', $employee->id)
             ->where('id', '!=', $leave->id)
             ->where(function ($query) use ($start_date, $end_date) {

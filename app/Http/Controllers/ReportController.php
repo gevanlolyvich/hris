@@ -109,7 +109,6 @@ class ReportController extends Controller
             $data[] = $incomeArr;
             $data[] = $expenseArr;
 
-
             return view('report.income_expense', compact('labels', 'data', 'incomeCount', 'expenseCount', 'filter'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -197,7 +196,6 @@ class ReportController extends Controller
                     $reject->whereYear('applied_on', $request->year);
                     $pending->whereYear('applied_on', $request->year);
 
-
                     $filterYear['dateYearRange'] = $request->year;
                     $filterYear['type'] = __('Yearly');
                 }
@@ -226,7 +224,6 @@ class ReportController extends Controller
             $filter['totalApproved'] = $totalApproved;
             $filter['totalReject'] = $totalReject;
             $filter['totalPending'] = $totalPending;
-
 
             return view('report.leave', compact('department', 'branch', 'leaves', 'filterYear', 'filter'));
         } else {
@@ -275,6 +272,9 @@ class ReportController extends Controller
             $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
                 $query->whereIn('branch_id', $branch_id);
             })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
+            $leaveData = $branch_id?->isNotEmpty() ? Leave::whereHas('employees', function ($query) use ($branch_id) {
+                $query->whereIn('branch_id', $branch_id);
+            })->where('employee_id', $employee_id)->where('status', $status) : Leave::where('employee_id', $employee_id)->where('status', $status);
             if ($type == 'yearly') {
                 $leaveData->whereYear('applied_on', $year);
             } else {
@@ -284,9 +284,7 @@ class ReportController extends Controller
                 $leaveData->whereMonth('applied_on', $m)->whereYear('applied_on', $y);
             }
 
-
             $leaveData = $leaveData->get();
-
 
             return view('report.leaveShow', compact('leaves', 'leaveData'));
         } else {
@@ -302,7 +300,6 @@ class ReportController extends Controller
 
             $filterYear['account'] = __('All');
             $filterYear['type'] = __('Income');
-
 
             if ($request->type == 'expense') {
                 $accountData = Expense::orderBy('id');
@@ -362,7 +359,6 @@ class ReportController extends Controller
                     $start = strtotime(date('Y-m'));
                     $end = strtotime(date('Y-m', strtotime("-5 month")));
                 }
-
 
                 $currentdate = $start;
 
@@ -440,7 +436,6 @@ class ReportController extends Controller
 
             $payslips = PaySlip::select('pay_slips.*', 'employees.name')->leftjoin('employees', 'pay_slips.employee_id', '=', 'employees.id');
 
-
             if ($request->type == 'monthly' && !empty($request->month)) {
 
                 $payslips->where('salary_month', $request->month);
@@ -456,7 +451,6 @@ class ReportController extends Controller
                 $filterYear['type'] = __('Monthly');
             }
 
-
             if ($request->type == 'yearly' && !empty($request->year)) {
                 $startMonth = $request->year . '-01';
                 $endMonth = $request->year . '-12';
@@ -465,7 +459,6 @@ class ReportController extends Controller
                 $filterYear['dateYearRange'] = $request->year;
                 $filterYear['type'] = __('Yearly');
             }
-
 
             if (!empty($request->branch)) {
                 $payslips->where('employees.branch_id', $request->branch);
@@ -536,7 +529,6 @@ class ReportController extends Controller
             $filterData['totalOtherPayment'] = $totalOtherPayment;
             $filterData['totalOverTime'] = $totalOverTime;
 
-
             $starting_year = date('Y', strtotime('-5 year'));
             $ending_year = date('Y', strtotime('+5 year'));
 
@@ -571,8 +563,6 @@ class ReportController extends Controller
 
             $data['branch'] = __('All');
             $data['department'] = __('All');
-
-
 
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
@@ -802,7 +792,6 @@ class ReportController extends Controller
             $filterYear['totalHours'] = $totalHours;
             $filterYear['totalEmployee'] = count($timesheetFilters);
 
-
             return view('report.timesheet', compact('timesheets', 'branch', 'department', 'filterYear', 'timesheetFilters'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
@@ -860,15 +849,12 @@ class ReportController extends Controller
 
         $employees = $employees->orderby('name', 'asc')->get()->pluck('name', 'id');
 
-
         $currentdate = strtotime($filter_month);
         $month = date('m', $currentdate);
         $year = date('Y', $currentdate);
         $data['curMonth'] = date('M-Y', strtotime($filter_month));
 
-
         $fileName = $data['branch'] . ' ' . __('Branch') . ' ' . $data['curMonth'] . ' ' . __('Attendance Report of') . ' ' . $data['department'] . ' ' . __('Department') . ' ' . '.csv';
-
 
         $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
         for ($i = 1; $i <= $num_of_days; $i++) {
@@ -922,7 +908,6 @@ class ReportController extends Controller
             foreach ($employeesAttendance as $attendance) {
                 fputcsv($file, str_replace('"', '', array_values($attendance)));
             }
-
 
             fclose($file);
         };
