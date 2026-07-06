@@ -1164,6 +1164,11 @@
             let locationIcon = document.getElementById('location-permission');
             return new Promise((resolve, reject) => {
                 if ("geolocation" in navigator) {
+                    const options = {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    };
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             const latitude = position.coords.latitude;
@@ -1184,7 +1189,8 @@
                                 locationIcon.style.color = "Red";
                                 reject(error);
                             }
-                        }
+                        },
+                        options
                     );
                 } else {
                     locationIcon.style.color = "Red";

@@ -10,6 +10,7 @@ use App\Models\SaturationDeduction;
 use App\Models\DeductionOption;
 use App\Models\Utility;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class Pph21Controller extends Controller
@@ -266,33 +267,117 @@ class Pph21Controller extends Controller
 
     public function destroy(Pph21 $pph21)
     {
-        if (\Auth::user()->type == 'company' // admin
-            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $pph21?->employee?->branch_id == \Auth::user()->branch_id)) // HR
-        ) {
-            $month = date('m', strtotime($pph21->date));
-            $year  = date('Y', strtotime($pph21->date));
+        if ($this->canDeletePph21($pph21)) {
             $settings = Utility::settings();
-
-            $pph21->delete();
-
-            if ($settings['pph21_autocut'] == 'on') {
-                $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
-                $pph21_deduction = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
-                if ($pph21_deduction) {
-                    $pph21_deduction->delete();
-
-                    $payslip    = PaySlip::where('employee_id', $pph21->employee_id)->where('salary_month', "$year-$month")->first();
-                    if ($payslip) {
-                        $payslip->net_payble    = bcadd($payslip->net_payble, $pph21->pph21, 2);
-                        $payslip->save();
-                    }
-                }
-            }
+            $this->deletePph21WithAutocutReversal($pph21, $settings);
 
             return redirect()->back()->with('success', __('PPh 21 Successfully Deleted'));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+    }
+
+    public function destroyPeriod(Request $request)
+    {
+        if (\Auth::user()->type == 'employee' || !in_array(\Auth::user()->type, ['company', 'hr'])) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'branch' => 'nullable|integer|exists:branches,id',
+        ]);
+
+        $employeeIds = $this->scopedEmployeeIds($request->branch);
+        if ($employeeIds === false) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $startDate = date('Y-m-01', strtotime($request->month));
+        $endDate = date('Y-m-t', strtotime($request->month));
+        $query = Pph21::whereBetween('date', [$startDate, $endDate]);
+        if ($employeeIds !== null) {
+            $query->whereIn('employee_id', $employeeIds);
+        }
+
+        $pph21 = $query->get();
+        if ($pph21->isEmpty()) {
+            return redirect()->back()->with('error', __('No PPh 21 data found for selected period.'));
+        }
+
+        $settings = Utility::settings();
+        DB::transaction(function () use ($pph21, $settings) {
+            foreach ($pph21 as $item) {
+                $this->deletePph21WithAutocutReversal($item, $settings);
+            }
+        });
+
+        return redirect()->back()->with('success', __('PPh 21 data for selected period successfully deleted.'));
+    }
+
+    private function canDeletePph21(Pph21 $pph21): bool
+    {
+        return \Auth::user()->type == 'company'
+            || (\Auth::user()->type == 'hr' && (\Auth::user()->branch_id == null || $pph21?->employee?->branch_id == \Auth::user()->branch_id));
+    }
+
+    private function deletePph21WithAutocutReversal(Pph21 $pph21, array $settings): void
+    {
+        $month = date('m', strtotime($pph21->date));
+        $year  = date('Y', strtotime($pph21->date));
+
+        $pph21->delete();
+
+        if ($settings['pph21_autocut'] == 'on') {
+            $pph21_deduction_option = DeductionOption::where('name', 'like', "%PPh21%")->first();
+            $pph21_deduction = SaturationDeduction::where('employee_id', $pph21->employee_id)->where('period', "$year-$month")->where('deduction_option', $pph21_deduction_option?->id ?? 0)->where('amount', $pph21->pph21)->first();
+            if ($pph21_deduction) {
+                $pph21_deduction->delete();
+
+                $payslip    = PaySlip::where('employee_id', $pph21->employee_id)->where('salary_month', "$year-$month")->first();
+                if ($payslip) {
+                    $payslip->net_payble    = bcadd($payslip->net_payble, $pph21->pph21, 2);
+                    $payslip->save();
+                }
+            }
+        }
+    }
+
+    private function accessibleBranchIds()
+    {
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        return $branch_id;
+    }
+
+    private function scopedEmployeeIds($selectedBranch = null)
+    {
+        $branchIds = $this->accessibleBranchIds();
+
+        if ($selectedBranch) {
+            if ($branchIds->isNotEmpty() && !$branchIds->contains((int) $selectedBranch)) {
+                return false;
+            }
+
+            return Employee::where('branch_id', $selectedBranch)->select('id')->get()->pluck('id');
+        }
+
+        if ($branchIds->isNotEmpty()) {
+            return Employee::whereIn('branch_id', $branchIds)->select('id')->get()->pluck('id');
+        }
+
+        return null;
     }
 
     public function export(Request $request)

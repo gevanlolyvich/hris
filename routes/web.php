@@ -699,6 +699,12 @@ Route::get('payslip/delete/{id}', [PaySlipController::class, 'destroy'])->name('
         'XSS',
     ]
 );
+Route::delete('payslip/delete-period', [PaySlipController::class, 'destroyPeriod'])->name('payslip.delete-period')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 Route::resource('payslip', PaySlipController::class)->middleware(
     [
@@ -880,6 +886,7 @@ Route::post('attendanceemployee/bulkattendance', [AttendanceEmployeeController::
     [
         'auth',
         'XSS',
+        'throttle:10,1',
     ]
 );
 
@@ -887,6 +894,7 @@ Route::post('attendanceemployee/attendance', [AttendanceEmployeeController::clas
     [
         'auth',
         'XSS',
+        'throttle:10,1',
     ]
 );
 
@@ -895,22 +903,51 @@ Route::patch('attendanceemployee/validate/{id}', [AttendanceEmployeeController::
     [
         'auth',
         'XSS',
+        'throttle:10,1',
     ]
 );
 Route::put('attendanceemployee/edit-attendance/{id}', [AttendanceEmployeeController::class, 'updateAttendance'])->name('attendanceemployee.updateAttendance')->middleware(
     [
         'auth',
         'XSS',
+        'throttle:10,1',
     ]
 );
 
-
-Route::resource('attendanceemployee', AttendanceEmployeeController::class)->middleware(
+// Override resource store/update/destroy with rate limiting
+Route::post('attendanceemployee', [AttendanceEmployeeController::class, 'store'])->name('attendanceemployee.store')->middleware(
     [
         'auth',
         'XSS',
+        'throttle:10,1',
     ]
 );
+Route::match(['put', 'patch'], 'attendanceemployee/{attendanceemployee}', [AttendanceEmployeeController::class, 'update'])->name('attendanceemployee.update')->middleware(
+    [
+        'auth',
+        'XSS',
+        'throttle:10,1',
+    ]
+);
+Route::delete('attendanceemployee/{attendanceemployee}', [AttendanceEmployeeController::class, 'destroy'])->name('attendanceemployee.destroy')->middleware(
+    [
+        'auth',
+        'XSS',
+        'throttle:10,1',
+    ]
+);
+
+Route::resource('attendanceemployee', AttendanceEmployeeController::class)->only([
+    'index',
+    'create',
+    'show',
+    'edit',
+])->middleware(
+        [
+            'auth',
+            'XSS',
+        ]
+    );
 
 Route::resource('attendancerequest', AttendanceRequestController::class)->middleware(
     [
@@ -1406,8 +1443,8 @@ Route::get('export/employee', [EmployeeController::class, 'export'])->name('empl
 Route::get('import/timesheet/file', [TimeSheetController::class, 'importFile'])->name('timesheet.file.import');
 Route::post('import/timesheet', [TimeSheetController::class, 'import'])->name('timesheet.import');
 Route::get('export/timesheet', [TimeSheetController::class, 'export'])->name('timesheet.export');
-Route::get('export/timesheet/export', [ReportController::class, 'exportTimeshhetReport'])->name('timesheet.report.export');
-Route::get('export/attendancerequest', [AttendanceRequestController::class, 'export'])->name('attendancerequest.export');
+Route::get('export/timesheet/export', [ReportController::class, 'exportTimeshhetReport'])->name('timesheet.report.export')->middleware(['auth', 'XSS']);
+Route::get('export/attendancerequest', [AttendanceRequestController::class, 'export'])->name('attendancerequest.export')->middleware(['auth', 'XSS']);
 
 //leave export
 Route::get('export/leave', [LeaveController::class, 'export'])->name('leave.export');
@@ -1559,10 +1596,10 @@ Route::post('eventemployee/attendance', [EventEmployeeController::class, 'attend
 Route::post('overtime/attendance', [OvertimeController::class, 'attendance'])->name('overtime.attendance')->middleware(['auth', 'XSS']);
 Route::post('overtime/report', [OvertimeController::class, 'report'])->name('overtime.report')->middleware(['auth', 'XSS']);
 Route::get('overtime/{id}/approve', [OvertimeController::class, 'approve'])
-    ->name('overtime.approve');
+    ->name('overtime.approve')->middleware(['auth', 'XSS']);
 
 Route::get('overtime/{id}/reject', [OvertimeController::class, 'reject'])
-    ->name('overtime.reject');
+    ->name('overtime.reject')->middleware(['auth', 'XSS']);
 
 
 Route::get('export/attendanceEmployee', [AttendanceEmployeeController::class, 'export'])->name('attendanceemployee.export')->middleware(['auth', 'XSS']);
@@ -1618,6 +1655,12 @@ Route::patch('appraisal/{id}/comment', [AppraisalController::class, 'comment'])-
     ]
 );
 
+Route::delete('pph21/delete-period', [Pph21Controller::class, 'destroyPeriod'])->name('pph21.delete-period')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::resource('pph21', Pph21Controller::class)->middleware(
     [
         'auth',

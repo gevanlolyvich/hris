@@ -83,8 +83,15 @@
 
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>{{ __('Employee Payslip') }}</h5>
+                @if (\Auth::user()->type != 'employee')
+                    {{ Form::open(['route' => ['pph21.delete-period'], 'method' => 'DELETE', 'id' => 'pph21_delete_period']) }}
+                        {{ Form::month('month', null, ['style' => 'display: none;', 'id'=>'delete_month'])}}
+                        {{ Form::text('branch', null, ['style' => 'display: none;', 'id'=>'delete_branch'])}}
+                        <button type="button" class="btn btn-danger btn-sm bs-pass-para">{{ __('Delete Period') }}</button>
+                    {{ Form::close() }}
+                @endif
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -141,6 +148,7 @@
                 let exportMonth = document.getElementById('export_month');
                 let generateMonth = document.getElementById('generate_month');
                 let bulkpayMonth = document.getElementById('bulkpay_month');
+                let deleteMonth = document.getElementById('delete_month');
 
                 if (filterMonth) {
                     filterMonth.value = month;
@@ -158,6 +166,10 @@
                     bulkpayMonth.value = month;
                     bulkpayMonth.val = month;
                 }
+                if (deleteMonth) {
+                    deleteMonth.value = month;
+                    deleteMonth.val = month;
+                }
             }
 
             function branchChange() {
@@ -167,6 +179,7 @@
                 let exportbranch = document.getElementById('export_branch');
                 let generatebranch = document.getElementById('generate_branch');
                 let bulkpaybranch = document.getElementById('bulk_branch');
+                let deletebranch = document.getElementById('delete_branch');
 
                 if (filterbranch) {
                     filterbranch.value = branch;
@@ -183,6 +196,10 @@
                 if (bulkpaybranch) {
                     bulkpaybranch.value = branch;
                     bulkpaybranch.val = branch;
+                }
+                if (deletebranch) {
+                    deletebranch.value = branch;
+                    deletebranch.val = branch;
                 }
             }
 

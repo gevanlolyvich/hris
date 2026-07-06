@@ -232,6 +232,54 @@ class PaySlipController extends Controller
     {
         $settings = Utility::settings();
         $payslip = PaySlip::find($id);
+
+        if (!$payslip) {
+            return redirect()->back()->with('error', __('Payslip not found.'));
+        }
+
+        $this->deletePayslipWithRelatedRecords($payslip, $settings);
+
+        return redirect()->back()->with('success', __('Payslip Successfully Deleted'));
+    }
+
+    public function destroyPeriod(Request $request)
+    {
+        if (!\Auth::user()->can('Manage Pay Slip') || \Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'branch' => 'nullable|integer|exists:branches,id',
+        ]);
+
+        $employeeIds = $this->scopedEmployeeIds($request->branch);
+        if ($employeeIds === false) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $query = PaySlip::where('salary_month', $request->month);
+        if ($employeeIds !== null) {
+            $query->whereIn('employee_id', $employeeIds);
+        }
+
+        $payslips = $query->get();
+        if ($payslips->isEmpty()) {
+            return redirect()->back()->with('error', __('No payslip data found for selected period.'));
+        }
+
+        $settings = Utility::settings();
+        DB::transaction(function () use ($payslips, $settings) {
+            foreach ($payslips as $payslip) {
+                $this->deletePayslipWithRelatedRecords($payslip, $settings);
+            }
+        });
+
+        return redirect()->back()->with('success', __('Payslip data for selected period successfully deleted.'));
+    }
+
+    private function deletePayslipWithRelatedRecords(PaySlip $payslip, array $settings): void
+    {
         $month = date('m', strtotime($payslip->salary_month));
         $year = date('Y', strtotime($payslip->salary_month));
 
@@ -249,8 +297,43 @@ class PaySlipController extends Controller
 
             $pph21->delete();
         }
+    }
 
-        return redirect()->back()->with('success', __('Payslip Successfully Deleted'));
+    private function accessibleBranchIds()
+    {
+        $branch = Branch::find(\Auth::user()->branch_id);
+        $branch_id = collect();
+        if ($branch) {
+            $branch_id->push($branch?->id);
+        }
+
+        $children = $branch?->childBranchFlatten();
+        if ($children?->isNotEmpty()) {
+            foreach ($children as $child) {
+                $branch_id->push($child->id);
+            }
+        }
+
+        return $branch_id;
+    }
+
+    private function scopedEmployeeIds($selectedBranch = null)
+    {
+        $branchIds = $this->accessibleBranchIds();
+
+        if ($selectedBranch) {
+            if ($branchIds->isNotEmpty() && !$branchIds->contains((int) $selectedBranch)) {
+                return false;
+            }
+
+            return Employee::where('branch_id', $selectedBranch)->select('id')->get()->pluck('id');
+        }
+
+        if ($branchIds->isNotEmpty()) {
+            return Employee::whereIn('branch_id', $branchIds)->select('id')->get()->pluck('id');
+        }
+
+        return null;
     }
 
     public function showemployee($paySlip)

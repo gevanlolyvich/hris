@@ -218,6 +218,11 @@
         async function getLocation() {
             return new Promise((resolve, reject) => {
                 if ("geolocation" in navigator) {
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                };
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                     const latitude = position.coords.latitude;
@@ -247,7 +252,8 @@
                     } else {
                         reject(error);
                     }
-                    }
+                    },
+                    options
                 );
                 } else {
                 reject(new Error("Geolocation is not supported by your browser."));

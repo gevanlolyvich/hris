@@ -530,7 +530,8 @@
                                             <td>{{ $overtime->clock_in ?? '-' }}</td>
                                             <td>{{ $overtime->clock_out ?? '-' }}</td>
                                             <td>{{ $total_hours }} {{ __('Hours') }}</td>
-                                            <td>{{ \Auth::user()->priceFormat($rate) }}</td>
+                                            {{-- <td>{{ \Auth::user()->priceFormat($rate) }}</td> --}}
+                                            <td>0</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

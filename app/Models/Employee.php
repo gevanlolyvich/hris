@@ -349,7 +349,7 @@ class Employee extends Model
         $normal_salary = $this->get_salary($month, $year);
 
         //Net Salary Calculate
-        $advance_salary = $total_allowance + $total_commission + $total_other_payment + $total_over_time;
+        $advance_salary = $total_allowance + $total_commission + $total_other_payment;
 
         $bruto = $normal_salary + $advance_salary;
 
