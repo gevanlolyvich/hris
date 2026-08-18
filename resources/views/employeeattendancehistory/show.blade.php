@@ -402,6 +402,7 @@
                                     <thead>
                                         <tr>
                                             <th>{{ __('Date') }}</th>
+                                            <th>{{ __('Unit / Location') }}</th>
                                             <th>{{ __('Status') }}</th>
                                             <th>{{ __('Clock In') }}</th>
                                             <th>{{ __('Clock Out') }}</th>
@@ -415,6 +416,7 @@
                                         @foreach ($attendanceEmployee as $attendance)
                                             <tr>
                                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                                <td>{{ $attendance->branch_name ?? '-' }}</td>
                                                 <td>{{ $attendance->status }}</td>
                                                 <!-- Modify Clock In and Clock Out columns in your table -->
                                                 <td>

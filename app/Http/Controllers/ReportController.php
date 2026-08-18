@@ -20,6 +20,7 @@ use App\Models\TimeSheet;
 use App\Models\ShiftTime;
 use App\Models\Overtime;
 use App\Models\Holiday;
+use App\Utilities\AttendanceLocationResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -475,7 +476,7 @@ class ReportController extends Controller
             $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id')->get()->pluck('id') : Employee::select('id')->get()->pluck('id');
             $payslips = $branch_id?->isNotEmpty() ? $payslips->whereIn('employee_id', $employees)->get() : $payslips->get();
 
-            $totalBasicSalary = $totalNetSalary = $totalAllowance = $totalCommision = $totalLoan = $totalSaturationDeduction = $totalOtherPayment = $totalOverTime = 0;
+            $totalBasicSalary = $totalNetSalary = $totalAllowance = $totalCommision = $totalLoan = $totalSaturationDeduction = $totalBpjs = $totalOtherPayment = $totalOverTime = 0;
 
             foreach ($payslips as $payslip) {
                 $totalBasicSalary += $payslip->basic_salary;
@@ -499,6 +500,11 @@ class ReportController extends Controller
                 $saturationDeductions = json_decode($payslip->saturation_deduction);
                 foreach ($saturationDeductions as $saturationDeduction) {
                     $totalSaturationDeduction += $saturationDeduction->amount;
+                }
+
+                $bpjs = json_decode($payslip->bpjs) ?? [];
+                foreach ($bpjs as $item) {
+                    $totalBpjs += $item->amount;
                 }
 
                 $otherPayments = json_decode($payslip->other_payment);
@@ -526,6 +532,7 @@ class ReportController extends Controller
             $filterData['totalCommision'] = $totalCommision;
             $filterData['totalLoan'] = $totalLoan;
             $filterData['totalSaturationDeduction'] = $totalSaturationDeduction;
+            $filterData['totalBpjs'] = $totalBpjs;
             $filterData['totalOtherPayment'] = $totalOtherPayment;
             $filterData['totalOverTime'] = $totalOverTime;
 
@@ -564,12 +571,10 @@ class ReportController extends Controller
             $data['branch'] = __('All');
             $data['department'] = __('All');
 
-            $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
+            $employees = Employee::orderBy('name', 'ASC');
             if (!empty($request->branch)) {
-                // $employees->where('branch_id', $request->branch);
                 $showed_branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->find($request->branch) : Branch::find($request->branch);
                 if (!empty($showed_branch)) {
-                    $employees = $employees->where('branch_id', $showed_branch->id);
                     $data['branch'] = $showed_branch->name;
                 }
 
@@ -604,6 +609,15 @@ class ReportController extends Controller
                 $query->whereDate('termination_date', '<', $startDate);
             })->get();
 
+            $allowedBranchIds = null;
+            if (!empty($request->branch)) {
+                $allowedBranchIds = [(int) $request->branch];
+            } elseif ($branch_id?->isNotEmpty()) {
+                $allowedBranchIds = $branch_id->map(function ($id) {
+                    return (int) $id;
+                })->all();
+            }
+
             $num_of_days = date('t', mktime(0, 0, 0, $month, 1, $year));
             $holiday_date = [];
             for ($i = 1; $i <= $num_of_days; $i++) {
@@ -621,9 +635,18 @@ class ReportController extends Controller
             foreach ($employees as $employee) {
                 $attendanceStatus = [];
                 $attendances['name'] = $employee->name;
+                $hasScopedDay = false;
+
+                $isScoped = function ($dateFormat) use ($allowedBranchIds, $employee) {
+                    if ($allowedBranchIds === null) {
+                        return true;
+                    }
+
+                    return in_array(AttendanceLocationResolver::resolveBranchId($employee->id, $dateFormat), $allowedBranchIds, true);
+                };
 
                 $employee_attendances = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', true)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
-                $employee_overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in')->get();
+                $employee_overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in', 'date')->get();
                 $shift = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
 
                 //permits table database
@@ -634,11 +657,19 @@ class ReportController extends Controller
                     ->get();
 
                 foreach ($employee_overtimes as $overtime) {
+                    if (!$isScoped($overtime->date)) {
+                        continue;
+                    }
+
                     $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
                     $totalOvertime += $total_hours;
                 }
 
                 foreach ($employee_attendances as $attendance) {
+                    if (!$isScoped($attendance->date)) {
+                        continue;
+                    }
+
                     if ($attendance->early_leaving > 0) {
                         $earlyleaveHours += date('h', strtotime($attendance->early_leaving));
                         $earlyleaveMins += date('i', strtotime($attendance->early_leaving));
@@ -654,6 +685,17 @@ class ReportController extends Controller
                     $dateFormat = $year . '-' . $month . '-' . $date;
 
                     if ($dateFormat <= date('Y-m-d')) {
+                        if (!$isScoped($dateFormat)) {
+                            if (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
+                                $attendanceStatus[$date] = 'L';
+                            } else {
+                                $attendanceStatus[$date] = 'A';
+                            }
+                            continue;
+                        }
+
+                        $hasScopedDay = true;
+
                         if (isset($employee_attendances[$dateFormat])) {
                             if (($employee_attendances[$dateFormat]->status == 'Present') || ($employee_attendances[$dateFormat]->status == 'No Working Hour')) {
                                 $attendanceStatus[$date] = 'H';
@@ -694,7 +736,10 @@ class ReportController extends Controller
                     }
                 }
                 $attendances['status'] = $attendanceStatus;
-                $employeesAttendance[] = $attendances;
+
+                if ($hasScopedDay) {
+                    $employeesAttendance[] = $attendances;
+                }
             }
 
             $totalEarlyleave = $earlyleaveHours + ($earlyleaveMins / 60);

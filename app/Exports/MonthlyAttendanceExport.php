@@ -10,6 +10,7 @@ use App\Models\LeaveType;
 use App\Models\ShiftTime;
 use App\Models\Utility;
 use App\Utilities\DistanceCalculator;
+use App\Utilities\AttendanceLocationResolver;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -102,11 +103,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             }
         }
 
-        $employees = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC') : Employee::orderBy('name', 'ASC');
-        if (!empty($this->query->branch)) {
-            // $employees->where('branch_id', $request->branch);
-            $employees      = $employees->where('branch_id', $this->query->branch);
-        }
+        $employees = Employee::orderBy('name', 'ASC');
 
         if (!empty($this->query->department)) {
             // $employees->where('department_id', $request->department);
@@ -120,10 +117,44 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             $query->whereDate('termination_date', '<', $startDate);
         })->get();
 
-        $this->total_data = count($employees) + 6;
+        $allowedBranchIds = null;
+        if (!empty($this->query->branch)) {
+            $allowedBranchIds = [(int) $this->query->branch];
+        } elseif ($branch_id?->isNotEmpty()) {
+            $allowedBranchIds = $branch_id->map(function ($id) {
+                return (int) $id;
+            })->all();
+        }
 
-        foreach ($employees as $index => $employee) {
-            $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', $employee?->branch?->name ?? '-', $employee?->employeeType?->name ?? '-'];
+        $branchNameOverride = !empty($this->query->branch) ? Branch::find((int) $this->query->branch)?->name : null;
+        $dataRowCount = 0;
+
+        foreach ($employees as $employee) {
+            $isScoped = function ($dateFormat) use ($allowedBranchIds, $employee) {
+                if ($allowedBranchIds === null) {
+                    return true;
+                }
+
+                return in_array(AttendanceLocationResolver::resolveBranchId($employee->id, $dateFormat), $allowedBranchIds, true);
+            };
+
+            $hasScopedDay = false;
+            foreach ($dates as $date) {
+                $dateFormat = $year . '-' . $month . '-' . $date;
+
+                if ($dateFormat <= date('Y-m-d') && $isScoped($dateFormat)) {
+                    $hasScopedDay = true;
+                    break;
+                }
+            }
+
+            if (!$hasScopedDay) {
+                continue;
+            }
+
+            $dataRowCount++;
+            $employeeBranchName     = $branchNameOverride ?? (AttendanceLocationResolver::resolveBranchName($employee->id, $startDate) ?? '-');
+            $employeeArray          = [$dataRowCount, $employee->name, $employee?->designation?->name ?? '-', $employeeBranchName, $employee?->employeeType?->name ?? '-'];
             $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'clock_out', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in', 'work_hours', 'source_in')->get();
 
             $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
@@ -138,6 +169,11 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                 $dateFormat = $year . '-' . $month . '-' . $date;
 
                 if ($dateFormat <= date('Y-m-d')) {
+                    if (!$isScoped($dateFormat)) {
+                        $arrayAttendanceDate[] = '';
+                        continue;
+                    }
+
                     $attendances_on_date    = $employee_attendances->where('date', $dateFormat);
                     $present                = false;
                     $leave                  = false;
@@ -159,7 +195,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                 $present            = true;
 
                                 if ($attendance->is_valid && $attendance->attendance_type_id != '1') {
-                                    $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                    $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                                 } else {
                                     if ($attendance->coord_in) {
                                         $coordinate         = explode(', ', $attendance->coord_in);
@@ -167,15 +203,19 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                         $longitude          = $coordinate[1];
                                         $accuracy           = $coordinate[2];
 
-                                        $branch_data        = Branch::where('id', $employee->branch_id)->first();
-                                        $distance           = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
+                                        $attendanceBranchId  = AttendanceLocationResolver::resolveBranchId($employee->id, $dateFormat);
+                                        $branch_data        = !empty($attendanceBranchId) ? Branch::where('id', $attendanceBranchId)->first() : null;
 
-                                        if (($accuracy + (float)$branch_data['tolerance']) < $distance) {
-                                            $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                        if ($branch_data) {
+                                            $distance           = DistanceCalculator::haversineDistance($latitude, $longitude, (float)$branch_data['latitude'], (float)$branch_data['longitude']);
+
+                                            if (($accuracy + (float)$branch_data['tolerance']) < $distance) {
+                                                $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
+                                            }
                                         }
 
                                         if (!in_array($attendance->source_in, ['Application', null])) {
-                                            $this->face_recog_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                            $this->face_recog_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                                         }
                                     }
                                 }
@@ -194,7 +234,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                 if ($attendance_shift->is_working) {
                                     if ((strtotime($attendance->clock_in) > (strtotime($attendance_shift->start_time) + ((int)$settings['late_tolerance'] * 60)))) {
                                         $totalLate += 1;
-                                        $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                        $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
     
                                         // Parse late time to extract hours, minutes, and seconds
                                         list($hours, $minutes, $seconds) = explode(':', $attendance->late);
@@ -231,7 +271,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                 $permission         = true;
                             } else if (($holiday_date[$dateFormat] || !$attendance_shift->is_working) && !$leave && !$permission) {
                                 $date_data          = __('Holiday');
-                                $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                                $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                             } else {
                                 $date_data          = '';
                             }
@@ -240,7 +280,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                         $arrayAttendanceDate[]  = $date_data;
                     } else if (($holiday_date[$dateFormat] || !$shift[date('l', strtotime($dateFormat))]) && !$leave && !$permission) {
                         $arrayAttendanceDate[]  = __('Holiday');
-                        $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
+                        $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                     } else {
                         $arrayAttendanceDate[]  = '';
                     }
@@ -269,6 +309,8 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
             $data->push(array_merge($employeeArray, $arrayAttendanceDate));
         }
+
+        $this->total_data = $dataRowCount + 6;
 
         return $data;
     }

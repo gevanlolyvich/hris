@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\EmployeeBranchHistory;
 use App\Models\ShiftType;
 use App\Mail\TransferSend;
 use App\Models\Transfer;
@@ -98,6 +99,14 @@ class TransferController extends Controller
             $transfer->description      = $request->description;
             $transfer->created_by       = \Auth::user()->id;
             $transfer->save();
+
+            EmployeeBranchHistory::ensureInitialPlacement($transfer->employee_id);
+
+            EmployeeBranchHistory::record(
+                $transfer->employee_id,
+                $transfer->branch_id,
+                $transfer->transfer_date
+            );
 
 
             $setings = Utility::settings();

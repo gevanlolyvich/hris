@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\AttendanceEmployee;
 use App\Models\LeaveType;
+use App\Utilities\AttendanceLocationResolver;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -72,7 +73,7 @@ class IndividualMarkedAttendanceExport implements FromCollection, WithHeadings, 
                 $data->push([
                     $attendance?->employee?->name ?? 'Deleted Employee',
                     $attendance?->employee?->employee_id ? "{$attendance?->employee?->employee_id} " : '-',
-                    !empty(\Auth::user()->getBranch($attendance?->employee?->branch_id)) ? \Auth::user()->getBranch($attendance->employee->branch_id)->name : '-',
+                    AttendanceLocationResolver::resolveBranchName($attendance?->employee_id, $attendance->date) ?? '-',
                     !empty(\Auth::user()->getDepartment($attendance?->employee?->department_id)) ? \Auth::user()->getDepartment($attendance->employee->department_id)->name : '-',
                     !empty(\Auth::user()->getDesignation($attendance?->employee?->designation_id)) ? \Auth::user()->getDesignation($attendance->employee->designation_id)->name : '-',
                     $attendance->shift_type?->name ?? $attendance?->employee?->shift_type?->name,

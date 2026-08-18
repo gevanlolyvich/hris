@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use App\Models\LeaveType;
 use App\Models\ShiftTime;
 use App\Models\Utility;
+use App\Utilities\AttendanceLocationResolver;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -85,8 +86,10 @@ class IndividualMonthlyAttendanceExport implements FromCollection, WithEvents, S
 
         $this->total_data = count($employees) + 6;
 
+        $monthStart = date('Y-m-01', strtotime("{$year}-{$month}-01"));
+
         foreach ($employees as $index => $employee) {
-            $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', $employee?->branch?->name ?? '-', $employee?->employeeType?->name ?? '-'];
+            $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', AttendanceLocationResolver::resolveBranchName($employee->id, $monthStart) ?? '-', $employee?->employeeType?->name ?? '-'];
             $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid')->get();
 
             $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');

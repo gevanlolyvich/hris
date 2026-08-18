@@ -23,6 +23,7 @@ use App\Imports\EmployeesImport;
 use App\Exports\EmployeesExport;
 use App\Models\EmployeePeriod;
 use App\Models\EmployeeType;
+use App\Models\EmployeeBranchHistory;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\NOC;
 use App\Models\Termination;
@@ -246,6 +247,14 @@ class EmployeeController extends Controller
             }
 
             $employee = Employee::create($form_employee);
+
+            if (!empty($request['branch_id'])) {
+                EmployeeBranchHistory::record(
+                    $employee->id,
+                    $request['branch_id'],
+                    $request['company_doj'] ?? date('Y-m-d')
+                );
+            }
 
             ShiftHistory::create(
                 [
@@ -500,8 +509,18 @@ class EmployeeController extends Controller
             $input                              = $request->all();
             $input['emergency_contact_photo']   = $document_path;
 
+            $oldBranchId = $employee->branch_id;
+
             // Save the employee model after updating the emergency_contact_photo
             $employee->fill($input)->save();
+
+            if ($oldBranchId != $employee->branch_id && !empty($employee->branch_id)) {
+                EmployeeBranchHistory::record(
+                    $employee->id,
+                    $employee->branch_id,
+                    date('Y-m-d')
+                );
+            }
 
             $user->fill($request->except('type'))->save();
             // if ($request->salary) {
@@ -837,6 +856,14 @@ class EmployeeController extends Controller
                 $employeeData->shift_type_id       = $employee[14];
                 $employeeData->created_by          = \Auth::user()->id;
                 $employeeData->save();
+
+                if (!empty($employeeData->branch_id)) {
+                    EmployeeBranchHistory::record(
+                        $employeeData->id,
+                        $employeeData->branch_id,
+                        $employeeData->company_doj ?? date('Y-m-d')
+                    );
+                }
             }
 
 

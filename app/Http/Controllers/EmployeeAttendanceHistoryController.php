@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\ShiftTime;
 use App\Models\EmployeeHomeHistory;
 use App\Models\EmployeePeriod;
+use App\Utilities\AttendanceLocationResolver;
 use App\Utilities\DistanceCalculator;
 use App\Models\User;
 use App\Models\Utility;
@@ -307,6 +308,9 @@ class EmployeeAttendanceHistoryController extends Controller
                 $attendance['location_out_address']     = $near_out_name;
                 $attendance['location_out_radius']      = $near_out_radius;
             }
+
+            $attendance['branch_id']   = AttendanceLocationResolver::resolveBranchId($empId, $attendance->date);
+            $attendance['branch_name'] = AttendanceLocationResolver::resolveBranchName($empId, $attendance->date);
         }
 
         $transfers  = Transfer::where('employee_id', $empId)->where('transfer_date', '<=', date('Y-m-d'))->get();

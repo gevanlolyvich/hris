@@ -14,6 +14,7 @@ use App\Models\ShiftTime;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\LogAttendance;
+use App\Utilities\AttendanceLocationResolver;
 use App\Utilities\DistanceCalculator;
 use App\Exports\NotClockInExport;
 use App\Models\ShiftHistory;
@@ -99,10 +100,6 @@ class AttendanceEmployeeController extends Controller
                 $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
             } else {
                 $employee = $branch_id?->isNotEmpty() ? Employee::whereIn('branch_id', $branch_id)->select('id') : Employee::select('id');
-                if (!empty($request->branch)) {
-                    $employee->where('branch_id', $request->branch);
-                }
-
                 if (!empty($request->department)) {
                     $employee->where('department_id', $request->department);
                 }
@@ -142,6 +139,13 @@ class AttendanceEmployeeController extends Controller
                 }
 
                 $attendanceEmployee = $attendanceEmployee->orderBy('date', 'desc')->withAggregate('employee', 'name')->orderBy('employee_name', 'asc')->get();
+
+                if (!empty($request->branch)) {
+                    $requestedBranchId = (int) $request->branch;
+                    $attendanceEmployee = $attendanceEmployee->filter(function ($attendance) use ($requestedBranchId) {
+                        return AttendanceLocationResolver::resolveBranchId($attendance->employee_id, $attendance->date) === $requestedBranchId;
+                    })->values();
+                }
             }
 
             $branchCoordinates = Branch::select('name', 'latitude', 'longitude', 'tolerance')->get();
@@ -192,6 +196,8 @@ class AttendanceEmployeeController extends Controller
                     $attendance['location_out_radius'] = $near_out_radius;
                 }
 
+                $attendance['branch_id']   = AttendanceLocationResolver::resolveBranchId($attendance->employee_id, $attendance->date);
+                $attendance['branch_name'] = AttendanceLocationResolver::resolveBranchName($attendance->employee_id, $attendance->date);
             }
 
             $emp = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;

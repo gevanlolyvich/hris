@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Document;
 use App\Models\Employee;
+use App\Models\EmployeeBranchHistory;
 use App\Models\EmployeeDocument;
 use App\Models\InterviewSchedule;
 use App\Models\Job;
@@ -524,6 +525,14 @@ class JobApplicationController extends Controller
             $JobOnBoard                      = JobOnBoard::find($id);
             $JobOnBoard->convert_to_employee = $employee->id;
             $JobOnBoard->save();
+
+            if (!empty($employee->branch_id)) {
+                EmployeeBranchHistory::record(
+                    $employee->id,
+                    $employee->branch_id,
+                    $employee->company_doj ?? date('Y-m-d')
+                );
+            }
         }
         if ($request->hasFile('document')) {
             foreach ($request->document as $key => $document) {

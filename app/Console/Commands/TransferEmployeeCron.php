@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Transfer;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\EmployeeBranchHistory;
 use Illuminate\Support\Facades\Log;
 
 class TransferEmployeeCron extends Command
@@ -46,6 +47,8 @@ class TransferEmployeeCron extends Command
             $transfer   = $transfers[$i];
             $emp        = Employee::where('id', $transfer->employee_id)->first();
 
+            EmployeeBranchHistory::ensureInitialPlacement($transfer->employee_id);
+
             Employee::where('id', $transfer->employee_id)->update([
                 'branch_id'         => $transfer->branch_id,
                 'department_id'     => $transfer->department_id,
@@ -64,6 +67,8 @@ class TransferEmployeeCron extends Command
         for ($i = 0; $i < count($old_transfers); $i++) {
             $old_transfer   = $old_transfers[$i];
             $emp            = Employee::where('id', $old_transfer->employee_id)->first();
+
+            EmployeeBranchHistory::ensureInitialPlacement($old_transfer->employee_id);
 
             Employee::where('id', $old_transfer->employee_id)->update([
                 'branch_id'         => $old_transfer->branch_id,
