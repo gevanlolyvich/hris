@@ -77,6 +77,8 @@ use App\Http\Controllers\EventEmployeeController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\SaturationDeductionController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\BpjsController;
+use App\Http\Controllers\BpjsOptionController;
 use App\Http\Controllers\DeductionOptionController;
 use App\Http\Controllers\LoanOptionController;
 use App\Http\Controllers\AllowanceOptionController;
@@ -453,6 +455,12 @@ Route::get('loans/create/{eid}', [LoanController::class, 'loanCreate'])->name('l
         'XSS',
     ]
 );
+Route::get('bpjs/create/{eid}', [BpjsController::class, 'bpjsCreate'])->name('bpjs.create')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 Route::get('saturationdeductions/create/{eid}', [SaturationDeductionController::class, 'saturationdeductionCreate'])->name('saturationdeductions.create')->middleware(
     [
         'auth',
@@ -507,6 +515,13 @@ Route::resource('loanoption', LoanOptionController::class)->middleware(
     ]
 );
 
+Route::resource('bpjsoption', BpjsOptionController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::resource('deductionoption', DeductionOptionController::class)->middleware(
     [
         'auth',
@@ -516,6 +531,14 @@ Route::resource('deductionoption', DeductionOptionController::class)->middleware
 
 
 Route::resource('loan', LoanController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+
+Route::resource('bpjs', BpjsController::class)->except(['create'])->middleware(
     [
         'auth',
         'XSS',
@@ -611,6 +634,27 @@ Route::resource('setsalary', SetSalaryController::class)->middleware(
     ]
 );
 
+Route::get('import/setsalary/file', [SetSalaryController::class, 'importFile'])->name('setsalary.file.import')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('import/setsalary', [SetSalaryController::class, 'import'])->name('setsalary.import')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('export/setsalary/template', [SetSalaryController::class, 'exportTemplate'])->name('setsalary.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::get('payslip/employee/{id}', [PaySlipController::class, 'indexEmployee'])->name('payslip.employee')->middleware(
     [
         'auth',
@@ -675,6 +719,18 @@ Route::post('payslip/editemployee/{id}', [PaySlipController::class, 'updateEmplo
     ]
 );
 Route::get('payslip/pdf/{id}/{m}', [PaySlipController::class, 'pdf'])->name('payslip.pdf')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('payslip/download/{id}/{m}', [PaySlipController::class, 'downloadPdf'])->name('payslip.download')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('payslip/password', [PaySlipController::class, 'setPayslipPassword'])->name('payslip.password')->middleware(
     [
         'auth',
         'XSS',
@@ -1093,6 +1149,14 @@ Route::post('update-bank', [UserController::class, 'updateBank'])->name('update.
 Route::post('update-nationality', [UserController::class, 'updateNationality'])->name('update.nationality');
 
 Route::post('update-documents', [UserController::class, 'updateDocuments'])->name('update.documents');
+
+Route::post('store-certificate', [UserController::class, 'storeCertificate'])->name('store.certificate');
+
+Route::delete('delete-certificate/{id}', [UserController::class, 'destroyCertificate'])->name('delete.certificate');
+
+Route::post('update-cv', [UserController::class, 'updateCv'])->name('update.cv');
+
+Route::get('cv', [UserController::class, 'cv'])->name('cv.show');
 
 // Route::resource('coupons', CouponController::class)->middleware(
 //     [

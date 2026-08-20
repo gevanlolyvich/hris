@@ -232,15 +232,15 @@ class Utility extends Model
         $year = $month ? date('Y', strtotime($month)) : date('Y');
         $month = $month ? date('m', strtotime($month)) : date('m');
         $total_work_hours = 173;
-        $year = $month ? date('Y', strtotime($month)) : date('Y');
-        $month = $month ? date('m', strtotime($month)) : date('m');
-        $total_work_hours = 173;
 
         $earning['allowance'] = Allowance::where('employee_id', $employee->id)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
         $totalAllowance = 0;
+        $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
 
         foreach ($earning['allowance'] as $earn) {
             if ($earn->type == 'percentage') {
@@ -248,6 +248,10 @@ class Utility extends Model
             } else {
                 $empall = $earn->amount;
             }
+            if ($earn->is_prorated) {
+                $empall = $employee->employeeType->type == 'Fixed' ? $empall * $fixed_rate : $empall * $total_present_days;
+            }
+            $earn->prorated_amount = $empall;
             $totalAllowance += $empall;
         }
 
@@ -368,13 +372,21 @@ class Utility extends Model
             $earning['totalOverTime'] += $amount;
         }
 
-        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
-            $query->orWhere('is_recurring', true)
-                ->orWhere('period', "{$year}-{$month}");
+        $current = "{$year}-{$month}";
+        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($current) {
+            $query->where(function ($q) use ($current) {
+                $q->where('is_recurring', true)
+                    ->where('period_start', '<=', $current)
+                    ->where('period_end', '>=', $current);
+            })->orWhere('period', $current);
         })->get();
-        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($month, $year) {
-            $query->orWhere('is_recurring', true)
-                ->orWhere('period', "{$year}-{$month}");
+        $current = "{$year}-{$month}";
+        $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($current) {
+            $query->where(function ($q) use ($current) {
+                $q->where('is_recurring', true)
+                    ->where('period_start', '<=', $current)
+                    ->where('period_end', '>=', $current);
+            })->orWhere('period', $current);
         })->get();
         $totalloan = 0;
 
@@ -402,14 +414,22 @@ class Utility extends Model
             $totaldeduction += $empdeduction;
         }
 
+        $deduction['bpjs'] = Bpjs::where('employee_id', $employeeId)->get();
+        $totalbpjs = 0;
+
+        foreach ($deduction['bpjs'] as $earn) {
+            $empbpjs = $earn->type == 'percentage' ? $earn->amount * $employee->salary / 100 : $earn->amount;
+            $totalbpjs += $empbpjs;
+        }
+
         $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
         $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + $earning['totalOverTime'] + (float) $payslip?->basic_salary ?? 0;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
         // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
 
         $payslip['deduction'] = $deduction;
-        $payslip['totalDeduction'] = $totalloan + $totaldeduction;
+        $payslip['totalDeduction'] = $totalloan + $totaldeduction + $totalbpjs;
 
         return $payslip;
     }

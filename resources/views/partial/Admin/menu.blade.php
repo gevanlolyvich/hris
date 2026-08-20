@@ -805,6 +805,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     Gate::check('Manage Payslip Type') ||
                     Gate::check('Manage Allowance Option') ||
                     Gate::check('Manage Loan Options') ||
+                    Gate::check('Manage Bpjs Option') ||
                     Gate::check('Manage Deduction Options') ||
                     Gate::check('Manage Expense Type') ||
                     Gate::check('Manage Income Type') ||
@@ -903,6 +904,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <li class="dash-item {{ request()->is('loanoption*') ? 'active' : '' }}">
                                     <a class="dash-link"
                                         href="{{ route('loanoption.index') }}">{{ __('Loan Option') }}</a>
+                                </li>
+                            @endcan
+                            @can('Manage Bpjs Option')
+                                <li class="dash-item {{ request()->is('bpjsoption*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('bpjsoption.index') }}">{{ __('BPJS Option') }}</a>
                                 </li>
                             @endcan
                             @can('Manage Deduction Option')

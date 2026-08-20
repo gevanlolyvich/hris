@@ -9,6 +9,14 @@
     <li class="breadcrumb-item">{{ __('Employee Salary') }}</li>
 @endsection
 
+@section('action-button')
+    <a href="#" data-url="{{ route('setsalary.file.import') }}" data-ajax-popup="true"
+        data-title="{{ __('Import  employee salary CSV file') }}" data-bs-toggle="tooltip" title="" class="btn btn-sm btn-primary"
+        data-bs-original-title="{{ __('Import') }}">
+        <i class="ti ti-file"></i>
+    </a>
+@endsection
+
 
 @section('content')
     <div class="col-md-12 col-lg-12 col-sm-12 col-xl-12">

@@ -12,6 +12,7 @@ class SaturationDeduction extends Model
         'is_recurring',
         'period',
         'title',
+        'type',
         'amount',
         'created_by',
     ];

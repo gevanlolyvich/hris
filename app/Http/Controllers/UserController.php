@@ -14,6 +14,12 @@ use App\Models\Document;
 use App\Models\Training;
 use App\Models\EmployeeDocument;
 use App\Models\EmployeeHomeHistory;
+use App\Models\EmployeeCertificate;
+use App\Models\EmployeeCv;
+use App\Models\EmployeeCvExperience;
+use App\Models\EmployeeCvEducation;
+use App\Models\EmployeeCvSkill;
+use App\Models\EmployeeCvLanguage;
 use File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -252,14 +258,13 @@ class UserController extends Controller
         ];
         $banks = Bank::orderBy('name')->get()->pluck('name', 'id');
         $documents        = Document::get();
-        // return $documents;
 
-        $certifications = collect();
-        if (\Auth::user()->type == 'employee') {
-            $certifications = Training::where('employee', \Auth::user()->employee->id)->whereNotNull('result_file')->select(['id', 'name', 'employee', 'result_file', 'updated_at'])->get();
+        $certificates = collect();
+        if (\Auth::user()->type == 'employee' && \Auth::user()->employee) {
+            $certificates = \Auth::user()->employee->certificates()->orderBy('id', 'desc')->get();
         }
 
-        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents', 'certifications'));
+        return view('user.profile', compact('userDetail', 'nationalities', 'identity_types', 'banks', 'emergency_contact_relations', 'marital_status', 'documents', 'certificates'));
     }
 
     public function editprofile(Request $request)
@@ -486,6 +491,205 @@ class UserController extends Controller
         }
         // return $employee;
         return redirect()->route('profile', Auth::user()->id)->with('success', __('Document successfully updated.'));
+    }
+
+    public function storeCertificate(Request $request)
+    {
+        if (!\Auth::Check()) {
+            return redirect()->back()->with('error', __('Something is wrong.'));
+        }
+
+        $employee = \Auth::user()->employee;
+        if (!$employee) {
+            return redirect()->back()->with('error', __('Employee not found.'));
+        }
+
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255',
+                'issuer' => 'nullable|string|max:255',
+                'issue_date' => 'nullable|date',
+                'expiry_date' => 'nullable|date|after_or_equal:issue_date',
+                'description' => 'nullable|string|max:1000',
+                'file' => 'required|mimes:jpeg,png,jpg,gif,svg,pdf,doc,zip,docx,xls,xlsx,ppt,pptx|max:10480',
+            ]
+        );
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return redirect()->back()->with('error', $messages->first());
+        }
+
+        $emp_name = preg_replace('/\s+/', '', $employee->name);
+        $file     = $request->file('file');
+        $filename = time() . "_" . date('Y-m-d') . "_" . $emp_name . '_certificate' . "." . $file->getClientOriginalExtension();
+        $filepath = $file->storeAs("uploads/certificates/{$emp_name}", $filename, 'public');
+
+        $certificate = EmployeeCertificate::create(
+            [
+                'employee_id' => $employee->id,
+                'name' => $request->name,
+                'issuer' => $request->issuer,
+                'issue_date' => $request->issue_date,
+                'expiry_date' => $request->expiry_date,
+                'description' => $request->description,
+                'file' => env('APP_URL') . '/storage/' . $filepath,
+                'created_by' => \Auth::user()->id,
+            ]
+        );
+
+        return redirect()->route('profile', \Auth::user()->id)->with('success', __('Certificate successfully uploaded.'));
+    }
+
+    public function destroyCertificate($id)
+    {
+        if (!\Auth::Check()) {
+            return redirect()->back()->with('error', __('Something is wrong.'));
+        }
+
+        $certificate = EmployeeCertificate::find($id);
+        if (!$certificate) {
+            return redirect()->back()->with('error', __('Certificate not found.'));
+        }
+
+        $employee = \Auth::user()->employee;
+        if (!$employee || $certificate->employee_id != $employee->id) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $filepath_array = explode('/', $certificate->file);
+        $filename       = array_pop($filepath_array);
+        if (!empty($filename) && Storage::disk('public')->exists('uploads/certificates/' . preg_replace('/\s+/', '', $employee->name) . '/' . $filename)) {
+            Storage::disk('public')->delete('uploads/certificates/' . preg_replace('/\s+/', '', $employee->name) . '/' . $filename);
+        }
+
+        $certificate->delete();
+
+        return redirect()->route('profile', \Auth::user()->id)->with('success', __('Certificate successfully deleted.'));
+    }
+
+    public function updateCv(Request $request)
+    {
+        if (!\Auth::Check()) {
+            return redirect()->back()->with('error', __('Something is wrong.'));
+        }
+
+        $employee = \Auth::user()->employee;
+        if (!$employee) {
+            return redirect()->back()->with('error', __('Employee not found.'));
+        }
+
+        EmployeeCv::updateOrCreate(
+            ['employee_id' => $employee->id],
+            ['summary' => $request->summary]
+        );
+
+        $experiences = [];
+        if ($request->has('experience_company')) {
+            foreach ($request->experience_company as $index => $company) {
+                if (empty($company) && empty($request->experience_position[$index] ?? null)) {
+                    continue;
+                }
+                $experiences[] = [
+                    'employee_id' => $employee->id,
+                    'company' => $company,
+                    'position' => $request->experience_position[$index] ?? null,
+                    'start_date' => !empty($request->experience_start_date[$index]) ? date('Y-m-d', strtotime($request->experience_start_date[$index])) : null,
+                    'end_date' => !empty($request->experience_end_date[$index]) ? date('Y-m-d', strtotime($request->experience_end_date[$index])) : null,
+                    'description' => $request->experience_description[$index] ?? null,
+                    'sort_order' => $index,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+        EmployeeCvExperience::where('employee_id', $employee->id)->delete();
+        if (count($experiences)) {
+            EmployeeCvExperience::insert($experiences);
+        }
+
+        $educations = [];
+        if ($request->has('education_institution')) {
+            foreach ($request->education_institution as $index => $institution) {
+                if (empty($institution)) {
+                    continue;
+                }
+                $educations[] = [
+                    'employee_id' => $employee->id,
+                    'institution' => $institution,
+                    'degree' => $request->education_degree[$index] ?? null,
+                    'field_of_study' => $request->education_field_of_study[$index] ?? null,
+                    'start_year' => !empty($request->education_start_year[$index]) ? $request->education_start_year[$index] : null,
+                    'end_year' => !empty($request->education_end_year[$index]) ? $request->education_end_year[$index] : null,
+                    'gpa' => $request->education_gpa[$index] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+        EmployeeCvEducation::where('employee_id', $employee->id)->delete();
+        if (count($educations)) {
+            EmployeeCvEducation::insert($educations);
+        }
+
+        $skills = [];
+        if ($request->has('skill')) {
+            foreach ($request->skill as $index => $skill) {
+                if (empty($skill)) {
+                    continue;
+                }
+                $skills[] = [
+                    'employee_id' => $employee->id,
+                    'skill' => $skill,
+                    'proficiency' => $request->skill_proficiency[$index] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+        EmployeeCvSkill::where('employee_id', $employee->id)->delete();
+        if (count($skills)) {
+            EmployeeCvSkill::insert($skills);
+        }
+
+        $languages = [];
+        if ($request->has('language')) {
+            foreach ($request->language as $index => $language) {
+                if (empty($language)) {
+                    continue;
+                }
+                $languages[] = [
+                    'employee_id' => $employee->id,
+                    'language' => $language,
+                    'proficiency' => $request->language_proficiency[$index] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+        EmployeeCvLanguage::where('employee_id', $employee->id)->delete();
+        if (count($languages)) {
+            EmployeeCvLanguage::insert($languages);
+        }
+
+        return redirect()->route('profile', \Auth::user()->id)->with('success', __('CV successfully updated.'));
+    }
+
+    public function cv()
+    {
+        if (!\Auth::Check()) {
+            return redirect()->route('login')->with('error', __('Please Login.'));
+        }
+
+        $employee = \Auth::user()->employee;
+        if (!$employee) {
+            return redirect()->back()->with('error', __('Employee not found.'));
+        }
+
+        $profile = \App\Models\Utility::get_file('uploads/avatar/');
+
+        return view('cv.show', compact('employee', 'profile'));
     }
 
     public function notificationSeen($user_id)

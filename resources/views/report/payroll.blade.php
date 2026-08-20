@@ -257,6 +257,12 @@
             </div>
             <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3 col-xl-3">
                 <div class="card p-4 mb-4">
+                    <h6 class="report-text gray-text mb-0">{{ __('Total BPJS') }} :</h6>
+                    <h7 class="report-text mb-0">{{ \Auth::user()->priceFormat($filterData['totalBpjs']) }}</h7>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3 col-xl-3">
+                <div class="card p-4 mb-4">
                     <h6 class="report-text gray-text mb-0">{{ __('Total Other Payment') }} :</h6>
                     <h7 class="report-text mb-0">{{ \Auth::user()->priceFormat($filterData['totalOtherPayment']) }}</h7>
                 </div>

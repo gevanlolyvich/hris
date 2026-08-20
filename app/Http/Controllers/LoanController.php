@@ -50,6 +50,8 @@ class LoanController extends Controller
                                    'title' => 'required',
                                    'amount' => 'required',
                                    'reason' => 'required',
+                                   'period_start' => 'required_if:is_recurring,1',
+                                   'period_end' => 'required_if:is_recurring,1',
                                ]
             );
             if($validator->fails())
@@ -70,7 +72,9 @@ class LoanController extends Controller
             $loan->loan_option  = $request->loan_option;
             $loan->title        = $request->title;
             $loan->is_recurring = $request->is_recurring;
-            $loan->period       = $request->period;
+            $loan->period       = $request->is_recurring ? null : $request->period;
+            $loan->period_start = $request->is_recurring ? $request->period_start : null;
+            $loan->period_end   = $request->is_recurring ? $request->period_end : null;
             $loan->amount       = $request->amount;
             $loan->type         = $request->type;
             $loan->reason       = $request->reason;
@@ -132,6 +136,8 @@ class LoanController extends Controller
                                        'amount' => 'required',
                                        'is_recurring' => 'required',
                                        'reason' => 'required',
+                                       'period_start' => 'required_if:is_recurring,1',
+                                       'period_end' => 'required_if:is_recurring,1',
                                    ]
                 );
                 if($validator->fails())
@@ -149,7 +155,9 @@ class LoanController extends Controller
                 $loan->loan_option  = $request->loan_option;
                 $loan->title        = $request->title;
                 $loan->is_recurring = $request->is_recurring;
-                $loan->period       = $request->period;
+                $loan->period       = $request->is_recurring ? null : $request->period;
+                $loan->period_start = $request->is_recurring ? $request->period_start : null;
+                $loan->period_end   = $request->is_recurring ? $request->period_end : null;
                 $loan->type         = $request->type; 
                 $loan->amount       = $request->amount;
                 $loan->reason       = $request->reason;

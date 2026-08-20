@@ -11,7 +11,9 @@ class Allowance extends Model
         'allowance_option',
         'title',
         'is_recurring',
+        'is_prorated',
         'period',
+        'type',
         'amount',
         'created_by',
     ];

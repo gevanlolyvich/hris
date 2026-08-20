@@ -33,6 +33,7 @@ class Employee extends Model
         'emergency_contact_photo',
         'email',
         'password',
+        'payslip_password',
         'employee_id',
         'branch_id',
         'department_id',
@@ -177,6 +178,36 @@ class Employee extends Model
         return $this->hasMany('App\Models\EmployeeDocument', 'employee_id', 'id')->get();
     }
 
+    public function certificates()
+    {
+        return $this->hasMany(EmployeeCertificate::class, 'employee_id', 'id');
+    }
+
+    public function cv()
+    {
+        return $this->hasOne(EmployeeCv::class, 'employee_id', 'id');
+    }
+
+    public function cvExperiences()
+    {
+        return $this->hasMany(EmployeeCvExperience::class, 'employee_id', 'id')->orderBy('sort_order');
+    }
+
+    public function cvEducations()
+    {
+        return $this->hasMany(EmployeeCvEducation::class, 'employee_id', 'id');
+    }
+
+    public function cvSkills()
+    {
+        return $this->hasMany(EmployeeCvSkill::class, 'employee_id', 'id');
+    }
+
+    public function cvLanguages()
+    {
+        return $this->hasMany(EmployeeCvLanguage::class, 'employee_id', 'id');
+    }
+
     public function salary_type()
     {
         return $this->hasOne('App\Models\PayslipType', 'id', 'salary_type')->pluck('name')->first();
@@ -217,9 +248,13 @@ class Employee extends Model
         $normal_salary = $this->get_bruto_salary($month, $year);
 
         //Loan
-        $loans = Loan::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-            $query->orWhere('is_recurring', true)
-                ->orWhere('period', "{$year}-{$month}");
+        $current = "{$year}-{$month}";
+        $loans = Loan::where('employee_id', '=', $this->id)->where(function ($query) use ($current) {
+            $query->where(function ($q) use ($current) {
+                $q->where('is_recurring', true)
+                    ->where('period_start', '<=', $current)
+                    ->where('period_end', '>=', $current);
+            })->orWhere('period', $current);
         })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
@@ -244,8 +279,19 @@ class Employee extends Model
             }
         }
 
+        //Bpjs
+        $bpjs = Bpjs::where('employee_id', '=', $this->id)->get();
+        $total_bpjs = 0;
+        foreach ($bpjs as $item) {
+            if ($item->type == 'percentage') {
+                $total_bpjs = $item->amount * $employee->salary / 100 + $total_bpjs;
+            } else {
+                $total_bpjs = $item->amount + $total_bpjs;
+            }
+        }
+
         //Net Salary Calculate
-        $deduction_salary = $total_loan + $total_saturation_deduction;
+        $deduction_salary = $total_loan + $total_saturation_deduction + $total_bpjs;
 
         $net_salary = $normal_salary - $deduction_salary;
 
@@ -260,18 +306,7 @@ class Employee extends Model
         // $total_present_days   = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid')->get()->toArray(), $employee->shift_type->shiftTimes->where('is_working', 1));
 
         //allowance
-        $allowances = Allowance::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
-            $query->orWhere('is_recurring', true)
-                ->orWhere('period', "{$year}-{$month}");
-        })->get();
-        $total_allowance = 0;
-        foreach ($allowances as $allowance) {
-            if ($allowance->type == 'percentage') {
-                $total_allowance = $allowance->amount * $employee->salary / 100 + $total_allowance;
-            } else {
-                $total_allowance = $allowance->amount + $total_allowance;
-            }
-        }
+        $total_allowance = $this->getTotalAllowance($month, $year);
 
         //commission
         $commissions = Commission::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
@@ -356,8 +391,38 @@ class Employee extends Model
         return $bruto;
     }
 
+    public function getTotalAllowance($month, $year, $total_present_days = null, $total_work_days = null)
+    {
+        $employee = Employee::find($this->id);
+        $allowances = Allowance::where('employee_id', '=', $this->id)->where(function ($query) use ($month, $year) {
+            $query->orWhere('is_recurring', true)
+                ->orWhere('period', "{$year}-{$month}");
+        })->get();
+
+        if (is_null($total_work_days)) {
+            $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        }
+        if (is_null($total_present_days)) {
+            $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        }
+
+        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+
+        $total_allowance = 0;
+        foreach ($allowances as $allowance) {
+            $amount = $allowance->type == 'percentage' ? $allowance->amount * $employee->salary / 100 : $allowance->amount;
+            if ($allowance->is_prorated) {
+                $amount = $employee->employeeType->type == 'Fixed' ? $amount * $fixed_rate : $amount * $total_present_days;
+            }
+            $total_allowance += $amount;
+        }
+
+        return $total_allowance;
+    }
+
     public static function allowance($id, $month, $year)
     {
+        $employee = Employee::find($id);
         $allowances = Allowance::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
             $query->orWhere('is_recurring', true)
                 ->orWhere('period', "{$year}-{$month}");
@@ -365,6 +430,19 @@ class Employee extends Model
         $total_allowance = 0;
         foreach ($allowances as $allowance) {
             $total_allowance = $allowance->amount + $total_allowance;
+        }
+
+        if (empty($employee)) {
+            return json_encode($allowances);
+        }
+
+        $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+
+        foreach ($allowances as $allowance) {
+            $amount = $allowance->type == 'percentage' ? $allowance->amount * $employee->salary / 100 : $allowance->amount;
+            $allowance->prorated_amount = $allowance->is_prorated ? ($employee->employeeType->type == 'Fixed' ? $amount * $fixed_rate : $amount * $total_present_days) : $amount;
         }
 
         $allowance_json = json_encode($allowances);
@@ -393,9 +471,13 @@ class Employee extends Model
     public static function loan($id, $month, $year)
     {
         //Loan
-        $loans = Loan::where('employee_id', '=', $id)->where(function ($query) use ($month, $year) {
-            $query->orWhere('is_recurring', true)
-                ->orWhere('period', "{$year}-{$month}");
+        $current = "{$year}-{$month}";
+        $loans = Loan::where('employee_id', '=', $id)->where(function ($query) use ($current) {
+            $query->where(function ($q) use ($current) {
+                $q->where('is_recurring', true)
+                    ->where('period_start', '<=', $current)
+                    ->where('period_end', '>=', $current);
+            })->orWhere('period', $current);
         })->get();
         $total_loan = 0;
         foreach ($loans as $loan) {
@@ -420,6 +502,19 @@ class Employee extends Model
         $saturation_deduction_json = json_encode($saturation_deductions);
 
         return $saturation_deduction_json;
+    }
+
+    public static function bpjs($id, $month, $year)
+    {
+        //Bpjs
+        $bpjs = Bpjs::where('employee_id', '=', $id)->get();
+        $total_bpjs = 0;
+        foreach ($bpjs as $item) {
+            $total_bpjs = $item->amount + $total_bpjs;
+        }
+        $bpjs_json = json_encode($bpjs);
+
+        return $bpjs_json;
     }
 
     public static function other_payment($id, $month, $year)
