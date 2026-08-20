@@ -23,7 +23,7 @@
                         <div class="modal-body" style="padding-top: 0.35rem">
                                 <div class="form-group">
                                     {{ Form::label('password', __('Password'), ['class' => 'col-form-label']) }}
-                                    {{ Form::password('password', ['class' => 'form-control', 'placeholder' => __('Enter Password'), 'type'=>'password', 'required'=>'required', 'id'=>'password_input']) }}
+                                    {{ Form::password('password', ['class' => 'form-control', 'placeholder' => __('Enter Password'), 'type'=>'password', 'required'=>'required', 'id'=>'password_input', 'autocomplete' => 'new-password']) }}
                                 </div>
                                 <input type="hidden" name="payslip_id" id="payslip_id" value="0">
                         </div>
@@ -67,7 +67,9 @@
                                 <th>{{ __('Payroll Type') }}</th>
                                 <th>{{ __('Created Date') }}</th>
                                 <th>{{ __('Status') }}</th>
-                                <th>{{ __('Action') }}</th>
+                                @if (\Auth::user()->type != 'employee')
+                                    <th>{{ __('Action') }}</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -83,13 +85,13 @@
                                             <div class="badge bg-danger p-2 px-3 rounded text-white">{{__('UnPaid')}}</div>
                                         @endif
                                     </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm m-1 btn-warning" data-payslip="{{ $payslip->id }}" id="payslipPDF">{{ __('Payslip') }}</button>
-                                            {{-- <a href="#" data-url="{{ route('payslip.pdf', ['id' => $payslip->employee_id, 'm' => $payslip->salary_month]) }}" data-size="md-pdf"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Employee Payslip') }}">{{ __('Payslip') }}</a> --}}
-                                            {{-- <a href="#" data-url="{{ route('payslip.authform', $payslip->id) }}" data-size="xl-pdf"  data-ajax-popup="true" class="btn btn-sm m-1 btn-warning" data-title="{{ __('Enter Password To Access Payslip') }}">{{ __('Payslip') }}</a> --}}
-                                        </div>
-                                    </td>
+                                    @if (\Auth::user()->type != 'employee')
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm m-1 btn-warning" data-payslip="{{ $payslip->id }}" id="payslipPDF">{{ __('Payslip') }}</button>
+                                            </div>
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>
@@ -123,19 +125,25 @@
                     data: formData,
                     dataType: 'html', // Expect HTML response for PDF content
                     success: function(response) {
-                        if (response.includes('error')) {
-                            let parsedResponse = JSON.parse(response);
-                            // Display error message within the modal
-                            $('#pdfModal .modal-body').html('<div class="alert alert-danger">' + parsedResponse.error + '</div>');
+                        let isError = false, errMsg = '';
+                        try {
+                            let parsed = JSON.parse(response);
+                            isError = true;
+                            errMsg = parsed.error || '';
+                        } catch (e) {
+                            isError = false;
+                        }
+
+                        if (isError) {
+                            $('#pdfModal .modal-body').html('<div class="alert alert-danger">' + errMsg + '</div>');
                         } else {
-                            // Display PDF content within a modal
                             $('#pdfModal .modal-body').html(response);
                         }
 
                         $('#pdfModal').modal('show'); // Show modal
                     },
                     error: function(error) {
-                        console.error('Error:', error);
+                        show_toastr('error', '{{ __('Something went wrong.') }}');
                     }
                 });
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\PayslipExport;
 use App\Models\Allowance;
+use App\Models\Bpjs;
 use App\Models\Branch;
 use App\Models\Commission;
 use App\Models\Employee;
@@ -185,6 +186,7 @@ class PaySlipController extends Controller
                 $payslipEmployee->commission = Employee::commission($employee->id, $month, $year);
                 $payslipEmployee->loan = Employee::loan($employee->id, $month, $year);
                 $payslipEmployee->saturation_deduction = Employee::saturation_deduction($employee->id, $month, $year);
+                $payslipEmployee->bpjs = Employee::bpjs($employee->id, $month, $year);
                 $payslipEmployee->other_payment = Employee::other_payment($employee->id, $month, $year);
                 $payslipEmployee->overtime = Employee::get_overtime($employee->id, $month, $year);
                 $payslipEmployee->created_by = \Auth::user()->id;
@@ -591,6 +593,10 @@ class PaySlipController extends Controller
 
     public function employeepayslip()
     {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $branch = Branch::find(\Auth::user()->branch_id);
         $branch_id = collect();
         if ($branch) {
@@ -615,6 +621,10 @@ class PaySlipController extends Controller
 
     public function pdf($id, $month)
     {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $payslip = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
         $employee = Employee::find($payslip->employee_id);
 
@@ -625,6 +635,105 @@ class PaySlipController extends Controller
         $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
 
         return view('payslip.pdf', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'));
+    }
+
+    public function downloadPdf($id, $month)
+    {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $payslip = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
+
+        if (!$payslip) {
+            return redirect()->back()->with('error', __('Payslip not found.'));
+        }
+
+        $employee = Employee::find($payslip->employee_id);
+
+        if (empty($employee->payslip_password)) {
+            return redirect()->back()->with('error', __('Payslip password has not been set. Please set the payslip password first.'));
+        }
+
+        try {
+            $password = Crypt::decryptString($employee->payslip_password);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', __('Payslip password is invalid. Please set the payslip password again.'));
+        }
+
+        $salaryType = $employee->salaryType?->name ?? '-';
+
+        $payslipDetail = Utility::employeePayslipDetail($id, $month);
+
+        $company_name = DB::table('settings')->select('value')->where('name', 'company_name')->first();
+
+        $html = view('payslip.pdf_download', compact('payslip', 'employee', 'payslipDetail', 'company_name', 'salaryType'))->render();
+
+        try {
+            $mpdf = new \Mpdf\Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'margin_top' => 20,
+                'margin_bottom' => 20,
+                'margin_left' => 15,
+                'margin_right' => 15,
+            ]);
+
+            $mpdf->SetProtection(['copy', 'print'], $password, config('app.key'));
+
+            $mpdf->SetWatermarkText('CONFIDENTIAL');
+            $mpdf->showWatermarkText = true;
+            $mpdf->watermark_font = 'DejaVuSans';
+            $mpdf->watermarkTextAlpha = 0.1;
+            $mpdf->watermarkAngle = 45;
+
+            $mpdf->WriteHTML($html);
+
+            $filename = 'Payslip_' . str_replace(['/', ' '], '_', $employee->name) . '_' . $month . '.pdf';
+
+            return response($mpdf->Output($filename, 'S'), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Payslip PDF generation failed: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', __('Something went wrong while generating the payslip PDF.'));
+        }
+    }
+
+    public function setPayslipPassword(Request $request)
+    {
+        $validator = \Validator::make(
+            $request->all(),
+            [
+                'payslip_id' => 'required',
+                'password' => 'required|min:4',
+            ]
+        );
+
+        if ($validator->fails()) {
+            $messages = $validator->getMessageBag();
+
+            return response()->json(['error' => $messages->first()]);
+        }
+
+        $payslip = PaySlip::find($request->payslip_id);
+
+        if (!$payslip) {
+            return response()->json(['error' => __('Payslip not found.')]);
+        }
+
+        $employee = Employee::find($payslip->employee_id);
+
+        if (!$employee) {
+            return response()->json(['error' => __('Employee not found.')]);
+        }
+
+        $employee->payslip_password = Crypt::encryptString($request->password);
+        $employee->save();
+
+        return response()->json(['success' => __('Payslip password successfully set.')]);
     }
 
     public function send($id, $month)
@@ -713,6 +822,17 @@ class PaySlipController extends Controller
         }
 
 
+        if (isset($request->bpjs) && !empty($request->bpjs)) {
+            $bpjss = $request->bpjs;
+            $bpjsIds = $request->bpjs_id;
+            foreach ($bpjss as $k => $bpjsAmount) {
+                $bpjsData = Bpjs::find($bpjsIds[$k]);
+                $bpjsData->amount = $bpjsAmount;
+                $bpjsData->save();
+            }
+        }
+
+
         if (isset($request->saturation_deductions) && !empty($request->saturation_deductions)) {
             $saturation_deductionss = $request->saturation_deductions;
             $saturation_deductionsIds = $request->saturation_deductions_id;
@@ -755,6 +875,7 @@ class PaySlipController extends Controller
         $payslipEmployee->commission = Employee::commission($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->loan = Employee::loan($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->saturation_deduction = Employee::saturation_deduction($payslipEmployee->employee_id, $month, $year);
+        $payslipEmployee->bpjs = Employee::bpjs($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->other_payment = Employee::other_payment($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->overtime = Employee::get_overtime($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->net_payble = Employee::find($payslipEmployee->employee_id)->get_net_salary($month, $year);
@@ -775,6 +896,10 @@ class PaySlipController extends Controller
 
     public function payslipAuth(Request $request)
     {
+        if (\Auth::user()->type == 'employee') {
+            return response()->json(['error' => __('Permission denied.')]);
+        }
+
         $validator = \Validator::make(
             $request->all(),
             [
