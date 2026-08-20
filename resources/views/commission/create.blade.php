@@ -16,7 +16,7 @@
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
-            {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled'])}}
+            {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled', 'required' => 'required'])}}
         </div>
         <div class="form-group">
             {{ Form::label('amount', __('Amount'), ['class' => 'col-form-label amount_label']) }}

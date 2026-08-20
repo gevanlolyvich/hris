@@ -15,19 +15,27 @@
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('is_recurring', __('Recurring'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-            {{ Form::select('is_recurring', $recurringOptions, null , ['class' => 'form-control select2', 'required' => 'required']) }}
+            {{ Form::select('is_recurring', $recurringOptions, null , ['class' => 'form-control select2', 'id' => 'is_recurring', 'required' => 'required']) }}
         </div>
         @if ($loan->is_recurring)
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 recurring-period">
                 {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
-                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled'])}}
+                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled', 'required' => 'required'])}}
             </div>
         @else
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-6 recurring-period">
                 {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
-                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period'])}}
+                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'required' => 'required'])}}
             </div>
         @endif
+        <div class="form-group col-md-6 recurring-range">
+            {{ Form::label('period_start', __('Period Start'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+            {{Form::month('period_start', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period_start', 'required' => 'required'])}}
+        </div>
+        <div class="form-group col-md-6 recurring-range">
+            {{ Form::label('period_end', __('Period End'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
+            {{Form::month('period_end', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period_end', 'required' => 'required'])}}
+        </div>
         <div class="col-md-6">
             <div class="form-group">
                 {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>

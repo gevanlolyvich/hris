@@ -46,7 +46,7 @@ class PayrollExport implements FromCollection, WithHeadings
             $payslip["net_salary"] = \Auth::user()->priceFormat($payslip->net_payble);
             $payslip["month"] = $payslip->salary_month;
             $payslip["status"] = $payslip->status == 0 ? 'UnPaid' :  'Paid';
-            unset($payslip->created_at, $payslip->updated_at, $payslip->allowance, $payslip->commission, $payslip->loan, $payslip->saturation_deduction, $payslip->other_payment, $payslip->overtime, $payslip->saturation_deduction, $payslip->created_by, $payslip->id, $payslip->name, $payslip->net_payble, $payslip->basic_salary, $payslip->salary_month);
+            unset($payslip->created_at, $payslip->updated_at, $payslip->allowance, $payslip->commission, $payslip->loan, $payslip->saturation_deduction, $payslip->bpjs, $payslip->other_payment, $payslip->overtime, $payslip->saturation_deduction, $payslip->created_by, $payslip->id, $payslip->name, $payslip->net_payble, $payslip->basic_salary, $payslip->salary_month);
         }
 
         return $data;

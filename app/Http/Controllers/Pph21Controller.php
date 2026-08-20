@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Pph21Export;
 use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\PaySlip;
@@ -12,6 +13,7 @@ use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Pph21Controller extends Controller
 {
@@ -382,7 +384,11 @@ class Pph21Controller extends Controller
 
     public function export(Request $request)
     {
-        return redirect()->back();
+        $name = 'pph21_' . date('Y-m-d H:i:s');
+        $data = Excel::download(new Pph21Export($request), $name . '.xlsx');
+        ob_end_clean();
+
+        return $data;
     }
 
     public function get_ptkp(Employee $employee): String {

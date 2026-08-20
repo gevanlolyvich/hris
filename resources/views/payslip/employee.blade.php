@@ -23,7 +23,7 @@
                         <div class="modal-body" style="padding-top: 0.35rem">
                                 <div class="form-group">
                                     {{ Form::label('password', __('Password'), ['class' => 'col-form-label']) }}
-                                    {{ Form::password('password', ['class' => 'form-control', 'placeholder' => __('Enter Password'), 'type'=>'password', 'required'=>'required', 'id'=>'password_input']) }}
+                                    {{ Form::password('password', ['class' => 'form-control', 'placeholder' => __('Enter Password'), 'type'=>'password', 'required'=>'required', 'id'=>'password_input', 'autocomplete' => 'new-password']) }}
                                 </div>
                                 <input type="hidden" name="payslip_id" id="payslip_id" value="0">
                         </div>

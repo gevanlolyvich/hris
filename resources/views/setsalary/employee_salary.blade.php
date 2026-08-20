@@ -128,6 +128,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row mb-2">
+                            <hr>
+                            <div class="project-info d-flex text-md">
+                                <div class="project-info-inner col-12">
+                                    <b class="m-0"> {{ __('Total Allowance (Valid Days)') }} </b>
+                                    <div class="project-amnt">{{ \Auth::user()->priceFormat($total_allowance) }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,6 +148,10 @@
                         <div class="row">
                             <div class="col-6">
                                 <h5>{{ __('Allowance') . ' (+)' }}</h5>
+                                <h6 class="m-0 text-muted">{{ __('Total') }}:
+                                    {{ \Auth::user()->priceFormat($total_allowance) }}
+                                    <small>({{ __('per Valid Days') }})</small>
+                                </h6>
                             </div>
                             @can('Create Allowance')
                                 <div class="col-6 text-end">
@@ -162,6 +175,7 @@
                                         <th>{{ __('Recurring') }}</th>
                                         <th>{{ __('Period') }}</th>
                                         <th>{{ __('Amount') }}</th>
+                                        <th>{{ __('Effective Amount') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
                                 </thead>
@@ -171,9 +185,11 @@
                                             <td>{{ !empty($allowance->allowance_option()) ? $allowance->allowance_option()->name : '' }}
                                             </td>
                                             <td>{{ $allowance->title }}</td>
-                                            <td>{{ $allowance->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $allowance->is_prorated ? __('Prorated') : ($allowance->is_recurring ? __('Recurring') : __('No')) }}
+                                            </td>
                                             <td>{{ $allowance->period ?? '-' }}</td>
                                             <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
+                                            <td>{{ \Auth::user()->priceFormat($allowance->effective_amount ?? $allowance->amount) }}</td>
                                             <td class="Action">
                                                 <span>
                                                     @can('Edit Allowance')
@@ -583,7 +599,7 @@
                                             </td>
                                             <td>{{ $loan->title }}</td>
                                             <td>{{ $loan->is_recurring ? __('Recurring') : __('No') }}</td>
-                                            <td>{{ $loan->period ?? '-' }}</td>
+                                            <td>{{ $loan->is_recurring ? ($loan->period_start ?? '-') . ' ~ ' . ($loan->period_end ?? '-') : ($loan->period ?? '-') }}</td>
                                             <td>{{ ucfirst($loan->type) }}</td>
                                             @if ($loan->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($loan->amount) }}</td>
@@ -612,6 +628,88 @@
                                                                 'method' => 'DELETE',
                                                                 'route' => ['loan.destroy', $loan->id],
                                                                 'id' => 'delete-form-' . $loan->id,
+                                                            ]) !!}
+                                                            <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
+                                                                data-bs-toggle="tooltip" title=""
+                                                                data-bs-original-title="Delete" aria-label="Delete"><i
+                                                                    class="ti ti-trash text-white text-white"></i></a>
+                                                            </form>
+                                                        </div>
+                                                    @endcan
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BPJS -->
+            <div class="col-md-6">
+                <div class="card set-card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>{{ __('BPJS') . ' (-)' }}</h5>
+                            </div>
+                            @can('Create Bpjs')
+                                <div class="col text-end">
+                                    <a data-url="{{ route('bpjs.create', $employee->id) }}" data-ajax-popup="true"
+                                        data-title="{{ __('Create Bpjs') }}" data-bs-toggle="tooltip" title=""
+                                        data-size="lg" class="btn btn-sm btn-primary"
+                                        data-bs-original-title="{{ __('Create') }}">
+                                        <i class="ti ti-plus"></i>
+                                    </a>
+                                </div>
+                            @endcan
+                        </div>
+                    </div>
+                    <div class=" card-body table-border-style" style=" overflow:auto">
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('Bpjs Options') }}</th>
+                                        <th>{{ __('Recurring') }}</th>
+                                        <th>{{ __('Type') }}</th>
+                                        <th>{{ __('Amount') }}</th>
+                                        <th>{{ __('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($bpjs as $item)
+                                        <tr>
+                                            <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}
+                                            </td>
+                                            <td>{{ $item->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ ucfirst($item->type) }}</td>
+                                            <td>{{ $item->amount }}%
+                                                ({{ \Auth::user()->priceFormat($item->tota_allow ?? 0) }})
+                                            </td>
+                                            <td class="Action">
+                                                <span>
+                                                    @can('Edit Bpjs')
+                                                        <div class="action-btn bg-info ms-2">
+                                                            <a class="mx-3 btn btn-sm  align-items-center"
+                                                                data-url="{{ URL::to('bpjs/' . $item->id . '/edit') }}"
+                                                                data-ajax-popup="true" data-size="lg"
+                                                                data-bs-toggle="tooltip" title=""
+                                                                data-title="{{ __('Edit Bpjs') }}"
+                                                                data-bs-original-title="{{ __('Edit') }}">
+                                                                <i class="ti ti-pencil text-white"></i>
+                                                            </a>
+                                                        </div>
+                                                    @endcan
+                                                    @can('Delete Bpjs')
+                                                        <div class="action-btn bg-danger ms-2">
+                                                            {!! Form::open([
+                                                                'method' => 'DELETE',
+                                                                'route' => ['bpjs.destroy', $item->id],
+                                                                'id' => 'delete-form-' . $item->id,
                                                             ]) !!}
                                                             <a class="mx-3 btn btn-sm  align-items-center bs-pass-para"
                                                                 data-bs-toggle="tooltip" title=""
@@ -771,12 +869,39 @@
         $(document).on('change', 'select[name=is_recurring]', function() {
             let recurring_choice = $(this).val();
             let periodHTML = document.getElementById('period');
+            let recurringPeriod = document.querySelectorAll('.recurring-period');
+            let recurringRange = document.querySelectorAll('.recurring-range');
 
-            if (recurring_choice == 1) {
-                periodHTML.disabled = true;
-                periodHTML.value = null;
+            if (recurring_choice == 1 || recurring_choice == 2) {
+                if (periodHTML) {
+                    periodHTML.disabled = true;
+                    periodHTML.value = null;
+                }
+                if (recurringPeriod.length) {
+                    $(recurringPeriod).hide();
+                }
+                if (recurringRange.length) {
+                    $(recurringRange).each(function() {
+                        let input = $(this).find('input');
+                        input.prop('disabled', false);
+                    });
+                    $(recurringRange).show();
+                }
             } else if (recurring_choice == 0) {
-                periodHTML.disabled = false;
+                if (periodHTML) {
+                    periodHTML.disabled = false;
+                }
+                if (recurringPeriod.length) {
+                    $(recurringPeriod).show();
+                }
+                if (recurringRange.length) {
+                    $(recurringRange).each(function() {
+                        let input = $(this).find('input');
+                        input.val(null);
+                        input.prop('disabled', true);
+                    });
+                    $(recurringRange).hide();
+                }
             }
         })
 
@@ -785,12 +910,40 @@
                 let recurringHTML = document.getElementById('is_recurring');
 
                 if (recurringHTML) {
+                    let recurring_choice = recurringHTML.value;
                     let periodHTML = document.getElementById('period');
+                    let recurringPeriod = document.querySelectorAll('.recurring-period');
+                    let recurringRange = document.querySelectorAll('.recurring-range');
 
-                    if (recurringHTML.value == 1) {
-                        periodHTML.disabled = true;
-                    } else if (recurringHTML.value == 0) {
-                        periodHTML.disabled = false;
+                    if (recurring_choice == 1 || recurring_choice == 2) {
+                        if (periodHTML) {
+                            periodHTML.disabled = true;
+                        }
+                        if (recurringPeriod.length) {
+                            $(recurringPeriod).hide();
+                        }
+                        if (recurringRange.length) {
+                            $(recurringRange).each(function() {
+                                let input = $(this).find('input');
+                                input.prop('disabled', false);
+                            });
+                            $(recurringRange).show();
+                        }
+                    } else if (recurring_choice == 0) {
+                        if (periodHTML) {
+                            periodHTML.disabled = false;
+                        }
+                        if (recurringPeriod.length) {
+                            $(recurringPeriod).show();
+                        }
+                        if (recurringRange.length) {
+                            $(recurringRange).each(function() {
+                                let input = $(this).find('input');
+                                input.val(null);
+                                input.prop('disabled', true);
+                            });
+                            $(recurringRange).hide();
+                        }
                     }
                 }
             });

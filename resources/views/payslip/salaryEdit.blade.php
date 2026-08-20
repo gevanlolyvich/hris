@@ -30,6 +30,9 @@
                         <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#loan" role="tab" aria-controls="pills-contact" aria-selected="false">{{__('Loan')}}</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#bpjs" role="tab" aria-controls="pills-contact" aria-selected="false">{{__('BPJS')}}</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#deduction" role="tab" aria-controls="pills-contact" aria-selected="false">{{__('Saturation Deduction')}}</a>
                     </li>
                     <li class="nav-item">
@@ -93,6 +96,26 @@
                                                 {!! Form::label('title', $loan->title,['class'=>'col-form-label']) !!}
                                                 {!! Form::text('loan[]', $loan->amount, ['class' => 'form-control']) !!}
                                                 {!! Form::hidden('loan_id[]', $loan->id, ['class' => 'form-control']) !!}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="bpjs" class="tab-pane">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card bg-none mb-0">
+                                    <div class="row px-3">
+                                        @php
+                                            $bpjs = json_decode($payslip->bpjs) ?? [];
+                                        @endphp
+                                        @foreach($bpjs as $item)
+                                            <div class="col-md-12 form-group">
+                                                {!! Form::label('title', $item->bpjs_option()->name ?? 'BPJS',['class'=>'col-form-label']) !!}
+                                                {!! Form::text('bpjs[]', $item->amount, ['class' => 'form-control']) !!}
+                                                {!! Form::hidden('bpjs_id[]', $item->id, ['class' => 'form-control']) !!}
                                             </div>
                                         @endforeach
                                     </div>

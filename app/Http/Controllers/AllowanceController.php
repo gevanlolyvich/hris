@@ -27,7 +27,7 @@ class AllowanceController extends Controller
 
         $allowance_options  = AllowanceOption::get()->pluck('name', 'id');
         $employee           = $branch_id?->isNotEmpty() ? Employee::where('is_active', 1)->whereIn('branch_id', $branch_id)->find($id) : Employee::where('is_active', 1)->find($id);
-        $recurringOptions   = [0 => __('No'), 1 => __('Recurring')];
+        $recurringOptions   = [0 => __('No'), 1 => __('Recurring'), 2 => __('Prorated')];
 
         return view('allowance.create', compact('employee', 'allowance_options', 'recurringOptions'));
     }
@@ -51,11 +51,13 @@ class AllowanceController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $recurringType                  = $request->is_recurring;
             $allowance                      = new Allowance();
             $allowance->employee_id         = $request->employee_id;
             $allowance->allowance_option    = $request->allowance_option;
             $allowance->title               = $request->title;
-            $allowance->is_recurring        = $request->is_recurring;
+            $allowance->is_recurring        = $recurringType == 2 ? 1 : $recurringType;
+            $allowance->is_prorated         = $recurringType == 2 ? 1 : 0;
             $allowance->period              = $request->period;
             $allowance->amount              = $request->amount;
             $allowance->created_by          = \Auth::user()->id;
@@ -77,9 +79,10 @@ class AllowanceController extends Controller
         $allowance = Allowance::find($allowance);
         if (\Auth::user()->can('Edit Allowance')) {
             $allowance_options = AllowanceOption::get()->pluck('name', 'id');
-            $recurringOptions   = [0 => __('No'), 1 => __('Recurring')];
+            $recurringOptions   = [0 => __('No'), 1 => __('Recurring'), 2 => __('Prorated')];
+            $selectedRecurring  = $allowance->is_prorated ? 2 : ($allowance->is_recurring ? 1 : 0);
 
-            return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions'));
+            return view('allowance.edit', compact('allowance', 'allowance_options', 'recurringOptions', 'selectedRecurring'));
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);
         }
@@ -104,9 +107,11 @@ class AllowanceController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
+            $recurringType                  = $request->is_recurring;
             $allowance->allowance_option    = $request->allowance_option;
             $allowance->title               = $request->title;
-            $allowance->is_recurring        = $request->is_recurring;
+            $allowance->is_recurring        = $recurringType == 2 ? 1 : $recurringType;
+            $allowance->is_prorated         = $recurringType == 2 ? 1 : 0;
             $allowance->period              = $request->period;
             $allowance->amount              = $request->amount;
             $allowance->save();

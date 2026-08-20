@@ -35,13 +35,13 @@
                                     <a data-toggle="tab" href="#loan">{{ __('Loan') }}</a>
                                 </li>
                                 <li>
+                                    <a data-toggle="tab" href="#bpjs">{{ __('BPJS') }}</a>
+                                </li>
+                                <li>
                                     <a data-toggle="tab" href="#deduction">{{ __('Saturation Deduction') }}</a>
                                 </li>
                                 <li>
                                     <a data-toggle="tab" href="#payment">{{ __('Other Payment') }}</a>
-                                </li>
-                                <li>
-                                    <a data-toggle="tab" href="#overtime">{{ __('Overtime') }}</a>
                                 </li>
                             </ul>
                             <div class="tab-content">
@@ -73,12 +73,13 @@
                                                                     );
                                                                     $empallow =
                                                                         ($allownace->amount * $employess->salary) / 100;
+                                                                    $allowanceAmount = $allownace->prorated_amount ?? $allownace->amount;
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ $allownace->title }}</td>
                                                                     <td>{{ ucfirst($allownace->type) }}</td>
                                                                     @if ($allownace->type != 'percentage')
-                                                                        <td>{{ \Auth::user()->priceFormat($allownace->amount) }}
+                                                                        <td>{{ \Auth::user()->priceFormat($allowanceAmount) }}
                                                                         </td>
                                                                     @else
                                                                         <td>{{ $allownace->amount }}%
@@ -190,6 +191,52 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div id="bpjs" class="tab-pane">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="card bg-none mb-0">
+                                                <div class="table-responsive">
+                                                    @php
+                                                        $bpjs = json_decode($payslip->bpjs) ?? [];
+                                                    @endphp
+                                                    <table class="table align-items-center">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>{{ __('Bpjs Options') }}</th>
+                                                                <th>{{ __('Type') }}</th>
+                                                                <th>{{ __('Amount') }}</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="list">
+                                                            @foreach ($bpjs as $item)
+                                                                @php
+                                                                    $employess = \App\Models\Employee::find(
+                                                                        $item->employee_id,
+                                                                    );
+                                                                    $empbpjs =
+                                                                        ($item->amount * $employess->salary) / 100;
+                                                                @endphp
+                                                                <tr>
+                                                                    <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}</td>
+                                                                    <td>{{ ucfirst($item->type) }}</td>
+                                                                    @if ($item->type != 'percentage')
+                                                                        <td>{{ \Auth::user()->priceFormat($item->amount) }}
+                                                                        </td>
+                                                                    @else
+                                                                        <td>{{ $item->amount }}%
+                                                                            ({{ \Auth::user()->priceFormat($empbpjs) }})
+                                                                        </td>
+                                                                    @endif
+
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div id="deduction" class="tab-pane">
                                     <div class="row">
                                         <div class="col-lg-12">
@@ -274,36 +321,6 @@
                                                                             ({{ \Auth::user()->priceFormat($emppayment) }})
                                                                         </td>
                                                                     @endif
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="overtime" class="tab-pane">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="card bg-none mb-0">
-                                                <div class="table-responsive">
-                                                    @php
-                                                        $overtimes = json_decode($payslip->overtime);
-                                                    @endphp
-                                                    <table class="table align-items-center">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>{{ __('Title') }}</th>
-                                                                <th>{{ __('Amount') }}</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="list">
-                                                            @foreach ($overtimes as $overtime)
-                                                                <tr>
-                                                                    <td>{{ $overtime->title }}</td>
-                                                                    <td>{{ \Auth::user()->priceFormat($overtime->rate) }}
-                                                                    </td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>

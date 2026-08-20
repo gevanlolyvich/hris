@@ -1,8 +1,8 @@
 @php
-// $logo = asset(Storage::url('uploads/logo/'));
-$logo=\App\Models\Utility::get_file('uploads/logo/');
+    // $logo = asset(Storage::url('uploads/logo/'));
+    $logo = \App\Models\Utility::get_file('uploads/logo/');
 
-$company_logo = Utility::getValByName('company_logo');
+    $company_logo = Utility::getValByName('company_logo');
 @endphp
 @extends('layouts.contractheader')
 @section('page-title')
@@ -12,8 +12,9 @@ $company_logo = Utility::getValByName('company_logo');
 @section('content')
     <div class="main-content">
         <div class="text-md-right mb-2">
-            <a href="#" class="btn btn-warning"   data-bs-toggle="tooltip" data-bs-placement="bottom"
-            title="{{ __('Download') }}" onclick="saveAsPDF()"><span class="fa fa-download"></span></a>
+            <a href="{{ route('payslip.download', [$payslip->employee_id, $payslip->salary_month]) }}"
+                class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                title="{{ __('Download') }}"><span class="fa fa-download"></span></a>
         </div>
 
         <div class="col-8">
@@ -75,7 +76,8 @@ $company_logo = Utility::getValByName('company_logo');
                                                 <td>{{ __('Allowance') }}</td>
                                                 <td>{{ $allowance->title }}</td>
                                                 <td class="text-right">
-                                                    {{ \Auth::user()->priceFormat($allowance->amount) }}</td>
+                                                    {{ \Auth::user()->priceFormat($allowance->prorated_amount ?? $allowance->amount) }}
+                                                </td>
                                             </tr>
                                         @endforeach
                                         @foreach ($payslipDetail['earning']['commission'] as $commission)
@@ -132,6 +134,16 @@ $company_logo = Utility::getValByName('company_logo');
                                                     {{ \Auth::user()->priceFormat($deduction->amount) }}</td>
                                             </tr>
                                         @endforeach
+                                        @foreach ($payslipDetail['deduction']['bpjs'] ?? [] as $item)
+                                            <tr>
+                                                <td>{{ __('BPJS') }}</td>
+                                                <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}
+                                                </td>
+                                                <td class="text-right">
+                                                    {{ \Auth::user()->priceFormat($item->type == 'percentage' ? ($item->amount * \App\Models\Employee::find($item->employee_id)?->salary) / 100 : $item->amount) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -170,54 +182,5 @@ $company_logo = Utility::getValByName('company_logo');
                 </div>
             </div>
         </div>
-        <script type="text/javascript" src="{{ asset('js/html2pdf.bundle.min.js') }}"></script>
-        <script>
-            function saveAsPDF() {
-                var element = document.getElementById('printableArea');
-                var opt = {
-                    margin: 0.3,
-                    filename: '{{ $employee->name }}',
-                    image: {
-                        type: 'jpeg',
-                        quality: 1
-                    },
-                    html2canvas: {
-                        scale: 4,
-                        dpi: 72,
-                        letterRendering: true
-                    },
-                    jsPDF: {
-                        unit: 'in',
-                        format: 'A4'
-                    }
-                };
-                html2pdf().set(opt).from(element).save();
-            }
-        </script>
-
     </div>
-    <script type="text/javascript" src="{{ asset('js/html2pdf.bundle.min.js') }}"></script>
-    <script>
-        function saveAsPDF() {
-            var element = document.getElementById('printableArea');
-            var opt = {
-                margin: 0.3,
-                filename: '{{ $employee->name }}',
-                image: {
-                    type: 'jpeg',
-                    quality: 1
-                },
-                html2canvas: {
-                    scale: 4,
-                    dpi: 72,
-                    letterRendering: true
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'A4'
-                }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-    </script>
 @endsection

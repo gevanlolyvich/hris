@@ -12,6 +12,8 @@ class Loan extends Model
         'title',
         'is_recurring',
         'period',
+        'period_start',
+        'period_end',
         'amount',
         'type',
         'reason',

@@ -51,6 +51,8 @@
                                     'Payslip Type',
                                     'Allowance Option',
                                     'Loan Option',
+                                    'Bpjs Option',
+                                    'Bpjs',
                                     'Deduction Option',
                                     'Set Salary',
                                     'Allowance',

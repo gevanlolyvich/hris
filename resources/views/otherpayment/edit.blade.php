@@ -12,12 +12,12 @@
         @if ($otherpayment->is_recurring)
             <div class="form-group col-md-6">
                 {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
-                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled'])}}
+                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'disabled' => 'disabled', 'required' => 'required'])}}
             </div>
         @else
             <div class="form-group col-md-6">
                 {{ Form::label('period', __('Period'), ['class' => 'col-form-label']) }}
-                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period'])}}
+                {{Form::month('period', null ,['class'=>'month-btn form-control month-btn', 'id' => 'period', 'required' => 'required'])}}
             </div>
         @endif
         <div class="col-md-6">

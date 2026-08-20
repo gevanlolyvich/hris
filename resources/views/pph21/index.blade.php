@@ -19,6 +19,9 @@
                         <div class="col-4">
                             <div class="btn-box">
                                 {{Form::label('branch',__('Branch'),['class'=>'form-label'])}}
+                                <i class="ti ti-alert-circle text-warning" tabindex="0" data-bs-toggle="tooltip"
+                                    data-bs-html="true" data-bs-placement="top"
+                                    title="{{ __('Payslip yang diunduh dilindungi password (diberikan oleh HR) dan berisi watermark CONFIDENTIAL. Jangan bagikan slip gaji kepada pihak lain.') }}"></i>
                                 {{Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : null, ['class'=>'month-btn form-control select2', 'placeholder' => __('Select Branch'), 'id' => 'branch-filter'])}}
                             </div>
                         </div>

@@ -6,11 +6,28 @@
 @endphp
 <div class="modal-body">
     <div class="text-md-end mb-2">
-        <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom"
-            title="{{ __('Download') }}" onclick="saveAsPDF()"><span class="fa fa-download"></span></a>
+        @if (\Auth::user()->type != 'employee')
+            <button type="button" class="btn btn-sm btn-secondary" id="setPayslipPassword" data-bs-toggle="tooltip"
+                data-bs-placement="bottom" title="{{ __('Set Payslip Password') }}"><span
+                    class="fa fa-key"></span></button>
+        @endif
+        <a href="{{ route('payslip.download', [$payslip->employee_id, $payslip->salary_month]) }}"
+            class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            title="{{ __('Download') }}"><span class="fa fa-download"></span></a>
         {{-- <a title="Mail Send" href="{{ route('payslip.send', [$employee->id, $payslip->salary_month]) }}"
             class="btn btn-sm btn-warning"><span class="fa fa-paper-plane"></span></a> --}}
     </div>
+    @if (\Auth::user()->type != 'employee')
+        <div id="payslipPasswordForm" style="display: none;" class="mb-2">
+            <div class="input-group">
+                <input type="password" class="form-control" id="payslip_password"
+                    placeholder="{{ __('Enter Password') }}" autocomplete="new-password" readonly>
+                <input type="hidden" id="payslip_id" value="{{ $payslip->id }}">
+                <button type="button" class="btn btn-success" id="savePayslipPassword">{{ __('Save') }}</button>
+            </div>
+            <small class="text-muted">{{ __('Password ini dipakai untuk membuka PDF payslip employee ini.') }}</small>
+        </div>
+    @endif
     <div class="invoice" id="printableArea">
         <div class="row">
             <div class="col-form-label">
@@ -73,6 +90,7 @@
                                             @php
                                                 $employess = \App\Models\Employee::find($allowance->employee_id);
                                                 $empdallow = ($allowance->amount * $employess->salary) / 100;
+                                                $allowanceAmount = $allowance->prorated_amount ?? $allowance->amount;
                                             @endphp
                                             <tr>
                                                 <td>{{ __('Allowance') }}</td>
@@ -80,7 +98,7 @@
                                                 <td>{{ ucfirst($allowance->type) }}</td>
                                                 @if ($allowance->type != 'percentage')
                                                     <td class="text-right">
-                                                        {{ \Auth::user()->priceFormat($allowance->amount) }}</td>
+                                                        {{ \Auth::user()->priceFormat($allowanceAmount) }}</td>
                                                 @else
                                                     <td class="text-right">{{ $allowance->amount }}%
                                                         ({{ \Auth::user()->priceFormat($empdallow) }})
@@ -128,17 +146,7 @@
 
                                             </tr>
                                         @endforeach
-                                        @foreach ($payslipDetail['earning']['overTime'] as $overTime)
-                                            <tr>
-                                                <td>{{ __('OverTime 1') }}</td>
-                                                <td>{{ $overTime->title }}</td>
-                                                <td>{{ $overTime->type ?? 'hourly' }}</td>
-                                                <td class="text-right">
-                                                    {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
-                                            </tr>
-                                        @endforeach
-
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
                             <div class="table-responsive">
@@ -150,7 +158,7 @@
                                             <th>{{ __('type') }}</th>
                                             <th class="text-right">{{ __('Amount') }}</th>
                                         </tr>
-                                        @if (count($payslipDetail['deduction']['loan']) || count($payslipDetail['deduction']['deduction']))
+                                        @if (count($payslipDetail['deduction']['loan']) || count($payslipDetail['deduction']['deduction']) || count($payslipDetail['deduction']['bpjs'] ?? []))
                                             @foreach ($payslipDetail['deduction']['loan'] as $loan)
                                                 @php
                                                     $employess = \App\Models\Employee::find($loan->employee_id);
@@ -186,6 +194,26 @@
                                                     @else
                                                         <td class="text-right">{{ $deduction->amount }}%
                                                             ({{ \Auth::user()->priceFormat($empdeduction) }})
+                                                        </td>
+                                                    @endif
+
+                                                </tr>
+                                            @endforeach
+                                            @foreach ($payslipDetail['deduction']['bpjs'] ?? [] as $item)
+                                                @php
+                                                    $employess = \App\Models\Employee::find($item->employee_id);
+                                                    $empbpjs = ($item->amount * $employess->salary) / 100;
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ __('BPJS') }}</td>
+                                                    <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}</td>
+                                                    <td>{{ ucfirst($item->type) }}</td>
+                                                    @if ($item->type != 'percentage')
+                                                        <td class="text-right">
+                                                            {{ \Auth::user()->priceFormat($item->amount) }}</td>
+                                                    @else
+                                                        <td class="text-right">{{ $item->amount }}%
+                                                            ({{ \Auth::user()->priceFormat($empbpjs) }})
                                                         </td>
                                                     @endif
 
@@ -244,27 +272,45 @@
     </div>
 </div>
 
-<script type="text/javascript" src="{{ asset('js/html2pdf.bundle.min.js') }}"></script>
-<script>
-    function saveAsPDF() {
-        var element = document.getElementById('printableArea');
-        var opt = {
-            margin: 0.3,
-            filename: '{{ $employee->name }}',
-            // image: {
-            //     type: 'jpeg',
-            //     quality: 1
-            // },
-            html2canvas: {
-                scale: 4,
-                dpi: 72,
-                letterRendering: true
+<script type="text/javascript">
+    $('#setPayslipPassword').on('click', function () {
+        $('#payslipPasswordForm').toggle();
+    });
+
+    $('#payslip_password').on('focus click', function () {
+        $(this).removeAttr('readonly');
+    });
+
+    $('#savePayslipPassword').on('click', function () {
+        var password = $('#payslip_password').val();
+        var payslip_id = $('#payslip_id').val();
+
+        if (!password || password.length < 4) {
+            show_toastr('error', '{{ __('Password minimal 4 karakter.') }}');
+            return;
+        }
+
+        $.ajax({
+            url: '{{ route('payslip.password') }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                payslip_id: payslip_id,
+                password: password
             },
-            jsPDF: {
-                unit: 'in',
-                format: 'A4'
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    show_toastr('success', data.success);
+                    $('#payslipPasswordForm').hide();
+                    $('#payslip_password').val('');
+                } else if (data.error) {
+                    show_toastr('error', data.error);
+                }
+            },
+            error: function () {
+                show_toastr('error', '{{ __('Something went wrong.') }}');
             }
-        };
-        html2pdf().set(opt).from(element).save();
-    }
+        });
+    });
 </script>

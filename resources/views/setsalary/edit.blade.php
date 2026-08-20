@@ -22,6 +22,9 @@
                                 <a data-toggle="tab" href="#loan" class="">{{__('Loan')}}</a>
                             </li>
                             <li>
+                                <a data-toggle="tab" href="#bpjs" class="">{{__('BPJS')}}</a>
+                            </li>
+                            <li>
                                 <a data-toggle="tab" href="#saturation-deduction" class="">{{__('Saturation Deduction')}}</a>
                             </li>
                             <li>
@@ -298,6 +301,98 @@
                                                     @endcan
                                                     @can('Delete Loan')
                                                     {!! Form::open(['method' => 'DELETE', 'route' => ['loan.destroy', $loan->id], 'id' => 'delete-form-' . $loan->id]) !!}
+                                                    <a href="#!"
+                                                        class="action-btn btn-danger me-1 btn btn-sm d-inline-flex align-items-center show_confirm"
+                                                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                                        title="{{ __('Delete') }}">
+                                                        <i class="ti ti-trash"></i></a>
+                                                    {!! Form::close() !!}
+
+                                                    @endcan
+                                                </td>
+
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="bpjs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-body">
+                                {{Form::open(array('url'=>'bpjs','method'=>'post'))}}
+                                @csrf
+                                {{ Form::hidden('employee_id',$employee->id, array()) }}
+                                <div class="row">
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            {{ Form::label('bpjs_option', __('Bpjs Options*'),['class'=>'col-form-label']) }}
+                                            {{ Form::select('bpjs_option',$bpjs_options,null, array('class' => 'form-control ','required'=>'required','placeholder'=>__('Select Bpjs Option'))) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            {{ Form::label('is_recurring', __('Recurring'),['class'=>'col-form-label']) }}
+                                            {{ Form::select('is_recurring',[1=>__('Recurring')],1, array('class' => 'form-control ','required'=>'required')) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            {{ Form::label('amount', __('Amount (%)'),['class'=>'col-form-label']) }}
+                                            {{ Form::number('amount',null, array('class' => 'form-control ','required'=>'required','step'=>'0.01')) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12 col-md-4">
+                                        <div class="form-group">
+                                            {{ Form::label('type', __('Type'),['class'=>'col-form-label']) }}
+                                            {{ Form::select('type',['percentage'=>'Percentage'],'percentage', array('class' => 'form-control ','required'=>'required')) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @can('Create Bpjs')
+                                    <div class="row">
+                                        <div class="col-12 text-right mt-1">
+                                            <input type="submit" value="{{__('Save Change')}}" class="btn-create badge-blue">
+                                        </div>
+                                    </div>
+                                @endcan
+                                {{Form::close()}}
+
+                                <hr>
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped mb-0" id="bpjs-dataTable">
+                                        <thead>
+                                        <tr>
+                                            <th>{{__('employee')}}</th>
+                                            <th>{{__('Bpjs Options')}}</th>
+                                            <th>{{__('Recurring')}}</th>
+                                            <th>{{__('Type')}}</th>
+                                            <th>{{__('Amount')}}</th>
+                                            <th>{{ __('Action') }}</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody >
+                                        @foreach ($bpjs as $item)
+                                            <tr>
+                                                <td>{{ $item->employee()->name }}</td>
+                                                <td>{{ $item->bpjs_option()->name }}</td>
+                                                <td>{{ $item->is_recurring ? __('Recurring') : __('No') }}</td>
+                                                <td>{{ ucfirst($item->type) }}</td>
+                                                <td>{{ $item->amount }}%</td>
+
+                                                <td class="d-flex">
+                                                    @can('Edit Bpjs')
+                                                        <a href="#" data-url="{{ URL::to('bpjs/'.$item->id.'/edit') }}" data-size="lg" data-ajax-popup="true" data-title="{{__('Edit Bpjs')}}" class="action-btn btn-primary me-1 btn btn-sm d-inline-flex align-items-center" data-toggle="tooltip" data-original-title="{{__('Edit')}}"><i class="ti ti-pencil"></i></a>
+                                                    @endcan
+                                                    @can('Delete Bpjs')
+                                                    {!! Form::open(['method' => 'DELETE', 'route' => ['bpjs.destroy', $item->id], 'id' => 'delete-form-' . $item->id]) !!}
                                                     <a href="#!"
                                                         class="action-btn btn-danger me-1 btn btn-sm d-inline-flex align-items-center show_confirm"
                                                         data-bs-toggle="tooltip" data-bs-placement="bottom"
