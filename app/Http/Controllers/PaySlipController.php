@@ -593,6 +593,10 @@ class PaySlipController extends Controller
 
     public function employeepayslip()
     {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $branch = Branch::find(\Auth::user()->branch_id);
         $branch_id = collect();
         if ($branch) {
@@ -617,6 +621,10 @@ class PaySlipController extends Controller
 
     public function pdf($id, $month)
     {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $payslip = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
         $employee = Employee::find($payslip->employee_id);
 
@@ -631,14 +639,14 @@ class PaySlipController extends Controller
 
     public function downloadPdf($id, $month)
     {
+        if (\Auth::user()->type == 'employee') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $payslip = PaySlip::where('employee_id', $id)->where('salary_month', $month)->first();
 
         if (!$payslip) {
             return redirect()->back()->with('error', __('Payslip not found.'));
-        }
-
-        if (\Auth::user()->type == 'employee' && \Auth::user()?->employee?->id != $id) {
-            return redirect()->back()->with('error', __('Permission denied.'));
         }
 
         $employee = Employee::find($payslip->employee_id);
@@ -888,6 +896,10 @@ class PaySlipController extends Controller
 
     public function payslipAuth(Request $request)
     {
+        if (\Auth::user()->type == 'employee') {
+            return response()->json(['error' => __('Permission denied.')]);
+        }
+
         $validator = \Validator::make(
             $request->all(),
             [
