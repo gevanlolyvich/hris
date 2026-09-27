@@ -17,9 +17,9 @@
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" name="is_shift" value="1" id="shift_is_shift" @if (!empty($shift_type->is_shift)) checked @endif>
                 <label class="form-check-label" for="shift_is_shift">
-                    {{ __('Jadwal Shift-shiftan (Rostering)') }}
+                    {{ __('Jadwal Shift (Rostering)') }}
                 </label>
-                <small class="text-muted d-block">{{ __('Centang jika shift ini adalah jadwal shift-shiftan (Shift 1/2/3) yang dijadwalkan bulanan per karyawan.') }}</small>
+                <small class="text-muted d-block">{{ __('Centang jika shift ini adalah jadwal shift (Shift 1/2/3) yang dijadwalkan bulanan per karyawan.') }}</small>
             </div>
         </div>
         <div class="table-responsive">

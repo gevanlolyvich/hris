@@ -47,7 +47,7 @@
                                     <td>{{ $shift->name }}
                                     <td>
                                         @if (!empty($shift->is_shift))
-                                            <span class="badge bg-warning text-dark">{{ __('Shift-shiftan') }}</span>
+                                            <span class="badge bg-warning text-dark">{{ __('Shift') }}</span>
                                         @else
                                             <span class="badge bg-secondary">{{ __('Normal') }}</span>
                                         @endif

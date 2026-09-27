@@ -401,7 +401,7 @@
                                 </table>
                             </div>
                             @else
-                            <h5>{{ __('Shift') }} ({{ __('Shift-Shiftan') }})</h5>
+                            <h5>{{ __('Shift') }}</h5>
                             <hr>
                             <p class="text-muted mb-0">{{ __('Karyawan ini mengikuti jadwal roster bulanan.') }}</p>
                             @endif
