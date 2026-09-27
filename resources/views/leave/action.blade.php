@@ -13,16 +13,18 @@
         ->map(fn($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))
         ->toArray();
 
-    $shiftTimes = \DB::table('shift_times')
-        ->where('shift_type_id', $leave->employees->shift_type_id)
-        ->get()
-        ->keyBy(fn($item) => strtolower($item->days));
+    $shiftTimes = $leave->employees?->shift_type_id
+        ? \DB::table('shift_times')
+            ->where('shift_type_id', $leave->employees->shift_type_id)
+            ->get()
+            ->keyBy(fn($item) => strtolower($item->days))
+        : collect();
 
     $subordinates = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? [];
 
     $isAtasan = in_array($leave->employee_id, $subordinates);
 
-    $isShiftEmp = (bool) $leave->employees->is_shift;
+    $isShiftEmp = (bool) ($leave->employees?->is_shift);
 @endphp
 
 <div class="modal-body">
