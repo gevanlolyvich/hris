@@ -195,6 +195,7 @@
         </div>
 
         <div class="col-xxl-5">
+            @if (!$isShiftEmployee)
             <div class="card">
                 <div class="card-header">
                     <h5>{{ __('Mark Attandance') }}</h5>
@@ -227,6 +228,43 @@
                             {{ __('No Working Hour') }}
                         </h6>
                     @endif
+                    @php
+                        // Apakah tombol CLOCK IN sedang aktif? Logika ini harus identik dengan
+                        // rantai kondisi tombol CLOCK IN di bawah, supaya form Inside/Outside
+                        // tidak pernah disembunyikan padahal clock in sebenarnya tersedia.
+                        $nowTimestamp = strtotime(date('Y-m-d H:i:s'));
+                        $canClockIn   = true;
+                        if (
+                            $yesterdayOfficeTime['is_cross_day'] &&
+                                !empty($yesterdayEmployeeAttendance) &&
+                                ($yesterdayEmployeeAttendance->clock_out === $yesterdayOfficeTime['default_clock_out'] ||
+                                    $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in ||
+                                    $yesterdayEmployeeAttendance->source_out !== 'Application') &&
+                                $nowTimestamp > strtotime($officeTime['startTime']) - 3600
+                        ) {
+                            $canClockIn = false;
+                        } elseif (
+                            $yesterdayOfficeTime['is_cross_day'] &&
+                                empty($yesterdayEmployeeAttendance) &&
+                                $nowTimestamp > strtotime(date('Y-m-d', strtotime('yesterday')) . ' ' . $yesterdayOfficeTime['startTime']) - 3600
+                        ) {
+                            $canClockIn = true;
+                        } elseif (empty($employeeAttendance) && $nowTimestamp > strtotime($officeTime['startTime']) - 3600) {
+                            $canClockIn = true;
+                        } elseif (
+                            !empty($employeeAttendance) &&
+                                ($employeeAttendance->clock_out == '00:00:00' ||
+                                    $employeeAttendance->clock_out == $employeeAttendance->clock_in ||
+                                    $employeeAttendance->source_out !== 'Application')
+                        ) {
+                            $canClockIn = false;
+                        } elseif (
+                            !empty($yesterdayEmployeeAttendance) &&
+                                $yesterdayEmployeeAttendance->clock_out === $yesterdayEmployeeAttendance->clock_in
+                        ) {
+                            $canClockIn = false;
+                        }
+                    @endphp
                     <div class="row d-flex flex-column align-items-center">
                         {{-- Show form for attendance type and notes --}}
                         {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form', 'enctype' => 'multipart/form-data']) }}
@@ -265,7 +303,7 @@
                                 <input type="hidden" name="picture" id="picture">
                             </label>
                         </div>
-                        <div class="col-md-12" id="other-form" style="display: none;">
+                        <div class="col-md-12" id="other-form" style="display: {{ $canClockIn ? '' : 'none' }};">
                             <div class="form-group mb-1">
                                 {!! Form::label('shift_type_id', __('Shift'), ['class' => 'col-form-label pb-1 pt-3']) !!}
                                 <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
@@ -387,6 +425,212 @@
                     </div>
                 </div>
             </div>
+            @endif
+
+            @if ($isShiftEmployee)
+                @php
+                    $currentAtt = $currentShift['attendance'] ?? null;
+                    $isPermitPlaceholder = !empty($currentAtt) && $currentAtt->clock_in == '00:00:00';
+                    $needsClockOut = !empty($currentAtt) && !$isPermitPlaceholder;
+                @endphp
+                {{-- Dedicated clock in form for scheduled shift employees --}}
+                {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form-shift', 'enctype' => 'multipart/form-data']) }}
+                    <input type="hidden" name="shift_type_id" id="shift_type_id_shift" value="{{ $currentShift['shift_type_id'] ?? '' }}">
+                    <input type="hidden" name="attendance_type" id="attendance_type_shift" value="1">
+                    <input type="hidden" name="notes" id="notes_shift" value="">
+                    <input type="hidden" name="latitude" id="latitude_shift" value="0">
+                    <input type="hidden" name="longitude" id="longitude_shift" value="0">
+                    <input type="hidden" name="accuracy" id="accuracy_shift" value="0">
+                    <input type="hidden" name="picture" id="picture_shift">
+                {{ Form::close() }}
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ __('Shift Attendance') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!empty($currentShift))
+                            <div class="border rounded p-3 mb-3">
+                                <h6>{{ $currentShift['name'] }}</h6>
+                                <p class="text-muted mb-2">
+                                    @if ($currentShift['is_working'])
+                                        {{ __('Office Time:') }} {{ $currentShift['start_time'] }} {{ __(' to ') }} {{ $currentShift['end_time'] }} WIB
+                                    @else
+                                        {{ __('No Working Hour') }}
+                                    @endif
+                                </p>
+
+                                @if ($currentAtt && $currentAtt->clock_in != '00:00:00')
+                                    <h5 class="text-danger pb-0-5">{{ __('Already Clock In At') }} |
+                                        {{ $currentAtt->date }} {{ $currentAtt->clock_in }} WIB
+                                    </h5>
+                                @endif
+
+                                @if ($needsClockOut)
+                                    {{-- Karyawan sudah clock-in tapi belum clock-out: wajib clock-out dulu (prioritas) --}}
+                                    {{ Form::model($currentAtt, ['route' => ['attendanceemployee.update', $currentAtt->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form-shift']) }}
+                                    <div class="row d-flex flex-column align-items-center">
+                                        {{ Form::label('picture_out', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
+                                        @if ($settings['photo_on_clock'] == 'Required')
+                                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
+                                        @endif
+                                        <div class="col-md-6 col-lg-12 text-center mx-auto">
+                                            <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load-shift"><i
+                                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                            </button>
+                                            <div id="camera-shift" style="display: none; position: relative" class="col-12">
+                                                <video id="video-shift" style="border-radius: 5%" class="mb-2">Video stream not
+                                                    available.</video>
+                                                <div class="row allign-center text-center">
+                                                    <div class="col-6">
+                                                        <button type="button" class="btn btn-info btn-md custBtn1" id="takepic-shift"
+                                                            style="display: none;">
+                                                            <i class="fa fa-solid fa-camera"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera-shift"
+                                                            style="display: none;">
+                                                            <i class="fa fa-solid fa-window-close"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <canvas id="canvas-shift" style="display: none;"></canvas>
+                                            <div id="output-shift" style="display: none;">
+                                                <img id="photo-shift" style="border-radius: 5%"
+                                                    alt="The screen capture will appear in this box.">
+                                            </div>
+                                            <input type="hidden" name="picture_out" id="picture_out_shift">
+                                        </div>
+                                        <div class="col-md-12" id="other-form-shift" style="display: none;">
+                                            <div class="form-group">
+                                                {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
+                                                {!! Form::textarea('notes', null, [
+                                                    'class' => 'form-control',
+                                                    'rows' => '2',
+                                                    'placeholder' => __('Enter notes for clock out'),
+                                                ]) !!}
+                                            </div>
+                                            <input type="hidden" name="latitude" id="latitude_out_shift" value="0">
+                                            <input type="hidden" name="longitude" id="longitude_out_shift" value="0">
+                                            <input type="hidden" name="accuracy" id="accuracy_out_shift" value="0">
+                                            <input type="hidden" name="shift_type_id" value="{{ $currentAtt->shift_type_id }}">
+                                        </div>
+                                        <div class="col-md-6 text-center mx-auto mt-1">
+                                            <button type="button" value="1" name="out" id="clock_out_shift"
+                                                class="btn btn-danger btn-lg btn-block"
+                                                style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                        </div>
+                                    </div>
+                                    {{ Form::close() }}
+                                @else
+                                    @if ($approvedLeaveToday)
+                                        <div class="alert alert-info mb-0">
+                                            <h6>{{ __('Hari Ini Cuti') }}</h6>
+                                            <p class="mb-0">{{ __('Anda sedang cuti pada hari ini dan tidak dapat melakukan absensi.') }}</p>
+                                        </div>
+                                    @else
+                                    {{-- Tidak ada shift yang menunggu clock-out: tampilkan tombol clock in --}}
+                                    <div class="row d-flex flex-column align-items-center">
+                                        {{ Form::label('picture', __('Picture'), ['class' => 'col-form-label pb-1 pt-3']) }}
+                                        @if ($settings['photo_on_clock'] == 'Required')
+                                            <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
+                                        @endif
+                                        <div class="col-md-6 col-lg-12 text-center mx-auto">
+                                            <button type="button" class="btn btn-info btn-lg btn-block mb-3" id="load-shift"><i
+                                                    class="fa fa-solid fa-camera"></i> {{ __('Load Webcam') }}
+                                            </button>
+                                            <div id="camera-shift" style="display: none; position: relative" class="col-12">
+                                                <video id="video-shift" style="border-radius: 5%" class="mb-2">Video stream not
+                                                    available.</video>
+                                                <div class="row allign-center text-center">
+                                                    <div class="col-6">
+                                                        <button type="button" class="btn btn-info btn-md custBtn1" id="takepic-shift"
+                                                            style="display: none;">
+                                                            <i class="fa fa-solid fa-camera"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <button type="button" class="btn btn-danger btn-md custBtn2" id="closecamera-shift"
+                                                            style="display: none;">
+                                                            <i class="fa fa-solid fa-window-close"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <canvas id="canvas-shift" style="display: none;"></canvas>
+                                            <div id="output-shift" style="display: none;">
+                                                <img id="photo-shift" style="border-radius: 5%"
+                                                    alt="The screen capture will appear in this box.">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group mb-1">
+                                                {!! Form::label('attendance_type', __('Attendance Type'), ['class' => 'col-form-label pb-1 pt-3']) !!}
+                                                <p style="color: rgba(218, 71, 71, 0.788)" class="mb-2">* {{ __('Required') }}</p>
+                                                {{ Form::select('attendance_type', $attendance_type, 1, ['class' => 'form-control select2', 'id' => 'attendance_type_shift_select', 'placeholder' => 'Choose attendance type']) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {!! Form::label('notes', __('Notes'), ['class' => 'col-form-label']) !!}
+                                                {!! Form::textarea('notes', null, [
+                                                    'class' => 'form-control',
+                                                    'id' => 'notes_shift_input',
+                                                    'rows' => '2',
+                                                    'placeholder' => __('Enter notes for clock in'),
+                                                ]) !!}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 text-center mx-auto mt-1">
+                                            @if ($currentShift['is_working'])
+                                                <button type="button" value="0" name="in" id="clock_in_shift"
+                                                    class="btn btn-primary btn-lg btn-block"
+                                                    style="width: 150px">{{ __('CLOCK IN') }}</button>
+                                            @else
+                                                <button type="button" value="0" name="in" id="clock_in_shift"
+                                                    class="btn btn-primary btn-lg btn-block disabled"
+                                                    style="width: 150px" disabled>{{ __('CLOCK IN') }}</button>
+                                            @endif
+                                        </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+                        @else
+                            @if ($approvedLeaveToday)
+                                <div class="alert alert-info">
+                                    <h6>{{ __('Hari Ini Cuti') }}</h6>
+                                    <p class="mb-0">{{ __('Anda sedang cuti pada hari ini dan tidak dapat melakukan absensi.') }}</p>
+                                </div>
+                            @elseif ($scheduledShifts->isNotEmpty())
+                                <div class="alert alert-info">
+                                    <h6>{{ __('Jadwal Shift Hari Ini') }}</h6>
+                                    @foreach ($scheduledShifts as $shift)
+                                        <div class="mb-2">
+                                            <strong>{{ $shift['name'] }}</strong>:
+                                            {{ __('Mulai') }}
+                                            @if ($shift['is_working'])
+                                                {{ $shift['start_time'] }} - {{ $shift['end_time'] }} WIB
+                                            @else
+                                                {{ __('No Working Hour') }}
+                                            @endif
+                                        </div>
+                                        @if (!$loop->last)
+                                            <p class="text-muted mb-1"><small>{{ __('Selanjutnya,') }}</small></p>
+                                        @endif
+                                    @endforeach
+                                    <p class="text-muted mt-2 mb-0">
+                                        {{ __('Belum masuk waktu shift. Silakan clock-in saat shift dimulai.') }}
+                                    </p>
+                                </div>
+                            @else
+                                <p class="text-muted">{{ __('Tidak ada shift terjadwal hari ini.') }}</p>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            @endif
             @if (!$attendances->isEmpty())
                 <div class="card">
                     <div class="card-header">
@@ -1243,34 +1487,38 @@
                     }
                     clockOutButton.disabled = false;
                 }
+
+                // Shift attendance buttons: enable only if location was granted.
+                const clockInShift = document.getElementById("clock_in_shift");
+                const clockOutShift = document.getElementById("clock_out_shift");
+                if (clockInShift && !clockInShift.hasAttribute('disabled')) {
+                    clockInShift.disabled = false;
+                }
+                if (clockOutShift) {
+                    clockOutShift.disabled = false;
+                }
             } catch (error) {
                 console.error(error);
                 if (error.message === "User denied Geolocation") {
                     // Handle the case where the user denied geolocation access
                     const clockInButton = document.getElementById("clock_in");
                     const clockOutButton = document.getElementById("clock_out");
-                    const otherForm = document.getElementById('other-form');
                     if (clockInButton) {
                         clockInButton.disabled = true;
                     }
                     if (clockOutButton) {
                         clockOutButton.disabled = true;
                     }
-                    if (otherForm) {
-                        otherForm.style.display = ''
-                    }
-                }
-            } finally {
-                const otherForm = document.getElementById('other-form');
-                const clockOutButton = document.getElementById("clock_out");
-                const clockInButton = document.getElementById("clock_in");
 
-                if (!Boolean(Number(clockOutButton.value))) {
-                    if (otherForm) {
-                        otherForm.style.display = ''
+                    // Shift attendance buttons: keep disabled when location was denied/error.
+                    const clockInShiftErr = document.getElementById("clock_in_shift");
+                    const clockOutShiftErr = document.getElementById("clock_out_shift");
+                    if (clockInShiftErr) {
+                        clockInShiftErr.disabled = true;
                     }
-                } else {
-                    otherForm.style.display = 'none';
+                    if (clockOutShiftErr) {
+                        clockOutShiftErr.disabled = true;
+                    }
                 }
             }
         });
@@ -1488,6 +1736,10 @@
             var takepic = null;
             var loadbutton = document.getElementById('load');
 
+            if (!loadbutton) {
+                return;
+            }
+
             loadbutton.addEventListener('click', startup, false);
 
             function compressAndSetPicture(canvas, quality) {
@@ -1607,6 +1859,131 @@
                 document.getElementById('load').style.display = '';
                 document.getElementById('camera').style.display = 'none';
                 document.getElementById('output').style.display = 'none';
+
+                var tracks = video.srcObject?.getTracks();
+                tracks?.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        })();
+    </script>
+
+    <script>
+        /* Shift attendance camera */
+        (function() {
+            var loadbuttonShift = document.getElementById('load-shift');
+
+            if (!loadbuttonShift) {
+                return;
+            }
+
+            var width = 320;
+            var height = 0;
+            var streaming = false;
+
+            var video = document.getElementById('video-shift');
+            var canvas = document.getElementById('canvas-shift');
+            var photo = document.getElementById('photo-shift');
+            var takepic = document.getElementById('takepic-shift');
+            var closecamera = document.getElementById('closecamera-shift');
+
+            loadbuttonShift.addEventListener('click', startup, false);
+
+            function compressAndSetPictureShift(canvas, quality) {
+                canvas.toBlob(
+                    function(blob) {
+                        var reader = new FileReader();
+                        reader.onloadend = function() {
+                            var compressedDataUrl = reader.result;
+                            if (photo) {
+                                photo.src = compressedDataUrl;
+                            }
+                            var pictureIn = document.getElementById('picture_shift');
+                            var pictureOut = document.getElementById('picture_out_shift');
+                            if (pictureIn) {
+                                pictureIn.value = compressedDataUrl;
+                            }
+                            if (pictureOut) {
+                                pictureOut.value = compressedDataUrl;
+                            }
+                        };
+                        reader.readAsDataURL(blob);
+                    },
+                    'image/jpeg',
+                    quality
+                );
+            }
+
+            function startup() {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                    .then(function(stream) {
+                        document.getElementById('load-shift').style.display = 'none';
+                        document.getElementById('camera-shift').style.display = 'block';
+                        document.getElementById('output-shift').style.display = 'block';
+
+                        takepic.style.display = '';
+                        closecamera.style.display = '';
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function(err) {
+                        alert("Please Allow Camera Access To Take Picture For Clock In / Out");
+                        console.log("An error occurred: " + err);
+                    });
+
+                video.addEventListener('canplay', function(ev) {
+                    if (!streaming) {
+                        height = video.videoHeight / (video.videoWidth / width);
+                        if (isNaN(height)) {
+                            height = width / (4 / 3);
+                        }
+                        video.setAttribute('width', width);
+                        video.setAttribute('height', height);
+                        canvas.setAttribute('width', width);
+                        canvas.setAttribute('height', height);
+                        photo.setAttribute('width', width);
+                        photo.setAttribute('height', height);
+                        streaming = true;
+                    }
+                }, false);
+
+                takepic.addEventListener('click', function(ev) {
+                    takepicture();
+                    ev.preventDefault();
+                }, false);
+
+                closecamera.addEventListener('click', function(ev) {
+                    closeCameraShift();
+                    ev.preventDefault();
+                }, false);
+
+                clearphoto();
+            }
+
+            function clearphoto() {
+                var context = canvas.getContext('2d');
+                context.fillStyle = "#AAA";
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                var data = canvas.toDataURL('image/png');
+                photo.setAttribute('src', data);
+            }
+
+            function takepicture() {
+                var context = canvas.getContext('2d');
+                if (width && height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                    context.drawImage(video, 0, 0, width, height);
+                    compressAndSetPictureShift(canvas, 0.8);
+                } else {
+                    clearphoto();
+                }
+            }
+
+            function closeCameraShift() {
+                document.getElementById('load-shift').style.display = '';
+                document.getElementById('camera-shift').style.display = 'none';
+                document.getElementById('output-shift').style.display = 'none';
 
                 var tracks = video.srcObject?.getTracks();
                 tracks?.forEach(track => track.stop());
@@ -1881,6 +2258,72 @@
 
                 // Submit the form
                 $('#clock-in-form').submit();
+            });
+
+            $('body').on('click', '#clock_in_shift', async function() {
+                var attType = $('#attendance_type_shift_select').val();
+                if (attType) {
+                    $('#attendance_type_shift').val(attType);
+                }
+
+                var notesVal = $('#notes_shift_input').val();
+                if (notesVal) {
+                    $('#notes_shift').val(notesVal);
+                }
+
+                try {
+                    const {
+                        latitude,
+                        longitude,
+                        accuracy
+                    } = await getLocation();
+
+                    $('#latitude_shift').val(latitude);
+                    $('#longitude_shift').val(longitude);
+                    $('#accuracy_shift').val(accuracy);
+                } catch (err) {
+                    console.error(err);
+                }
+
+                $('#clock-in-form-shift').submit();
+            });
+
+            $('body').on('click', '#clock_out_shift', async function() {
+                try {
+                    const {
+                        latitude,
+                        longitude,
+                        accuracy
+                    } = await getLocation();
+
+                    $('#latitude_out_shift').val(latitude);
+                    $('#longitude_out_shift').val(longitude);
+                    $('#accuracy_out_shift').val(accuracy);
+                } catch (err) {
+                    console.error(err);
+                }
+
+                $('#clock-out-form-shift').submit();
+            });
+
+            $('body').on('click', '.clock-out-btn', async function() {
+                var form = $(this).closest('form');
+
+                try {
+                    const {
+                        latitude,
+                        longitude,
+                        accuracy
+                    } = await getLocation();
+
+                    form.find('[name="latitude_out"]').val(latitude);
+                    form.find('[name="longitude_out"]').val(longitude);
+                    form.find('[name="accuracy_out"]').val(accuracy);
+                } catch (err) {
+                    console.error(err);
+                }
+
+                form.submit();
             });
 
             $('body').on('click', '#clock_out', async function() {

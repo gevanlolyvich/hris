@@ -1,7 +1,7 @@
 @php
     $setting = App\Models\Utility::settings();
 @endphp
-{{ Form::open(['url' => 'permit', 'method' => 'post','enctype' => 'multipart/form-data']) }}
+{{ Form::open(['url' => 'permit', 'method' => 'post','enctype' => 'multipart/form-data', 'data-emp-id' => optional(auth()->user()->employee)->id]) }}
 <div class="modal-body">
     @if (\Auth::user()->type != 'employee')
         <div class="row">
@@ -28,13 +28,13 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select Start Date')]) }}
+                {{ Form::text('start_date', null, ['id' => 'start_date', 'class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select Start Date')]) }}
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select End Date')]) }}
+                {{ Form::text('end_date', null, ['id' => 'end_date', 'class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => __('Select End Date')]) }}
             </div>
         </div>
     </div>

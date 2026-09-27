@@ -56,6 +56,18 @@ class HomeController extends Controller
 
                 $overtime       = Overtime::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->first();
                 $attendances    = AttendanceEmployee::where('employee_id', $emp->id)->where('date', date('Y-m-d'))->orderBy('id', 'ASC')->get();
+                $isShiftEmployee = (bool) $emp->is_shift;
+
+                $approvedLeaveToday = \App\Models\Leave::where('employee_id', $emp->id)
+                    ->where('status', 'Approved')
+                    ->where('start_date', '<=', $today)
+                    ->where('end_date', '>=', $today)
+                    ->exists();
+
+                $officeTime           = [];
+                $yesterdayOfficeTime  = [];
+                $scheduledShifts      = collect();
+                $currentShift         = null;
 
                 // $shift_types    = ShiftType::where('branch_id', $emp->branch_id)->get()->pluck('name', 'id');
                 $branch = Branch::find($emp->branch_id);
@@ -146,6 +158,7 @@ class HomeController extends Controller
                 // return $employeeAttendance;
                 $yesterdayEmployeeAttendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0)->where('date', $dateYesterday)->first();
 
+                if (!$emp->is_shift) {
                 $shift_times = ShiftTime::where('shift_type_id', \Auth::user()?->employee?->shift_type?->id)
                     ->where('days', date('l'))
                     ->first();
@@ -187,11 +200,103 @@ class HomeController extends Controller
                 $yesterday_absolute_out_time              = sprintf('%02d:%02d:%02d', $hours + 1, $mins, $secs);
                 $yesterdayOfficeTime['default_clock_out'] = $default_clock_out_cross_day;
                 $yesterdayOfficeTime['absolute_out']      = strtotime("$date $yesterday_absolute_out_time");
+                } elseif ($emp->is_shift) {
+                    $scheduledShifts = collect();
+                    $currentShift = null;
+                    $now = time();
+
+                    // Build a normalized shift window + its attendance for a roster schedule.
+                    // Attendance for a shift is always recorded on the shift's start date (schedule->date).
+                    $buildShiftEntry = function ($schedule, $attendance) {
+                        $stimes = ShiftTime::where('shift_type_id', $schedule->shift_type_id)
+                            ->where('days', date('l', strtotime($schedule->date)))
+                            ->first();
+
+                        return [
+                            'shift_type_id'      => $schedule->shift_type_id,
+                            'name'               => $schedule->shiftType?->name ?? '-',
+                            'start_time'         => $stimes?->start_time,
+                            'end_time'           => $stimes?->end_time,
+                            'is_working'         => (bool) ($stimes?->is_working ?? 0),
+                            'is_cross_day'       => $stimes && $stimes->start_time > $stimes->end_time ? true : false,
+                            'shift_date'         => $schedule->date,
+                            'end_date'           => $schedule->end_date ?? $schedule->date,
+                            'attendance'         => $attendance,
+                        ];
+                    };
+
+                    // Active roster schedules whose window covers or relates to today
+                    // (schedules starting today, or cross-day schedules that started earlier
+                    // and are still running, e.g. Shift 3 on 28 ends on the morning of 29).
+                    $rosteredSchedules = $emp->shiftSchedules()
+                        ->where('date', '<=', $date)
+                        ->where(function ($q) use ($date) {
+                            $q->where('end_date', '>=', $date)
+                                ->orWhereNull('end_date');
+                        })
+                        ->orderBy('date', 'ASC')
+                        ->orderBy('id', 'ASC')
+                        ->get();
+
+                    foreach ($rosteredSchedules as $schedule) {
+                        $shiftDate = $schedule->date;
+                        $endDate = $schedule->end_date ?? $shiftDate;
+
+                        // Only consider schedules where today is within [date, end_date].
+                        if ($date < $shiftDate || $date > $endDate) {
+                            continue;
+                        }
+
+                        $attendance = AttendanceEmployee::where('employee_id', $emp->id)
+                            ->where('date', $shiftDate)
+                            ->where('shift_type_id', $schedule->shift_type_id)
+                            ->first();
+
+                        $scheduledShifts->push($buildShiftEntry($schedule, $attendance));
+                    }
+
+                    $scheduledShifts = $scheduledShifts->values();
+
+                    // A permit/permission placeholder row (clock_in == '00:00:00') represents an
+                    // approved permit, not a real clock-in. The employee must still be able to
+                    // clock in for that shift, so treat it as "no attendance yet".
+                    $isPermitPlaceholder = function ($attendance) {
+                        return !empty($attendance) && $attendance->clock_in == '00:00:00';
+                    };
+
+                    // An un-clocked-out shift always takes priority so the employee can finish it first.
+                    $pendingShift = $scheduledShifts->first(function ($s) use ($isPermitPlaceholder) {
+                        return !empty($s['attendance']) && !$isPermitPlaceholder($s['attendance']) && ($s['attendance']->clock_out == '00:00:00' || $s['attendance']->clock_out == $s['attendance']->clock_in);
+                    });
+
+                    if ($pendingShift) {
+                        // Belum clock-out: tampilkan tombol clock-out (wajib diselesaikan dulu).
+                        $currentShift = $pendingShift;
+                    } else {
+                        // Tidak ada yang menunggu clock-out.
+                        // 1) Shift yang sedang aktif & BELUM ada attendance → tombol clock-in.
+                        $activeNoAttendance = $this->resolveCurrentShift($scheduledShifts, $now, function ($s) use ($isPermitPlaceholder) {
+                            return empty($s['attendance']) || $isPermitPlaceholder($s['attendance']);
+                        });
+
+                        if ($activeNoAttendance) {
+                            $currentShift = $activeNoAttendance;
+                        } else {
+                            // 2) Shift yang sedang aktif & SUDAH ada attendance (sudah clock-out)
+                            //    → tombol clock-out tetap tampil agar bisa diklik ulang.
+                            //    Pilih yang attendance-nya terbaru agar menunjuk ke shift yang
+                            //    sedang/baru dikerjakan (menghindari tertuju ke shift lama saat overlap).
+                            $currentShift = $this->resolveCurrentShift($scheduledShifts, $now, function ($s) {
+                                return !empty($s['attendance']);
+                            }, true);
+                        }
+                    }
+                }
 
                 // get all attendance type
                 $attendance_type        = AttendanceType::where('id', '!=', 4)->get()->pluck('name', 'id');
 
-                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime', 'shift_types', 'attendances'));
+                return view('dashboard.dashboard', compact('announcements', 'employees', 'meetings', 'employeeAttendance', 'yesterdayEmployeeAttendance', 'officeTime', 'yesterdayOfficeTime', 'attendance_type', 'settings', 'overtime', 'shift_types', 'attendances', 'isShiftEmployee', 'scheduledShifts', 'currentShift', 'approvedLeaveToday'));
             } else {
                 $branch = Branch::find(\Auth::user()->branch_id);
                 $branch_id = collect();
@@ -353,4 +458,46 @@ class HomeController extends Controller
 
     //     return $arrTask;
     // }
+
+    /**
+     * Resolve the roster shift that is currently active based on the current time.
+     *
+     * A shift already clocked-in but not clocked-out is prioritized so the employee
+     * can finish it first before moving on to the next scheduled shift.
+     *
+     * @param \Illuminate\Support\Collection $scheduledShifts
+     * @param int|null $now
+     * @return array|null
+     */
+    private function resolveCurrentShift($scheduledShifts, $now = null, $filter = null, $sortByAttendanceDesc = false)
+    {
+        $now = $now ?: time();
+
+        $candidates = $scheduledShifts->filter(function ($s) use ($now, $filter) {
+            if ($filter && !$filter($s)) {
+                return false;
+            }
+
+            if (empty($s['start_time']) || empty($s['end_time']) || !$s['is_working']) {
+                return false;
+            }
+
+            $startDate = !empty($s['shift_date']) ? $s['shift_date'] : date('Y-m-d');
+            $endDate = !empty($s['end_date']) ? $s['end_date'] : $startDate;
+            $start = strtotime($startDate . ' ' . $s['start_time']);
+            $end = strtotime($endDate . ' ' . $s['end_time']);
+
+            return $now >= $start && $now < $end;
+        });
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        if ($sortByAttendanceDesc) {
+            return $candidates->sortByDesc(fn($s) => $s['attendance']->id)->first();
+        }
+
+        return $candidates->sortBy('start_time')->first();
+    }
 }

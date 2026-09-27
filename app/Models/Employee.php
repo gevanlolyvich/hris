@@ -14,10 +14,23 @@ class Employee extends Model
     use SoftDeletes;
 
     protected $table = 'employees';
+
+    protected static function booted()
+    {
+        // Rostering employees get their shifts from the monthly roster; a fixed
+        // default shift must never be stored alongside is_shift = 1.
+        static::saving(function (Employee $employee) {
+            if ($employee->is_shift && $employee->shift_type_id !== null) {
+                $employee->shift_type_id = null;
+            }
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'personel_id',
         'shift_type_id',
+        'is_shift',
         'managed_by',
         'name',
         'type_id',
@@ -116,6 +129,31 @@ class Employee extends Model
 
     function getPresentDays($attendanceData, $shiftTimes, $type = '')
     {
+        // Shift employees: valid day = number of shifts actually worked (Present) on each date.
+        // - Kerja N shift -> valid day = N (multiple Present rows on the same date each count).
+        // - Izin sebelum shift pertama (Permission-only date, no Present) -> valid day = 1.
+        // Approved permits (Permission rows) never count as worked shifts.
+        if ($this->is_shift) {
+            $presentDaysCount = 0;
+            $grouped = collect($attendanceData)->groupBy('date');
+            foreach ($grouped as $rows) {
+                $presentRows = $rows->where('status', 'Present');
+                if ($presentRows->isNotEmpty()) {
+                    $presentDaysCount += $presentRows->count();
+                } elseif ($rows->isNotEmpty()) {
+                    // Permission-only date -> 1 valid day (approved izin before any shift).
+                    $presentDaysCount += 1;
+                }
+            }
+
+            return $presentDaysCount;
+        }
+
+        // Non-shift employees: approved permits (Permission) do not count as valid days.
+        $attendanceData = collect($attendanceData)->reject(function ($attendance) {
+            return $attendance->status == 'Permission';
+        });
+
         // Initialize the present days count
         $presentDaysCount = 0;
 
@@ -173,6 +211,74 @@ class Employee extends Model
         return $this->belongsTo(ShiftType::class, 'shift_type_id', 'id')->withTrashed();
     }
 
+    public function shiftSchedules(): HasMany
+    {
+        return $this->hasMany(EmployeeShiftSchedule::class, 'employee_id', 'id');
+    }
+
+    public function scheduledShiftSchedulesForDate($date)
+    {
+        $schedules = $this->shiftSchedules()->where('date', $date)->get();
+
+        // Fallback to the employee's default shift so unscheduled shift employees can still attend.
+        return $schedules->isNotEmpty() ? $schedules : collect([new EmployeeShiftSchedule(['date' => $date, 'shift_type_id' => $this->shift_type_id])]);
+    }
+
+    public function scheduledShiftTypesForDate($date)
+    {
+        $shiftTypeIds = $this->scheduledShiftIdsForDate($date);
+
+        return !empty($shiftTypeIds) ? ShiftType::whereIn('id', $shiftTypeIds)->with('shiftTimes')->get() : collect();
+    }
+
+    public function scheduledShiftIdsForDate($date)
+    {
+        return $this->scheduledShiftSchedulesForDate($date)->pluck('shift_type_id')->unique()->values()->toArray();
+    }
+
+    public function hasScheduledShiftOn($date)
+    {
+        return $this->shiftSchedules()->where('date', $date)->exists();
+    }
+
+    public function monthlyShiftSchedule($month, $year)
+    {
+        $start = date('Y-m-01', strtotime("{$year}-{$month}-01"));
+        $end = date('Y-m-t', strtotime("{$year}-{$month}-01"));
+
+        return $this->shiftSchedules()->whereBetween('date', [$start, $end])->get()->groupBy('date');
+    }
+
+    public function rosteredDaysInMonth($month, $year)
+    {
+        $start = date('Y-m-01', strtotime("{$year}-{$month}-01"));
+        $end = date('Y-m-t', strtotime("{$year}-{$month}-01"));
+
+        return $this->shiftSchedules()->whereBetween('date', [$start, $end])->count();
+    }
+
+    public function salaryWorkdaysAndPresentDays($month, $year)
+    {
+        $employee = Employee::find($this->id);
+        $workingShiftTimes = $employee->shift_type?->shiftTimes?->where('is_working', 1) ?? collect();
+
+        if ($employee->is_shift) {
+            // Rostering employees: work days come from the monthly roster instead
+            // of a fixed shift, and fall back to present days when unrostered.
+            $total_work_days = $this->rosteredDaysInMonth($month, $year);
+        } else {
+            $total_work_days = $this->getTotalWorkdays($workingShiftTimes->pluck('days')->toArray(), $month, $year);
+        }
+
+        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $workingShiftTimes, $employee->employeeType?->type);
+
+        if ($total_work_days <= 0) {
+            $total_work_days = max($total_present_days, 1);
+        }
+
+        return [$total_work_days, $total_present_days];
+    }
+
     public function documents()
     {
         return $this->hasMany('App\Models\EmployeeDocument', 'employee_id', 'id')->get();
@@ -223,16 +329,10 @@ class Employee extends Model
 
     public function get_salary($month, $year)
     {
+        list($total_work_days, $total_present_days) = $this->salaryWorkdaysAndPresentDays($month, $year);
         $employee = Employee::find($this->id);
-        $total_work_days = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
-        $fixed_rate = ($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1;
-        $normal_salary = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
-        $employee = Employee::find($this->id);
-        $total_work_days = $this->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days = $this->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
-        $fixed_rate = ($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1;
-        $normal_salary = $employee->employeeType->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
+        $fixed_rate = $total_work_days > 0 ? ($total_present_days / $total_work_days <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+        $normal_salary = $employee->employeeType?->type == 'Fixed' ? (!empty($employee->salary) ? $employee->salary : 0) * $fixed_rate : (!empty($employee->salary) ? $employee->salary : 0) * $total_present_days;
 
         return $normal_salary;
     }
@@ -282,12 +382,12 @@ class Employee extends Model
         //Bpjs
         $bpjs = Bpjs::where('employee_id', '=', $this->id)->get();
         $total_bpjs = 0;
+        if ($bpjs->isNotEmpty()) {
+            list($bpjs_work_days, $bpjs_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
+            $bpjs_fixed_rate = $bpjs_work_days > 0 ? (($bpjs_present_days / $bpjs_work_days) <= 1 ? $bpjs_present_days / $bpjs_work_days : 1) : 1;
+        }
         foreach ($bpjs as $item) {
-            if ($item->type == 'percentage') {
-                $total_bpjs = $item->amount * $employee->salary / 100 + $total_bpjs;
-            } else {
-                $total_bpjs = $item->amount + $total_bpjs;
-            }
+            $total_bpjs = $item->resolvedAmount($employee, $bpjs_fixed_rate ?? 1, $bpjs_present_days ?? 0) + $total_bpjs;
         }
 
         //Net Salary Calculate
@@ -399,11 +499,10 @@ class Employee extends Model
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
 
-        if (is_null($total_work_days)) {
-            $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        }
-        if (is_null($total_present_days)) {
-            $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        if (is_null($total_work_days) || is_null($total_present_days)) {
+            list($roster_work_days, $roster_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
+            $total_work_days = $total_work_days ?? $roster_work_days;
+            $total_present_days = $total_present_days ?? $roster_present_days;
         }
 
         $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
@@ -436,8 +535,7 @@ class Employee extends Model
             return json_encode($allowances);
         }
 
-        $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        list($total_work_days, $total_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
         $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
 
         foreach ($allowances as $allowance) {
@@ -508,10 +606,23 @@ class Employee extends Model
     {
         //Bpjs
         $bpjs = Bpjs::where('employee_id', '=', $id)->get();
+        $employee = Employee::find($id);
         $total_bpjs = 0;
         foreach ($bpjs as $item) {
             $total_bpjs = $item->amount + $total_bpjs;
         }
+
+        if (empty($employee)) {
+            return json_encode($bpjs);
+        }
+
+        list($total_work_days, $total_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
+        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+
+        foreach ($bpjs as $item) {
+            $item->prorated_amount = $item->resolvedAmount($employee, $fixed_rate, $total_present_days);
+        }
+
         $bpjs_json = json_encode($bpjs);
 
         return $bpjs_json;

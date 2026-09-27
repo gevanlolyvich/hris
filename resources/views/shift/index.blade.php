@@ -29,6 +29,7 @@
                         <thead>
                             <tr>
                                 <th>{{ __('Shift Name') }}</th>
+                                <th>{{ __('Tipe') }}</th>
                                 <th>{{ __('Branch') }}</th>
                                 <th>{{ __('Work Days') }}</th>
                                 <th>{{ __('Start Time') }}</th>
@@ -44,6 +45,13 @@
                             @foreach ($shifts as $shift)
                                 <tr>
                                     <td>{{ $shift->name }}
+                                    <td>
+                                        @if (!empty($shift->is_shift))
+                                            <span class="badge bg-warning text-dark">{{ __('Shift-shiftan') }}</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ __('Normal') }}</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $shift->branch?->name  }}
                                     </td>
                                     <td>

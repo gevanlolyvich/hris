@@ -54,4 +54,15 @@ class AttendanceEmployee extends Model
     {
         return $this->belongsTo(AttendanceType::class, 'attendance_type_id', 'id');
     }
+
+    public function getDateRange()
+    {
+        if ($this->clock_in && $this->clock_out && $this->clock_in !== '00:00:00' && $this->clock_out !== '00:00:00') {
+            if (strtotime($this->clock_out) < strtotime($this->clock_in)) {
+                $endDate = date('Y-m-d', strtotime($this->date . ' +1 day'));
+                return \Auth::user()->dateFormat($this->date) . ' - ' . \Auth::user()->dateFormat($endDate);
+            }
+        }
+        return \Auth::user()->dateFormat($this->date);
+    }
 }

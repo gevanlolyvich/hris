@@ -518,7 +518,11 @@ class ReportController extends Controller
                     $year = date('Y', strtotime($overtime->date));
 
                     $employee = Employee::find($overtime->employee_id);
-                    $total_work_hours = $employee->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
+                    $total_work_hours = $employee->getTotalHours($employee->shift_type?->shiftTimes?->where('is_working', 1) ?? collect(), $month, $year);
+
+                    if ($total_work_hours <= 0) {
+                        continue;
+                    }
 
                     $total_hours = max(0, round((strtotime($overtime->clock_out) - strtotime($overtime->clock_in)) / 3600, 2));
                     $amount = $overtime->is_work_day ? $total_hours * ($employee->salary / $total_work_hours) : $total_hours * ($employee->salary / $total_work_hours) * 2;
@@ -645,9 +649,14 @@ class ReportController extends Controller
                     return in_array(AttendanceLocationResolver::resolveBranchId($employee->id, $dateFormat), $allowedBranchIds, true);
                 };
 
-                $employee_attendances = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', true)->select('date', 'status', 'early_leaving', 'late')->get()->pluck(null, 'date');
+                $employee_attendances = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', true)->select('date', 'status', 'early_leaving', 'late', 'shift_type_id')->get()->groupBy('date');
                 $employee_overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in', 'date')->get();
-                $shift = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+                $shift = ShiftTime::where('shift_type_id', $employee->shift_type?->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+
+                $rosterByDate = collect();
+                if ($employee->is_shift) {
+                    $rosterByDate = collect($employee->monthlyShiftSchedule($month, $year));
+                }
 
                 //permits table database
                 $permits = DB::table('permits')
@@ -665,7 +674,7 @@ class ReportController extends Controller
                     $totalOvertime += $total_hours;
                 }
 
-                foreach ($employee_attendances as $attendance) {
+                foreach ($employee_attendances->flatten(1) as $attendance) {
                     if (!$isScoped($attendance->date)) {
                         continue;
                     }
@@ -685,48 +694,120 @@ class ReportController extends Controller
                     $dateFormat = $year . '-' . $month . '-' . $date;
 
                     if ($dateFormat <= date('Y-m-d')) {
-                        if (!$isScoped($dateFormat)) {
-                            if (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
-                                $attendanceStatus[$date] = 'L';
-                            } else {
-                                $attendanceStatus[$date] = 'A';
+                        $permitStatus = function () use ($permits, $dateFormat) {
+                            $permitOnDate = $permits->first(function ($permit) use ($dateFormat) {
+                                return $dateFormat >= $permit->start_date
+                                    && $dateFormat <= $permit->end_date;
+                            });
+                            if ($permitOnDate) {
+                                return match ((int) $permitOnDate->permit_type_id) {
+                                    1 => 'S',
+                                    2 => 'IK',
+                                    3 => 'CO',
+                                    4 => 'EO',
+                                    5 => 'PH',
+                                    6 => 'L',
+                                    default => 'I',
+                                };
                             }
+                            return 'I';
+                        };
+
+                        // Karyawan shift2an: 1 badge per shift yang dijadwalkan di roster hari itu.
+                        if ($employee->is_shift) {
+                            $slotsToday = $rosterByDate[$dateFormat] ?? collect();
+                            $badges = [];
+
+                            if (!$isScoped($dateFormat)) {
+                                if ($slotsToday->isEmpty()) {
+                                    $badges[] = 'L';
+                                } else {
+                                    foreach ($slotsToday as $slot) {
+                                        $badges[] = 'A';
+                                    }
+                                }
+                                $attendanceStatus[$date] = $badges;
+                                continue;
+                            }
+
+                            $hasScopedDay = true;
+                            $attRows = $employee_attendances[$dateFormat] ?? collect();
+                            $dateHasValidLeave = $attRows->contains(fn($r) => $r->status == 'Leave');
+                            $leaveCountedForDate = false;
+
+                            if ($slotsToday->isEmpty()) {
+                                // Tidak ada shift dijadwalkan hari itu.
+                                $badges[] = 'L';
+                            } else {
+                                foreach ($slotsToday as $slot) {
+                                    $match = $attRows->first(function ($r) use ($slot) {
+                                        return (int) $r->shift_type_id === (int) $slot->shift_type_id;
+                                    });
+
+                                    if ($match) {
+                                        if ($match->status == 'Present' || $match->status == 'No Working Hour') {
+                                            $badges[] = 'H';
+                                            $totalPresent += 1;
+                                        } elseif ($match->status == 'Leave') {
+                                            $badges[] = 'C';
+                                            if (!$leaveCountedForDate) {
+                                                $totalLeave += 1;
+                                                $leaveCountedForDate = true;
+                                            }
+                                        } elseif ($match->status == 'Permission') {
+                                            $badges[] = $permitStatus();
+                                        } else {
+                                            $badges[] = 'A';
+                                        }
+                                    } else {
+                                        // Cuti berlaku penuh 1 hari: jika ada row Leave valid di tanggal ini
+                                        // (row cuti hanya dibuat untuk shift pertama), semua shift dianggap 'C'.
+                                        if ($dateHasValidLeave) {
+                                            $badges[] = 'C';
+                                            if (!$leaveCountedForDate) {
+                                                $totalLeave += 1;
+                                                $leaveCountedForDate = true;
+                                            }
+                                        } else {
+                                            $badges[] = 'A';
+                                        }
+                                    }
+                                }
+                            }
+
+                            $attendanceStatus[$date] = $badges;
+                            continue;
+                        }
+
+                        // Non-shift: tetap 1 badge.
+                        $isWorkday = !empty($shift[date('l', strtotime($dateFormat))]) && !$holiday_date[$dateFormat];
+
+                        if (!$isScoped($dateFormat)) {
+                            $attendanceStatus[$date] = $isWorkday ? 'A' : 'L';
                             continue;
                         }
 
                         $hasScopedDay = true;
 
-                        if (isset($employee_attendances[$dateFormat])) {
-                            if (($employee_attendances[$dateFormat]->status == 'Present') || ($employee_attendances[$dateFormat]->status == 'No Working Hour')) {
+                        $attRows = $employee_attendances[$dateFormat] ?? collect();
+
+                        if ($attRows->isNotEmpty()) {
+                            $presentRow = $attRows->first(function ($r) {
+                                return $r->status == 'Present' || $r->status == 'No Working Hour';
+                            });
+
+                            if ($presentRow) {
                                 $attendanceStatus[$date] = 'H';
                                 $totalPresent += 1;
-                            } elseif ($employee_attendances[$dateFormat]->status == 'Leave') {
+                            } elseif ($attRows->contains(fn($r) => $r->status == 'Leave')) {
                                 $attendanceStatus[$date] = 'C';
                                 $totalLeave += 1;
-                            } elseif ($employee_attendances[$dateFormat]->status == 'Permission') {
-                                //permit Date Format
-                                $permitOnDate = $permits->first(function ($permit) use ($dateFormat) {
-                                    return $dateFormat >= $permit->start_date
-                                        && $dateFormat <= $permit->end_date;
-                                });
-                                if ($permitOnDate) {
-                                    //match permit_type_id
-                                    $attendanceStatus[$date] = match ((int) $permitOnDate->permit_type_id) {
-                                        1 => 'S',
-                                        2 => 'IK',
-                                        3 => 'CO',
-                                        4 => 'EO',
-                                        5 => 'PH',
-                                        6 => 'L',
-                                        default => 'I',
-                                    };
-                                } else {
-                                    $attendanceStatus[$date] = 'I';
-                                }
+                            } elseif ($attRows->contains(fn($r) => $r->status == 'Permission')) {
+                                $attendanceStatus[$date] = $permitStatus();
                             } else {
                                 $attendanceStatus[$date] = 'A';
                             }
-                        } elseif (!$shift[date('l', strtotime($dateFormat))] || $holiday_date[$dateFormat]) {
+                        } elseif (!$isWorkday) {
                             $attendanceStatus[$date] = 'L';
                         } else {
                             $attendanceStatus[$date] = 'A';

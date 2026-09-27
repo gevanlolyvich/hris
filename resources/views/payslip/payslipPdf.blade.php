@@ -140,7 +140,7 @@
                                                 <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}
                                                 </td>
                                                 <td class="text-right">
-                                                    {{ \Auth::user()->priceFormat($item->type == 'percentage' ? ($item->amount * \App\Models\Employee::find($item->employee_id)?->salary) / 100 : $item->amount) }}
+                                                    {{ \Auth::user()->priceFormat($item->prorated_amount ?? ($item->type == 'percentage' ? ($item->amount * \App\Models\Employee::find($item->employee_id)?->salary) / 100 : $item->amount)) }}
                                                 </td>
                                             </tr>
                                         @endforeach

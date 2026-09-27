@@ -32,7 +32,7 @@ class BpjsController extends Controller
         }
 
         $bpjs_options   = BpjsOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-        $recurringOptions = [ 1 => __('Recurring')];
+        $recurringOptions = [0 => __('No'), 1 => __('Recurring'), 2 => __('Prorated')];
         $bpjsTypes        = [ 'percentage' => 'Percentage'];
         return view('bpjs.create', compact('employee', 'bpjs_options', 'recurringOptions', 'bpjsTypes'));
     }
@@ -44,7 +44,7 @@ class BpjsController extends Controller
                 $request->all(), [
                                    'employee_id' => 'required',
                                    'bpjs_option' => 'required',
-                                   'is_recurring' => 'required',
+                                   'is_recurring' => 'required|in:0,1,2',
                                    'type' => 'required',
                                    'amount' => 'required',
                                ]
@@ -61,10 +61,13 @@ class BpjsController extends Controller
                 return redirect()->back()->with('error', __('Inactive'));
             }
 
+            $recurringType = $request->is_recurring;
+
             $bpjs                = new Bpjs();
             $bpjs->employee_id   = $request->employee_id;
             $bpjs->bpjs_option   = $request->bpjs_option;
-            $bpjs->is_recurring  = $request->is_recurring;
+            $bpjs->is_recurring  = $recurringType == 2 ? 1 : $recurringType;
+            $bpjs->is_prorated   = $recurringType == 2 ? 1 : 0;
             $bpjs->type          = $request->type;
             $bpjs->amount        = $request->amount;
             $bpjs->created_by    = \Auth::user()->id;
@@ -87,9 +90,10 @@ class BpjsController extends Controller
         if (\Auth::user()->can('Edit Bpjs')) {
             if ($bpjs->created_by == \Auth::user()->id || \Auth::user()->type != 'employee') {
                 $bpjs_options = BpjsOption::where('created_by', \Auth::user()->creatorId())->get()->pluck('name', 'id');
-                $recurringOptions   = [ 1 => __('Recurring')];
+                $recurringOptions   = [0 => __('No'), 1 => __('Recurring'), 2 => __('Prorated')];
+                $selectedRecurring  = $bpjs->is_prorated ? 2 : ($bpjs->is_recurring ? 1 : 0);
                 $bpjsTypes          = [ 'percentage' => 'Percentage'];
-                return view('bpjs.edit', compact('bpjs', 'bpjs_options', 'recurringOptions', 'bpjsTypes'));
+                return view('bpjs.edit', compact('bpjs', 'bpjs_options', 'recurringOptions', 'selectedRecurring', 'bpjsTypes'));
             } else {
                 return response()->json(['error' => __('Permission denied.')], 401);
             }
@@ -107,7 +111,7 @@ class BpjsController extends Controller
 
                                        'bpjs_option' => 'required',
                                        'amount' => 'required',
-                                       'is_recurring' => 'required',
+                                       'is_recurring' => 'required|in:0,1,2',
                                        'type' => 'required',
                                    ]
                 );
@@ -122,8 +126,11 @@ class BpjsController extends Controller
                     return redirect()->back()->with('error', __('Inactive'));
                 }
 
+                $recurringType = $request->is_recurring;
+
                 $bpjs->bpjs_option   = $request->bpjs_option;
-                $bpjs->is_recurring  = $request->is_recurring;
+                $bpjs->is_recurring  = $recurringType == 2 ? 1 : $recurringType;
+                $bpjs->is_prorated   = $recurringType == 2 ? 1 : 0;
                 $bpjs->type          = $request->type;
                 $bpjs->amount        = $request->amount;
                 $bpjs->save();

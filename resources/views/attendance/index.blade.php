@@ -337,7 +337,7 @@
                                             <tr>
                                                 <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                                 <td>{{ $attendance->branch_name ?? '' }}</td>
-                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type->name }}</td>
+                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee?->shift_type?->name ?? ($attendance->employee?->is_shift ? __('Shift-Shiftan') : '-') }}</td>
                                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                                 <td>{{ $attendance->status }}</td>
                                                 <td>
@@ -461,7 +461,7 @@
                                             <tr>
                                                 <td>{{ !empty($attendance->employee) ? $attendance->employee->name : '' }}</td>
                                                 <td>{{ $attendance->branch_name ?? '' }}</td>
-                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name }}</td>
+                                                <td>{{ $attendance->shift_type?->name ?? $attendance->employee?->shift_type?->name ?? ($attendance->employee?->is_shift ? __('Shift-Shiftan') : '-') }}</td>
                                                 <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                                 <td>{{ $attendance->status }}</td>
                                                 <td>
@@ -620,7 +620,7 @@
                                     <tr>
                                         <td>{{ !empty($attendance->employee) ? $attendance->employee?->name : '' }}</td>
                                         <td>{{ $attendance->branch_name ?? '' }}</td>
-                                        <td>{{ $attendance->shift_type?->name ?? $attendance->employee->shift_type?->name }}</td>
+                                        <td>{{ $attendance->shift_type?->name ?? $attendance->employee?->shift_type?->name ?? ($attendance->employee?->is_shift ? __('Shift-Shiftan') : '-') }}</td>
                                         <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
                                         <td>{{ $attendance->status }}</td>
                                         <td>

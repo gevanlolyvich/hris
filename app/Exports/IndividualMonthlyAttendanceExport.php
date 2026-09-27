@@ -92,7 +92,8 @@ class IndividualMonthlyAttendanceExport implements FromCollection, WithEvents, S
             $employeeArray          = [$index + 1, $employee->name, $employee?->designation?->name ?? '-', AttendanceLocationResolver::resolveBranchName($employee->id, $monthStart) ?? '-', $employee?->employeeType?->name ?? '-'];
             $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid')->get();
 
-            $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+            $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type?->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+            $rosterByDate           = $employee->is_shift ? collect($employee->monthlyShiftSchedule($month, $year)) : collect();
             $totalAttendance        = 0;
             $arrayAttendanceDate    = [];
             
@@ -116,23 +117,23 @@ class IndividualMonthlyAttendanceExport implements FromCollection, WithEvents, S
                                 if (!$attendance->is_valid && $attendance->attendance_type_id != '1') {
                                     $this->yellowed_cell->push($this->getColomnByDateAndEmployeeIndex($d, $index));
                                 }
-                            } else if ($attendance->status == 'Leave' && !$present) {
-                                $date_data          = __('Leave');
+                            } else if ($attendance->status == 'Leave') {
+                                $date_data          .= __('Leave') . '; ';
                                 $totalAttendance    += 1;
                                 $leave              = true;
-                            } else if ($attendance->status == 'Permission' && !$present) {
-                                $date_data          = __('Permission');
+                            } else if ($attendance->status == 'Permission') {
+                                $date_data          .= __('Permission') . '; ';
                                 $totalAttendance    += 1;
                                 $permission         = true;
-                            } else if (($holiday_date[$dateFormat] || !$shift[date('l', strtotime($dateFormat))]) && !$leave && !$permission) {
+                            } else if (($holiday_date[$dateFormat] || !$this->resolveDayWorking($employee, $shift, $rosterByDate, $dateFormat)) && !$leave && !$permission) {
                                 $date_data          = __('Holiday');
                             } else {
                                 $date_data          = '';
                             }
                         }
 
-                        $arrayAttendanceDate[]  = $date_data;
-                    } else if (($holiday_date[$dateFormat] || !$shift[date('l', strtotime($dateFormat))]) && !$leave && !$permission) {
+                        $arrayAttendanceDate[]  = rtrim((string) $date_data, '; ');
+                    } else if (($holiday_date[$dateFormat] || !$this->resolveDayWorking($employee, $shift, $rosterByDate, $dateFormat)) && !$leave && !$permission) {
                         $arrayAttendanceDate[]  = __('Holiday');
                     } else {
                         $arrayAttendanceDate[]  = '';
@@ -153,6 +154,15 @@ class IndividualMonthlyAttendanceExport implements FromCollection, WithEvents, S
     public function startCell(): string
     {
         return 'B2';
+    }
+
+    protected function resolveDayWorking($employee, $shift, $rosterByDate, $dateFormat): bool
+    {
+        if ($employee->is_shift) {
+            return $rosterByDate->has($dateFormat);
+        }
+
+        return (bool) ($shift[date('l', strtotime($dateFormat))] ?? false);
     }
 
     public function title(): string

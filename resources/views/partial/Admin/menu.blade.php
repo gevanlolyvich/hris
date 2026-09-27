@@ -633,6 +633,24 @@ $mode_setting = \App\Models\Utility::mode_layout();
                     </li>
                 @endcan
 
+                <!--manage meeting-->
+                @can('Manage Meeting New')
+                    <li class="dash-item {{ Request::segment(1) == 'meeting-new' ? 'active' : '' }}">
+                        <a href="{{ route('meeting-new.index') }}" class="dash-link"><span class="dash-micon"><i
+                                    class="ti ti-calendar-plus"></i></span><span
+                                class="dash-mtext">{{ __('Manage Meeting') }}</span></a>
+                    </li>
+                @endcan
+
+                <!--hasil meeting-->
+                @can('Manage Meeting New')
+                    <li class="dash-item {{ Request::segment(1) == 'meeting-result' ? 'active' : '' }}">
+                        <a href="{{ route('meeting-result.index') }}" class="dash-link"><span class="dash-micon"><i
+                                    class="ti ti-file-text"></i></span><span
+                                class="dash-mtext">{{ __('Hasil Meeting') }}</span></a>
+                    </li>
+                @endcan
+
 
                 <!-- Zoom meeting-->
                 {{-- @if (\Auth::user()->type != 'super admin')
@@ -750,6 +768,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             <li class="dash-item {{ Request::segment(1) == 'shift' ? 'active' : '' }}">
                                 <a class="dash-link" href="{{ route('shift.index') }}">{{ __('Shift') }}</a>
                             </li>
+                            @can('Manage Shift')
+                                <li class="dash-item {{ Request::segment(1) == 'employee-shift-schedule' ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('employee-shift-schedule.index') }}">{{ __('Jadwal Shift') }}</a>
+                                </li>
+                            @endcan
                             <li class="dash-item {{ Request::segment(1) == 'award' ? 'active' : '' }}">
                                 <a class="dash-link" href="{{ route('award.index') }}">{{ __('Award') }}</a>
                             </li>

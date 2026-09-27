@@ -419,7 +419,12 @@ class AttendanceRequestController extends Controller
 
         if ($form['is_approved']) {
             //* Method Create Attendance
-            $shift_times = ShiftTime::where('shift_type_id', $attendance_request->employee->shift_type->id)
+            $requestEmployee = $attendance_request->employee;
+            $targetShiftId = $requestEmployee->is_shift
+                ? ($requestEmployee->scheduledShiftIdsForDate($attendance_request->date)[0] ?? $requestEmployee->shift_type_id)
+                : $requestEmployee->shift_type_id;
+
+            $shift_times = ShiftTime::where('shift_type_id', $targetShiftId)
                 ->where('days', date('l', strtotime($attendance_request->date)))
                 ->first();
 
@@ -430,33 +435,34 @@ class AttendanceRequestController extends Controller
             $secs                     = floor($totalWorkHoursSeconds % 60);
             $workHours                = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
-            $shift_startTime = strtotime($shift_times->start_time);
-            $shift_endTime   = strtotime($shift_times->end_time);
+            $late        = '00:00:00';
+            $earlyLeaving = '00:00:00';
 
-            if ($shift_startTime > $shift_endTime) {
-                $shift_endTime += 86400;
-            }
+            if ($shift_times) {
+                $shift_startTime = strtotime($shift_times->start_time);
+                $shift_endTime   = strtotime($shift_times->end_time);
 
-            // late
-            if ($start_time_cal > ($shift_startTime + ((int)$settings['late_tolerance'] * 60))) {
-                $totalLateSeconds = $start_time_cal - ($shift_startTime + ((int)$settings['late_tolerance'] * 60));
-                $hours = floor($totalLateSeconds / 3600);
-                $mins  = floor($totalLateSeconds / 60 % 60);
-                $secs  = floor($totalLateSeconds % 60);
-                $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-            } else {
-                $late  = '00:00:00';
-            }
+                if ($shift_startTime > $shift_endTime) {
+                    $shift_endTime += 86400;
+                }
 
-            //early Leaving
-            if ($shift_endTime > $end_time_cal) {
-                $totalEarlyLeavingSeconds = $shift_endTime - $end_time_cal;
-                $hours                    = floor($totalEarlyLeavingSeconds / 3600);
-                $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
-                $secs                     = floor($totalEarlyLeavingSeconds % 60);
-                $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
-            } else {
-                $earlyLeaving             = '00:00:00';
+                // late
+                if ($start_time_cal > ($shift_startTime + ((int)$settings['late_tolerance'] * 60))) {
+                    $totalLateSeconds = $start_time_cal - ($shift_startTime + ((int)$settings['late_tolerance'] * 60));
+                    $hours = floor($totalLateSeconds / 3600);
+                    $mins  = floor($totalLateSeconds / 60 % 60);
+                    $secs  = floor($totalLateSeconds % 60);
+                    $late  = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                }
+
+                //early Leaving
+                if ($shift_endTime > $end_time_cal) {
+                    $totalEarlyLeavingSeconds = $shift_endTime - $end_time_cal;
+                    $hours                    = floor($totalEarlyLeavingSeconds / 3600);
+                    $mins                     = floor($totalEarlyLeavingSeconds / 60 % 60);
+                    $secs                     = floor($totalEarlyLeavingSeconds % 60);
+                    $earlyLeaving             = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                }
             }
 
             $employee = $attendance_request->employee;
@@ -467,8 +473,8 @@ class AttendanceRequestController extends Controller
                 'status'                => $presentAttendance->name,
                 'clock_in'              => $attendance_request->start_time . ':00',
                 'clock_out'             => $attendance_request->end_time . ':00',
-                'late'                  => $shift_times->is_working ? $late : '00:00:00',
-                'early_leaving'         => $shift_times->is_working ? $earlyLeaving : '00:00:00',
+                'late'                  => $shift_times?->is_working ? $late : '00:00:00',
+                'early_leaving'         => $shift_times?->is_working ? $earlyLeaving : '00:00:00',
                 'work_hours'            => $workHours,
                 'overtime'              => '00:00:00',
                 'total_rest'            => '00:00:00',
@@ -480,7 +486,7 @@ class AttendanceRequestController extends Controller
                 'source_out'            => 'Application',
                 'is_valid'              => true,
                 'validate_by'           => Auth::user()->id,
-                'shift_type_id'         => $attendance_request->employee->shift_type_id,
+                'shift_type_id'         => $targetShiftId,
             ];
         }
 
@@ -488,7 +494,7 @@ class AttendanceRequestController extends Controller
             AttendanceRequest::where('id', $attendance_request->id)->update($form);
 
             if ($form_attendance && $form['is_approved']) {
-                AttendanceEmployee::where('employee_id', $form_attendance['employee_id'])->where('date', $form_attendance['date'])->delete();
+                AttendanceEmployee::where('employee_id', $form_attendance['employee_id'])->where('date', $form_attendance['date'])->where('shift_type_id', $form_attendance['shift_type_id'])->delete();
                 AttendanceEmployee::create($form_attendance);
 
                 $logForm =  [

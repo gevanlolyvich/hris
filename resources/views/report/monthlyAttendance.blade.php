@@ -331,29 +331,34 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($employeesAttendance as $attendance)
+                                        @php
+                                            $badgeColors = [
+                                                'H'  => 'success',   // Hadir
+                                                'A'  => 'danger',    // Alpha
+                                                'I'  => 'info',      // Izin umum
+                                                'IK' => 'info',      // Izin Keperluan
+                                                'C'  => 'warning',   // Cuti
+                                                'L'  => 'primary',   // Libur
+                                                'CO' => 'info',      // Cuti Off
+                                                'EO' => 'info', // Emergency Off
+                                                'PH' => 'info',   // Public Holiday
+                                                'S'  => 'info',
+                                            ];
+                                        @endphp
                                         <tr>
                                             <td>{{ $attendance['name'] }}</td>
                                             @foreach ($attendance['status'] as $status)
-                                                 @php
-                                                    $badgeColors = [
-                                                        'H'  => 'success',   // Hadir
-                                                        'A'  => 'danger',    // Alpha
-                                                        'I'  => 'info',      // Izin umum
-                                                        'IK' => 'info',      // Izin Keperluan
-                                                        'C'  => 'warning',   // Cuti
-                                                        'L'  => 'primary',   // Libur
-                                                        'CO' => 'info',      // Cuti Off
-                                                        'EO' => 'info', // Emergency Off
-                                                        'PH' => 'info',   // Public Holiday
-                                                        'S'  => 'info',
-                                                    ];
+                                                @php
+                                                    $badges = is_array($status) ? $status : (is_null($status) ? [] : [$status]);
                                                 @endphp
                                                 <td>
-                                                    @if ($status)
-                                                        <i class="badge bg-{{ $badgeColors[$status] ?? 'secondary' }} p-2 rounded">
-                                                            {{ $status }}
-                                                        </i>
-                                                    @endif
+                                                    @foreach ($badges as $st)
+                                                        @if ($st)
+                                                            <i class="badge bg-{{ $badgeColors[$st] ?? 'secondary' }} p-2 rounded">
+                                                                {{ $st }}
+                                                            </i>
+                                                        @endif
+                                                    @endforeach
                                                 </td>
                                             @endforeach
                                         </tr>

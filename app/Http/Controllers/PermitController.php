@@ -123,6 +123,46 @@ class PermitController extends Controller
         }
     }
 
+    public function shiftDates(Request $request)
+    {
+        $employee = Employee::where('is_active', 1)->find($request->get('employee_id'));
+
+        if (!$employee || $employee->is_shift != 1) {
+            return response()->json(['unrestricted' => true]);
+        }
+
+        $month = preg_match('/^\d{4}-\d{2}$/', (string) $request->get('month', date('Y-m')))
+            ? $request->get('month')
+            : date('Y-m');
+
+        $schedule = $employee->monthlyShiftSchedule(date('m', strtotime($month)), date('Y', strtotime($month)));
+
+        return response()->json([
+            'dates' => array_values(array_keys($schedule->toArray())),
+        ]);
+    }
+
+    private function validateShiftDates(Employee $employee, $startDate, $endDate)
+    {
+        if ($employee->is_shift != 1) {
+            return true;
+        }
+
+        $period = new \DatePeriod(
+            new \DateTime($startDate),
+            new \DateInterval('P1D'),
+            new \DateTime(date('Y-m-d', strtotime('+1 day', strtotime($endDate))))
+        );
+
+        foreach ($period as $value) {
+            if (!$employee->hasScheduledShiftOn($value->format('Y-m-d'))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function store(Request $request)
     {
         if (\Auth::user()->can('Create Leave')) {
@@ -162,6 +202,10 @@ class PermitController extends Controller
 
             if (empty($employee) || !$employee) {
                 return redirect()->back()->with('error', __('Inactive'));
+            }
+
+            if (!$this->validateShiftDates($employee, $request->start_date, $request->end_date)) {
+                return redirect()->back()->with('error', __('Selected date has no scheduled shift for this employee'));
             }
 
             $duplicate_permit = Permit::where('employee_id', $permit->employee_id)
@@ -310,6 +354,10 @@ class PermitController extends Controller
                     return redirect()->back()->with('error', __('Permit Already Exist In That Date Range'));
                 }
 
+                if ($permit->employee && !$this->validateShiftDates($permit->employee, $request->start_date, $request->end_date)) {
+                    return redirect()->back()->with('error', __('Selected date has no scheduled shift for this employee'));
+                }
+
                 $date = date_create($request->date);
                 $document_path = null;
                 if ($request->file('myDocument')) {
@@ -416,12 +464,10 @@ class PermitController extends Controller
             }
 
             $permitAttendance = AttendanceStatus::find(3);
-            for ($i = 0; $i < count($dates); $i++) {
-                $date = $dates[$i];
 
-                AttendanceEmployee::where('employee_id', $permit->employee_id)->where('date', $date)->delete();
+            $createPermissionRow = function ($employeeId, $date, $shiftTypeId) use ($permitAttendance) {
                 AttendanceEmployee::create([
-                    'employee_id'           => $permit->employee_id,
+                    'employee_id'           => $employeeId,
                     'date'                  => $date,
                     'attendance_status_id'  => $permitAttendance->id,
                     'status'                => $permitAttendance->name,
@@ -432,16 +478,49 @@ class PermitController extends Controller
                     'work_hours'            => '00:00:00',
                     'overtime'              => '00:00:00',
                     'total_rest'            => '00:00:00',
-                    'created_by'            => $permit->employee_id,
+                    'created_by'            => $employeeId,
                     'attendance_type_id'    => null, //* ON SITE
                     'coord_in'              => null,
                     'coord_out'             => null,
                     'is_valid'              => true,
                     'validate_by'           => Auth::user()->id,
-                    'shift_type_id'         => $permit->employee->shift_type_id,
+                    'shift_type_id'         => $shiftTypeId,
                     'source_in'             => 'Application',
                     'source_out'            => 'Application'
                 ]);
+            };
+
+            $hasAttendanceOn = function ($employeeId, $date, $shiftTypeId = null) {
+                $query = AttendanceEmployee::where('employee_id', $employeeId)->where('date', $date);
+                if (!empty($shiftTypeId)) {
+                    $query->where('shift_type_id', $shiftTypeId);
+                }
+                return $query->exists();
+            };
+
+            for ($i = 0; $i < count($dates); $i++) {
+                $date = $dates[$i];
+
+                if ($permit->employee->is_shift) {
+                    // Shift employee: satu baris Permission untuk tiap shift terjadwal
+                    // yang belum memiliki record attendance (hadir/Permission/dll).
+                    $shiftTypeIds = $permit->employee->scheduledShiftIdsForDate($date);
+
+                    if (empty($shiftTypeIds)) {
+                        $shiftTypeIds = [$permit->employee->shift_type_id];
+                    }
+
+                    foreach ($shiftTypeIds as $shiftTypeId) {
+                        if (!empty($shiftTypeId) && !$hasAttendanceOn($permit->employee_id, $date, $shiftTypeId)) {
+                            $createPermissionRow($permit->employee_id, $date, $shiftTypeId);
+                        }
+                    }
+                } else {
+                    // Non-shift: satu baris Permission per tanggal (perilaku sebelumnya).
+                    if (!$hasAttendanceOn($permit->employee_id, $date)) {
+                        $createPermissionRow($permit->employee_id, $date, $permit->employee->shift_type_id);
+                    }
+                }
             }
         }
 

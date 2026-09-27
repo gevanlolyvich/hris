@@ -210,11 +210,7 @@
                                                         <tbody class="list">
                                                             @foreach ($bpjs as $item)
                                                                 @php
-                                                                    $employess = \App\Models\Employee::find(
-                                                                        $item->employee_id,
-                                                                    );
-                                                                    $empbpjs =
-                                                                        ($item->amount * $employess->salary) / 100;
+                                                                    $empbpjs = $item->prorated_amount ?? (($item->amount * \App\Models\Employee::find($item->employee_id)?->salary) / 100);
                                                                 @endphp
                                                                 <tr>
                                                                     <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}</td>

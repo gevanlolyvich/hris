@@ -21,6 +21,8 @@
     $subordinates = \Auth::user()?->employee?->subordinatesFlatten()->pluck('id')->toArray() ?? [];
 
     $isAtasan = in_array($leave->employee_id, $subordinates);
+
+    $isShiftEmp = (bool) $leave->employees->is_shift;
 @endphp
 
 <div class="modal-body">
@@ -119,9 +121,13 @@
                                 }
 
                                 $isDisabled = !($leave->status == 'Pending' && $isAtasan);
+
+                                $isWorkingDay = $isShiftEmp
+                                    ? $leave->employees->hasScheduledShiftOn($formattedDate)
+                                    : (!empty($shift) && $shift->is_working == 1);
                             @endphp
 
-                            @if (!empty($shift) && $shift->is_working == 1)
+                            @if ($isWorkingDay)
                                 <label style="display:block;">
                                     <input type="checkbox" name="selected_dates[]" value="{{ $formattedDate }}"
                                         {{ $isChecked ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>

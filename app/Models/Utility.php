@@ -238,8 +238,7 @@ class Utility extends Model
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
         $totalAllowance = 0;
-        $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        list($total_work_days, $total_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
         $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
 
         foreach ($earning['allowance'] as $earn) {
@@ -418,7 +417,8 @@ class Utility extends Model
         $totalbpjs = 0;
 
         foreach ($deduction['bpjs'] as $earn) {
-            $empbpjs = $earn->type == 'percentage' ? $earn->amount * $employee->salary / 100 : $earn->amount;
+            $empbpjs = $earn->resolvedAmount($employee, $fixed_rate, $total_present_days);
+            $earn->prorated_amount = $empbpjs;
             $totalbpjs += $empbpjs;
         }
 

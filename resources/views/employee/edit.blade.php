@@ -176,7 +176,8 @@
                                     
                                     <div class="form-group col-md-12">
                                         {{ Form::label('branch_id', __('Branch'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
-                                        {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required','style'=>'font-weight:bold;', 'placeholder' => 'Select Branch']) }}
+                                        {{ Form::select('branch_id', $branches, $employee->branch_id, ['class' => 'form-control select2', 'disabled' => 'disabled', 'style'=>'font-weight:bold;']) }}
+                                        <input type="hidden" name="branch_id" value="{{ $employee->branch_id }}">
                                     </div>
                                     <div class="form-group col-md-12">
                                         {{ Form::label('department_id', __('Select Department'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
@@ -223,7 +224,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group col-md-12">
+                                    <div class="form-group col-md-12" id="shift-select-wrapper">
                                         {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
     
                                         <div class="form-icon-user">
@@ -235,6 +236,16 @@
                                                      @endif
                                                 </select>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="is_shift" value="1" id="is_shift" @if (!empty($employee->is_shift)) checked @endif>
+                                            <label class="form-check-label" for="is_shift">
+                                                {{ __('Karyawan Shift (Rostering)') }}
+                                            </label>
+                                            <small class="text-muted d-block">{{ __('Centang jika karyawan bekerja dengan sistem shift (Shift 1/2/3) dan dijadwalkan bulanan. Shift tetap tidak perlu dipilih.') }}</small>
                                         </div>
                                     </div>
                                     
@@ -483,7 +494,7 @@
             getBranchShift(branch_id);
         });
         
-        function getDepartment(branch_id) {
+        function getDepartment(branch_id, selectedId, selectedDesigId) {
             $('.designation_id').empty();
             $.ajax({
                 url: '{{ route('department.employee.json') }}',
@@ -502,19 +513,23 @@
 
                     $('.department_id').append('<option value="" disabled selected>{{ __('Select Department') }}</option>');
                     $.each(data, function(key, value) {
-                        $('.department_id').append('<option value="' + key + '">' + value +
+                        var isSelected = (typeof selectedId !== 'undefined' && selectedId !== null && key == selectedId) ? ' selected' : '';
+                        $('.department_id').append('<option value="' + key + '"' + isSelected + '>' + value +
                             '</option>');
                     });
                     new Choices('#choices-multiple', {
                         removeItemButton: true,
                     });
 
+                    if (typeof selectedId !== 'undefined' && selectedId !== null) {
+                        getDesignation(selectedId, selectedDesigId);
+                    }
 
                 }
             });
         }
 
-        function getEmployeeBranch(branch_id) {
+        function getEmployeeBranch(branch_id, selectedId) {
             console.log({branch_id})
             $.ajax({
                 url: '{{ route('branch.employee.json') }}',
@@ -533,7 +548,8 @@
 
                     $('.managed_by').append('<option value="" disabled selected>{{ __('Select Direct Supervisor') }}</option>');
                     $.each(data, function(key, value) {
-                        $('.managed_by').append('<option value="' + key + '">' + value +
+                        var isSelected = (typeof selectedId !== 'undefined' && selectedId !== null && key == selectedId) ? ' selected' : '';
+                        $('.managed_by').append('<option value="' + key + '"' + isSelected + '>' + value +
                             '</option>');
                     });
                     new Choices('#choices-multiple2', {
@@ -545,7 +561,7 @@
             });
         }
 
-        function getBranchShift(branch_id) {
+        function getBranchShift(branch_id, selectedId) {
                 // console.log({branch_id})
                 console.log({loc:'branchshift'})
                 $.ajax({
@@ -553,6 +569,7 @@
                     type: 'POST',
                     data: {
                         "branch_id": branch_id,
+                        "is_shift": 0,
                         "_token": "{{ csrf_token() }}",
                     },
                     success: function(data) {
@@ -563,21 +580,54 @@
                                                 </select>`;
                         $('.shift_type_id_div').html(emp_selct);
 
-                        $('.shift_type_id').append('<option value="" disabled selected>{{ __('Select Shift') }}</option>');
+                        $('.shift_type_id').append('<option value="" disabled>{{ __('Select Shift') }}</option>');
                         $.each(data, function(key, value) {
-                            $('.shift_type_id').append('<option value="' + key + '">' + value +
+                            var isSelected = (typeof selectedId !== 'undefined' && selectedId !== null && key == selectedId) ? ' selected' : '';
+                            $('.shift_type_id').append('<option value="' + key + '"' + isSelected + '>' + value +
                                 '</option>');
                         });
+                        if (!$('.shift_type_id').find('option[selected]').length) {
+                            $('.shift_type_id').find('option:first').attr('selected', true);
+                        }
                         new Choices('#choices-multiple5', {
                             removeItemButton: true,
                         });
 
+                        applyShiftToggle();
 
                     }
                 });
             }
 
-        function getDesignation(did) {
+        function applyShiftToggle() {
+            var isShift = $('#is_shift').is(':checked');
+            $('#shift-select-wrapper').toggleClass('d-none', isShift);
+            $('.shift_type_id').prop('disabled', isShift);
+        }
+
+        $('body').on('change', '#is_shift', function() {
+            applyShiftToggle();
+        });
+
+        $(function() {
+            applyShiftToggle();
+
+            // Because the branch is locked (disabled), the change-triggered cascade
+            // never fires, so we populate the dependent selects on page load using
+            // the employee's current values while showing the full option lists.
+            var branchId = "{{ $employee->branch_id ?? 'null' }}";
+            var deptId   = {{ $employee->department_id ?? 'null' }};
+            var desigId  = {{ $employee->designation_id ?? 'null' }};
+            var spvId    = {{ $employee->managed_by ?? 'null' }};
+
+            if (branchId && branchId !== 'null') {
+                getDepartment(branchId, deptId, desigId);  // full departments + current, cascades to designation
+                getEmployeeBranch(branchId, spvId);        // full supervisors (active in branch) + current
+                getBranchShift(branchId, {{ $employee->shift_type_id ?? 'null' }}); // existing behavior
+            }
+        });
+
+        function getDesignation(did, selectedId) {
 
             $.ajax({
                 url: '{{ route('employee.json') }}',
@@ -596,7 +646,8 @@
 
                     $('.designation_id').append('<option value="" disabled selected>{{ __('Select Designation') }}</option>');
                     $.each(data, function(key, value) {
-                        $('.designation_id').append('<option value="' + key + '">' + value +
+                        var isSelected = (typeof selectedId !== 'undefined' && selectedId !== null && key == selectedId) ? ' selected' : '';
+                        $('.designation_id').append('<option value="' + key + '"' + isSelected + '>' + value +
                             '</option>');
                     });
                     new Choices('#choices-multiple3', {

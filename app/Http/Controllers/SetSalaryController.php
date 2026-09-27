@@ -88,6 +88,11 @@ class SetSalaryController extends Controller
         // Initialize the present days count
         $presentDaysCount = 0;
 
+        // Approved permits (Permission) do not count as valid days.
+        $attendanceData = collect($attendanceData)->reject(function ($attendance) {
+            return $attendance['status'] == 'Permission';
+        });
+
         // Loop through each attendance entry
         foreach ($attendanceData as $attendance) {
             // Get the day of the week for the attendance date
@@ -264,10 +269,15 @@ class SetSalaryController extends Controller
         $bpjs = Bpjs::where('employee_id', $employee->id)->get();
         $overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull('report_document')->where('status', 'approved')->get();
 
-        $total_work_days = (new Employee)->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        if ($employee->is_shift) {
+            // Rostering employees: required days come from the monthly roster, not a fixed shift.
+            list($total_work_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
+        } else {
+            $total_work_days = $employee->getTotalWorkdays($employee->shift_type?->shiftTimes->where('is_working', 1)->pluck('days')->toArray() ?? [], $month, $year);
+        }
         // $total_work_hours = (new Employee)->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-        $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays) 
-        $total_present_days = (new Employee)->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays)
+        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type?->shiftTimes->where('is_working', 1) ?? collect(), $employee->employeeType?->type);
 
         $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
         $total_allowance = 0;
@@ -313,8 +323,7 @@ class SetSalaryController extends Controller
         }
 
         foreach ($bpjs as $value) {
-            $empsal = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            $value->tota_allow = $value->resolvedAmount($employee, $fixed_rate, $total_present_days);
         }
 
         return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances', 'total_work_days', 'total_work_hours', 'total_present_days', 'total_allowance', 'bpjs', 'bpjs_options'));
@@ -875,14 +884,17 @@ class SetSalaryController extends Controller
         $recurringRaw = $this->val($row, SalaryDataSheet::COL_BPJS_RECURRING);
         $recurring = $recurringRaw === '' ? 1 : (int) $recurringRaw;
 
-        if (!in_array($recurring, [0, 1], true)) {
-            return ['ok' => false, 'error' => __('BPJS Recurring harus 0 atau 1')];
+        if (!in_array($recurring, [0, 1, 2], true)) {
+            return ['ok' => false, 'error' => __('BPJS Recurring harus 0, 1, atau 2')];
         }
 
         $option = $this->resolveOption(BpjsOption::class, $this->val($row, SalaryDataSheet::COL_BPJS_OPTION));
         if ($option['ok'] === false) {
             return $option;
         }
+
+        $isRecurring = $recurring === 2 ? 1 : $recurring;
+        $isProrated = $recurring === 2 ? 1 : 0;
 
         return [
             'ok' => true,
@@ -891,7 +903,8 @@ class SetSalaryController extends Controller
                 'criteria' => [
                     'employee_id' => $employee->id,
                     'bpjs_option' => $option['id'],
-                    'is_recurring' => $recurring,
+                    'is_recurring' => $isRecurring,
+                    'is_prorated' => $isProrated,
                 ],
                 'values' => [
                     'type' => $type,

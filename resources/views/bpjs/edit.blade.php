@@ -7,7 +7,7 @@
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('is_recurring', __('Recurring'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>
-            {{ Form::select('is_recurring', $recurringOptions, null, ['class' => 'form-control select2', 'id' => 'is_recurring', 'required' => 'required']) }}
+            {{ Form::select('is_recurring', $recurringOptions, $selectedRecurring ?? null, ['class' => 'form-control select2', 'id' => 'is_recurring', 'required' => 'required']) }}
         </div>
         <div class="form-group col-md-6">
             {{ Form::label('type', __('Type'), ['class' => 'col-form-label']) }} <span class="text-danger pl-1"> *</span>

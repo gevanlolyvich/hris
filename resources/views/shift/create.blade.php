@@ -16,6 +16,15 @@
                     {{ Form::select('branch_id', $branches, null, ['class' => 'form-control select2', 'required' => 'required', 'placeholder' => __('Select Branch')]) }}
                 </div>
             </div>
+            <div class="form-group col-md-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="is_shift" value="1" id="shift_is_shift">
+                    <label class="form-check-label" for="shift_is_shift">
+                        {{ __('Jadwal Shift-shiftan (Rostering)') }}
+                    </label>
+                    <small class="text-muted d-block">{{ __('Centang jika shift ini adalah jadwal shift-shiftan (Shift 1/2/3) yang dijadwalkan bulanan per karyawan.') }}</small>
+                </div>
+            </div>
         @endif
         <div class="table-responsive">
             <table class="table" id="pc-dt-simple">

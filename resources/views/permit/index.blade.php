@@ -206,9 +206,85 @@
                     
                     var buttonValue = $(this).data("status");
                     $("#hiddenStatus").val(buttonValue);
-                })
+                });
+
+                applyPermitShiftDateRestriction();
             });
         });
+    </script>
+
+    <script>
+        function applyPermitShiftDateRestriction() {
+            var startInput = document.getElementById('start_date');
+            var endInput = document.getElementById('end_date');
+            if (!startInput || !endInput) return;
+
+            var form = startInput.closest('form');
+            var empSel = form.querySelector('#employee_id');
+            var empId = empSel ? empSel.value : (form.dataset.empId || '');
+
+            var startDp = startInput.datepicker;
+            var endDp = endInput.datepicker;
+            if (!startDp || !endDp) return;
+
+            function monthOf(date) {
+                var m = date.getMonth() + 1;
+                return date.getFullYear() + '-' + (m < 10 ? '0' + m : m);
+            }
+
+            function restrictForMonth(dp, month) {
+                if (!empId) {
+                    dp.setOptions({ datesDisabled: [] });
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('permit.shift-dates') }}',
+                    data: { employee_id: empId, month: month },
+                    success: function (data) {
+                        if (data.unrestricted || !data.dates || !data.dates.length) {
+                            dp.setOptions({ datesDisabled: [] });
+                            return;
+                        }
+
+                        var prefix = month + '-';
+                        var disabled = [];
+                        var first = new Date(month + '-01');
+                        var daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+
+                        for (var d = 1; d <= daysInMonth; d++) {
+                            var dat = prefix + (d < 10 ? '0' + d : d);
+                            if (data.dates.indexOf(dat) === -1) disabled.push(dat);
+                        }
+
+                        dp.setOptions({ datesDisabled: disabled });
+                    }
+                });
+            }
+
+            function applyToBoth(month) {
+                restrictForMonth(startDp, month);
+                restrictForMonth(endDp, month);
+            }
+
+            applyToBoth(monthOf(startDp.getDate() || new Date()));
+
+            if (empSel) {
+                $(empSel).on('change', function () {
+                    empId = this.value;
+                    applyToBoth(monthOf(startDp.getDate() || new Date()));
+                });
+            }
+
+            [startDp, endDp].forEach(function (dp) {
+                dp.element.addEventListener('changeMonth', function (e) {
+                    applyToBoth(monthOf(new Date(e.detail.viewDate)));
+                });
+                dp.element.addEventListener('changeYear', function (e) {
+                    applyToBoth(monthOf(new Date(e.detail.viewDate)));
+                });
+            });
+        }
     </script>
 
     <script>

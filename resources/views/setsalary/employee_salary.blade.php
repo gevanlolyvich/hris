@@ -123,7 +123,7 @@
                                 <div class="project-info-inner col-4">
                                     <b class="m-0"> {{ __('Total Main Salary') }} </b>
                                     <div class="project-amnt">
-                                        {{ \Auth::user()->priceFormat($employee->employeeType->type == 'Fixed' ? $employee->salary * ($total_present_days / $total_work_days) : $total_present_days * $employee->salary) }}
+                                        {{ \Auth::user()->priceFormat($employee->employeeType->type == 'Fixed' ? ($total_work_days > 0 ? $employee->salary * ($total_present_days / $total_work_days) : $employee->salary) : $total_present_days * $employee->salary) }}
                                     </div>
                                 </div>
                             </div>
@@ -685,7 +685,7 @@
                                         <tr>
                                             <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}
                                             </td>
-                                            <td>{{ $item->is_recurring ? __('Recurring') : __('No') }}</td>
+                                            <td>{{ $item->is_prorated ? __('Prorated') : ($item->is_recurring ? __('Recurring') : __('No')) }}</td>
                                             <td>{{ ucfirst($item->type) }}</td>
                                             <td>{{ $item->amount }}%
                                                 ({{ \Auth::user()->priceFormat($item->tota_allow ?? 0) }})

@@ -73,7 +73,7 @@ class SalaryInstructionsSheet implements FromArray, WithTitle
 
         $rows[] = ['   7) BPJS'];
         $rows[] = ['      - BPJS Option    : nama pilihan BPJS. Contoh: ' . $this->optionNames(BpjsOption::class)];
-        $rows[] = ['      - BPJS Recurring : biasanya 1 = berulang tiap bulan.'];
+        $rows[] = ['      - BPJS Recurring : 0 = hanya 1 bulan, 1 = berulang tiap bulan, 2 = prorata kehadiran.'];
         $rows[] = ['      - BPJS Type      : percentage (persen dari gaji).'];
         $rows[] = ['      - BPJS Amount (%) : persentase BPJS. Contoh: 4 untuk 4%.'];
         $rows[] = [];

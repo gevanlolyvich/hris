@@ -150,7 +150,12 @@ class NewFeature extends Seeder
                 "updated_at" => date('Y-m-d H:i:s'),
             ],
         ];
-        Permission::insert($newFeaturePermissionDatas);
+        foreach ($newFeaturePermissionDatas as $permissionData) {
+            Permission::firstOrCreate([
+                'name' => $permissionData['name'],
+                'guard_name' => $permissionData['guard_name'],
+            ]);
+        }
 
         $newFeatures = [
             ["name" => "Manage Shift"],

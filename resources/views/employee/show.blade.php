@@ -369,6 +369,7 @@
                 <div class="col-sm-12 col-md-6">
                     <div class="card ">
                         <div class="card-header card-body employee-detail-body fulls-card">
+                            @if ($employee->shift_type)
                             <h5>{{__('Shift') }} ({{ $employee->shift_type->name }})</h5>
                             <hr>
                             <div class="table-responsive">
@@ -399,6 +400,11 @@
                                     </tbody>
                                 </table>
                             </div>
+                            @else
+                            <h5>{{ __('Shift') }} ({{ __('Shift-Shiftan') }})</h5>
+                            <hr>
+                            <p class="text-muted mb-0">{{ __('Karyawan ini mengikuti jadwal roster bulanan.') }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>
