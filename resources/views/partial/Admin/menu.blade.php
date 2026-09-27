@@ -186,11 +186,6 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             <a class="dash-link {{ request()->is('employeeattendancehistory*') ? 'active' : '' }}"
                                 href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                         </li>
-                        @if (\Auth::user()->can('Manage Budget') && in_array(\Auth::user()->type, ['company', 'hr'], true))
-                            <li class="dash-item {{ Request::segment(1) == 'budget' ? 'active' : '' }}">
-                                <a class="dash-link" href="{{ route('budget.index') }}">{{ __('Budget') }}</a>
-                            </li>
-                        @endif
                     </ul>
                 </li>
                 @endif
@@ -762,7 +757,7 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif -->
 
                 <!-- HR-->
-                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday')) && \Auth::user()->type != 'employee')
+                @if ((Gate::check('Manage Awards') || Gate::check('Manage Transfer') || Gate::check('Manage Resignation') || Gate::check('Manage Travels') || Gate::check('Manage Promotion') || Gate::check('Manage Complaint') || Gate::check('Manage Warning') || Gate::check('Manage Announcement') || Gate::check('Manage Holiday') || Gate::check('Manage Budget')) && \Auth::user()->type != 'employee')
                     <li
                         class="dash-item dash-hasmenu {{ Request::segment(1) == 'holiday' ? 'dash-trigger active' : '' }}">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
@@ -814,6 +809,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <a class="dash-link"
                                     href="{{ route('holiday.index') }}">{{ __('Holidays') }}</a>
                             </li>
+                            @if (\Auth::user()->can('Manage Budget') && in_array(\Auth::user()->type, ['company', 'hr'], true))
+                                <li class="dash-item {{ Request::segment(1) == 'budget' ? ' active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('budget.index') }}">{{ __('Budget') }}</a>
+                                </li>
+                            @endif
                             <li class="dash-item {{ Request::segment(1) == 'vehicle-officer' ? ' active' : '' }}">
                                 <a class="dash-link"
                                     href="{{ route('vehicle-officer.index') }}">{{ __('Vehicle Officer') }}</a>
