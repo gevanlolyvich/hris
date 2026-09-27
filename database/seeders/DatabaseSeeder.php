@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             NewFeatureVehicleWorkshopAndType::class,
             NewFeatureBpjs::class,
             BpjsOptionSeeder::class,
+            NewFeatureBudget::class,
         ]);
     }
 }

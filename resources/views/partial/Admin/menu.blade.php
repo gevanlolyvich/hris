@@ -186,6 +186,11 @@ $mode_setting = \App\Models\Utility::mode_layout();
                             <a class="dash-link {{ request()->is('employeeattendancehistory*') ? 'active' : '' }}"
                                 href="{{ route('employeeattendancehistory.index')}}">{{ __('Employee History') }}</a>
                         </li>
+                        @if (\Auth::user()->can('Manage Budget') && in_array(\Auth::user()->type, ['company', 'hr'], true))
+                            <li class="dash-item {{ Request::segment(1) == 'budget' ? 'active' : '' }}">
+                                <a class="dash-link" href="{{ route('budget.index') }}">{{ __('Budget') }}</a>
+                            </li>
+                        @endif
                     </ul>
                 </li>
                 @endif

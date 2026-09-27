@@ -32,6 +32,7 @@ use App\Http\Controllers\AwardTypeController;
 use App\Http\Controllers\TerminationController;
 use App\Http\Controllers\TerminationTypeController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\PaySlipController;
@@ -1955,6 +1956,13 @@ Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->mid
 );
 
 Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('budget', BudgetController::class)->middleware(
     [
         'auth',
         'XSS',
