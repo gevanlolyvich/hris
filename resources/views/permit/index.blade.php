@@ -95,8 +95,8 @@
                         <tbody>
                             @foreach ($permits as $permit)
                                 <tr>
-                                    <td>{{ $permit->employee->name }}</td>
-                                    <td>{{ $permit->permitType->name }}</td>
+                                    <td>{{ $permit->employee?->name ?? '-' }}</td>
+                                    <td>{{ $permit->permitType?->name ?? '-' }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->end_date) }}</td>
                                     <td>{{ $permit->total_permit_days }}</td>
@@ -136,7 +136,7 @@
                                                 </a>
                                             </div>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if (($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $permit->status != 'Approved')
+                                                @if (($permit->created_by == Auth::user()->id || $permit->employee_id == (Auth::user()->employee?->id ?? null) || Auth::user()->type != 'employee') && $permit->status != 'Approved')
                                                     @can('Edit Permit')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
