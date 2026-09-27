@@ -106,7 +106,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
                     <h5>{{ __('Kalender Shift') }} | {{ $selectedEmployee->name }}</h5>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-pill" id="shift-counter">0 / 20 shift</span>
+                        <span class="badge rounded-pill" id="shift-counter">0 shift</span>
                         <button type="button" class="btn btn-sm btn-danger" id="clear-month">{{ __('Hapus Semua') }}</button>
                     </div>
                 </div>
@@ -263,7 +263,6 @@
             var EMPLOYEE_ID = {{ $selectedEmployee?->id ?? 'null' }};
             var MONTH = '{{ $monthYear }}';
             var TODAY = @json(date('Y-m-d'));
-            var TARGET = 20;
 
             function isLockedDate(date) {
                 return date < TODAY;
@@ -315,8 +314,8 @@
                 var el = document.getElementById('shift-counter');
                 if (!el) return;
                 var total = totalShifts();
-                el.textContent = total + ' / ' + TARGET + ' shift';
-                el.className = 'badge rounded-pill ' + (total < TARGET ? 'bg-success' : (total == TARGET ? 'bg-primary' : 'bg-danger'));
+                el.textContent = total + ' shift';
+                el.className = 'badge rounded-pill ' + (total > 0 ? 'bg-success' : 'bg-secondary');
             }
 
             function renderChips() {
@@ -458,9 +457,6 @@
                         }
                     }
                     if (scheduleData[date] && scheduleData[date][id] !== undefined) return;
-                    if (totalShifts() >= TARGET) {
-                        if (!confirm('Melebihi target 20 shift. Lanjutkan?')) return;
-                    }
                     if (shiftIsCrossDay(id)) {
                         openEndDateModal(date, id, 'add');
                     } else {
@@ -517,10 +513,6 @@
             var saveBtn = document.getElementById('save-schedule');
             if (saveBtn) {
                 saveBtn.addEventListener('click', function() {
-                    var total = totalShifts();
-                    if (total > TARGET && !confirm('Jumlah shift ' + total + ' melebihi target 20. Simpan tetap?')) {
-                        return;
-                    }
                     var prefix = MONTH.slice(0, 7);
                     var payload = {};
                     Object.keys(scheduleData).forEach(function(date) {
