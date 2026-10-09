@@ -650,6 +650,10 @@ class ReportController extends Controller
                 };
 
                 $employee_attendances = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', true)->select('date', 'status', 'early_leaving', 'late', 'shift_type_id')->get()->groupBy('date');
+
+                // Tanggal yang punya absensi namun ditandai tidak valid (is_valid = false).
+                // Dipakai untuk membedakan "absen invalid" (tampil A) dari "belum absen" (tampil L).
+                $invalidAttendanceDates = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', false)->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))->flip();
                 $employee_overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('clock_out', 'clock_in', 'date')->get();
                 $shift = ShiftTime::where('shift_type_id', $employee->shift_type?->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
 
@@ -736,8 +740,28 @@ class ReportController extends Controller
                             $leaveCountedForDate = false;
 
                             if ($slotsToday->isEmpty()) {
-                                // Tidak ada shift dijadwalkan hari itu.
-                                $badges[] = 'L';
+                                // Tidak ada shift dijadwalkan. Karyawan bisa saja sebelumnya non-shift
+                                // di bulan ini, jadi absensi selalu diprioritaskan atas status libur.
+                                if ($attRows->isNotEmpty()) {
+                                    $presentRow = $attRows->first(fn($r) => in_array($r->status, ['Present', 'No Working Hour']));
+                                    if ($presentRow) {
+                                        $badges[] = 'H';
+                                        $totalPresent += 1;
+                                    } elseif ($attRows->contains(fn($r) => $r->status == 'Leave')) {
+                                        $badges[] = 'C';
+                                        $totalLeave += 1;
+                                    } elseif ($attRows->contains(fn($r) => $r->status == 'Permission')) {
+                                        $badges[] = $permitStatus();
+                                    } else {
+                                        $badges[] = 'A';
+                                    }
+                                } elseif (isset($invalidAttendanceDates[$dateFormat])) {
+                                    // Absensi ada tapi ditandai tidak valid.
+                                    $badges[] = 'A';
+                                } else {
+                                    // Benar-benar libur / belum ada absensi.
+                                    $badges[] = 'L';
+                                }
                             } else {
                                 foreach ($slotsToday as $slot) {
                                     $match = $attRows->first(function ($r) use ($slot) {
