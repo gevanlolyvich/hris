@@ -855,21 +855,6 @@ class PaySlipController extends Controller
             }
         }
 
-
-        if (isset($request->rate) && !empty($request->rate)) {
-            $rates = $request->rate;
-            $rateIds = $request->rate_id;
-            $hourses = $request->hours;
-
-            foreach ($rates as $k => $rate) {
-                $overtime = Overtime::find($rateIds[$k]);
-                $overtime->rate = $rate;
-                $overtime->hours = $hourses[$k];
-                $overtime->save();
-            }
-        }
-
-
         $payslipEmployee = PaySlip::find($request->payslip_id);
         $payslipEmployee->allowance = Employee::allowance($payslipEmployee->employee_id, $month, $year);
         $payslipEmployee->commission = Employee::commission($payslipEmployee->employee_id, $month, $year);

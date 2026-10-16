@@ -441,7 +441,7 @@ class Employee extends Model
         }
 
         //Overtime
-        $over_times = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+        $over_times = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->where('status', 'approved')->get();
         $total_over_time = 0;
         $total_over_time_hours = 0;
         $overtime_limit = $employee?->departments?->overtime_limit;
@@ -488,7 +488,7 @@ class Employee extends Model
         $normal_salary = $this->get_salary($month, $year);
 
         //Net Salary Calculate
-        $advance_salary = $total_allowance + $total_commission + $total_other_payment;
+        $advance_salary = $total_allowance + $total_commission + $total_other_payment + $total_over_time;
 
         $bruto = $normal_salary + $advance_salary;
 

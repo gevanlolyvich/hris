@@ -293,7 +293,7 @@ class Utility extends Model
         }
 
         //Overtime
-        $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+        $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->where('status', 'approved')->get();
 
         $earning['totalOverTime'] = 0;
         $total_over_time_hours = 0;
@@ -371,6 +371,8 @@ class Utility extends Model
             $earning['totalOverTime'] += $amount;
         }
 
+        $earning['overTime'] = $earning['overTime']->filter(fn ($o) => isset($o->amount));
+
         $current = "{$year}-{$month}";
         $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($current) {
             $query->where(function ($q) use ($current) {
@@ -423,10 +425,8 @@ class Utility extends Model
         }
 
         $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
-        $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
-        // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
+        // $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary + (float) $earning['totalOverTime'];
 
         $payslip['deduction'] = $deduction;
         $payslip['totalDeduction'] = $totalloan + $totaldeduction + $totalbpjs;

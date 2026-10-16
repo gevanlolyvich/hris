@@ -128,6 +128,14 @@
                         @endif
                     </tr>
                 @endforeach
+                @foreach ($payslipDetail['earning']['overTime'] as $overTime)
+                    <tr>
+                        <td>{{ __('OverTime') }}</td>
+                        <td>{{ $overTime->title }}</td>
+                        <td>{{ ucfirst($overTime->type) }}</td>
+                        <td class="text-right">{{ \Auth::user()->priceFormat($overTime->amount) }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
 

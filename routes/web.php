@@ -805,7 +805,7 @@ Route::post('payslip/password', [PaySlipController::class, 'setPayslipPassword']
         'XSS',
     ]
 );
-Route::get('payslip/payslipPdf/{id}', [PaySlipController::class, 'payslipPdf'])->name('payslip.payslipPdf')->middleware(
+Route::get('payslip/payslipPdf/{id}/{m}', [PaySlipController::class, 'payslipPdf'])->name('payslip.payslipPdf')->middleware(
     [
         'auth',
         'XSS',

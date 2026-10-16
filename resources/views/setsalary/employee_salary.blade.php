@@ -189,7 +189,8 @@
                                             </td>
                                             <td>{{ $allowance->period ?? '-' }}</td>
                                             <td>{{ \Auth::user()->priceFormat($allowance->amount) }}</td>
-                                            <td>{{ \Auth::user()->priceFormat($allowance->effective_amount ?? $allowance->amount) }}</td>
+                                            <td>{{ \Auth::user()->priceFormat($allowance->effective_amount ?? $allowance->amount) }}
+                                            </td>
                                             <td class="Action">
                                                 <span>
                                                     @can('Edit Allowance')
@@ -546,8 +547,8 @@
                                             <td>{{ $overtime->clock_in ?? '-' }}</td>
                                             <td>{{ $overtime->clock_out ?? '-' }}</td>
                                             <td>{{ $total_hours }} {{ __('Hours') }}</td>
-                                            {{-- <td>{{ \Auth::user()->priceFormat($rate) }}</td> --}}
-                                            <td>0</td>
+                                            <td>{{ \Auth::user()->priceFormat($rate) }}</td>
+                                            {{-- <td>0</td> --}}
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -599,7 +600,8 @@
                                             </td>
                                             <td>{{ $loan->title }}</td>
                                             <td>{{ $loan->is_recurring ? __('Recurring') : __('No') }}</td>
-                                            <td>{{ $loan->is_recurring ? ($loan->period_start ?? '-') . ' ~ ' . ($loan->period_end ?? '-') : ($loan->period ?? '-') }}</td>
+                                            <td>{{ $loan->is_recurring ? ($loan->period_start ?? '-') . ' ~ ' . ($loan->period_end ?? '-') : $loan->period ?? '-' }}
+                                            </td>
                                             <td>{{ ucfirst($loan->type) }}</td>
                                             @if ($loan->type == 'fixed')
                                                 <td>{{ \Auth::user()->priceFormat($loan->amount) }}</td>
@@ -685,7 +687,8 @@
                                         <tr>
                                             <td>{{ !empty($item->bpjs_option()) ? $item->bpjs_option()->name : '' }}
                                             </td>
-                                            <td>{{ $item->is_prorated ? __('Prorated') : ($item->is_recurring ? __('Recurring') : __('No')) }}</td>
+                                            <td>{{ $item->is_prorated ? __('Prorated') : ($item->is_recurring ? __('Recurring') : __('No')) }}
+                                            </td>
                                             <td>{{ ucfirst($item->type) }}</td>
                                             <td>{{ $item->amount }}%
                                                 ({{ \Auth::user()->priceFormat($item->tota_allow ?? 0) }})

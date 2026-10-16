@@ -12,9 +12,9 @@
 @section('content')
     <div class="main-content">
         <div class="text-md-right mb-2">
-            <a href="{{ route('payslip.download', [$payslip->employee_id, $payslip->salary_month]) }}"
-                class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                title="{{ __('Download') }}"><span class="fa fa-download"></span></a>
+            <a href="{{ route('payslip.download', [$payslip->employee_id, $payslip->salary_month]) }}" class="btn btn-warning"
+                data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ __('Download') }}"><span
+                    class="fa fa-download"></span></a>
         </div>
 
         <div class="col-8">
@@ -96,14 +96,14 @@
                                                     {{ \Auth::user()->priceFormat($otherPayment->amount) }}</td>
                                             </tr>
                                         @endforeach
-                                        {{-- @foreach ($payslipDetail['earning']['overTime'] as $overTime)
+                                        @foreach ($payslipDetail['earning']['overTime'] as $overTime)
                                             <tr>
                                                 <td>{{ __('OverTime') }}</td>
                                                 <td>{{ $overTime->title }}</td>
                                                 <td class="text-right">
                                                     {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
                                             </tr>
-                                        @endforeach --}}
+                                        @endforeach
 
                                     </tbody>
                                 </table>
