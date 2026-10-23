@@ -430,12 +430,14 @@
             @if ($isShiftEmployee)
                 @php
                     $currentAtt = $currentShift['attendance'] ?? null;
-                    $isPermitPlaceholder = !empty($currentAtt) && $currentAtt->clock_in == '00:00:00';
-                    $needsClockOut = !empty($currentAtt) && !$isPermitPlaceholder;
+                    $mode = $shiftWindow['mode'] ?? null;
+                    $canAct = $shiftWindow['can_act'] ?? false;
+                    $shiftMessage = $shiftWindow['message'] ?? null;
                 @endphp
                 {{-- Dedicated clock in form for scheduled shift employees --}}
                 {{ Form::open(['url' => 'attendanceemployee/attendance', 'method' => 'post', 'id' => 'clock-in-form-shift', 'enctype' => 'multipart/form-data']) }}
                     <input type="hidden" name="shift_type_id" id="shift_type_id_shift" value="{{ $currentShift['shift_type_id'] ?? '' }}">
+                    <input type="hidden" name="shift_date" id="shift_date_shift" value="{{ $currentShift['shift_date'] ?? '' }}">
                     <input type="hidden" name="attendance_type" id="attendance_type_shift" value="1">
                     <input type="hidden" name="notes" id="notes_shift" value="">
                     <input type="hidden" name="latitude" id="latitude_shift" value="0">
@@ -448,7 +450,7 @@
                         <h5>{{ __('Shift Attendance') }}</h5>
                     </div>
                     <div class="card-body">
-                        @if (!empty($currentShift))
+                        @if (!empty($currentShift) && in_array($mode, ['check_in', 'check_out']))
                             <div class="border rounded p-3 mb-3">
                                 <h6>{{ $currentShift['name'] }}</h6>
                                 <p class="text-muted mb-2">
@@ -465,7 +467,7 @@
                                     </h5>
                                 @endif
 
-                                @if ($needsClockOut)
+                                @if ($mode === 'check_out')
                                     {{-- Karyawan sudah clock-in tapi belum clock-out: wajib clock-out dulu (prioritas) --}}
                                     {{ Form::model($currentAtt, ['route' => ['attendanceemployee.update', $currentAtt->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data', 'id' => 'clock-out-form-shift']) }}
                                     <div class="row d-flex flex-column align-items-center">
@@ -516,10 +518,21 @@
                                             <input type="hidden" name="accuracy" id="accuracy_out_shift" value="0">
                                             <input type="hidden" name="shift_type_id" value="{{ $currentAtt->shift_type_id }}">
                                         </div>
+                                        @if (!empty($shiftMessage))
+                                            <div class="col-md-12 text-center">
+                                                <p class="text-warning mb-2">{{ $shiftMessage }}</p>
+                                            </div>
+                                        @endif
                                         <div class="col-md-6 text-center mx-auto mt-1">
-                                            <button type="button" value="1" name="out" id="clock_out_shift"
-                                                class="btn btn-danger btn-lg btn-block"
-                                                style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                            @if ($canAct)
+                                                <button type="button" value="1" name="out" id="clock_out_shift"
+                                                    class="btn btn-danger btn-lg btn-block"
+                                                    style="width: 150px">{{ __('CLOCK OUT') }}</button>
+                                            @else
+                                                <button type="button" value="1" name="out" id="clock_out_shift"
+                                                    class="btn btn-danger btn-lg btn-block disabled"
+                                                    style="width: 150px" disabled>{{ __('CLOCK OUT') }}</button>
+                                            @endif
                                         </div>
                                     </div>
                                     {{ Form::close() }}
@@ -582,8 +595,13 @@
                                                 ]) !!}
                                             </div>
                                         </div>
+                                        @if (!empty($shiftMessage))
+                                            <div class="col-md-12 text-center">
+                                                <p class="text-warning mb-2">{{ $shiftMessage }}</p>
+                                            </div>
+                                        @endif
                                         <div class="col-md-6 text-center mx-auto mt-1">
-                                            @if ($currentShift['is_working'])
+                                            @if ($currentShift['is_working'] && $canAct)
                                                 <button type="button" value="0" name="in" id="clock_in_shift"
                                                     class="btn btn-primary btn-lg btn-block"
                                                     style="width: 150px">{{ __('CLOCK IN') }}</button>
@@ -621,7 +639,7 @@
                                         @endif
                                     @endforeach
                                     <p class="text-muted mt-2 mb-0">
-                                        {{ __('Belum masuk waktu shift. Silakan clock-in saat shift dimulai.') }}
+                                        {{ $shiftMessage ?: __('Belum masuk waktu shift. Silakan clock-in saat shift dimulai.') }}
                                     </p>
                                 </div>
                             @else

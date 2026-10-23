@@ -19,6 +19,8 @@ use App\Utilities\DistanceCalculator;
 use App\Exports\NotClockInExport;
 use App\Models\ShiftHistory;
 use App\Models\Leave;
+use App\Services\ShiftSequenceService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -403,6 +405,10 @@ class AttendanceEmployeeController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (Auth::user()->type == 'employee' && !empty(Auth::user()->employee) && Auth::user()->employee->is_shift) {
+            return $this->shiftEmployeeClockOut($request, $id);
+        }
+
         $picture_path = null;
         $employee = Employee::where('user_id', Auth::user()->id)->first();
 
@@ -933,6 +939,18 @@ class AttendanceEmployeeController extends Controller
 
             $note = $request->input('notes');
             $attendance_type = $request->input('attendance_type');
+
+            if ($employee->is_shift) {
+                return $this->shiftEmployeeClockIn($request, $employee, $settings, [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                    'accuracy' => $accuracy,
+                    'coord_in' => $coord_in,
+                    'coord_out' => $coord_out,
+                    'note' => $note,
+                    'attendance_type' => $attendance_type,
+                ]);
+            }
 
             // Determine the effective attendance date (cross-day shifts stay on their start date).
             $date = date("Y-m-d");
@@ -1779,6 +1797,226 @@ class AttendanceEmployeeController extends Controller
         } else {
             return redirect()->back()->with('error', __('Clock Out Data Invalid'));
         }
+    }
+
+    /**
+     * Check-in untuk karyawan shift berdasarkan rangkaian shift (shift sequence).
+     *
+     * Aturan: check-in hanya dibuka 30 menit sebelum shift pertama rangkaian
+     * dimulai sampai shift pertama selesai, dan hanya sekali per rangkaian.
+     */
+    private function shiftEmployeeClockIn(Request $request, Employee $employee, array $settings, array $payload)
+    {
+        $service = app(ShiftSequenceService::class);
+        $now = Carbon::now();
+
+        $validation = $service->validateCheckIn(
+            $employee,
+            $now,
+            (int) $request->shift_type_id,
+            $request->input('shift_date') ?: null
+        );
+
+        if (!$validation['allowed']) {
+            return redirect()->back()->with('error', $validation['message']);
+        }
+
+        $shift = $validation['shift'];
+        $shiftDate = $shift['shift_date'];
+        $existingAttendance = $shift['attendance'];
+
+        if ($existingAttendance && $existingAttendance->status == 'Permission') {
+            return redirect()->back()->with('error', __('This shift is covered by an approved permit. Clock-in is not allowed.'));
+        }
+
+        $approvedLeave = Leave::where('employee_id', $employee->id)
+            ->where('status', 'Approved')
+            ->where('start_date', '<=', $shiftDate)
+            ->where('end_date', '>=', $shiftDate)
+            ->exists();
+
+        if ($approvedLeave) {
+            return redirect()->back()->with('error', __('This date is covered by an approved leave. Clock-in is not allowed.'));
+        }
+
+        // Validasi lokasi (sama seperti jalur non-shift).
+        $attendance_type = $payload['attendance_type'];
+        $accuracy = $payload['accuracy'];
+        $is_valid_location = null;
+        if ($attendance_type == '1') {
+            $branch_data = Branch::where('id', Auth::user()->employee->branch_id)->first();
+            if ($branch_data) {
+                $distance = DistanceCalculator::haversineDistance($payload['latitude'], $payload['longitude'], (float) $branch_data['latitude'], (float) $branch_data['longitude']);
+                $is_valid_location = ($accuracy + (float) $branch_data['tolerance']) >= $distance ? true : null;
+            }
+        } elseif ($attendance_type == '3' && !empty($employee->coordinate)) {
+            $home_coordinate = explode(', ', $employee->coordinate);
+            $distance = DistanceCalculator::haversineDistance($payload['latitude'], $payload['longitude'], (float) $home_coordinate[0], (float) $home_coordinate[1]);
+            $is_valid_location = ($accuracy + (float) $home_coordinate[2]) >= $distance ? true : null;
+        }
+
+        $is_valid_shift = true;
+        $is_valid = $is_valid_shift && $is_valid_location ? true : null;
+
+        $picture_path = null;
+        if ($request->input('picture')) {
+            $base64ImageData = $request->input('picture');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
+            Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+        }
+
+        $time = date('H:i:s');
+        $presentStatus = AttendanceStatus::where('id', 1)->first();
+        $source = $this->detectDeviceSource($request);
+
+        // Keterlambatan dihitung dari jam mulai shift ini.
+        $late = '00:00:00';
+        if (!$shift['is_cross_day']) {
+            $threshold = strtotime($shiftDate . ' ' . $shift['start_time']) + ((int) $settings['late_tolerance'] * 60);
+            if (time() > $threshold) {
+                $late = $this->formatDuration(time() - $threshold);
+            }
+        }
+
+        // Satu baris attendance per shift (perilaku lama dipertahankan agar payroll = 1 hari/shift).
+        $attendance = $existingAttendance ?: new AttendanceEmployee();
+        if (!$existingAttendance) {
+            $attendance->employee_id = $employee->id;
+            $attendance->date = $shiftDate;
+            $attendance->shift_type_id = $shift['shift_type_id'];
+        }
+
+        $attendance->attendance_status_id = $presentStatus->id;
+        $attendance->status = $presentStatus->name;
+        $attendance->clock_in = $time;
+        $attendance->clock_out = $time;
+        $attendance->late = $late;
+        $attendance->early_leaving = '00:00:00';
+        $attendance->overtime = '00:00:00';
+        $attendance->total_rest = '00:00:00';
+        $attendance->work_hours = '00:00:00';
+        $attendance->coord_in = $payload['coord_in'];
+        $attendance->note = $payload['note'] ?: $attendance->note;
+        $attendance->is_valid = $is_valid;
+        $attendance->validate_by = $is_valid ? 1 : null;
+        $attendance->attendance_type_id = $attendance_type ?: $attendance->attendance_type_id;
+        $attendance->picture_in = $picture_path ?: $attendance->picture_in;
+        $attendance->created_by = Auth::user()->id;
+        $attendance->source_in = $source;
+        $attendance->save();
+
+        LogAttendance::create([
+            'personel_id' => $employee->personel_id,
+            'date' => $shiftDate,
+            'coordinate' => $payload['coord_in'],
+            'min' => $time,
+            'max' => $time,
+            'min_source' => $source,
+            'max_source' => $source,
+            'shift_id' => $shift['shift_type_id'],
+        ]);
+
+        $last_shift_history = ShiftHistory::where('employee_id', $employee->id)->orderBy('id', 'desc')->first();
+        if (empty($last_shift_history) || $last_shift_history->shift_type_id != $shift['shift_type_id']) {
+            ShiftHistory::create(['employee_id' => $employee->id, 'shift_type_id' => $shift['shift_type_id']]);
+        }
+
+        return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $shiftDate])->with([
+            'success' => __('Employee Successfully Clock In.'),
+            'employee' => $employee,
+        ]);
+    }
+
+    /**
+     * Check-out untuk karyawan shift (per shift).
+     *
+     * Aturan: check-out dibuka saat shift selesai; shift terakhir dibatasi 2 jam.
+     */
+    private function shiftEmployeeClockOut(Request $request, $id)
+    {
+        $employee = Auth::user()->employee;
+        $service = app(ShiftSequenceService::class);
+        $now = Carbon::now();
+
+        $attendance = AttendanceEmployee::find($id);
+        if (!$attendance || $attendance->employee_id != $employee->id) {
+            return redirect()->back()->with('error', __('Data attendance tidak ditemukan atau bukan milik Anda.'));
+        }
+
+        $validation = $service->validateCheckOut($employee, $now, $attendance);
+
+        if (!$validation['allowed']) {
+            return redirect()->back()->with('error', $validation['message']);
+        }
+
+        $shift = $validation['shift'];
+
+        $picture_path = null;
+        if ($request->input('picture_out')) {
+            $base64ImageData = $request->input('picture_out');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
+            Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+        } else {
+            return redirect()->back()->with('error', __('The picture field is required.'));
+        }
+
+        $time = date('H:i:s');
+        $source = $this->detectDeviceSource($request);
+
+        // Jam kerja dari check-in shift ini sampai sekarang.
+        $clockInTs = strtotime($attendance->date . ' ' . $attendance->clock_in);
+        $workHours = time() > $clockInTs ? $this->formatDuration(time() - $clockInTs) : '00:00:00';
+
+        $overtime = '00:00:00';
+        $earlyLeaving = '00:00:00';
+        $shiftEndTs = $shift['end_at']->getTimestamp();
+        if (time() > $shiftEndTs) {
+            $overtime = $this->formatDuration(time() - $shiftEndTs);
+        } elseif (time() < $shiftEndTs) {
+            $earlyLeaving = $this->formatDuration($shiftEndTs - time());
+        }
+
+        $attendance->clock_out = $time;
+        $attendance->coord_out = $request->input('latitude') . ', ' . $request->input('longitude') . ', ' . $request->input('accuracy');
+        $attendance->picture_out = $picture_path ?: $attendance->picture_out;
+        $attendance->source_out = $source;
+        $attendance->work_hours = $workHours;
+        $attendance->overtime = $overtime;
+        $attendance->early_leaving = $earlyLeaving;
+        $attendance->save();
+
+        LogAttendance::create([
+            'personel_id' => $employee->personel_id,
+            'date' => Carbon::now()->toDateString(),
+            'coordinate' => $request->input('latitude') . ', ' . $request->input('longitude') . ', ' . $request->input('accuracy'),
+            'min' => $time,
+            'max' => $time,
+            'min_source' => $source,
+            'max_source' => $source,
+            'shift_id' => $shift['shift_type_id'],
+        ]);
+
+        return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $attendance->date])->with([
+            'success' => __('Employee Successfully Clock Out.'),
+            'employee' => $employee,
+        ]);
+    }
+
+    /**
+     * Format durasi detik menjadi HH:MM:SS.
+     */
+    private function formatDuration(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = floor($seconds / 3600);
+        $mins = floor($seconds / 60 % 60);
+        $secs = floor($seconds % 60);
+
+        return sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
     }
 
     private function detectDeviceSource(Request $request)
