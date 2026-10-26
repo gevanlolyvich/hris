@@ -166,7 +166,7 @@ class LeaveController extends Controller
                 ->find($request->employee_id);
         }
 
-        if (!$employee || !$employee->shift_type) {
+        if (!$employee || (!$employee->is_shift && !$employee->shift_type)) {
             return redirect()->back()->with('error', 'Shift belum di assign ke employee');
         }
 
@@ -198,11 +198,19 @@ class LeaveController extends Controller
             if ($isHoliday)
                 continue;
 
-            $shift = \DB::table('shift_times')
-                ->where('shift_type_id', $employee->shift_type_id)
-                ->whereRaw('LOWER(days) = ?', [$dayName])
-                ->where('is_working', 1)
-                ->first();
+            $shift = null;
+            if ($employee->is_shift) {
+                // rostering employees work per the monthly roster schedule
+                if ($employee->hasScheduledShiftOn($date->format('Y-m-d'))) {
+                    $shift = (object) ['is_working' => true];
+                }
+            } else {
+                $shift = \DB::table('shift_times')
+                    ->where('shift_type_id', $employee->shift_type_id)
+                    ->whereRaw('LOWER(days) = ?', [$dayName])
+                    ->where('is_working', 1)
+                    ->first();
+            }
 
             if ($shift) {
                 $total_leave_days++;
@@ -431,7 +439,7 @@ class LeaveController extends Controller
         $leave_type = LeaveType::find($request->leave_type_id);
         $employee = Employee::with('shift_type')->where('is_active', 1)->find($leave->employee_id);
 
-        if (!$employee || !$employee->shift_type) {
+        if (!$employee || (!$employee->is_shift && !$employee->shift_type)) {
             return redirect()->back()->with('error', __('Employee inactive / shift belum di assign'));
         }
 
@@ -486,7 +494,15 @@ class LeaveController extends Controller
             if ($isHoliday)
                 continue;
 
-            $shift = $shiftTimes[$dayName] ?? null;
+            $shift = null;
+            if ($employee->is_shift) {
+                // rostering employees work per the monthly roster schedule
+                if ($employee->hasScheduledShiftOn($date->format('Y-m-d'))) {
+                    $shift = (object) ['is_working' => 1];
+                }
+            } else {
+                $shift = $shiftTimes[$dayName] ?? null;
+            }
 
             if ($shift && $shift->is_working == 1) {
                 $total_leave_days++;
@@ -622,6 +638,8 @@ class LeaveController extends Controller
 
             $selectedDates = $request->selected_dates;
 
+            $isShiftEmp = (bool) $leave->employees->is_shift;
+
             AttendanceEmployee::where('employee_id', $leave->employee_id)
                 ->whereBetween('date', [$leave->start_date, $leave->end_date])
                 ->where('source_in', 'Application')
@@ -635,11 +653,18 @@ class LeaveController extends Controller
             foreach ($period as $date) {
                 $day = strtolower($date->format('l'));
 
-                $shift = \DB::table('shift_times')
-                    ->where('shift_type_id', $leave->employees->shift_type_id)
-                    ->whereRaw('LOWER(days) = ?', [$day])
-                    ->where('is_working', 1)
-                    ->first();
+                $shift = null;
+                if ($isShiftEmp) {
+                    if ($leave->employees->hasScheduledShiftOn($date->format('Y-m-d'))) {
+                        $shift = (object) ['is_working' => true];
+                    }
+                } else {
+                    $shift = \DB::table('shift_times')
+                        ->where('shift_type_id', $leave->employees->shift_type_id)
+                        ->whereRaw('LOWER(days) = ?', [$day])
+                        ->where('is_working', 1)
+                        ->first();
+                }
 
                 if ($shift) {
                     $originalDates[] = $date->format('Y-m-d');
@@ -670,7 +695,9 @@ class LeaveController extends Controller
                     'coord_out' => null,
                     'is_valid' => $isChanged ? false : true,
                     'validate_by' => $isChanged ? null : Auth::user()->id,
-                    'shift_type_id' => $leave->employees?->shift_type_id,
+                    'shift_type_id' => $isShiftEmp
+                        ? ($leave->employees->scheduledShiftIdsForDate($date)[0] ?? $leave->employees->shift_type_id)
+                        : $leave->employees?->shift_type_id,
                     'source_in' => 'Application',
                     'source_out' => 'Application'
                 ]);

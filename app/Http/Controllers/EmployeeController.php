@@ -140,7 +140,7 @@ class EmployeeController extends Controller
                 [
                     'employee_id' => 'required|unique:employees,employee_id,NULL,NULL,deleted_at,NULL',
                     'personel_id' => 'nullable|unique:employees,personel_id,NULL,NULL,deleted_at,NULL',
-                    'shift_type_id' => 'required',
+                    'shift_type_id' => 'required_unless:is_shift,1',
                     'name' => 'required',
                     'type' => 'required',
                     'dob' => 'required',
@@ -206,10 +206,16 @@ class EmployeeController extends Controller
             }
 
 
+            // Shift employees get their shifts from the monthly roster; no fixed
+            // default shift is stored for them.
+            $isShiftEmployee = !empty($request->is_shift);
+            $shiftTypeId     = $isShiftEmployee ? null : $request['shift_type_id'];
+
             $form_employee = [
                 'user_id' => $user->id,
                 'personel_id' => $request['personel_id'],
-                'shift_type_id' => $request['shift_type_id'],
+                'shift_type_id' => $shiftTypeId,
+                'is_shift' => $isShiftEmployee,
                 'managed_by' => $request['managed_by'],
                 'name' => $request['name'],
                 'type_id' => $request['type'],
@@ -256,12 +262,14 @@ class EmployeeController extends Controller
                 );
             }
 
-            ShiftHistory::create(
-                [
-                    'shift_type_id' => $request['shift_type_id'],
-                    'employee_id' => $employee->id,
-                ]
-            );
+            if (!empty($shiftTypeId)) {
+                ShiftHistory::create(
+                    [
+                        'shift_type_id' => $shiftTypeId,
+                        'employee_id' => $employee->id,
+                    ]
+                );
+            }
 
             if ($employee_type->period_type == 'Periodical') {
                 $form_emp_period = [
@@ -400,7 +408,7 @@ class EmployeeController extends Controller
                 [
 
                     'employee_id' => 'required|unique:employees,employee_id,' . $id . ',id,deleted_at,NULL',
-                    'shift_type_id' => 'required',
+                    'shift_type_id' => 'required_unless:is_shift,1',
                     // 'personel_id' => 'required|unique:employees,personel_id,' . $id,
                     'name' => 'required',
                     'type_id' => 'required',
@@ -431,11 +439,17 @@ class EmployeeController extends Controller
                 return redirect()->back()->with('error', __('Inactive'));
             }
 
-            // create shift history when employee changing it's shift
-            if ($employee->shift_type_id !== (int)$request['shift_type_id']) {
+            // Shift employees get their shifts from the monthly roster; no fixed
+            // default shift is stored for them.
+            $isShiftEmployee = !empty($request->is_shift);
+            $shiftTypeId     = $isShiftEmployee ? null : $request['shift_type_id'];
+
+            // create shift history when employee changing it's fixed shift
+            // (skipped when moving to/from rostering because shift_type_id is null)
+            if (!empty($employee->shift_type_id) && !empty($shiftTypeId) && (int)$employee->shift_type_id !== (int)$shiftTypeId) {
                 ShiftHistory::create(
                     [
-                        'shift_type_id' => $request['shift_type_id'],
+                        'shift_type_id' => $shiftTypeId,
                         'employee_id' => $employee->id,
                     ]
                 );
@@ -508,6 +522,8 @@ class EmployeeController extends Controller
 
             $input                              = $request->all();
             $input['emergency_contact_photo']   = $document_path;
+            $input['is_shift']                  = $isShiftEmployee;
+            $input['shift_type_id']             = $shiftTypeId;
 
             $oldBranchId = $employee->branch_id;
 
@@ -780,7 +796,11 @@ class EmployeeController extends Controller
             }
         }
 
-        $shift_types      = ShiftType::whereIn('branch_id', $branch_id)->orderBy('name', 'ASC')->get()->pluck('name', 'id');
+        $shift_types = ShiftType::whereIn('branch_id', $branch_id)
+            ->when(isset($request->is_shift) && $request->is_shift !== '', function ($q) use ($request) {
+                $q->where('is_shift', (int) $request->is_shift);
+            })
+            ->orderBy('name', 'ASC')->get()->pluck('name', 'id');
         return response()->json($shift_types);
     }
     public function importFile()

@@ -157,7 +157,8 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
             $employeeArray          = [$dataRowCount, $employee->name, $employee?->designation?->name ?? '-', $employeeBranchName, $employee?->employeeType?->name ?? '-'];
             $employee_attendances   = AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->select('date', 'clock_in', 'clock_out', 'status', 'early_leaving', 'late', 'attendance_type_id', 'is_valid', 'shift_type_id', 'coord_in', 'work_hours', 'source_in')->get();
 
-            $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+            $shift                  = ShiftTime::where('shift_type_id', $employee->shift_type?->id)->select('is_working', 'days')->get()->pluck('is_working', 'days');
+            $rosterByDate           = $employee->is_shift ? collect($employee->monthlyShiftSchedule($month, $year)) : collect();
             $totalAttendance        = 0;
             $arrayAttendanceDate    = [];
             $totalLate              = 0;
@@ -185,7 +186,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                         foreach ($attendances_on_date as $attendance) {
 
 
-			    $attendance_shift   = $attendance->shift_type->shiftTimes->where('days', $day)->values()[0];
+			    $attendance_shift   = $attendance->shift_type?->shiftTimes?->where('days', $day)->values()[0] ?? null;
 
 
                             if (($attendance->status == 'Present') || ($attendance->status == 'No Working Hour')) {
@@ -231,7 +232,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                     $attendanceWorkHours                = 0;
                                 }
 
-                                if ($attendance_shift->is_working) {
+                                if ($attendance_shift?->is_working) {
                                     if ((strtotime($attendance->clock_in) > (strtotime($attendance_shift->start_time) + ((int)$settings['late_tolerance'] * 60)))) {
                                         $totalLate += 1;
                                         $this->late_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
@@ -261,15 +262,15 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                                     }
                                 }
 
-                            } else if ($attendance->status == 'Leave' && !$present) {
-                                $date_data          = __('Leave');
+                            } else if ($attendance->status == 'Leave') {
+                                $date_data          .= __('Leave') . '; ';
                                 $totalAttendance    += 1;
                                 $leave              = true;
-                            } else if ($attendance->status == 'Permission' && !$present) {
-                                $date_data          = __('Permission');
+                            } else if ($attendance->status == 'Permission') {
+                                $date_data          .= __('Permission') . '; ';
                                 $totalAttendance    += 1;
                                 $permission         = true;
-                            } else if (($holiday_date[$dateFormat] || !$attendance_shift->is_working) && !$leave && !$permission) {
+                            } else if (($holiday_date[$dateFormat] || !$attendance_shift?->is_working) && !$leave && !$permission) {
                                 $date_data          = __('Holiday');
                                 $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                             } else {
@@ -277,8 +278,8 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
                             }
                         }
 
-                        $arrayAttendanceDate[]  = $date_data;
-                    } else if (($holiday_date[$dateFormat] || !$shift[date('l', strtotime($dateFormat))]) && !$leave && !$permission) {
+                        $arrayAttendanceDate[]  = rtrim((string) $date_data, '; ');
+                    } else if (($holiday_date[$dateFormat] || !$this->resolveDayWorking($employee, $shift, $rosterByDate, $dateFormat)) && !$leave && !$permission) {
                         $arrayAttendanceDate[]  = __('Holiday');
                         $this->holiday_cell->push($this->getColomnByDateAndEmployeeIndex($d, $dataRowCount - 1));
                     } else {
@@ -575,5 +576,14 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
     protected function getColomnByDateAndEmployeeIndex($date, $index) : STRING {
         $colomn     = $this->date_colomns[$date] . $index + 7;
         return $colomn;
+    }
+
+    protected function resolveDayWorking($employee, $shift, $rosterByDate, $dateFormat): bool
+    {
+        if ($employee->is_shift) {
+            return $rosterByDate->has($dateFormat);
+        }
+
+        return (bool) ($shift[date('l', strtotime($dateFormat))] ?? false);
     }
 }

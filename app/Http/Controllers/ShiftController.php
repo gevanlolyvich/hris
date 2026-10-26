@@ -65,7 +65,8 @@ class ShiftController extends Controller
 
             $shift_type = ShiftType::create([
                 'name' => $request->shift_name,
-                'branch_id' => $request->branch_id
+                'branch_id' => $request->branch_id,
+                'is_shift' => !empty($request->is_shift)
             ]);
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -124,6 +125,7 @@ class ShiftController extends Controller
             //* Update Shift Type
             $shift->name        = $request->shift_name;
             $shift->branch_id   = $request->branch_id;
+            $shift->is_shift    = !empty($request->is_shift);
             $shift->save();
 
             //* Update Shift Times

@@ -415,7 +415,7 @@
                                     <tbody>
                                         @foreach ($attendanceEmployee as $attendance)
                                             <tr>
-                                                <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                                <td>{{ $attendance->getDateRange() }}</td>
                                                 <td>{{ $attendance->branch_name ?? '-' }}</td>
                                                 <td>{{ $attendance->status }}</td>
                                                 <!-- Modify Clock In and Clock Out columns in your table -->
@@ -514,7 +514,7 @@
                                     @foreach ($attendanceEmployee as $attendance)
                                         @if ($attendance->work_hours !== '00:00:00')
                                             <tr>
-                                                <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                                <td>{{ $attendance->getDateRange() }}</td>
                                                 <!-- Modify Clock In and Clock Out columns in your table -->
                                                 <td>{{ $attendance->work_hours }}</td>
                                             </tr>
@@ -586,7 +586,7 @@
                                 <tbody>
                                     @foreach ($attendanceEmployee as $attendance)
                                         <tr>
-                                            <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                            <td>{{ $attendance->getDateRange() }}</td>
                                             <!-- Modify Clock In and Clock Out columns in your table -->
                                             <td>{{ $attendance->late }}</td>
                                         </tr>
@@ -617,7 +617,7 @@
                                 <tbody>
                                     @foreach ($attendanceEmployee as $attendance)
                                         <tr>
-                                            <td>{{ \Auth::user()->dateFormat($attendance->date) }}</td>
+                                            <td>{{ $attendance->getDateRange() }}</td>
                                             <!-- Modify Clock In and Clock Out columns in your table -->
                                             <td>{{ $attendance->early_leaving }}</td>
                                         </tr>

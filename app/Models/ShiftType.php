@@ -27,4 +27,9 @@ class ShiftType extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function employeeShiftSchedules(): HasMany
+    {
+        return $this->hasMany(EmployeeShiftSchedule::class);
+    }
 }

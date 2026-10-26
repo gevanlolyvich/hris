@@ -165,7 +165,7 @@
                                             @if (\Auth::user()->type == 'employee')
                                                 @if (
                                                     ($leave->created_by == Auth::user()->id ||
-                                                        $leave->employee_id == Auth::user()->employee->id ||
+                                                        $leave->employee_id == Auth::user()->employee?->id ||
                                                         Auth::user()->type != 'employee') &&
                                                         $leave->status != 'Approved' &&
                                                         $leave->status != 'Waiting Confirmation' &&

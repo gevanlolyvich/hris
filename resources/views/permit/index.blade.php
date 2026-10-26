@@ -95,8 +95,8 @@
                         <tbody>
                             @foreach ($permits as $permit)
                                 <tr>
-                                    <td>{{ $permit->employee->name }}</td>
-                                    <td>{{ $permit->permitType->name }}</td>
+                                    <td>{{ $permit->employee?->name ?? '-' }}</td>
+                                    <td>{{ $permit->permitType?->name ?? '-' }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->start_date) }}</td>
                                     <td>{{ \Auth::user()->dateFormat($permit->end_date) }}</td>
                                     <td>{{ $permit->total_permit_days }}</td>
@@ -136,7 +136,7 @@
                                                 </a>
                                             </div>
                                             @if (\Auth::user()->type == 'employee')
-                                                @if (($permit->created_by == Auth::user()->id || $permit->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $permit->status != 'Approved')
+                                                @if (($permit->created_by == Auth::user()->id || $permit->employee_id == (Auth::user()->employee?->id ?? null) || Auth::user()->type != 'employee') && $permit->status != 'Approved')
                                                     @can('Edit Permit')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center" data-size="lg"
@@ -206,9 +206,85 @@
                     
                     var buttonValue = $(this).data("status");
                     $("#hiddenStatus").val(buttonValue);
-                })
+                });
+
+                applyPermitShiftDateRestriction();
             });
         });
+    </script>
+
+    <script>
+        function applyPermitShiftDateRestriction() {
+            var startInput = document.getElementById('start_date');
+            var endInput = document.getElementById('end_date');
+            if (!startInput || !endInput) return;
+
+            var form = startInput.closest('form');
+            var empSel = form.querySelector('#employee_id');
+            var empId = empSel ? empSel.value : (form.dataset.empId || '');
+
+            var startDp = startInput.datepicker;
+            var endDp = endInput.datepicker;
+            if (!startDp || !endDp) return;
+
+            function monthOf(date) {
+                var m = date.getMonth() + 1;
+                return date.getFullYear() + '-' + (m < 10 ? '0' + m : m);
+            }
+
+            function restrictForMonth(dp, month) {
+                if (!empId) {
+                    dp.setOptions({ datesDisabled: [] });
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('permit.shift-dates') }}',
+                    data: { employee_id: empId, month: month },
+                    success: function (data) {
+                        if (data.unrestricted || !data.dates || !data.dates.length) {
+                            dp.setOptions({ datesDisabled: [] });
+                            return;
+                        }
+
+                        var prefix = month + '-';
+                        var disabled = [];
+                        var first = new Date(month + '-01');
+                        var daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+
+                        for (var d = 1; d <= daysInMonth; d++) {
+                            var dat = prefix + (d < 10 ? '0' + d : d);
+                            if (data.dates.indexOf(dat) === -1) disabled.push(dat);
+                        }
+
+                        dp.setOptions({ datesDisabled: disabled });
+                    }
+                });
+            }
+
+            function applyToBoth(month) {
+                restrictForMonth(startDp, month);
+                restrictForMonth(endDp, month);
+            }
+
+            applyToBoth(monthOf(startDp.getDate() || new Date()));
+
+            if (empSel) {
+                $(empSel).on('change', function () {
+                    empId = this.value;
+                    applyToBoth(monthOf(startDp.getDate() || new Date()));
+                });
+            }
+
+            [startDp, endDp].forEach(function (dp) {
+                dp.element.addEventListener('changeMonth', function (e) {
+                    applyToBoth(monthOf(new Date(e.detail.viewDate)));
+                });
+                dp.element.addEventListener('changeYear', function (e) {
+                    applyToBoth(monthOf(new Date(e.detail.viewDate)));
+                });
+            });
+        }
     </script>
 
     <script>

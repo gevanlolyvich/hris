@@ -175,7 +175,7 @@
                                 @php
                                     $attendance = $employee->present_status($employee->id, isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'));
                                     $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-                                    $shift = $employee->shift_type->shiftTimes->where('days', date('l', strtotime($date)));
+                                    $shift = $employee->shift_type?->shiftTimes?->where('days', date('l', strtotime($date))) ?? collect();
                                 @endphp
                                 <tr>
                                     <td class="Id">

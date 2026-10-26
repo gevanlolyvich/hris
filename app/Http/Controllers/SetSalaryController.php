@@ -15,6 +15,7 @@ use App\Models\LoanOption;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PayslipType;
+use App\Models\SalaryChangeRequest;
 use App\Models\SaturationDeduction;
 use App\Models\AttendanceEmployee;
 use App\Exports\SalaryDataSheet;
@@ -87,6 +88,11 @@ class SetSalaryController extends Controller
     {
         // Initialize the present days count
         $presentDaysCount = 0;
+
+        // Approved permits (Permission) do not count as valid days.
+        $attendanceData = collect($attendanceData)->reject(function ($attendance) {
+            return $attendance['status'] == 'Permission';
+        });
 
         // Loop through each attendance entry
         foreach ($attendanceData as $attendance) {
@@ -264,12 +270,12 @@ class SetSalaryController extends Controller
         $bpjs = Bpjs::where('employee_id', $employee->id)->get();
         $overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull('report_document')->where('status', 'approved')->get();
 
-        $total_work_days = (new Employee)->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
+        list($total_work_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
         // $total_work_hours = (new Employee)->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
-        $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays) 
-        $total_present_days = (new Employee)->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
+        $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays)
+        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type?->shiftTimes->where('is_working', 1) ?? collect(), $employee->employeeType?->type);
 
-        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+        $fixed_rate = $employee->payrollRate($total_present_days, $total_work_days);
         $total_allowance = 0;
         foreach ($allowances as $value) {
             $empsal = $value->type == 'percentage' ? $value->amount * $employee->salary / 100 : $value->amount;
@@ -313,8 +319,7 @@ class SetSalaryController extends Controller
         }
 
         foreach ($bpjs as $value) {
-            $empsal = $value->amount * $employee->salary / 100;
-            $value->tota_allow = $empsal;
+            $value->tota_allow = $value->resolvedAmount($employee, $fixed_rate, $total_present_days);
         }
 
         return view('setsalary.employee_salary', compact('employee', 'payslip_type', 'allowance_options', 'commissions', 'loan_options', 'overtimes', 'otherpayments', 'saturationdeductions', 'loans', 'deduction_options', 'allowances', 'total_work_days', 'total_work_hours', 'total_present_days', 'total_allowance', 'bpjs', 'bpjs_options'));
@@ -323,11 +328,15 @@ class SetSalaryController extends Controller
 
     public function employeeUpdateSalary(Request $request, $id)
     {
+        if (! \Auth::user()->can('Edit Set Salary')) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $validator = \Validator::make(
             $request->all(),
             [
                 'salary_type' => 'required',
-                'salary' => 'required',
+                'salary' => 'required|numeric|min:0',
             ]
         );
         if ($validator->fails()) {
@@ -336,10 +345,63 @@ class SetSalaryController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
         $employee = Employee::findOrFail($id);
-        $input = $request->all();
-        $employee->fill($input)->save();
+        $newSalary = (float) $request->input('salary');
+
+        // Payslip type is a label, not a monetary value, so it applies at once.
+        $employee->salary_type = $request->input('salary_type');
+
+        if (self::requiresSalaryApproval($employee, $newSalary)) {
+            $this->createSalaryChangeRequest($employee, $newSalary, SalaryChangeRequest::SOURCE_FORM);
+
+            return redirect()->back()->with('success', __('Salary change submitted for approval.'));
+        }
+
+        $employee->salary = $newSalary;
+        $employee->save();
 
         return redirect()->back()->with('success', 'Employee Salary Updated.');
+    }
+
+    /**
+     * An employee with no salary yet gets one straight away. Once a salary is
+     * on record every later change waits for the designated reviewer.
+     */
+    private static function requiresSalaryApproval($employee, $newSalary)
+    {
+        $current = (float) $employee->salary;
+
+        if ($current <= 0) {
+            return false;
+        }
+
+        return abs($current - $newSalary) > 0.0000001;
+    }
+
+    private function createSalaryChangeRequest($employee, $newSalary, $source)
+    {
+        $existing = SalaryChangeRequest::pending()
+            ->where('employee_id', $employee->id)
+            ->first();
+
+        if ($existing) {
+            $existing->update([
+                'old_salary' => (float) $employee->salary,
+                'new_salary' => $newSalary,
+                'source' => $source,
+                'requested_by' => \Auth::id(),
+            ]);
+
+            return $existing;
+        }
+
+        return SalaryChangeRequest::create([
+            'employee_id' => $employee->id,
+            'old_salary' => (float) $employee->salary,
+            'new_salary' => $newSalary,
+            'source' => $source,
+            'status' => SalaryChangeRequest::STATUS_PENDING,
+            'requested_by' => \Auth::id(),
+        ]);
     }
 
     public function employeeSalary()
@@ -402,6 +464,7 @@ class SetSalaryController extends Controller
         $rows = (new SalaryImport())->toArray(request()->file('file'))[0];
         $totalRecord = count($rows) - 1;
         $errorArray = [];
+        $pendingSalaryCount = 0;
 
         for ($i = 1; $i <= count($rows) - 1; $i++) {
             $row = $rows[$i];
@@ -486,7 +549,7 @@ class SetSalaryController extends Controller
                     continue;
                 }
 
-                $salaryData = ['salary' => $salary];
+                $newSalary = (float) $salary;
 
                 if (!empty($salaryTypeName)) {
                     $payslipType = PayslipType::where('name', $salaryTypeName)->first();
@@ -496,10 +559,17 @@ class SetSalaryController extends Controller
                         continue;
                     }
 
-                    $salaryData['salary_type'] = $payslipType->id;
+                    // Label only, so it applies without waiting for the reviewer.
+                    $employee->salary_type = $payslipType->id;
                 }
 
-                $employee->update($salaryData);
+                if (self::requiresSalaryApproval($employee, $newSalary)) {
+                    $this->createSalaryChangeRequest($employee, $newSalary, SalaryChangeRequest::SOURCE_IMPORT);
+                    $pendingSalaryCount++;
+                } else {
+                    $employee->salary = $newSalary;
+                    $employee->save();
+                }
             } elseif (empty($components)) {
                 // Tidak ada salary dan tidak ada komponen yang diisi.
                 $errorArray[] = $this->withReason($row, __('Tidak ada data yang diisi (Salary kosong)'));
@@ -515,10 +585,16 @@ class SetSalaryController extends Controller
         $errorRecord = [];
         if (empty($errorArray)) {
             $data['status'] = 'success';
-            $data['msg']    = __('Record successfully imported');
+            $data['msg']    = $pendingSalaryCount > 0
+                ? __('Record successfully imported') . ' — ' . $pendingSalaryCount . ' ' . __('salary change submitted for approval.')
+                : __('Record successfully imported');
         } else {
             $data['status'] = 'error';
             $data['msg']    = count($errorArray) . ' ' . __('Record imported fail out of' . ' ' . $totalRecord . ' ' . 'record');
+
+            if ($pendingSalaryCount > 0) {
+                $data['msg'] .= ' — ' . $pendingSalaryCount . ' ' . __('salary change submitted for approval.');
+            }
 
             foreach ($errorArray as $errorData) {
                 $errorRecord[] = implode(',', $errorData);
@@ -875,14 +951,17 @@ class SetSalaryController extends Controller
         $recurringRaw = $this->val($row, SalaryDataSheet::COL_BPJS_RECURRING);
         $recurring = $recurringRaw === '' ? 1 : (int) $recurringRaw;
 
-        if (!in_array($recurring, [0, 1], true)) {
-            return ['ok' => false, 'error' => __('BPJS Recurring harus 0 atau 1')];
+        if (!in_array($recurring, [0, 1, 2], true)) {
+            return ['ok' => false, 'error' => __('BPJS Recurring harus 0, 1, atau 2')];
         }
 
         $option = $this->resolveOption(BpjsOption::class, $this->val($row, SalaryDataSheet::COL_BPJS_OPTION));
         if ($option['ok'] === false) {
             return $option;
         }
+
+        $isRecurring = $recurring === 2 ? 1 : $recurring;
+        $isProrated = $recurring === 2 ? 1 : 0;
 
         return [
             'ok' => true,
@@ -891,7 +970,8 @@ class SetSalaryController extends Controller
                 'criteria' => [
                     'employee_id' => $employee->id,
                     'bpjs_option' => $option['id'],
-                    'is_recurring' => $recurring,
+                    'is_recurring' => $isRecurring,
+                    'is_prorated' => $isProrated,
                 ],
                 'values' => [
                     'type' => $type,

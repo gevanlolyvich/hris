@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Mail\TerminationSend;
 use App\Models\Termination;
 use App\Models\TerminationType;
+use App\Models\User;
 use App\Models\Utility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,12 +103,26 @@ class TerminationController extends Controller
             $termination->created_by = \Auth::user()->creatorId();
             $termination->save();
 
+            $employee = Employee::find($termination->employee_id);
+            if ($employee) {
+                $employee->terminated_by = \Auth::user()->creatorId();
+                $employee->is_active = 0;
+                $employee->save();
+
+                if ($employee->user_id) {
+                    $user = User::find($employee->user_id);
+                    if ($user) {
+                        $user->is_active = 0;
+                        $user->save();
+                    }
+                }
+            }
+
             $setings = Utility::settings();
             if ($setings['employee_termination'] == 1) {
-                $employee = Employee::find($termination->employee_id);
-
-                $employee->terminated_by = \Auth::user()->creatorId();
-                $employee->save();
+                if (!$employee) {
+                    $employee = Employee::find($termination->employee_id);
+                }
 
                 $uArr = [
                     'employee_termination_name' => $employee->name,
@@ -215,7 +230,21 @@ class TerminationController extends Controller
     {
         if (\Auth::user()->can('Delete Termination')) {
             if ($termination->created_by == \Auth::user()->creatorId()) {
-                Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
+                $employee = Employee::where('id', $termination?->employee_id)->where('is_active', 0)->first();
+                if ($employee) {
+                    $employee->is_active = 1;
+                    $employee->terminated_by = null;
+                    $employee->save();
+                    if ($employee->user_id) {
+                        $user = User::find($employee->user_id);
+                        if ($user) {
+                            $user->is_active = 1;
+                            $user->save();
+                        }
+                    }
+                } else {
+                    Employee::where('id', $termination?->employee_id)->where('is_active', 0)->update(['is_active' => 1]);
+                }
                 $termination->delete();
 
                 return redirect()->back()->with('success', __('Termination successfully deleted.'));

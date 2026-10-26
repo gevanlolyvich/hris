@@ -107,7 +107,12 @@
                             <div class="btn-box">
 
                                 {{ Form::label('branch', __('Branch'), ['class' => 'form-label']) }}
-                                {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                @if(isset($restrictedBranchId) && $restrictedBranchId)
+                                    {{ Form::hidden('branch', $restrictedBranchId) }}
+                                    {{ Form::select('branch_display', $branch, isset($_GET['branch']) ? $_GET['branch'] : $restrictedBranchId, ['class' => 'form-control select2', 'placeholder' => __('Select Branch'), 'disabled' => true]) }}
+                                @else
+                                    {{ Form::select('branch', $branch, isset($_GET['branch']) ? $_GET['branch'] : '', ['class' => 'form-control select2', 'placeholder' => __('Select Branch')]) }}
+                                @endif
 
                             </div>
                         </div>
@@ -116,7 +121,7 @@
 
                                 {{ Form::label('department', __('Department'), ['class' => 'form-label']) }}
                                 <div class="department_div btn-box">
-                                    {{ Form::select('department', isset($_GET['branch']) ? $department : [], isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
+                                    {{ Form::select('department', isset($_GET['branch']) ? $department : (isset($restrictedBranchId) && $restrictedBranchId ? $department : []), isset($_GET['department'])?$_GET['department']:null, ['class' => 'form-control select2 department_id', 'placeholder' => __('Select Department')]) }}
                                 </div>
                             </div>
                         </div>
@@ -127,7 +132,7 @@
                                 data-bs-toggle="tooltip" title="" data-bs-original-title="apply">
                                 <span class="btn-inner--icon"><i class="ti ti-search"></i></span>
                             </a>
-                            <a href="{{ route('report.monthly.attendance') }}" class="btn btn-sm btn-danger"
+                            <a href="{{ isset($restrictedBranchId) && $restrictedBranchId ? route('report.monthly.attendance', ['branch' => $restrictedBranchId]) : route('report.monthly.attendance') }}" class="btn btn-sm btn-danger"
                                 data-bs-toggle="tooltip" title="" data-bs-original-title="Reset">
                                 <span class="btn-inner--icon"><i class="ti ti-trash-off text-white-off "></i></span>
                             </a>
@@ -331,29 +336,34 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($employeesAttendance as $attendance)
+                                        @php
+                                            $badgeColors = [
+                                                'H'  => 'success',   // Hadir
+                                                'A'  => 'danger',    // Alpha
+                                                'I'  => 'info',      // Izin umum
+                                                'IK' => 'info',      // Izin Keperluan
+                                                'C'  => 'warning',   // Cuti
+                                                'L'  => 'primary',   // Libur
+                                                'CO' => 'info',      // Cuti Off
+                                                'EO' => 'info', // Emergency Off
+                                                'PH' => 'info',   // Public Holiday
+                                                'S'  => 'info',
+                                            ];
+                                        @endphp
                                         <tr>
                                             <td>{{ $attendance['name'] }}</td>
                                             @foreach ($attendance['status'] as $status)
-                                                 @php
-                                                    $badgeColors = [
-                                                        'H'  => 'success',   // Hadir
-                                                        'A'  => 'danger',    // Alpha
-                                                        'I'  => 'info',      // Izin umum
-                                                        'IK' => 'info',      // Izin Keperluan
-                                                        'C'  => 'warning',   // Cuti
-                                                        'L'  => 'primary',   // Libur
-                                                        'CO' => 'info',      // Cuti Off
-                                                        'EO' => 'info', // Emergency Off
-                                                        'PH' => 'info',   // Public Holiday
-                                                        'S'  => 'info',
-                                                    ];
+                                                @php
+                                                    $badges = is_array($status) ? $status : (is_null($status) ? [] : [$status]);
                                                 @endphp
                                                 <td>
-                                                    @if ($status)
-                                                        <i class="badge bg-{{ $badgeColors[$status] ?? 'secondary' }} p-2 rounded">
-                                                            {{ $status }}
-                                                        </i>
-                                                    @endif
+                                                    @foreach ($badges as $st)
+                                                        @if ($st)
+                                                            <i class="badge bg-{{ $badgeColors[$st] ?? 'secondary' }} p-2 rounded">
+                                                                {{ $st }}
+                                                            </i>
+                                                        @endif
+                                                    @endforeach
                                                 </td>
                                             @endforeach
                                         </tr>

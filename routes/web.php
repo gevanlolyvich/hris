@@ -11,6 +11,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\MeetingNewController;
 use App\Http\Controllers\IncomeTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseTypeController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\AccountListController;
 use App\Http\Controllers\TimeSheetController;
 use App\Http\Controllers\SetSalaryController;
+use App\Http\Controllers\SalaryChangeRequestController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
@@ -31,6 +33,7 @@ use App\Http\Controllers\AwardTypeController;
 use App\Http\Controllers\TerminationController;
 use App\Http\Controllers\TerminationTypeController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\AllowanceController;
 use App\Http\Controllers\PaySlipController;
@@ -89,6 +92,7 @@ use App\Http\Controllers\PayslipTypeController;
 use App\Http\Controllers\PermitController;
 use App\Http\Controllers\PermitTypeController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\EmployeeShiftScheduleController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\EmployeeAttendanceHistoryController;
 use App\Http\Controllers\EmployeeTypeController;
@@ -613,6 +617,50 @@ Route::get('calender/meeting', [MeetingController::class, 'calender'])->name('me
     ]
 );
 
+Route::post('meeting-new/getemployee', [MeetingNewController::class, 'getemployee'])->name('meeting-new.getemployee')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::resource('meeting-new', MeetingNewController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('meeting-result', [MeetingNewController::class, 'resultIndex'])->name('meeting-result.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('meeting-result/export', [MeetingNewController::class, 'resultExport'])->name('meeting-result.export')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('meeting-result/{id}', [MeetingNewController::class, 'resultShow'])->name('meeting-result.show')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('meeting-result/{id}/fill', [MeetingNewController::class, 'resultFill'])->name('meeting-result.fill')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('meeting-result/{id}/fill', [MeetingNewController::class, 'resultStore'])->name('meeting-result.store')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::post('employee/update/sallary/{id}', [SetSalaryController::class, 'employeeUpdateSalary'])->name('employee.salary.update')->middleware(
     [
         'auth',
@@ -628,6 +676,27 @@ Route::get('salary/employeeSalary', [SetSalaryController::class, 'employeeSalary
 
 
 Route::resource('setsalary', SetSalaryController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('salary-change-requests', [SalaryChangeRequestController::class, 'index'])->name('salary-change.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('salary-change-requests/{id}/approve', [SalaryChangeRequestController::class, 'approve'])->name('salary-change.approve')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('salary-change-requests/{id}/reject', [SalaryChangeRequestController::class, 'reject'])->name('salary-change.reject')->middleware(
     [
         'auth',
         'XSS',
@@ -736,7 +805,7 @@ Route::post('payslip/password', [PaySlipController::class, 'setPayslipPassword']
         'XSS',
     ]
 );
-Route::get('payslip/payslipPdf/{id}', [PaySlipController::class, 'payslipPdf'])->name('payslip.payslipPdf')->middleware(
+Route::get('payslip/payslipPdf/{id}/{m}', [PaySlipController::class, 'payslipPdf'])->name('payslip.payslipPdf')->middleware(
     [
         'auth',
         'XSS',
@@ -825,6 +894,25 @@ Route::resource('shift', ShiftController::class)->middleware(
     ]
 );
 
+Route::get('employee-shift-schedule', [EmployeeShiftScheduleController::class, 'index'])->name('employee-shift-schedule.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::post('employee-shift-schedule', [EmployeeShiftScheduleController::class, 'store'])->name('employee-shift-schedule.store')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+Route::get('employee-shift-schedule/get', [EmployeeShiftScheduleController::class, 'get'])->name('employee-shift-schedule.get')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
 Route::get('profile', [UserController::class, 'profile'])->name('profile')->middleware(
     [
         'auth',
@@ -880,6 +968,13 @@ Route::resource('leave', LeaveController::class)->middleware(
 );
 
 Route::resource('permit', PermitController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('permit/shift-dates', [PermitController::class, 'shiftDates'])->name('permit.shift-dates')->middleware(
     [
         'auth',
         'XSS',
@@ -1883,6 +1978,13 @@ Route::resource('vehicle-maintenance', VehicleMaintenanceController::class)->mid
 );
 
 Route::resource('vehicle-workshop', VehicleWorkshopController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::resource('budget', BudgetController::class)->middleware(
     [
         'auth',
         'XSS',

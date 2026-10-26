@@ -214,7 +214,7 @@
                                     {{ Form::select('shift_type_id', $shift_types, null, ['class' => 'form-control select2', 'id' => 'shift_type_id', 'required' => 'required' ,'placeholder' =>  __('Select Shift*')]) }}
                                 </div> --}}
                                 
-                                <div class="form-group col-md-12">
+                                <div class="form-group col-md-12" id="shift-select-wrapper">
                                     {{ Form::label('shift_type_id', __('Select Shift'), ['class' => 'form-label']) }}<span class="text-danger pl-1">*</span>
 
                                     <div class="form-icon-user">
@@ -225,6 +225,15 @@
                                                  
                                             </select>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="is_shift" value="1" id="is_shift">
+                                        <label class="form-check-label" for="is_shift">
+                                            {{ __('Karyawan Shift (Rostering)') }}
+                                        </label>
+                                        <small class="text-muted d-block">{{ __('Centang jika karyawan bekerja dengan sistem shift (Shift 1/2/3) dan dijadwalkan bulanan. Shift tetap tidak perlu dipilih.') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -419,6 +428,7 @@
                 type: 'POST',
                 data: {
                     "branch_id": branch_id,
+                    "is_shift": 0,
                     "_token": "{{ csrf_token() }}",
                 },
                 success: function(data) {
@@ -437,10 +447,33 @@
                         removeItemButton: true,
                     });
 
+                    applyShiftToggle();
+
 
                 }
             });
         }
+
+        function applyShiftToggle() {
+            var isShift = $('#is_shift').is(':checked');
+            $('#shift-select-wrapper').toggleClass('d-none', isShift);
+            $('.shift_type_id').prop('disabled', isShift);
+        }
+
+        $('body').on('change', '#is_shift', function() {
+            applyShiftToggle();
+        });
+
+        $(function() {
+            applyShiftToggle();
+
+            // Repopulate shift options when the page loads with a branch already
+            // chosen (e.g. after a validation-error redirect back).
+            var $branchSelect = $('select[name=branch_id]');
+            if ($branchSelect.val()) {
+                getBranchShift($branchSelect.val());
+            }
+        });
 
         function getDesignation(did) {
             $.ajax({

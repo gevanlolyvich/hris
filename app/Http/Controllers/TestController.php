@@ -24,6 +24,7 @@ class TestController extends Controller
         $apis = ['http://172.16.0.16:3050'];
         // $apis = ['http://127.0.0.1:3020'];
         $locations = '-6.172612489913187, 106.8627610802651';
+        $coordinate_tim = '-6.190052856551503, 106.83919645955152';
         $default_coordinate = '-6.172612489913187, 106.8627610802651, 20';
         $date = date('Y-m-d');
         $tomorrow = date("Y-m-d", strtotime('tomorrow'));
@@ -96,6 +97,7 @@ class TestController extends Controller
                     DB::raw("(SELECT coordinate_out FROM log_attendances WHERE max = MAX(la.max) AND personel_id = la.personel_id LIMIT 1) as coordinate_out"),
                     DB::raw("(SELECT min_source FROM log_attendances WHERE min = MIN(la.min) AND personel_id = la.personel_id LIMIT 1) as min_source"),
                     DB::raw("(SELECT max_source FROM log_attendances WHERE max = MAX(la.max) AND personel_id = la.personel_id LIMIT 1) as max_source"),
+                    DB::raw("(SELECT branch_id FROM employees WHERE personel_id = la.personel_id AND is_active = 1 LIMIT 1) as branch_id"),
                 )
                 ->where('la.date', date('Y-m-d'))
                 ->groupBy('la.personel_id')
@@ -105,21 +107,35 @@ class TestController extends Controller
                 $branchIds = Branch::where('id', 8)
                     ->orWhere('parent_branch', 8)
                     ->pluck('id');
-                $employee = Employee::where('is_active', 1)->whereIn('branch_id', $branchIds)->where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id')->with('shift_type:id')->first();
+                $employee = Employee::where('is_active', 1)->whereIn('branch_id', $branchIds)->where('personel_id', $f_data->personel_id)->select('id', 'user_id', 'shift_type_id', 'branch_id')->with('shift_type:id')->first();
+
+                if (!$employee) {
+                    continue;
+                }
+
+                $coord = ($employee->branch_id == 13) ? $coordinate_tim : $default_coordinate;
                 $duplicate_attendance = AttendanceEmployee::where('employee_id', $employee?->id)->where('date', '=', $date)->where('clock_in', $f_data->min)->where('clock_out', $f_data->max)->first();
 
                 if (empty($duplicate_attendance)) {
                     if (!empty($employee)) {
-                        if ($f_data->shift_id) {
-                            $shift_times = ShiftTime::where('shift_type_id', $f_data->shift_id)
+                        $shift_times = $f_data->shift_id
+                            ? ShiftTime::where('shift_type_id', $f_data->shift_id)
                                 ->where('days', date('l'))
                                 ->select(['is_working', 'start_time', 'end_time'])
-                                ->first();
-                        } else {
-                            $shift_times = ShiftTime::where('shift_type_id', $employee->shift_type->id)
-                                ->where('days', date('l'))
-                                ->select(['is_working', 'start_time', 'end_time'])
-                                ->first();
+                                ->first()
+                            : ($employee->shift_type
+                                ? ShiftTime::where('shift_type_id', $employee->shift_type->id)
+                                    ->where('days', date('l'))
+                                    ->select(['is_working', 'start_time', 'end_time'])
+                                    ->first()
+                                : null);
+
+                        // Rostered shift employees (is_shift=1) have no fixed default shift,
+                        // so their working window cannot be resolved here. Skip them so they
+                        // never interrupt the door sync loop for non-shift employees; they
+                        // clock in/out via the website instead.
+                        if (!$shift_times) {
+                            continue;
                         }
 
                         $attendance = AttendanceEmployee::where('employee_id', $employee->id)->where('date', '=', $date)->orderBy('created_at', 'DESC')->first();
@@ -175,7 +191,7 @@ class TestController extends Controller
                                 $attendance->work_hours = $shift_times->is_working ? $workhours : '00:00:00';
                                 $attendance->overtime = '00:00:00';
                                 $attendance->early_leaving = $shift_times->is_working ? $early_leaving : '00:00:00';
-                                $attendance->coord_in = $f_data->coordinate;
+                                $attendance->coord_in = $coord;
                                 $attendance->source_in = $f_data->min_source;
                                 $attendance->save();
                             } elseif ($attendance && $clock_out) {
@@ -184,7 +200,7 @@ class TestController extends Controller
                                 $attendance->work_hours = $shift_times->is_working ? $workhours : '00:00:00';
                                 $attendance->overtime = '00:00:00';
                                 $attendance->early_leaving = $shift_times->is_working ? $early_leaving : '00:00:00';
-                                $attendance->coord_out = $f_data->coordinate_out;
+                                $attendance->coord_out = $coord;
                                 $attendance->source_out = $f_data->max_source;
                                 $attendance->save();
                             } elseif ($clock_in && empty($attendance)) {
@@ -203,7 +219,7 @@ class TestController extends Controller
                                 $new_attendance->total_rest = '00:00:00';
                                 $new_attendance->created_by = $employee->user_id;
                                 $new_attendance->attendance_type_id = 1; //* ON SITE
-                                $new_attendance->coord_in = $f_data->coordinate;
+                                $new_attendance->coord_in = $coord;
                                 $new_attendance->is_valid = true;
                                 $new_attendance->validate_by = 1; //* System
                                 $new_attendance->shift_type_id = $employee->shift_type_id;

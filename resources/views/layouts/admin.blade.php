@@ -262,8 +262,12 @@ if (!empty($mode_setting['theme_color'])) {
 
 
     <script>
-        const dataTable = new simpleDatatables.DataTable("#pc-dt-simple");
-        const dataTable2 = new simpleDatatables.DataTable("#pc-dt-simple2");
+        if ($("#pc-dt-simple").length) {
+            const dataTable = new simpleDatatables.DataTable("#pc-dt-simple");
+        }
+        if ($("#pc-dt-simple2").length) {
+            const dataTable2 = new simpleDatatables.DataTable("#pc-dt-simple2");
+        }
     </script>
 
     <script>

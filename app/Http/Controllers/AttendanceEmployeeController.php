@@ -18,6 +18,9 @@ use App\Utilities\AttendanceLocationResolver;
 use App\Utilities\DistanceCalculator;
 use App\Exports\NotClockInExport;
 use App\Models\ShiftHistory;
+use App\Models\Leave;
+use App\Services\ShiftSequenceService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -269,11 +272,26 @@ class AttendanceEmployeeController extends Controller
 
             $startTime = Utility::getValByName('company_start_time');
             $endTime = Utility::getValByName('company_end_time');
-            $attendance = AttendanceEmployee::where('employee_id', '=', $request->employee_id)->where('date', '=', $request->date)->first();
+            $shiftId = !empty($request->shift_type_id) ? $request->shift_type_id : $employee->shift_type_id;
+            $attendance = AttendanceEmployee::where('employee_id', '=', $request->employee_id)->where('date', '=', $request->date);
+            if ($employee->is_shift) {
+                $attendance->where('shift_type_id', $shiftId);
+            }
+            $attendance = $attendance->first();
             if ($attendance) {
                 return redirect()->back()->with('error', __('Employee Attendance Already Created.'));
             } else {
                 $date = date("Y-m-d");
+
+                if ($employee->is_shift && $shiftId) {
+                    $shiftTime = ShiftTime::where('shift_type_id', $shiftId)
+                        ->where('days', date('l', strtotime($request->date)))
+                        ->first();
+                    if ($shiftTime) {
+                        $startTime = $shiftTime->start_time;
+                        $endTime = $shiftTime->end_time;
+                    }
+                }
 
                 $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
 
@@ -324,6 +342,7 @@ class AttendanceEmployeeController extends Controller
                 $employeeAttendance->total_rest = '00:00:00';
                 $employeeAttendance->work_hours = $workhours;
                 $employeeAttendance->source_in = $this->detectDeviceSource($request);
+                $employeeAttendance->shift_type_id = $shiftId;
                 $employeeAttendance->created_by = \Auth::user()->id;
 
                 $employeeAttendance->save();
@@ -386,6 +405,10 @@ class AttendanceEmployeeController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (Auth::user()->type == 'employee' && !empty(Auth::user()->employee) && Auth::user()->employee->is_shift) {
+            return $this->shiftEmployeeClockOut($request, $id);
+        }
+
         $picture_path = null;
         $employee = Employee::where('user_id', Auth::user()->id)->first();
 
@@ -424,13 +447,14 @@ class AttendanceEmployeeController extends Controller
         $settings = Utility::settings();
 
         // yesterday shift and attendance for cross day attendance operation
-        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->first();
+        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime('yesterday')))->where('shift_type_id', $request->shift_type_id)->first();
         $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance?->shift_type_id)
             ->where('days', date('l', strtotime('yesterday')))
             ->first();
 
-        // tomorrow shift
-        $tomorrow_shift_times = ShiftTime::where('shift_type_id', \Auth::user()->employee->shift_type->id)
+        // tomorrow shift (rostering employees resolve from the monthly roster)
+        $tomorrowScheduleIds = \Auth::user()->employee?->scheduledShiftIdsForDate($tomorrow_date) ?? [];
+        $tomorrow_shift_times = ShiftTime::where('shift_type_id', $tomorrowScheduleIds[0] ?? null)
             ->where('days', date('l', strtotime('tomorrow')))
             ->first();
 
@@ -454,11 +478,15 @@ class AttendanceEmployeeController extends Controller
         // $yesterday_absolute_out       = strtotime("$date $yesterday_absolute_out_time");
 
         // calculate abolute in for tommorow
-        $tomorrow_clock_in_second = strtotime($tomorrow_shift_times->start_time) - strtotime($date) - 3600;
-        $tomorrow_hours = floor($tomorrow_clock_in_second / 3600);
-        $tomorrow_mins = floor($tomorrow_clock_in_second / 60 % 60);
-        $tomorrow_secs = floor($tomorrow_clock_in_second % 60);
-        $tomorrow_absolute_in = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
+        if ($tomorrow_shift_times) {
+            $tomorrow_clock_in_second = strtotime($tomorrow_shift_times->start_time) - strtotime($date) - 3600;
+            $tomorrow_hours = floor($tomorrow_clock_in_second / 3600);
+            $tomorrow_mins = floor($tomorrow_clock_in_second / 60 % 60);
+            $tomorrow_secs = floor($tomorrow_clock_in_second % 60);
+            $tomorrow_absolute_in = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
+        } else {
+            $tomorrow_absolute_in = false;
+        }
 
         $today_cross_day = $shift_times?->start_time > $shift_times?->end_time ? true : false;
         $yesterday_cross_day = $yesterday_shift_times?->start_time > $yesterday_shift_times?->end_time ? true : false;
@@ -912,7 +940,63 @@ class AttendanceEmployeeController extends Controller
             $note = $request->input('notes');
             $attendance_type = $request->input('attendance_type');
 
-            $is_valid_shift = $employee->shift_type_id == $request->shift_type_id ? true : null;
+            if ($employee->is_shift) {
+                return $this->shiftEmployeeClockIn($request, $employee, $settings, [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                    'accuracy' => $accuracy,
+                    'coord_in' => $coord_in,
+                    'coord_out' => $coord_out,
+                    'note' => $note,
+                    'attendance_type' => $attendance_type,
+                ]);
+            }
+
+            // Determine the effective attendance date (cross-day shifts stay on their start date).
+            $date = date("Y-m-d");
+            $time = date("H:i:s");
+            $yesterday = date("Y-m-d", strtotime('yesterday'));
+            $now = time();
+
+            $shift_times = ShiftTime::where('shift_type_id', $request->shift_type_id)
+                ->where('days', date('l'))
+                ->first();
+            $yesterday_shift = ShiftTime::where('shift_type_id', $request->shift_type_id)
+                ->where('days', date('l', strtotime('yesterday')))
+                ->first();
+            $yesterday_start = strtotime("yesterday " . ($yesterday_shift?->start_time ?? '23:59:00'));
+            $today_start = strtotime("today " . ($shift_times?->start_time ?? '23:59:00'));
+            $attendanceDate = abs($now - $yesterday_start) < abs($now - $today_start) ? $yesterday : $date;
+
+            $is_valid_shift = null;
+            if ($employee->is_shift) {
+                // Validate against the explicit roster range (date/end_date) so cross-day shifts
+                // are valid when clocking in on the end date (e.g. Shift 3 starts 28, ends 29 morning).
+                $rosteredSchedule = $employee->shiftSchedules()
+                    ->where('shift_type_id', $request->shift_type_id)
+                    ->where('date', '<=', $date)
+                    ->where(function ($q) use ($date) {
+                        $q->where('end_date', '>=', $date)->orWhereNull('end_date');
+                    })
+                    ->orderBy('date', 'ASC')
+                    ->get()
+                    ->first(function ($sch) use ($now) {
+                        $sTimes = ShiftTime::where('shift_type_id', $sch->shift_type_id)
+                            ->where('days', date('l', strtotime($sch->date)))
+                            ->first();
+                        if (!$sTimes || !$sTimes->is_working || !$sTimes->start_time || !$sTimes->end_time) {
+                            return false;
+                        }
+                        $start = strtotime($sch->date . ' ' . $sTimes->start_time);
+                        $endDate = $sch->end_date ?? $sch->date;
+                        $end = strtotime($endDate . ' ' . $sTimes->end_time);
+                        return $now >= $start && $now < $end;
+                    });
+
+                $is_valid_shift = $rosteredSchedule ? true : null;
+            } else {
+                $is_valid_shift = $employee->shift_type_id == $request->shift_type_id ? true : null;
+            }
             $is_valid_location = null;
 
             // Check if employee choose in site
@@ -935,34 +1019,32 @@ class AttendanceEmployeeController extends Controller
 
             $is_valid = $is_valid_shift && $is_valid_location ? true : null;
 
-            $date = date("Y-m-d");
-            $time = date("H:i:s");
-            $yesterday = date("Y-m-d", strtotime('yesterday'));
-
             $employeeId = !empty(\Auth::user()->employee) ? \Auth::user()->employee->id : 0;
+            $guardDate = ($rosteredSchedule ?? null)?->date ?? $attendanceDate;
             $todayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)
-                ->where('date', date('Y-m-d'))
+                ->where('date', $guardDate)
                 ->where('shift_type_id', $request->shift_type_id)
                 ->first();
-            if ($todayAttendance) {
+            // Approved permit: clock-in is no longer allowed for this shift.
+            if ($todayAttendance && $todayAttendance->status == 'Permission') {
+                return redirect()->back()->with('error', __('This shift is covered by an approved permit. Clock-in is not allowed.'));
+            }
+            // Approved leave: clock-in is not allowed for the entire day.
+            $approvedLeave = Leave::where('employee_id', $employeeId)
+                ->where('status', 'Approved')
+                ->where('start_date', '<=', $guardDate)
+                ->where('end_date', '>=', $guardDate)
+                ->exists();
+            if ($approvedLeave) {
+                return redirect()->back()->with('error', __('This date is covered by an approved leave. Clock-in is not allowed.'));
+            }
+            // Already clocked in.
+            if ($todayAttendance && $todayAttendance->clock_in != '00:00:00') {
                 return redirect()->back()->with('error', __('Today you have clocked in and clocked out.'));
             }
 
-            $shift_times = ShiftTime::where('shift_type_id', $request->shift_type_id)
-                ->where('days', date('l'))
-                ->first();
             $cross_day = $shift_times->start_time > $shift_times->end_time ? true : false;
-            $yesterday_shift = ShiftTime::where('shift_type_id', $request->shift_type_id)
-                ->where('days', date('l', strtotime('yesterday')))
-                ->first();
             $yesterday_cross_day = $yesterday_shift->start_time > $yesterday_shift->end_time ? true : false;
-
-            // Determine correct attendance date
-            $yesterday_time = $yesterday_shift?->start_time ?? '23:59:00';
-            $yesterday_start = strtotime("yesterday {$yesterday_time}");
-            $today_start = strtotime("today {$shift_times->start_time}");
-            $now = time();
-            $attendanceDate = abs($now - $yesterday_start) < abs($now - $today_start) ? $yesterday : $date;
 
             if ($request->input('picture')) {
                 $base64ImageData = $request->input('picture');
@@ -970,6 +1052,60 @@ class AttendanceEmployeeController extends Controller
                 $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee?->name) . '.png';
                 Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
                 $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+            }
+
+            // An existing permit/permission placeholder row for this shift is converted to a real
+            // Present (clock-in) record so the S/EO badge turns into H. The roster/window
+            // validation above (is_valid_shift) already restricts this to the shift's scheduled hours.
+            if ($todayAttendance) {
+                $presentStatus = AttendanceStatus::where('id', 1)->first();
+                $late = '00:00:00';
+                if (!$cross_day) {
+                    if (time() > (strtotime($guardDate . $shift_times?->start_time) + ((int) $settings['late_tolerance'] * 60))) {
+                        $totalLateSeconds = time() - (strtotime($guardDate . $shift_times?->start_time) + ((int) $settings['late_tolerance'] * 60));
+                        $hours = floor($totalLateSeconds / 3600);
+                        $mins = floor($totalLateSeconds / 60 % 60);
+                        $secs = floor($totalLateSeconds % 60);
+                        $late = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+                    }
+                }
+
+                $todayAttendance = AttendanceEmployee::find($todayAttendance->id);
+                $todayAttendance->attendance_status_id = $presentStatus->id;
+                $todayAttendance->status = $presentStatus->name;
+                $todayAttendance->clock_in = $time;
+                $todayAttendance->clock_out = $time;
+                $todayAttendance->late = $late;
+                $todayAttendance->early_leaving = '00:00:00';
+                $todayAttendance->overtime = '00:00:00';
+                $todayAttendance->total_rest = '00:00:00';
+                $todayAttendance->work_hours = '00:00:00';
+                $todayAttendance->coord_in = $coord_in;
+                $todayAttendance->note = $note ?: $todayAttendance->note;
+                $todayAttendance->is_valid = $is_valid;
+                $todayAttendance->validate_by = $is_valid ? 1 : null;
+                $todayAttendance->attendance_type_id = $attendance_type ?: $todayAttendance->attendance_type_id;
+                $todayAttendance->picture_in = $picture_path ?: $todayAttendance->picture_in;
+                $todayAttendance->created_by = \Auth::user()->id;
+                $todayAttendance->source_in = $this->detectDeviceSource($request);
+                $todayAttendance->save();
+
+                $logForm = [
+                    'personel_id' => $employee->personel_id,
+                    'date' => $todayAttendance->date,
+                    'coordinate' => $coord_in,
+                    'min' => $time,
+                    'max' => $time,
+                    'min_source' => $this->detectDeviceSource($request),
+                    'max_source' => $this->detectDeviceSource($request),
+                    'shift_id' => $request->shift_type_id,
+                ];
+                LogAttendance::create($logForm);
+
+                return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $todayAttendance->date])->with([
+                    'success' => __('Employee Successfully Clock In.'),
+                    'employee' => $employee,
+                ]);
             }
 
             // Check clock in if today is shift in cross day mode
@@ -1063,7 +1199,7 @@ class AttendanceEmployeeController extends Controller
                 $startTime = $shift_times->start_time;
                 $endTime = $shift_times->end_time;
 
-                $attendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', $employeeId)->where('clock_out', '=', '00:00:00')->first();
+                $attendance = AttendanceEmployee::orderBy('id', 'desc')->where('employee_id', '=', $employeeId)->where('clock_out', '=', '00:00:00')->where('shift_type_id', $request->shift_type_id)->first();
 
                 if ($attendance != null) {
                     $attendance = AttendanceEmployee::find($attendance->id);
@@ -1086,7 +1222,7 @@ class AttendanceEmployeeController extends Controller
                     }
                 } else { // cross day late calculation
                     if (time() > (strtotime($attendanceDate . $startTime) + ((int) $settings['late_tolerance'] * 60))) {
-                        $totalLateSeconds = time() - (strtotime($yesterday . $startTime) + ((int) $settings['late_tolerance'] * 60));
+                        $totalLateSeconds = time() - (strtotime($attendanceDate . $startTime) + ((int) $settings['late_tolerance'] * 60));
                         $hours = floor($totalLateSeconds / 3600);
                         $mins = floor($totalLateSeconds / 60 % 60);
                         $secs = floor($totalLateSeconds % 60);
@@ -1259,14 +1395,22 @@ class AttendanceEmployeeController extends Controller
                         $workhours = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
 
 
-                        $attendance = AttendanceEmployee::where('employee_id', '=', $employee)->where('date', '=', $request->date)->first();
+                        $attendance = AttendanceEmployee::where('employee_id', '=', $employee)->where('date', '=', $request->date);
 
-                        if (!empty($attendance)) {
-                            $employeeAttendance = $attendance;
-                        } else {
+                        if ($employee_data->is_shift) {
+                            // Shift employees: always create a new row per shift so existing shift rows are not overwritten
                             $employeeAttendance = new AttendanceEmployee();
                             $employeeAttendance->employee_id = $employee;
                             $employeeAttendance->created_by = \Auth::user()->id;
+                        } else {
+                            $attendance = $attendance->first();
+                            if (!empty($attendance)) {
+                                $employeeAttendance = $attendance;
+                            } else {
+                                $employeeAttendance = new AttendanceEmployee();
+                                $employeeAttendance->employee_id = $employee;
+                                $employeeAttendance->created_by = \Auth::user()->id;
+                            }
                         }
 
 
@@ -1280,7 +1424,9 @@ class AttendanceEmployeeController extends Controller
                         $employeeAttendance->work_hours = $workhours;
                         $employeeAttendance->total_rest = '00:00:00';
                         $employeeAttendance->attendance_status_id = $presentStatus->id;
-                        $employeeAttendance->shift_type_id = $employee_data->shift_type_id;
+                        $employeeAttendance->shift_type_id = $employee_data->is_shift
+                            ? ($employee_data->scheduledShiftIdsForDate($request->date)[0] ?? $employee_data->shift_type_id)
+                            : $employee_data->shift_type_id;
                         $employeeAttendance->save();
                     }
                 }
@@ -1361,13 +1507,14 @@ class AttendanceEmployeeController extends Controller
         $settings = Utility::settings();
 
         // yesterday shift and attendance for cross day attendance operation
-        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime($yesterday_date)))->first();
+        $yesterdayAttendance = AttendanceEmployee::where('employee_id', '=', $employeeId)->where('date', date('Y-m-d', strtotime($yesterday_date)))->where('shift_type_id', $request?->shift_type_id)->first();
         $yesterday_shift_times = ShiftTime::where('shift_type_id', $request?->shift_type_id)
             ->where('days', date('l', strtotime($yesterday_date)))
             ->first();
 
         // tomorrow shift
-        $tomorrow_shift_times = ShiftTime::where('shift_type_id', $employee->shift_type->id)
+        $tomorrow_shift_type_id = $employee->is_shift && !empty($request->shift_type_id) ? $request->shift_type_id : ($employee->scheduledShiftIdsForDate($tomorrow_date)[0] ?? null);
+        $tomorrow_shift_times = ShiftTime::where('shift_type_id', $tomorrow_shift_type_id)
             ->where('days', date('l', strtotime($tomorrow_date)))
             ->first();
 
@@ -1391,11 +1538,15 @@ class AttendanceEmployeeController extends Controller
         // $yesterday_absolute_out       = strtotime("$date $yesterday_absolute_out_time");
 
         // calculate abolute in for tommorow
-        $tomorrow_clock_in_second = strtotime($tomorrow_shift_times->start_time) - strtotime($date) - 3600;
-        $tomorrow_hours = floor($tomorrow_clock_in_second / 3600);
-        $tomorrow_mins = floor($tomorrow_clock_in_second / 60 % 60);
-        $tomorrow_secs = floor($tomorrow_clock_in_second % 60);
-        $tomorrow_absolute_in = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
+        if ($tomorrow_shift_times) {
+            $tomorrow_clock_in_second = strtotime($tomorrow_shift_times->start_time) - strtotime($date) - 3600;
+            $tomorrow_hours = floor($tomorrow_clock_in_second / 3600);
+            $tomorrow_mins = floor($tomorrow_clock_in_second / 60 % 60);
+            $tomorrow_secs = floor($tomorrow_clock_in_second % 60);
+            $tomorrow_absolute_in = strtotime($tomorrow_date . " " . sprintf('%02d:%02d:%02d', $tomorrow_hours, $tomorrow_mins, $tomorrow_secs));
+        } else {
+            $tomorrow_absolute_in = false;
+        }
 
         $today_cross_day = $shift_times?->start_time > $shift_times?->end_time ? true : false;
         $yesterday_cross_day = $yesterday_shift_times?->start_time > $yesterday_shift_times?->end_time ? true : false;
@@ -1646,6 +1797,226 @@ class AttendanceEmployeeController extends Controller
         } else {
             return redirect()->back()->with('error', __('Clock Out Data Invalid'));
         }
+    }
+
+    /**
+     * Check-in untuk karyawan shift berdasarkan rangkaian shift (shift sequence).
+     *
+     * Aturan: check-in hanya dibuka 30 menit sebelum shift pertama rangkaian
+     * dimulai sampai shift pertama selesai, dan hanya sekali per rangkaian.
+     */
+    private function shiftEmployeeClockIn(Request $request, Employee $employee, array $settings, array $payload)
+    {
+        $service = app(ShiftSequenceService::class);
+        $now = Carbon::now();
+
+        $validation = $service->validateCheckIn(
+            $employee,
+            $now,
+            (int) $request->shift_type_id,
+            $request->input('shift_date') ?: null
+        );
+
+        if (!$validation['allowed']) {
+            return redirect()->back()->with('error', $validation['message']);
+        }
+
+        $shift = $validation['shift'];
+        $shiftDate = $shift['shift_date'];
+        $existingAttendance = $shift['attendance'];
+
+        if ($existingAttendance && $existingAttendance->status == 'Permission') {
+            return redirect()->back()->with('error', __('This shift is covered by an approved permit. Clock-in is not allowed.'));
+        }
+
+        $approvedLeave = Leave::where('employee_id', $employee->id)
+            ->where('status', 'Approved')
+            ->where('start_date', '<=', $shiftDate)
+            ->where('end_date', '>=', $shiftDate)
+            ->exists();
+
+        if ($approvedLeave) {
+            return redirect()->back()->with('error', __('This date is covered by an approved leave. Clock-in is not allowed.'));
+        }
+
+        // Validasi lokasi (sama seperti jalur non-shift).
+        $attendance_type = $payload['attendance_type'];
+        $accuracy = $payload['accuracy'];
+        $is_valid_location = null;
+        if ($attendance_type == '1') {
+            $branch_data = Branch::where('id', Auth::user()->employee->branch_id)->first();
+            if ($branch_data) {
+                $distance = DistanceCalculator::haversineDistance($payload['latitude'], $payload['longitude'], (float) $branch_data['latitude'], (float) $branch_data['longitude']);
+                $is_valid_location = ($accuracy + (float) $branch_data['tolerance']) >= $distance ? true : null;
+            }
+        } elseif ($attendance_type == '3' && !empty($employee->coordinate)) {
+            $home_coordinate = explode(', ', $employee->coordinate);
+            $distance = DistanceCalculator::haversineDistance($payload['latitude'], $payload['longitude'], (float) $home_coordinate[0], (float) $home_coordinate[1]);
+            $is_valid_location = ($accuracy + (float) $home_coordinate[2]) >= $distance ? true : null;
+        }
+
+        $is_valid_shift = true;
+        $is_valid = $is_valid_shift && $is_valid_location ? true : null;
+
+        $picture_path = null;
+        if ($request->input('picture')) {
+            $base64ImageData = $request->input('picture');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
+            Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+        }
+
+        $time = date('H:i:s');
+        $presentStatus = AttendanceStatus::where('id', 1)->first();
+        $source = $this->detectDeviceSource($request);
+
+        // Keterlambatan dihitung dari jam mulai shift ini.
+        $late = '00:00:00';
+        if (!$shift['is_cross_day']) {
+            $threshold = strtotime($shiftDate . ' ' . $shift['start_time']) + ((int) $settings['late_tolerance'] * 60);
+            if (time() > $threshold) {
+                $late = $this->formatDuration(time() - $threshold);
+            }
+        }
+
+        // Satu baris attendance per shift (perilaku lama dipertahankan agar payroll = 1 hari/shift).
+        $attendance = $existingAttendance ?: new AttendanceEmployee();
+        if (!$existingAttendance) {
+            $attendance->employee_id = $employee->id;
+            $attendance->date = $shiftDate;
+            $attendance->shift_type_id = $shift['shift_type_id'];
+        }
+
+        $attendance->attendance_status_id = $presentStatus->id;
+        $attendance->status = $presentStatus->name;
+        $attendance->clock_in = $time;
+        $attendance->clock_out = $time;
+        $attendance->late = $late;
+        $attendance->early_leaving = '00:00:00';
+        $attendance->overtime = '00:00:00';
+        $attendance->total_rest = '00:00:00';
+        $attendance->work_hours = '00:00:00';
+        $attendance->coord_in = $payload['coord_in'];
+        $attendance->note = $payload['note'] ?: $attendance->note;
+        $attendance->is_valid = $is_valid;
+        $attendance->validate_by = $is_valid ? 1 : null;
+        $attendance->attendance_type_id = $attendance_type ?: $attendance->attendance_type_id;
+        $attendance->picture_in = $picture_path ?: $attendance->picture_in;
+        $attendance->created_by = Auth::user()->id;
+        $attendance->source_in = $source;
+        $attendance->save();
+
+        LogAttendance::create([
+            'personel_id' => $employee->personel_id,
+            'date' => $shiftDate,
+            'coordinate' => $payload['coord_in'],
+            'min' => $time,
+            'max' => $time,
+            'min_source' => $source,
+            'max_source' => $source,
+            'shift_id' => $shift['shift_type_id'],
+        ]);
+
+        $last_shift_history = ShiftHistory::where('employee_id', $employee->id)->orderBy('id', 'desc')->first();
+        if (empty($last_shift_history) || $last_shift_history->shift_type_id != $shift['shift_type_id']) {
+            ShiftHistory::create(['employee_id' => $employee->id, 'shift_type_id' => $shift['shift_type_id']]);
+        }
+
+        return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $shiftDate])->with([
+            'success' => __('Employee Successfully Clock In.'),
+            'employee' => $employee,
+        ]);
+    }
+
+    /**
+     * Check-out untuk karyawan shift (per shift).
+     *
+     * Aturan: check-out dibuka saat shift selesai; shift terakhir dibatasi 2 jam.
+     */
+    private function shiftEmployeeClockOut(Request $request, $id)
+    {
+        $employee = Auth::user()->employee;
+        $service = app(ShiftSequenceService::class);
+        $now = Carbon::now();
+
+        $attendance = AttendanceEmployee::find($id);
+        if (!$attendance || $attendance->employee_id != $employee->id) {
+            return redirect()->back()->with('error', __('Data attendance tidak ditemukan atau bukan milik Anda.'));
+        }
+
+        $validation = $service->validateCheckOut($employee, $now, $attendance);
+
+        if (!$validation['allowed']) {
+            return redirect()->back()->with('error', $validation['message']);
+        }
+
+        $shift = $validation['shift'];
+
+        $picture_path = null;
+        if ($request->input('picture_out')) {
+            $base64ImageData = $request->input('picture_out');
+            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64ImageData));
+            $pictureName = 'attendance_' . time() . '_' . date('Y-m-d') . '_' . preg_replace('/\s+/', '', $employee->name) . '.png';
+            Storage::disk('public')->put('uploads/attendance/' . $pictureName, $imageData);
+            $picture_path = env('APP_URL') . '/storage/uploads/attendance/' . $pictureName;
+        } else {
+            return redirect()->back()->with('error', __('The picture field is required.'));
+        }
+
+        $time = date('H:i:s');
+        $source = $this->detectDeviceSource($request);
+
+        // Jam kerja dari check-in shift ini sampai sekarang.
+        $clockInTs = strtotime($attendance->date . ' ' . $attendance->clock_in);
+        $workHours = time() > $clockInTs ? $this->formatDuration(time() - $clockInTs) : '00:00:00';
+
+        $overtime = '00:00:00';
+        $earlyLeaving = '00:00:00';
+        $shiftEndTs = $shift['end_at']->getTimestamp();
+        if (time() > $shiftEndTs) {
+            $overtime = $this->formatDuration(time() - $shiftEndTs);
+        } elseif (time() < $shiftEndTs) {
+            $earlyLeaving = $this->formatDuration($shiftEndTs - time());
+        }
+
+        $attendance->clock_out = $time;
+        $attendance->coord_out = $request->input('latitude') . ', ' . $request->input('longitude') . ', ' . $request->input('accuracy');
+        $attendance->picture_out = $picture_path ?: $attendance->picture_out;
+        $attendance->source_out = $source;
+        $attendance->work_hours = $workHours;
+        $attendance->overtime = $overtime;
+        $attendance->early_leaving = $earlyLeaving;
+        $attendance->save();
+
+        LogAttendance::create([
+            'personel_id' => $employee->personel_id,
+            'date' => Carbon::now()->toDateString(),
+            'coordinate' => $request->input('latitude') . ', ' . $request->input('longitude') . ', ' . $request->input('accuracy'),
+            'min' => $time,
+            'max' => $time,
+            'min_source' => $source,
+            'max_source' => $source,
+            'shift_id' => $shift['shift_type_id'],
+        ]);
+
+        return redirect()->route('attendanceemployee.index', ['type' => 'daily', 'date' => $attendance->date])->with([
+            'success' => __('Employee Successfully Clock Out.'),
+            'employee' => $employee,
+        ]);
+    }
+
+    /**
+     * Format durasi detik menjadi HH:MM:SS.
+     */
+    private function formatDuration(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = floor($seconds / 3600);
+        $mins = floor($seconds / 60 % 60);
+        $secs = floor($seconds % 60);
+
+        return sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
     }
 
     private function detectDeviceSource(Request $request)

@@ -137,7 +137,7 @@
                                                         <i class="ti ti-caret-right text-white"></i>
                                                     </a>
                                                 </div>
-                                                @if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == Auth::user()->employee->id || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1)
+                                                @if (($attendance_request->created_by == Auth::user()->id || $attendance_request->employee_id == (Auth::user()->employee?->id ?? null) || Auth::user()->type != 'employee') && $attendance_request->is_approved != 1)
                                                     @can('Edit Request Attendance')
                                                         <div class="action-btn bg-info ms-2">
                                                             <a href="#" class="mx-3 btn btn-sm  align-items-center"

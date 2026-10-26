@@ -1,10 +1,10 @@
-{{ Form::model($permit, ['route' => ['permit.update', $permit->id], 'method' => 'PUT','enctype' => 'multipart/form-data']) }}
+{{ Form::model($permit, ['route' => ['permit.update', $permit->id], 'method' => 'PUT','enctype' => 'multipart/form-data', 'data-emp-id' => $permit->employee_id]) }}
 <div class="modal-body">
     <div class="row">
         <div class="col-md-12">
             <div class="form-group">
                 {{ Form::label('employee_id', __('Employee'), ['class' => 'col-form-label']) }}
-                {{ Form::select('employee_id', $employees, null, ['class' => 'form-control select2', 'placeholder' => __('Select Employee')]) }}
+                {{ Form::select('employee_id', $employees, null, ['id' => 'employee_id', 'class' => 'form-control select2', 'placeholder' => __('Select Employee')]) }}
             </div>
         </div>
     </div>
@@ -18,13 +18,13 @@
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('start_date', __('Start Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('start_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select start date']) }}
+                {{ Form::text('start_date', null, ['id' => 'start_date', 'class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select start date']) }}
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
                 {{ Form::label('end_date', __('End Date'), ['class' => 'col-form-label']) }}
-                {{ Form::text('end_date', null, ['class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
+                {{ Form::text('end_date', null, ['id' => 'end_date', 'class' => 'form-control d_week', 'autocomplete' => 'off', 'placeholder' => 'Select end date']) }}
             </div>
         </div>
     </div>

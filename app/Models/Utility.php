@@ -238,9 +238,8 @@ class Utility extends Model
                 ->orWhere('period', "{$year}-{$month}");
         })->get();
         $totalAllowance = 0;
-        $total_work_days = $employee->getTotalWorkdays($employee->shift_type->shiftTimes->where('is_working', 1)->pluck('days')->toArray(), $month, $year);
-        $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type->shiftTimes->where('is_working', 1), $employee->employeeType->type);
-        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+        list($total_work_days, $total_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
+        $fixed_rate = $employee->payrollRate($total_present_days, $total_work_days);
 
         foreach ($earning['allowance'] as $earn) {
             if ($earn->type == 'percentage') {
@@ -294,7 +293,7 @@ class Utility extends Model
         }
 
         //Overtime
-        $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->get();
+        $earning['overTime'] = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull(['report_document'])->where('status', 'approved')->get();
 
         $earning['totalOverTime'] = 0;
         $total_over_time_hours = 0;
@@ -372,6 +371,8 @@ class Utility extends Model
             $earning['totalOverTime'] += $amount;
         }
 
+        $earning['overTime'] = $earning['overTime']->filter(fn ($o) => isset($o->amount));
+
         $current = "{$year}-{$month}";
         $deduction['loan'] = Loan::where('employee_id', $employeeId)->where(function ($query) use ($current) {
             $query->where(function ($q) use ($current) {
@@ -418,15 +419,14 @@ class Utility extends Model
         $totalbpjs = 0;
 
         foreach ($deduction['bpjs'] as $earn) {
-            $empbpjs = $earn->type == 'percentage' ? $earn->amount * $employee->salary / 100 : $earn->amount;
+            $empbpjs = $earn->resolvedAmount($employee, $fixed_rate, $total_present_days);
+            $earn->prorated_amount = $empbpjs;
             $totalbpjs += $empbpjs;
         }
 
         $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
-        $payslip['earning'] = $earning;
-        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
-        // $payslip['totalEarning']   = $totalAllowance + $totalCommission + $totalotherpayment + 0;
+        // $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary ?? 0;
+        $payslip['totalEarning'] = $totalAllowance + $totalCommission + $totalotherpayment + (float) $payslip?->basic_salary + (float) $earning['totalOverTime'];
 
         $payslip['deduction'] = $deduction;
         $payslip['totalDeduction'] = $totalloan + $totaldeduction + $totalbpjs;

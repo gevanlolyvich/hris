@@ -117,7 +117,7 @@ class SalaryDataSheet implements FromCollection, WithHeadings, WithTitle
             "Loan Amount",
             "Loan Reason",
             "BPJS Option",
-            "BPJS Recurring (0/1)",
+            "BPJS Recurring (0/1/2)",
             "BPJS Type",
             "BPJS Amount (%)",
             "Deduction Option",

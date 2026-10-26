@@ -146,6 +146,15 @@
 
                                             </tr>
                                         @endforeach
+                                        @foreach ($payslipDetail['earning']['overTime'] as $overTime)
+                                            <tr>
+                                                <td>{{ __('OverTime') }}</td>
+                                                <td>{{ $overTime->title }}</td>
+                                                <td>{{ ucfirst($overTime->type) }}</td>
+                                                <td class="text-right">
+                                                    {{ \Auth::user()->priceFormat($overTime->amount) }}</td>
+                                            </tr>
+                                        @endforeach
                                         </tbody>
                                 </table>
                             </div>
@@ -201,8 +210,7 @@
                                             @endforeach
                                             @foreach ($payslipDetail['deduction']['bpjs'] ?? [] as $item)
                                                 @php
-                                                    $employess = \App\Models\Employee::find($item->employee_id);
-                                                    $empbpjs = ($item->amount * $employess->salary) / 100;
+                                                    $empbpjs = $item->prorated_amount ?? (($item->amount * \App\Models\Employee::find($item->employee_id)?->salary) / 100);
                                                 @endphp
                                                 <tr>
                                                     <td>{{ __('BPJS') }}</td>

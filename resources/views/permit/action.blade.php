@@ -9,7 +9,7 @@
                 </tr>
                 <tr>
                     <th>{{ __('Permit Type') }}</th>
-                    <td>{{ $permit->permitType->name }}</td>
+                    <td>{{ $permit->permitType?->name ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>{{ __('Start Date') }}</th>

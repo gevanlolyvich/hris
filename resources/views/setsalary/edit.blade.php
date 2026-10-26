@@ -335,7 +335,7 @@
                                     <div class="col-12 col-md-4">
                                         <div class="form-group">
                                             {{ Form::label('is_recurring', __('Recurring'),['class'=>'col-form-label']) }}
-                                            {{ Form::select('is_recurring',[1=>__('Recurring')],1, array('class' => 'form-control ','required'=>'required')) }}
+                                            {{ Form::select('is_recurring',[0=>__('No'), 1=>__('Recurring'), 2=>__('Prorated')],1, array('class' => 'form-control ','required'=>'required')) }}
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
@@ -383,7 +383,7 @@
                                             <tr>
                                                 <td>{{ $item->employee()->name }}</td>
                                                 <td>{{ $item->bpjs_option()->name }}</td>
-                                                <td>{{ $item->is_recurring ? __('Recurring') : __('No') }}</td>
+                                                <td>{{ $item->is_prorated ? __('Prorated') : ($item->is_recurring ? __('Recurring') : __('No')) }}</td>
                                                 <td>{{ ucfirst($item->type) }}</td>
                                                 <td>{{ $item->amount }}%</td>
 
