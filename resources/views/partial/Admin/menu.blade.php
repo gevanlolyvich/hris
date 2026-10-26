@@ -33,7 +33,18 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                     class="ti ti-home"></i></span><span
                                 class="dash-mtext">{{ __('Dashboard') }}</span>
                         </a>
-                    </li> 
+                    </li>
+                    @php
+                        $menuEmployee = \App\Models\Employee::where('user_id', \Auth::user()->id)->first();
+                    @endphp
+                    @if($menuEmployee && $menuEmployee->id == 14)
+                        <li class="dash-item {{ Request::route() && Request::route()->getName() == 'report.monthly.attendance' ? 'active' : '' }}">
+                            <a href="{{ route('report.monthly.attendance', ['branch' => 13]) }}" class="dash-link">
+                                <span class="dash-micon"><i class="ti ti-report"></i></span>
+                                <span class="dash-mtext">{{ __('Monthly Attendance') }}</span>
+                            </a>
+                        </li>
+                    @endif
                 @endif
                 @if (\Auth::user()->type != 'employee')
                     <li class="dash-item dash-hasmenu  {{ Request::segment(1) == 'null' ? 'active dash-trigger' : '' }}">

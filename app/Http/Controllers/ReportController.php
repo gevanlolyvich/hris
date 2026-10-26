@@ -22,6 +22,7 @@ use App\Models\Overtime;
 use App\Models\Holiday;
 use App\Utilities\AttendanceLocationResolver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MonthlyAttendanceExport;
@@ -554,8 +555,34 @@ class ReportController extends Controller
 
     public function monthlyAttendance(Request $request)
     {
-        if (\Auth::user()->can('Manage Report')) {
-            $branch = Branch::find(\Auth::user()->branch_id);
+        $user = Auth::user();
+        $restrictedBranchId = null;
+        $canManageReport = $user ? $user->can('Manage Report') : false;
+        $isEmployee14 = false;
+        if ($user) {
+            $employeeId = $user->employee?->id ?? \App\Models\Employee::where('user_id', $user->id)->value('id');
+            $isEmployee14 = $employeeId == 14;
+        }
+
+        if (!$canManageReport && !$isEmployee14) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        if ($isEmployee14 && !$canManageReport) {
+            $restrictedBranchId = 13;
+            if ((int) $request->input('branch') !== $restrictedBranchId) {
+                $query = $request->query();
+                $query['branch'] = $restrictedBranchId;
+                return redirect()->route('report.monthly.attendance', $query);
+            }
+        }
+
+        if ($restrictedBranchId) {
+            $branch = Branch::where('id', $restrictedBranchId)->get();
+            $branch_id = collect([$restrictedBranchId]);
+            $department = Department::whereIn('branch_id', $branch_id)->get();
+        } else {
+            $branch = Branch::find($user->branch_id);
             $branch_id = collect();
             if ($branch) {
                 $branch_id->push($branch?->id);
@@ -571,29 +598,34 @@ class ReportController extends Controller
             $branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->get() : Branch::get();
 
             $department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->get() : Department::get();
+        }
 
-            $data['branch'] = __('All');
-            $data['department'] = __('All');
+        $data['branch'] = __('All');
+        $data['department'] = __('All');
 
-            $employees = Employee::orderBy('name', 'ASC');
-            if (!empty($request->branch)) {
-                $showed_branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->find($request->branch) : Branch::find($request->branch);
-                if (!empty($showed_branch)) {
-                    $data['branch'] = $showed_branch->name;
-                }
-
-                $department = $department->where('branch_id', $request->branch);
+        $employees = Employee::orderBy('name', 'ASC');
+        if (!empty($request->branch)) {
+            if ($restrictedBranchId && (int) $request->branch != $restrictedBranchId) {
+                $request->merge(['branch' => $restrictedBranchId]);
             }
 
-            if (!empty($request->department)) {
-                // $employees->where('department_id', $request->department);
-                $showed_department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->find($request->department) : Department::find($request->department);
-
-                if (!empty($showed_department)) {
-                    $employees = $employees->where('department_id', $showed_department->id);
-                    $data['department'] = $showed_department->name;
-                }
+            $showed_branch = $branch_id?->isNotEmpty() ? Branch::whereIn('id', $branch_id)->find($request->branch) : Branch::find($request->branch);
+            if (!empty($showed_branch)) {
+                $data['branch'] = $showed_branch->name;
             }
+
+            $department = $department->where('branch_id', $request->branch);
+        }
+
+        if (!empty($request->department)) {
+            // $employees->where('department_id', $request->department);
+            $showed_department = $branch_id?->isNotEmpty() ? Department::whereIn('branch_id', $branch_id)->find($request->department) : Department::find($request->department);
+
+            if (!empty($showed_department)) {
+                $employees = $employees->where('department_id', $showed_department->id);
+                $data['department'] = $showed_department->name;
+            }
+        }
 
             if (!empty($request->month)) {
                 $currentdate = strtotime($request->month);
@@ -875,10 +907,7 @@ class ReportController extends Controller
                 }
             }
 
-            return view('report.monthlyAttendance', compact('employeesAttendance', 'branch', 'department', 'dates', 'data'));
-        } else {
-            return redirect()->back()->with('error', __('Permission denied.'));
-        }
+            return view('report.monthlyAttendance', compact('employeesAttendance', 'branch', 'department', 'dates', 'data', 'restrictedBranchId'));
     }
 
     public function timesheet(Request $request)
@@ -1067,22 +1096,37 @@ class ReportController extends Controller
 
     public function exportMonthlyAttendance(Request $request)
     {
-        if (\Auth::user()->can('Manage Report')) {
-            $urlQuery = parse_url($request->url, PHP_URL_QUERY);
-            $queryArray = [];
-            if (!empty($urlQuery)) {
-                foreach (explode('&', $urlQuery) as $query) {
-                    list($key, $value) = explode('=', $query);
-                    $queryArray[$key] = $value;
-                }
-            }
+        $user = Auth::user();
+        $canManageReport = $user ? $user->can('Manage Report') : false;
+        $isEmployee14 = false;
+        if ($user) {
+            $employeeId = $user->employee?->id ?? \App\Models\Employee::where('user_id', $user->id)->value('id');
+            $isEmployee14 = $employeeId == 14;
+        }
 
-            $name = 'Monthly_Attendance_Employee' . date('Y-m-d H:i:s');
-            $data = Excel::download(new MonthlyAttendanceExport(json_encode($queryArray)), $name . '.xlsx');
-
-            return $data;
-        } else {
+        if (!$canManageReport && !$isEmployee14) {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
+
+        $urlQuery = parse_url($request->url, PHP_URL_QUERY);
+        $queryArray = [];
+        if (!empty($urlQuery)) {
+            foreach (explode('&', $urlQuery) as $query) {
+                if (strpos($query, '=') === false) {
+                    continue;
+                }
+                list($key, $value) = explode('=', $query, 2);
+                $queryArray[$key] = $value;
+            }
+        }
+
+        if ($isEmployee14 && !$canManageReport) {
+            $queryArray['branch'] = '13';
+        }
+
+        $name = 'Monthly_Attendance_Employee' . date('Y-m-d H:i:s');
+        $data = Excel::download(new MonthlyAttendanceExport(json_encode($queryArray)), $name . '.xlsx');
+
+        return $data;
     }
 }
