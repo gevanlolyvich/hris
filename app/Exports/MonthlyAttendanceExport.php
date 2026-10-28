@@ -187,6 +187,7 @@ class MonthlyAttendanceExport implements FromCollection, WithEvents, ShouldAutoS
 
 
 			    $attendance_shift   = $attendance->shift_type?->shiftTimes?->where('days', $day)->values()[0] ?? null;
+			    $attendance_shift   = app(\App\Services\FlexibleTimeService::class)->applyToShiftTimes($attendance_shift, $employee->id, $dateFormat);
 
 
                             if (($attendance->status == 'Present') || ($attendance->status == 'No Working Hour')) {

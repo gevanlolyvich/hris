@@ -163,6 +163,7 @@ class HomeController extends Controller
                 $shift_times = ShiftTime::where('shift_type_id', \Auth::user()?->employee?->shift_type?->id)
                     ->where('days', date('l'))
                     ->first();
+                $shift_times = app(\App\Services\FlexibleTimeService::class)->applyToShiftTimes($shift_times, $emp->id, $date);
                 $shift_type = ShiftType::where('id', \Auth::user()->employee->shift_type->id)
                     ->first();
 
@@ -186,6 +187,7 @@ class HomeController extends Controller
                 $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayEmployeeAttendance?->shift_type_id)
                     ->where('days', date('l', strtotime('yesterday')))
                     ->first();
+                $yesterday_shift_times = app(\App\Services\FlexibleTimeService::class)->applyToShiftTimes($yesterday_shift_times, $emp->id, $dateYesterday);
 
                 $yesterdayOfficeTime['startTime']    = $yesterday_shift_times?->start_time;
                 $yesterdayOfficeTime['endTime']      = $yesterday_shift_times?->end_time;

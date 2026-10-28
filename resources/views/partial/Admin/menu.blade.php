@@ -262,7 +262,10 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 @endif --}}
 
                 <!-- timesheet-->
-                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet') || Gate::check('Manage Leave Office'))
+                @php
+                    $showFlexibleTime = \App\Models\FlexibleTime::canAccessMenu(\Auth::user());
+                @endphp
+                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet') || Gate::check('Manage Leave Office') || $showFlexibleTime)
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-clock"></i></span><span
@@ -275,6 +278,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('timesheet.index') }}">{{ __('Timesheet') }}</a>
                                 </li>
                             @endcan --}}
+                            @if ($showFlexibleTime)
+                                <li class="dash-item {{ request()->is('flexible-times*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('flexibletime.index') }}">{{ __('Flexible Time') }}</a>
+                                </li>
+                            @endif
                             @can('Manage Leave')
                                 <li class="dash-item">
                                     <a class="dash-link"

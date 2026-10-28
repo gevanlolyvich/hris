@@ -19,6 +19,7 @@ use App\Utilities\DistanceCalculator;
 use App\Exports\NotClockInExport;
 use App\Models\ShiftHistory;
 use App\Models\Leave;
+use App\Services\FlexibleTimeService;
 use App\Services\ShiftSequenceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -28,6 +29,19 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceEmployeeController extends Controller
 {
+    /**
+     * Override a ShiftTime instance in memory with the employee's approved
+     * Flexible Time for the given date (never persisted).
+     */
+    private function applyFlexibleTime($shiftTimes, ?int $employeeId, string $workDate)
+    {
+        if (! $shiftTimes || ! $employeeId) {
+            return $shiftTimes;
+        }
+
+        return app(FlexibleTimeService::class)->applyToShiftTimes($shiftTimes, $employeeId, $workDate);
+    }
+
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Attendance')) {
@@ -293,6 +307,12 @@ class AttendanceEmployeeController extends Controller
                     }
                 }
 
+                $flexibleSchedule = app(FlexibleTimeService::class)->getEffectiveWorkSchedule((int) $employee->id, $request->date);
+                if ($flexibleSchedule && ! empty($flexibleSchedule['flexible'])) {
+                    $startTime = $flexibleSchedule['start_time'];
+                    $endTime = $flexibleSchedule['end_time'];
+                }
+
                 $totalLateSeconds = strtotime($request->clock_in) - strtotime($date . $startTime);
 
                 $hours = floor($totalLateSeconds / 3600);
@@ -444,6 +464,8 @@ class AttendanceEmployeeController extends Controller
         $time = date("H:i:s");
         $timestamp = time();
 
+        $shift_times = $this->applyFlexibleTime($shift_times, $employeeId, $date);
+
         $settings = Utility::settings();
 
         // yesterday shift and attendance for cross day attendance operation
@@ -451,6 +473,7 @@ class AttendanceEmployeeController extends Controller
         $yesterday_shift_times = ShiftTime::where('shift_type_id', $yesterdayAttendance?->shift_type_id)
             ->where('days', date('l', strtotime('yesterday')))
             ->first();
+        $yesterday_shift_times = $this->applyFlexibleTime($yesterday_shift_times, $employeeId, $yesterday_date);
 
         // tomorrow shift (rostering employees resolve from the monthly roster)
         $tomorrowScheduleIds = \Auth::user()->employee?->scheduledShiftIdsForDate($tomorrow_date) ?? [];
@@ -961,9 +984,11 @@ class AttendanceEmployeeController extends Controller
             $shift_times = ShiftTime::where('shift_type_id', $request->shift_type_id)
                 ->where('days', date('l'))
                 ->first();
+            $shift_times = $this->applyFlexibleTime($shift_times, $employee->id, $date);
             $yesterday_shift = ShiftTime::where('shift_type_id', $request->shift_type_id)
                 ->where('days', date('l', strtotime('yesterday')))
                 ->first();
+            $yesterday_shift = $this->applyFlexibleTime($yesterday_shift, $employee->id, $yesterday);
             $yesterday_start = strtotime("yesterday " . ($yesterday_shift?->start_time ?? '23:59:00'));
             $today_start = strtotime("today " . ($shift_times?->start_time ?? '23:59:00'));
             $attendanceDate = abs($now - $yesterday_start) < abs($now - $today_start) ? $yesterday : $date;
@@ -1333,6 +1358,7 @@ class AttendanceEmployeeController extends Controller
                     $shift_times = ShiftTime::where('shift_type_id', $employee_data?->shift_type?->id)
                         ->where('days', date('l', strtotime($date)))
                         ->first();
+                    $shift_times = $this->applyFlexibleTime($shift_times, $employee_data?->id, $date);
 
                     $startTime = strtotime($shift_times->start_time);
                     $endTime = strtotime($shift_times->end_time);
@@ -1503,6 +1529,7 @@ class AttendanceEmployeeController extends Controller
         $shift_times = ShiftTime::where('shift_type_id', $request?->shift_type_id)
             ->where('days', date('l'))
             ->first();
+        $shift_times = $this->applyFlexibleTime($shift_times, $employeeId, $date);
 
         $settings = Utility::settings();
 
@@ -1511,6 +1538,7 @@ class AttendanceEmployeeController extends Controller
         $yesterday_shift_times = ShiftTime::where('shift_type_id', $request?->shift_type_id)
             ->where('days', date('l', strtotime($yesterday_date)))
             ->first();
+        $yesterday_shift_times = $this->applyFlexibleTime($yesterday_shift_times, $employeeId, $yesterday_date);
 
         // tomorrow shift
         $tomorrow_shift_type_id = $employee->is_shift && !empty($request->shift_type_id) ? $request->shift_type_id : ($employee->scheduledShiftIdsForDate($tomorrow_date)[0] ?? null);

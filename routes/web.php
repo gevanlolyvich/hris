@@ -24,6 +24,7 @@ use App\Http\Controllers\AccountListController;
 use App\Http\Controllers\TimeSheetController;
 use App\Http\Controllers\SetSalaryController;
 use App\Http\Controllers\SalaryChangeRequestController;
+use App\Http\Controllers\FlexibleTimeController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
@@ -697,6 +698,55 @@ Route::post('salary-change-requests/{id}/approve', [SalaryChangeRequestControlle
 );
 
 Route::post('salary-change-requests/{id}/reject', [SalaryChangeRequestController::class, 'reject'])->name('salary-change.reject')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('flexible-times', [FlexibleTimeController::class, 'index'])->name('flexibletime.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('flexible-times/create', [FlexibleTimeController::class, 'create'])->name('flexibletime.create')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('flexible-times', [FlexibleTimeController::class, 'store'])->name('flexibletime.store')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('flexible-times/{id}', [FlexibleTimeController::class, 'show'])->name('flexibletime.show')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('flexible-times/{id}/approve', [FlexibleTimeController::class, 'approve'])->name('flexibletime.approve')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('flexible-times/{id}/reject', [FlexibleTimeController::class, 'reject'])->name('flexibletime.reject')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('flexible-times/{id}/cancel', [FlexibleTimeController::class, 'cancel'])->name('flexibletime.cancel')->middleware(
     [
         'auth',
         'XSS',
