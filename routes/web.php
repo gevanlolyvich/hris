@@ -962,6 +962,12 @@ Route::get('employee-shift-schedule/get', [EmployeeShiftScheduleController::clas
         'XSS',
     ]
 );
+Route::get('my-shift-schedule', [EmployeeShiftScheduleController::class, 'mySchedule'])->name('my-shift-schedule.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
 
 Route::get('profile', [UserController::class, 'profile'])->name('profile')->middleware(
     [

@@ -11,6 +11,37 @@ use Illuminate\Support\Facades\Auth;
 
 class EmployeeShiftScheduleController extends Controller
 {
+    /**
+     * Read-only monthly shift schedule for the authenticated shift employee.
+     */
+    public function mySchedule(Request $request)
+    {
+        $employee = Auth::user()->employee;
+
+        if (!$employee || !$employee->is_shift) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $month = $request->get('month', date('Y-m'));
+        if (!preg_match('/^\d{4}-\d{2}$/', (string) $month)) {
+            $month = date('Y-m');
+        }
+
+        $schedule = $employee->monthlyShiftSchedule(
+            date('m', strtotime($month)),
+            date('Y', strtotime($month))
+        );
+
+        // Shift definitions used in this month's roster (with working times).
+        $shiftTypeIds = $schedule->flatten()->pluck('shift_type_id')->unique()->values();
+        $shifts = ShiftType::whereIn('id', $shiftTypeIds)
+            ->with('shiftTimes')
+            ->get()
+            ->keyBy('id');
+
+        return view('employeeshift.my-schedule', compact('employee', 'schedule', 'shifts', 'month'));
+    }
+
     public function index(Request $request)
     {
         if (\Auth::user()->can('Manage Shift')) {

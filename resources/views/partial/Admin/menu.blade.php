@@ -264,8 +264,9 @@ $mode_setting = \App\Models\Utility::mode_layout();
                 <!-- timesheet-->
                 @php
                     $showFlexibleTime = \App\Models\FlexibleTime::canAccessMenu(\Auth::user());
+                    $showMyShiftSchedule = \Auth::user()->employee && \Auth::user()->employee->is_shift;
                 @endphp
-                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet') || Gate::check('Manage Leave Office') || $showFlexibleTime)
+                @if (Gate::check('Manage Attendance') || Gate::check('Manage Leave') || Gate::check('Manage TimeSheet') || Gate::check('Manage Leave Office') || $showFlexibleTime || $showMyShiftSchedule)
                     <li class="dash-item dash-hasmenu">
                         <a href="#!" class="dash-link"><span class="dash-micon"><i
                                     class="ti ti-clock"></i></span><span
@@ -278,6 +279,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                         href="{{ route('timesheet.index') }}">{{ __('Timesheet') }}</a>
                                 </li>
                             @endcan --}}
+                            @if ($showMyShiftSchedule)
+                                <li class="dash-item {{ request()->is('my-shift-schedule*') ? 'active' : '' }}">
+                                    <a class="dash-link"
+                                        href="{{ route('my-shift-schedule.index') }}">{{ __('Jadwal Shift') }}</a>
+                                </li>
+                            @endif
                             @if ($showFlexibleTime)
                                 <li class="dash-item {{ request()->is('flexible-times*') ? 'active' : '' }}">
                                     <a class="dash-link"
