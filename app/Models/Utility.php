@@ -239,7 +239,7 @@ class Utility extends Model
         })->get();
         $totalAllowance = 0;
         list($total_work_days, $total_present_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
-        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+        $fixed_rate = $employee->payrollRate($total_present_days, $total_work_days);
 
         foreach ($earning['allowance'] as $earn) {
             if ($earn->type == 'percentage') {

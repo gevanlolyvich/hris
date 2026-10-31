@@ -269,17 +269,12 @@ class SetSalaryController extends Controller
         $bpjs = Bpjs::where('employee_id', $employee->id)->get();
         $overtimes = Overtime::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->whereNotNull('report_document')->where('status', 'approved')->get();
 
-        if ($employee->is_shift) {
-            // Rostering employees: required days come from the monthly roster, not a fixed shift.
-            list($total_work_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
-        } else {
-            $total_work_days = $employee->getTotalWorkdays($employee->shift_type?->shiftTimes->where('is_working', 1)->pluck('days')->toArray() ?? [], $month, $year);
-        }
+        list($total_work_days) = $employee->salaryWorkdaysAndPresentDays($month, $year);
         // $total_work_hours = (new Employee)->getTotalHours($employee->shift_type->shiftTimes->where('is_working', 1), $month, $year);
         $total_work_hours = 173; // Standard working hours in a month (e.g., 8 hours/day * 21.625 workdays)
         $total_present_days = $employee->getPresentDays(AttendanceEmployee::where('employee_id', $employee->id)->whereMonth('date', $month)->whereYear('date', $year)->where('is_valid', 1)->select('date', 'status', 'work_hours', 'is_valid', 'shift_type_id')->get(), $employee->shift_type?->shiftTimes->where('is_working', 1) ?? collect(), $employee->employeeType?->type);
 
-        $fixed_rate = $total_work_days > 0 ? (($total_present_days / $total_work_days) <= 1 ? $total_present_days / $total_work_days : 1) : 1;
+        $fixed_rate = $employee->payrollRate($total_present_days, $total_work_days);
         $total_allowance = 0;
         foreach ($allowances as $value) {
             $empsal = $value->type == 'percentage' ? $value->amount * $employee->salary / 100 : $value->amount;
