@@ -219,6 +219,12 @@ $mode_setting = \App\Models\Utility::mode_layout();
                                 <a class="dash-link {{ Request::segment(1) == 'pph21' ? 'active' : '-'}}"
                                     href="{{ route('pph21.index') }}">{{ __('PPh 21') }}</a>
                             </li>                                
+                            @if (\App\Models\SalaryChangeRequest::isReviewer(\Auth::user()))
+                                <li class="dash-item">
+                                    <a class="dash-link {{ Request::segment(1) == 'salary-change-requests' ? 'active' : '-'}}"
+                                        href="{{ route('salary-change.index') }}">{{ __('Approve Salary Change') }}</a>
+                                </li>
+                            @endif
                         </ul>
                     </li>
                 @endif

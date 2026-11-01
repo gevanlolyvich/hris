@@ -23,6 +23,7 @@ use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\AccountListController;
 use App\Http\Controllers\TimeSheetController;
 use App\Http\Controllers\SetSalaryController;
+use App\Http\Controllers\SalaryChangeRequestController;
 use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
@@ -675,6 +676,27 @@ Route::get('salary/employeeSalary', [SetSalaryController::class, 'employeeSalary
 
 
 Route::resource('setsalary', SetSalaryController::class)->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::get('salary-change-requests', [SalaryChangeRequestController::class, 'index'])->name('salary-change.index')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('salary-change-requests/{id}/approve', [SalaryChangeRequestController::class, 'approve'])->name('salary-change.approve')->middleware(
+    [
+        'auth',
+        'XSS',
+    ]
+);
+
+Route::post('salary-change-requests/{id}/reject', [SalaryChangeRequestController::class, 'reject'])->name('salary-change.reject')->middleware(
     [
         'auth',
         'XSS',

@@ -15,6 +15,7 @@ use App\Models\LoanOption;
 use App\Models\OtherPayment;
 use App\Models\Overtime;
 use App\Models\PayslipType;
+use App\Models\SalaryChangeRequest;
 use App\Models\SaturationDeduction;
 use App\Models\AttendanceEmployee;
 use App\Exports\SalaryDataSheet;
@@ -327,11 +328,15 @@ class SetSalaryController extends Controller
 
     public function employeeUpdateSalary(Request $request, $id)
     {
+        if (! \Auth::user()->can('Edit Set Salary')) {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
         $validator = \Validator::make(
             $request->all(),
             [
                 'salary_type' => 'required',
-                'salary' => 'required',
+                'salary' => 'required|numeric|min:0',
             ]
         );
         if ($validator->fails()) {
@@ -340,10 +345,63 @@ class SetSalaryController extends Controller
             return redirect()->back()->with('error', $messages->first());
         }
         $employee = Employee::findOrFail($id);
-        $input = $request->all();
-        $employee->fill($input)->save();
+        $newSalary = (float) $request->input('salary');
+
+        // Payslip type is a label, not a monetary value, so it applies at once.
+        $employee->salary_type = $request->input('salary_type');
+
+        if (self::requiresSalaryApproval($employee, $newSalary)) {
+            $this->createSalaryChangeRequest($employee, $newSalary, SalaryChangeRequest::SOURCE_FORM);
+
+            return redirect()->back()->with('success', __('Salary change submitted for approval.'));
+        }
+
+        $employee->salary = $newSalary;
+        $employee->save();
 
         return redirect()->back()->with('success', 'Employee Salary Updated.');
+    }
+
+    /**
+     * An employee with no salary yet gets one straight away. Once a salary is
+     * on record every later change waits for the designated reviewer.
+     */
+    private static function requiresSalaryApproval($employee, $newSalary)
+    {
+        $current = (float) $employee->salary;
+
+        if ($current <= 0) {
+            return false;
+        }
+
+        return abs($current - $newSalary) > 0.0000001;
+    }
+
+    private function createSalaryChangeRequest($employee, $newSalary, $source)
+    {
+        $existing = SalaryChangeRequest::pending()
+            ->where('employee_id', $employee->id)
+            ->first();
+
+        if ($existing) {
+            $existing->update([
+                'old_salary' => (float) $employee->salary,
+                'new_salary' => $newSalary,
+                'source' => $source,
+                'requested_by' => \Auth::id(),
+            ]);
+
+            return $existing;
+        }
+
+        return SalaryChangeRequest::create([
+            'employee_id' => $employee->id,
+            'old_salary' => (float) $employee->salary,
+            'new_salary' => $newSalary,
+            'source' => $source,
+            'status' => SalaryChangeRequest::STATUS_PENDING,
+            'requested_by' => \Auth::id(),
+        ]);
     }
 
     public function employeeSalary()
@@ -406,6 +464,7 @@ class SetSalaryController extends Controller
         $rows = (new SalaryImport())->toArray(request()->file('file'))[0];
         $totalRecord = count($rows) - 1;
         $errorArray = [];
+        $pendingSalaryCount = 0;
 
         for ($i = 1; $i <= count($rows) - 1; $i++) {
             $row = $rows[$i];
@@ -490,7 +549,7 @@ class SetSalaryController extends Controller
                     continue;
                 }
 
-                $salaryData = ['salary' => $salary];
+                $newSalary = (float) $salary;
 
                 if (!empty($salaryTypeName)) {
                     $payslipType = PayslipType::where('name', $salaryTypeName)->first();
@@ -500,10 +559,17 @@ class SetSalaryController extends Controller
                         continue;
                     }
 
-                    $salaryData['salary_type'] = $payslipType->id;
+                    // Label only, so it applies without waiting for the reviewer.
+                    $employee->salary_type = $payslipType->id;
                 }
 
-                $employee->update($salaryData);
+                if (self::requiresSalaryApproval($employee, $newSalary)) {
+                    $this->createSalaryChangeRequest($employee, $newSalary, SalaryChangeRequest::SOURCE_IMPORT);
+                    $pendingSalaryCount++;
+                } else {
+                    $employee->salary = $newSalary;
+                    $employee->save();
+                }
             } elseif (empty($components)) {
                 // Tidak ada salary dan tidak ada komponen yang diisi.
                 $errorArray[] = $this->withReason($row, __('Tidak ada data yang diisi (Salary kosong)'));
@@ -519,10 +585,16 @@ class SetSalaryController extends Controller
         $errorRecord = [];
         if (empty($errorArray)) {
             $data['status'] = 'success';
-            $data['msg']    = __('Record successfully imported');
+            $data['msg']    = $pendingSalaryCount > 0
+                ? __('Record successfully imported') . ' — ' . $pendingSalaryCount . ' ' . __('salary change submitted for approval.')
+                : __('Record successfully imported');
         } else {
             $data['status'] = 'error';
             $data['msg']    = count($errorArray) . ' ' . __('Record imported fail out of' . ' ' . $totalRecord . ' ' . 'record');
+
+            if ($pendingSalaryCount > 0) {
+                $data['msg'] .= ' — ' . $pendingSalaryCount . ' ' . __('salary change submitted for approval.');
+            }
 
             foreach ($errorArray as $errorData) {
                 $errorRecord[] = implode(',', $errorData);
